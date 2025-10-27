@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.U2D;
 
 public class SpriteDynamicBatchRenderer : BaseDynamicBatchRenderer<SpriteRenderUnit> {
+    
+    private static readonly Material BASE_MATERIAL = Resources.Load<Material>("SimpleLit");
 
     private SpriteAtlas _rawSpriteAtlas;
     private Dictionary<string, Vector2[]> _uvs;
@@ -102,13 +104,9 @@ public class SpriteDynamicBatchRenderer : BaseDynamicBatchRenderer<SpriteRenderU
 
         var texture = frameNames[0].texture;
 
-        var material = new Material(Shader.Find("Universal Render Pipeline/Simple Lit"));
-        // 设置主贴图
+        var material = Object.Instantiate(BASE_MATERIAL);
+
         material.SetTexture("_BaseMap", texture);
-        // 双面显示
-        material.SetFloat("_Cull", 0.0f);
-        // Alpha 裁剪
-        material.EnableKeyword("_ALPHATEST_ON");
 
         return material;
     }
