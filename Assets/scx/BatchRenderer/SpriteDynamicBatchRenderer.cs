@@ -5,7 +5,7 @@ using UnityEngine.U2D;
 
 public class SpriteDynamicBatchRenderer : BaseDynamicBatchRenderer<SpriteRenderUnit> {
     
-    private static readonly Material BASE_MATERIAL = Resources.Load<Material>("scx/Standard_CullOff");
+    private static readonly Material BASE_MATERIAL = Resources.Load<Material>("scx/Unlit-AlphaTest");
 
     private SpriteAtlas _rawSpriteAtlas;
     private Dictionary<string, Vector2[]> _uvs;
