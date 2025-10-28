@@ -148,6 +148,14 @@ public class MeshMergeBatchRenderer : BatchRenderer {
         return this._node.activeSelf;
     }
 
+    public void setLayer(string name) {
+        this._node.layer= LayerMask.NameToLayer(name);
+    }
+
+    public string getLayer() {
+        return LayerMask.LayerToName(this._node.layer);
+    }
+
     public void destroy() {
         // 销毁 GPU buffer (否则会导致内存泄露)
         Object.Destroy(this._mesh);

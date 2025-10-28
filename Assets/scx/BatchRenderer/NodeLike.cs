@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 // 移植完成
 public interface NodeLike {
@@ -24,6 +25,10 @@ public interface NodeLike {
     void setActive(bool active);
 
     bool getActive();
+
+    void setLayer(String name);
+    
+    String getLayer();
 
     void destroy();
     

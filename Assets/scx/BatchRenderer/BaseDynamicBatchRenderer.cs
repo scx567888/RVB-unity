@@ -77,6 +77,18 @@ public abstract class BaseDynamicBatchRenderer<U> : DynamicBatchRenderer<U> wher
         return this._node.activeSelf;
     }
 
+    public void setLayer(string name) {
+        this._node.layer= LayerMask.NameToLayer(name);
+        // 递归处理子 layer
+        foreach (var chunk in this._chunks) {
+            chunk.Value.setLayer(name);
+        }
+    }
+
+    public string getLayer() {
+        return LayerMask.LayerToName(this._node.layer);
+    }
+
     public void destroy() {
         foreach (var chunk in this._chunks) {
             chunk.Value.destroy();
@@ -120,6 +132,7 @@ public abstract class BaseDynamicBatchRenderer<U> : DynamicBatchRenderer<U> wher
         if (batchRenderer == null) {
             batchRenderer = new SlotMeshMergeBatchRenderer(this._chunkCapacity, this._rawMesh, this._material);
             batchRenderer.setParent(this._node);
+            batchRenderer.setLayer(this.getLayer());
             chunkID = this._nextChunkID++;
             index = batchRenderer.allocate();
             this._chunks.Add(chunkID, batchRenderer);
