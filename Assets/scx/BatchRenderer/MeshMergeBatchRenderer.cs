@@ -305,7 +305,7 @@ public class MeshMergeBatchRenderer : BatchRenderer {
         // _meshFilter.mesh.triangles = _indices;
 
         // 更新包围盒
-        // _meshFilter.mesh.RecalculateBounds();
+        _meshFilter.mesh.RecalculateBounds();
     }
 
     protected void refreshUnit(int index) {
