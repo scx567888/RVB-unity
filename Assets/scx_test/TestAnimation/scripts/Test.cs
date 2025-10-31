@@ -14,7 +14,7 @@ public class Test : MonoBehaviour {
     // Start is called before the first frame update
     void Start() {
         this.spriteRenderUnits = new List<Obj>();
-        this.spriteDynamicBatchRenderer = new SpriteDynamicBatchRenderer(5000, this.atlas, 100, null);
+        this.spriteDynamicBatchRenderer = new SpriteDynamicBatchRenderer(5000, this.atlas, 300, null);
         this.list = this.spriteDynamicBatchRenderer.getFrameNames();
 
         this.spriteDynamicBatchRenderer.setParent(this.gameObject);
