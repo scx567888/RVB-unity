@@ -9,6 +9,7 @@ Shader "scx/Unlit/Transparent" {
 Properties {
     _MainTex ("Base (RGB) Trans (A)", 2D) = "white" {}
     _Cutoff ("Alpha cutoff", Range(0,1)) = 0.5
+    _Color("Color", Color) = (0,0,0)
 }
 
 SubShader {
@@ -44,6 +45,7 @@ SubShader {
             sampler2D _MainTex;
             float4 _MainTex_ST;
             fixed _Cutoff;
+            fixed4 _Color;
 
             v2f vert (appdata_t v)
             {
@@ -60,6 +62,7 @@ SubShader {
             {
                 fixed4 col = tex2D(_MainTex, i.texcoord);
                 clip(col.a - _Cutoff);
+                col.rgb += _Color.rgb;
                 UNITY_APPLY_FOG(i.fogCoord, col);
                 return col;
             }
