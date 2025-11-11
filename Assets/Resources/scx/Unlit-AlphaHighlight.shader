@@ -1,26 +1,24 @@
-Shader "scx/Unlit/Transparent_Highlight"
-{
-    Properties
-    {
-        _MainTex("Main Tex", 2D) = "white" {}
-        _Color("Tint Color", Color) = (1,0,0,1)
-        _EdgeStrength("Edge Strength", Range(0,5)) = 1.5
-        _InnerStrength("Inner Strength", Range(0,1)) = 0.4
-        _Radius("Edge Radius", Range(1,16)) = 4
-        _Brightness("Brightness Boost", Range(1,3)) = 1.5 // 增亮参数
-        _Saturation("Saturation Boost", Range(1,3)) = 1.5 // 饱和度参数
-    }
+Shader "scx/Unlit/Transparent_Highlight" {
+Properties {
+    _MainTex ("Main Tex", 2D) = "white" {}
+    _Color ("Tint Color", Color) = (1,0,0,1)
+    _EdgeStrength ("Edge Strength", Range(0,5)) = 1.5
+    _InnerStrength ("Inner Strength", Range(0,1)) = 0.4
+    _Radius ("Edge Radius", Range(1,16)) = 4
+    _Brightness ("Brightness Boost", Range(1,3)) = 1.5 // 增亮参数
+    _Saturation ("Saturation Boost", Range(1,3)) = 1.5 // 饱和度参数
+}
 
-    SubShader
-    {
-        Tags{ "Queue"="Transparent" "RenderType"="Transparent" }
-        Blend SrcAlpha OneMinusSrcAlpha
-        ZWrite Off
+SubShader {
+    Tags {"Queue"="Transparent" "IgnoreProjector"="True" "RenderType"="Transparent"}
+    LOD 100
+
+    ZWrite On
+    Blend SrcAlpha OneMinusSrcAlpha
+
+    Pass {
         Cull Off
-
-        Pass
-        {
-            CGPROGRAM
+        CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
             #include "UnityCG.cginc"
@@ -40,7 +38,7 @@ Shader "scx/Unlit/Transparent_Highlight"
                 float2 uv  : TEXCOORD0;
             };
 
-            v2f vert(appdata_base v)
+            v2f vert (appdata_base v)
             {
                 v2f o;
                 o.pos = UnityObjectToClipPos(v.vertex);
@@ -55,7 +53,7 @@ Shader "scx/Unlit/Transparent_Highlight"
                 return lerp(float3(grey,grey,grey), col, sat);
             }
 
-            float4 frag(v2f i) : SV_Target
+            float4 frag (v2f i) : SV_Target
             {
                 float4 col = tex2D(_MainTex, i.uv);
                 if (col.a == 0) return col;
@@ -91,7 +89,8 @@ Shader "scx/Unlit/Transparent_Highlight"
 
                 return float4(finalColor, col.a);
             }
-            ENDCG
-        }
+        ENDCG
     }
+}
+
 }
