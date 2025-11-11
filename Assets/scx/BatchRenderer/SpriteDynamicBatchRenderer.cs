@@ -8,6 +8,7 @@ public class SpriteDynamicBatchRenderer : BaseDynamicBatchRenderer<SpriteRenderU
     private static readonly Material BASE_MATERIAL = Resources.Load<Material>("scx/Unlit-Alpha");
 
     private SpriteAtlas _rawSpriteAtlas;
+    private Material defaultMaterial;
     private Dictionary<string, Vector2[]> _uvs;
     private string[] _frameNames;
 
@@ -17,6 +18,7 @@ public class SpriteDynamicBatchRenderer : BaseDynamicBatchRenderer<SpriteRenderU
         // 没有则使用默认贴图
         createMaterial(rawSpriteAtlas)) {
         this._rawSpriteAtlas = rawSpriteAtlas;
+        this.defaultMaterial = createMaterial(rawSpriteAtlas);
 
         //创建 UVs
         this._uvs = new Dictionary<string, Vector2[]>();
@@ -149,8 +151,7 @@ public class SpriteDynamicBatchRenderer : BaseDynamicBatchRenderer<SpriteRenderU
     
     // 材质
     public void resetMaterial() {
-        var material = createMaterial(this._rawSpriteAtlas);
-        base.setMaterial(material);
+        base.setMaterial(defaultMaterial);
     }
 
 }

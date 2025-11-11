@@ -11,7 +11,7 @@ public abstract class BaseDynamicBatchRenderer<U> : DynamicBatchRenderer<U> wher
     protected readonly Mesh _rawMesh;
 
     // 默认材质
-    protected readonly Material _material;
+    protected Material _material;
 
     // 分块列表
     protected readonly Dictionary<int, SlotMeshMergeBatchRenderer> _chunks;
@@ -101,7 +101,8 @@ public abstract class BaseDynamicBatchRenderer<U> : DynamicBatchRenderer<U> wher
     // ================ DynamicBatchRenderer 接口 ================
 
     // 材质
-    public virtual void setMaterial(Material material){
+    public virtual void setMaterial(Material material) {
+        this._material = material;
         foreach (var chunk in this._chunks) {
             chunk.Value.setMaterial(material);
         }
