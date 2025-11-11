@@ -5,6 +5,7 @@ using Random = UnityEngine.Random;
 
 public class Test : MonoBehaviour {
     public SpriteAtlas atlas;
+    public Material hightlightMaterial;
 
     private SpriteDynamicBatchRenderer spriteDynamicBatchRenderer;
     private List<Obj> spriteRenderUnits;
@@ -31,6 +32,7 @@ public class Test : MonoBehaviour {
         }
     }
 
+    private int i = 0;
 
     // Update is called once per frame
     void Update() {
@@ -38,6 +40,17 @@ public class Test : MonoBehaviour {
         var euler = transform.eulerAngles;
         euler.y += 10f * Time.deltaTime;
         transform.eulerAngles = euler;
+
+        // 测试更换材质
+        if (i == 500) {
+            this.spriteDynamicBatchRenderer.setMaterial(hightlightMaterial);
+        }
+        if (i == 1000) {
+            this.spriteDynamicBatchRenderer.resetMaterial();
+        }
+        else {
+            i++;
+        }
 
         foreach (var spriteRenderUnit in this.spriteRenderUnits) {
             // 每个单元的帧索引累加
