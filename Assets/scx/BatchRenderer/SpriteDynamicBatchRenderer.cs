@@ -146,5 +146,11 @@ public class SpriteDynamicBatchRenderer : BaseDynamicBatchRenderer<SpriteRenderU
         material = updateMaterial(material);
         base.setMaterial(material);
     }
+    
+    // 材质
+    public void resetMaterial() {
+        var material = createMaterial(this._rawSpriteAtlas);
+        base.setMaterial(material);
+    }
 
 }
