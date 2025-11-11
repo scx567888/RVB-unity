@@ -101,7 +101,7 @@ public abstract class BaseDynamicBatchRenderer<U> : DynamicBatchRenderer<U> wher
     // ================ DynamicBatchRenderer 接口 ================
 
     // 材质
-    public void setMaterial(Material material){
+    public virtual void setMaterial(Material material){
         foreach (var chunk in this._chunks) {
             chunk.Value.setMaterial(material);
         }

@@ -111,6 +111,21 @@ public class SpriteDynamicBatchRenderer : BaseDynamicBatchRenderer<SpriteRenderU
         return material;
     }
 
+    // 适用于 URP 管线
+    private Material updateMaterial(Material baseMaterial) {
+        var spriteAtlas = this._rawSpriteAtlas;
+        var frameNames = new Sprite[spriteAtlas.spriteCount];
+        spriteAtlas.GetSprites(frameNames);
+
+        var texture = frameNames[0].texture;
+
+        var material = Object.Instantiate(baseMaterial);
+
+        material.SetTexture("_MainTex", texture);
+
+        return material;
+    }
+
     public Vector2[] getUVsByFrameName(string name) {
         return this._uvs[name];
     }
@@ -124,6 +139,12 @@ public class SpriteDynamicBatchRenderer : BaseDynamicBatchRenderer<SpriteRenderU
         var unit = new SpriteRenderUnit(this, batchRenderer, chunkID, index);
         unit.setVisible(true);
         return unit;
+    }
+
+    // 材质
+    public override void setMaterial(Material material) {
+        material = updateMaterial(material);
+        base.setMaterial(material);
     }
 
 }
