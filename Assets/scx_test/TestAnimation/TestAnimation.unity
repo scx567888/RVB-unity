@@ -168,7 +168,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   atlas: {fileID: 4343727234628468602, guid: a8efa2a6b7b5c984bb03ea87108909e3, type: 2}
-  hightlightMaterial: {fileID: 2100000, guid: 354b83e8760f5654f86b342c00b5e4a2, type: 2}
+  hightlightMaterial: {fileID: 2100000, guid: 870e2c7a72ba45329546f924ad3e61d0, type: 2}
 --- !u!114 &678313043
 MonoBehaviour:
   m_ObjectHideFlags: 0
