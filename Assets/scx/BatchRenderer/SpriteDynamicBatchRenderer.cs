@@ -10,6 +10,7 @@ public class SpriteDynamicBatchRenderer : BaseDynamicBatchRenderer<SpriteRenderU
     private SpriteAtlas _rawSpriteAtlas;
     private Material defaultMaterial;
     private Dictionary<string, Vector2[]> _uvs;
+    private Vector2[][] _uvs1;// 数组方式存储
     private string[] _frameNames;
 
     public SpriteDynamicBatchRenderer(int batchCapacity, SpriteAtlas rawSpriteAtlas, int pixelsToUnit, Material material) : base(
@@ -39,12 +40,13 @@ public class SpriteDynamicBatchRenderer : BaseDynamicBatchRenderer<SpriteRenderU
         }
 
         this._frameNames = this._uvs.Keys.ToArray();
+        this._uvs1 = this._uvs.Values.ToArray();
     }
 
 
     // 创建一个可以承载 精灵图的 4 变形网格
     static Mesh createMash(SpriteAtlas rawSpriteAtlas, int pixelsToUnit) {
-        
+
         var frameNames = new Sprite[rawSpriteAtlas.spriteCount];
         rawSpriteAtlas.GetSprites(frameNames);
         var firstFrame = frameNames[0];
@@ -58,8 +60,7 @@ public class SpriteDynamicBatchRenderer : BaseDynamicBatchRenderer<SpriteRenderU
         float halfHeight = height / pixelsToUnit / 2f;
 
         // 顶点 positions (x, y, z)
-        Vector3[] positions = new Vector3[] 
-        {
+        Vector3[] positions = new Vector3[] {
             new(-halfWidth, -halfHeight, 0), // 左下
             new(halfWidth, -halfHeight, 0), // 右下
             new(-halfWidth, halfHeight, 0), // 左上
@@ -113,6 +114,12 @@ public class SpriteDynamicBatchRenderer : BaseDynamicBatchRenderer<SpriteRenderU
         return material;
     }
 
+    public void sortFrame(string[] name) {
+        for (int i = 0; i < name.Length; i++) {
+            _uvs1[i] = getUVsByFrameName(name[i]);
+        }
+    }
+
     // 适用于 URP 管线
     private Material updateMaterial(Material baseMaterial) {
         var spriteAtlas = this._rawSpriteAtlas;
@@ -126,6 +133,10 @@ public class SpriteDynamicBatchRenderer : BaseDynamicBatchRenderer<SpriteRenderU
         material.SetTexture("_MainTex", texture);
 
         return material;
+    }
+
+    public Vector2[] getUVsByFrameIndex(int index) {
+        return this._uvs1[index];
     }
 
     public Vector2[] getUVsByFrameName(string name) {
@@ -148,7 +159,7 @@ public class SpriteDynamicBatchRenderer : BaseDynamicBatchRenderer<SpriteRenderU
         material = updateMaterial(material);
         base.setMaterial(material);
     }
-    
+
     // 材质
     public void resetMaterial() {
         base.setMaterial(defaultMaterial);
