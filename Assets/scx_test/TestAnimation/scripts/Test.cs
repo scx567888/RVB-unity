@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.U2D;
 using Random = UnityEngine.Random;
@@ -52,12 +53,20 @@ public class Test : MonoBehaviour {
             i++;
         }
 
-        foreach (var spriteRenderUnit in this.spriteRenderUnits) {
-            // 每个单元的帧索引累加
+        Parallel.For(0, spriteRenderUnits.Count, i => {
+            // 多核并行执行
+            var spriteRenderUnit = spriteRenderUnits[i];
             spriteRenderUnit.frameIndex++;
-            var frameName = this.list[spriteRenderUnit.frameIndex % this.list.Length];
-            spriteRenderUnit.spriteRenderUnit.setFrame(frameName);
-        }
+            spriteRenderUnit.spriteRenderUnit.setFrame(spriteRenderUnit.frameIndex % this.list.Length);
+        });
+
+        // 传统方式
+        // foreach (var spriteRenderUnit in this.spriteRenderUnits) {
+        //     // 每个单元的帧索引累加
+        //     spriteRenderUnit.frameIndex++;
+        //     var frameName = this.list[spriteRenderUnit.frameIndex % this.list.Length];
+        //     spriteRenderUnit.spriteRenderUnit.setFrame(frameName);
+        // }
 
         this.spriteDynamicBatchRenderer.update();
     }
