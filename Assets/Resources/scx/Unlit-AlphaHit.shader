@@ -76,8 +76,11 @@ SubShader {
     float highGray = 1.0;
 
     // 基准橙色
-    float3 darkCol  = float3(230.0,120.0,10.0)/255.0;
-    float3 brightCol = float3(255.0,220.0,140.0)/255.0;
+    // float3 darkCol  = float3(230.0,120.0,10.0)/255.0;
+    // float3 brightCol = float3(255.0,220.0,140.0)/255.0;
+    // 基准红色
+    float3 darkCol  = float3(237.0,38.0,46.0)/255.0;
+    float3 brightCol = float3(255.0,19.0,26.0)/255.0;
     float3 whiteCol  = float3(1.0,1.0,1.0);
 
     float3 newCol;
