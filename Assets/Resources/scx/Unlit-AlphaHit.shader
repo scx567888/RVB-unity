@@ -59,13 +59,46 @@ SubShader {
             }
 
             fixed4 frag (v2f i) : SV_Target
-            {
-                fixed4 col = tex2D(_MainTex, i.texcoord);
-                clip(col.a - _Cutoff);
-                col.rgb += _Color.rgb;
-                UNITY_APPLY_FOG(i.fogCoord, col);
-                return col;
-            }
+{
+    fixed4 col = tex2D(_MainTex, i.texcoord);
+    clip(col.a - _Cutoff);
+
+    // --- getHitColor3 的 HLSL 实现 ---
+    float r = col.r;
+    float g = col.g;
+    float b = col.b;
+
+    // 亮度
+    float luma = 0.299*r + 0.587*g + 0.114*b;
+
+    // 阈值
+    float midGray = 150.0/255.0;
+    float highGray = 1.0;
+
+    // 基准橙色
+    float3 darkCol  = float3(230.0,120.0,10.0)/255.0;
+    float3 brightCol = float3(255.0,220.0,140.0)/255.0;
+    float3 whiteCol  = float3(1.0,1.0,1.0);
+
+    float3 newCol;
+
+    if(luma <= midGray)
+    {
+        float factor = sqrt(luma / midGray);
+        newCol = darkCol + (brightCol - darkCol) * factor;
+    }
+    else
+    {
+        float factor = sqrt((luma - midGray)/(highGray - midGray));
+        newCol = brightCol + (whiteCol - brightCol) * factor;
+    }
+
+    col.rgb = newCol;
+
+    UNITY_APPLY_FOG(i.fogCoord, col);
+    return col;
+}
+
         ENDCG
     }
 }
