@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public sealed class ScxSpriteRenderBatch {
-    
     // 四边形的基础网格信息
     private static readonly Vector3[] BASE_NORMALS = { new(0, 0, -1), new(0, 0, -1), new(0, 0, -1), new(0, 0, -1) };
     private static readonly Vector2[] BASE_UVS = { new(0, 0), new(1, 0), new(0, 1), new(1, 1) };
     private static readonly int[] BASE_INDICES = { 0, 3, 1, 3, 0, 2 };
-    
+
     private readonly int capacity; // 容量
 
     private readonly Vector3[] positions; // 整个网格的 顶点 数据
@@ -31,19 +30,26 @@ public sealed class ScxSpriteRenderBatch {
         this.normals = new Vector3[capacity * 4];
         this.uvs = new Vector2[capacity * 4];
         this.indices = new int[capacity * 6];
-        
+
         // 初始化网格数据
         for (var i = 0; i < this.capacity; i++) {
             // 我们忽略填充 this.positions 以便 在视觉上默认隐藏所有单位
+            
+            var vertexOffset = i * 4;
+            var indexOffset = i * 6;
+            
             // 填充法线
-            Array.Copy(BASE_NORMALS, 0, this.normals, i * BASE_NORMALS.Length, BASE_NORMALS.Length);
+            Array.Copy(BASE_NORMALS, 0, this.normals, vertexOffset, 4);
             // 填充 UV
-            Array.Copy(BASE_UVS, 0, this.uvs, i * BASE_NORMALS.Length, BASE_NORMALS.Length);
+            Array.Copy(BASE_UVS, 0, this.uvs, vertexOffset, 4);
             // 填充 索引 (索引需要计算偏移)
-            var indicesOffset = i * BASE_INDICES.Length;
-            for (var j = 0; j < BASE_INDICES.Length; j++) {
-                this.indices[indicesOffset + j] = BASE_INDICES[j] + i * BASE_INDICES.Length;
-            }
+            this.indices[indexOffset + 0] = BASE_INDICES[0] + vertexOffset;
+            this.indices[indexOffset + 1] = BASE_INDICES[1] + vertexOffset;
+            this.indices[indexOffset + 2] = BASE_INDICES[2] + vertexOffset;
+            this.indices[indexOffset + 3] = BASE_INDICES[3] + vertexOffset;
+            this.indices[indexOffset + 4] = BASE_INDICES[4] + vertexOffset;
+            this.indices[indexOffset + 5] = BASE_INDICES[5] + vertexOffset;
+            
         }
 
 
@@ -104,5 +110,4 @@ public sealed class ScxSpriteRenderBatch {
         // 更新包围盒
         meshFilter.mesh.RecalculateBounds();
     }
-    
 }
