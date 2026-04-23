@@ -2,29 +2,27 @@
 using UnityEngine;
 
 public sealed class ScxSpriteRenderer {
-    
     private readonly ScxSpriteAtlas atlas;
     private readonly float pixelsPerUnit;
     private Material material;
     private readonly int batchCapacity;
-    
-    private readonly GameObject node;// 持有节点
-    private readonly Dictionary<int, ScxSpriteRenderBatch> batches;// 分块列表
-    private int nextBatchID;// 分块 ID
+
+    private readonly GameObject node; // 持有节点
+    private readonly Dictionary<int, ScxSpriteRenderBatch> batches; // 分块列表
+    private int nextBatchID; // 分块 ID
 
     public ScxSpriteRenderer(ScxSpriteAtlas atlas, float pixelsPerUnit, Material materialTemplate, int batchCapacity) {
         this.atlas = atlas;
         this.pixelsPerUnit = pixelsPerUnit;
-        this.material = createMaterial(atlas.texture,materialTemplate);
+        this.material = createMaterial(atlas.texture, materialTemplate);
         this.batchCapacity = batchCapacity;
         this.node = new GameObject("ScxSpriteRenderer");
         this.batches = new Dictionary<int, ScxSpriteRenderBatch>();
         this.nextBatchID = 0;
     }
-    
-    // 适用于 URP 管线
-    private static Material createMaterial(Texture2D texture,Material materialTemplate) {
 
+    // 适用于 URP 管线
+    private static Material createMaterial(Texture2D texture, Material materialTemplate) {
         var material = Object.Instantiate(materialTemplate);
 
         material.SetTexture("_MainTex", texture);
@@ -103,21 +101,21 @@ public sealed class ScxSpriteRenderer {
 
     // 材质
     public void setMaterialTemplate(Material materialTemplate) {
-        this.material = createMaterial(atlas.texture,materialTemplate);
+        this.material = createMaterial(atlas.texture, materialTemplate);
         foreach (var batch in this.batches) {
             batch.Value.setMaterial(this.material);
         }
     }
 
     // Unit
-    public ScxSpriteRenderUnit createUnit()  {
+    public ScxSpriteRenderUnit createUnit() {
         // 寻找一个空位
-        ScxSpriteRenderBatch  renderBatch= null;
-        int batchID=-1;
+        ScxSpriteRenderBatch renderBatch = null;
+        int batchID = -1;
         int index = -1;
 
         // 先尝试寻找一个空位
-        foreach (var batch  in this.batches) {
+        foreach (var batch in this.batches) {
             if (batch.Value.hasFree()) {
                 renderBatch = batch.Value;
                 batchID = batch.Key;
@@ -142,7 +140,7 @@ public sealed class ScxSpriteRenderer {
         return unit;
     }
 
-    public void destroyUnit(ScxSpriteRenderUnit unit)  {
+    public void destroyUnit(ScxSpriteRenderUnit unit) {
         // 获取分块
         var batch = this.batches[unit.batchID];
         // 回收 id
@@ -162,5 +160,4 @@ public sealed class ScxSpriteRenderer {
             batch.Value.update();
         }
     }
-    
 }
