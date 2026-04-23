@@ -9,7 +9,7 @@ public sealed class ScxSpriteRenderer {
     private readonly int batchCapacity;
     
     private readonly GameObject node;// 持有节点
-    private readonly Dictionary<int, ScxSpriteRenderBatch> batchs;// 分块列表
+    private readonly Dictionary<int, ScxSpriteRenderBatch> batches;// 分块列表
     private int nextBatchID;// 分块 ID
 
     public ScxSpriteRenderer(ScxSpriteAtlas atlas, float pixelsPerUnit, Material materialTemplate, int batchCapacity) {
@@ -18,7 +18,7 @@ public sealed class ScxSpriteRenderer {
         this.material = createMaterial(atlas.texture,materialTemplate);
         this.batchCapacity = batchCapacity;
         this.node = new GameObject("ScxSpriteRenderer");
-        this.batchs = new Dictionary<int, ScxSpriteRenderBatch>();
+        this.batches = new Dictionary<int, ScxSpriteRenderBatch>();
         this.nextBatchID = 0;
     }
     
@@ -81,7 +81,7 @@ public sealed class ScxSpriteRenderer {
     public void setLayer(string name) {
         this.node.layer = LayerMask.NameToLayer(name);
         // 处理子 layer
-        foreach (var batch in this.batchs) {
+        foreach (var batch in this.batches) {
             batch.Value.setLayer(this.node.layer);
         }
     }
@@ -91,7 +91,7 @@ public sealed class ScxSpriteRenderer {
     }
 
     public void destroy() {
-        foreach (var chunk in this.batchs) {
+        foreach (var chunk in this.batches) {
             chunk.Value.destroy();
         }
 
@@ -104,7 +104,7 @@ public sealed class ScxSpriteRenderer {
     // 材质
     public void setMaterialTemplate(Material materialTemplate) {
         this.material = createMaterial(atlas.texture,materialTemplate);
-        foreach (var batch in this.batchs) {
+        foreach (var batch in this.batches) {
             batch.Value.setMaterial(this.material);
         }
     }
@@ -117,7 +117,7 @@ public sealed class ScxSpriteRenderer {
         int index = -1;
 
         // 先尝试寻找一个空位
-        foreach (var batch  in this.batchs) {
+        foreach (var batch  in this.batches) {
             if (batch.Value.hasFree()) {
                 renderBatch = batch.Value;
                 batchID = batch.Key;
@@ -133,7 +133,7 @@ public sealed class ScxSpriteRenderer {
             renderBatch.setMaterial(this.material);
             batchID = this.nextBatchID++;
             index = renderBatch.allocate();
-            this.batchs.Add(batchID, renderBatch);
+            this.batches.Add(batchID, renderBatch);
         }
 
         // 创建一个 SpriteRenderUnit
@@ -144,7 +144,7 @@ public sealed class ScxSpriteRenderer {
 
     public void destroyUnit(ScxSpriteRenderUnit unit)  {
         // 获取分块
-        var batch = this.batchs[unit.batchID];
+        var batch = this.batches[unit.batchID];
         // 回收 id
         batch.release(unit.index);
         // 设为不可见
@@ -152,13 +152,13 @@ public sealed class ScxSpriteRenderer {
         // 全部空闲 则回收整个 分块
         if (batch.allFree()) {
             batch.destroy();
-            this.batchs.Remove(unit.batchID);
+            this.batches.Remove(unit.batchID);
         }
     }
 
     // 更新
     public void update() {
-        foreach (var batch in this.batchs) {
+        foreach (var batch in this.batches) {
             batch.Value.update();
         }
     }

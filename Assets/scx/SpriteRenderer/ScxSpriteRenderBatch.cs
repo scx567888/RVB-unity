@@ -82,7 +82,7 @@ public sealed class ScxSpriteRenderBatch {
     // ********************* GameObject 相关 ***********************
 
     public void setLayer(int layer) {
-        this.node.layer=this.node.layer;
+        this.node.layer=layer;
     }
     
     public void destroy() {
