@@ -6,7 +6,6 @@ public class ScxSpriteRenderUnit {
     public readonly int batchID;
     public readonly int index;
 
-    public int frame;
     public Vector3 position;
     public Quaternion rotation;
     public Vector3 scale;
@@ -18,8 +17,7 @@ public class ScxSpriteRenderUnit {
         this.renderBatch = renderBatch;
         this.batchID = batchID;
         this.index = index;
-
-        this.frame = 0;
+        
         this.position = new Vector3(0, 0, 0);
         this.rotation = new Quaternion(0, 0, 0, 1);
         this.scale = new Vector3(1, 1, 1);
@@ -28,16 +26,14 @@ public class ScxSpriteRenderUnit {
 
     // UV
     public void setFrame(string name) {
-        // todo 这里先不管
-        // var uvs = this.spriteRenderer.getUVsByFrameName(name);
-        // this.renderBatch.setUnitUVs(this.index, uvs);
+        var sprite = this.spriteRenderer.getSpriteByName(name);
+        this.renderBatch.setUVs(this.index, sprite.uv);
     }
 
     // UV
     public void setFrame(int index) {
-        // todo 这里先不管
-        // var uvs = this.spriteRenderer.getUVsByFrameIndex(index);
-        // this.renderBatch.setUnitUVs(this.index, uvs);
+        var sprite = this.spriteRenderer.getSpriteByIndex(index);
+        this.renderBatch.setUVs(this.index, sprite.uv);
     }
 
     // 位置
@@ -132,4 +128,6 @@ public class ScxSpriteRenderUnit {
         // todo 这里需要处理 复杂的计算 是不是 甚至需要 计算 原图的一些东西? 
         this.renderBatch.setPositions(this.index,  ?);
     }
+    
+    
 }
