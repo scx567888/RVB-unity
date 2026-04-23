@@ -1,23 +1,23 @@
 ﻿using UnityEngine;
 
 /// <summary>
-/// SCX 图
+/// SCX 图块 (不支持旋转)
 /// </summary>
-public class ScxSprite { 
+public interface ScxSprite { 
     
     /// 图块名称
-    private string name;
+    string name();
     
     /// 该图块在图集中的矩形区域
-    private RectInt atlasRect;
+    RectInt atlasRect();
     
     /// 该图块在原图中的矩形区域
-    private RectInt sourceRect;  
+    RectInt sourceRect();  
     
     /// 原图尺寸 (裁边前)
-    private Vector2Int sourceSize;
+    Vector2Int sourceSize();
 
     /// 归一化锚点, 通常 0~1
-    private Vector2 pivot;
+    Vector2 pivot();
     
 }
