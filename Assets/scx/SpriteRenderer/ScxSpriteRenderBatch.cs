@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 public sealed class ScxSpriteRenderBatch {
     // 四边形的基础网格信息
@@ -34,10 +35,10 @@ public sealed class ScxSpriteRenderBatch {
         // 初始化网格数据
         for (var i = 0; i < this.capacity; i++) {
             // 我们忽略填充 this.positions 以便 在视觉上默认隐藏所有单位
-            
+
             var vertexOffset = i * 4;
             var indexOffset = i * 6;
-            
+
             // 填充法线
             Array.Copy(BASE_NORMALS, 0, this.normals, vertexOffset, 4);
             // 填充 UV
@@ -49,7 +50,6 @@ public sealed class ScxSpriteRenderBatch {
             this.indices[indexOffset + 3] = BASE_INDICES[3] + vertexOffset;
             this.indices[indexOffset + 4] = BASE_INDICES[4] + vertexOffset;
             this.indices[indexOffset + 5] = BASE_INDICES[5] + vertexOffset;
-            
         }
 
 
@@ -79,6 +79,19 @@ public sealed class ScxSpriteRenderBatch {
         }
     }
 
+    // ********************* GameObject 相关 ***********************
+
+    public void setLayer(int layer) {
+        this.node.layer=this.node.layer;
+    }
+    
+    public void destroy() {
+        // 销毁 GPU buffer (否则会导致内存泄露)
+        Object.Destroy(this.mesh);
+        // 销毁 Node
+        Object.Destroy(this.node);
+    }
+
     // ********************* free 相关 ***********************
 
     public int allocate() {
@@ -96,23 +109,23 @@ public sealed class ScxSpriteRenderBatch {
     public bool allFree() {
         return this.freeIndex.Count == this.capacity;
     }
-    
+
     /// 更新 UVs
     public void setUVs(int index, Vector2[] newUVs) {
         // 计算 Unit 在 UVs 数组中的起始位置
-        var startIndex =  index * 4;
+        var startIndex = index * 4;
         // 更新 UV
         Array.Copy(newUVs, 0, this.uvs, startIndex, 4);
     }
-    
+
     /// 更新 Positions
     public void setPositions(int index, Vector3[] newPositions) {
         // 计算 Unit 在 UVs 数组中的起始位置
-        var startIndex =  index * 4;
+        var startIndex = index * 4;
         // 更新 UV
         Array.Copy(newPositions, 0, this.positions, startIndex, 4);
     }
-    
+
     /// 更新材质
     public void setMaterial(Material material) {
         this.meshRenderer.sharedMaterial = material;
