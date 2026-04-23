@@ -1,7 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public sealed class ScxSpriteRenderBatch {
+    
+    // 四边形的基础网格信息
+    private static readonly Vector3[] BASE_NORMALS = { new(0, 0, -1), new(0, 0, -1), new(0, 0, -1), new(0, 0, -1) };
+    private static readonly Vector2[] BASE_UVS = { new(0, 0), new(1, 0), new(0, 1), new(1, 1) };
+    private static readonly int[] BASE_INDICES = { 0, 3, 1, 3, 0, 2 };
     
     private readonly int capacity; // 容量
 
@@ -25,6 +31,20 @@ public sealed class ScxSpriteRenderBatch {
         this.normals = new Vector3[capacity * 4];
         this.uvs = new Vector2[capacity * 4];
         this.indices = new int[capacity * 6];
+        
+        // 初始化网格数据
+        for (var i = 0; i < this.capacity; i++) {
+            // 我们忽略填充 this.positions 以便 在视觉上默认隐藏所有单位
+            // 填充法线
+            Array.Copy(BASE_NORMALS, 0, this.normals, i * BASE_NORMALS.Length, BASE_NORMALS.Length);
+            // 填充 UV
+            Array.Copy(BASE_UVS, 0, this.uvs, i * BASE_NORMALS.Length, BASE_NORMALS.Length);
+            // 填充 索引 (索引需要计算偏移)
+            var indicesOffset = i * BASE_INDICES.Length;
+            for (var j = 0; j < BASE_INDICES.Length; j++) {
+                this.indices[indicesOffset + j] = BASE_INDICES[j] + i * BASE_INDICES.Length;
+            }
+        }
 
 
         // 创建容器节点, 同时绑定到 父节点上.
@@ -79,7 +99,7 @@ public sealed class ScxSpriteRenderBatch {
         meshFilter.mesh.vertices = positions;
         meshFilter.mesh.normals = normals;
         meshFilter.mesh.uv = uvs;
-        meshFilter.mesh.triangles = indices; // todo 顶点用更新吗? 
+        // 索引 我们无需更新 
 
         // 更新包围盒
         meshFilter.mesh.RecalculateBounds();
