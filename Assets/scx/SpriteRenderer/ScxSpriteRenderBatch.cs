@@ -82,9 +82,9 @@ public sealed class ScxSpriteRenderBatch {
     // ********************* GameObject 相关 ***********************
 
     public void setLayer(int layer) {
-        this.node.layer=layer;
+        this.node.layer = layer;
     }
-    
+
     public void destroy() {
         // 销毁 GPU buffer (否则会导致内存泄露)
         Object.Destroy(this.mesh);
@@ -142,5 +142,4 @@ public sealed class ScxSpriteRenderBatch {
         // 更新包围盒
         mesh.RecalculateBounds();
     }
-    
 }
