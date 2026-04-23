@@ -137,6 +137,7 @@ public sealed class ScxSpriteRenderer {
         // 创建一个 SpriteRenderUnit
         var unit = new ScxSpriteRenderUnit(this, renderBatch, batchID, index);
         unit.setVisible(true);
+        unit.setFrame(0);
         return unit;
     }
 
@@ -160,4 +161,13 @@ public sealed class ScxSpriteRenderer {
             batch.Value.update();
         }
     }
+
+    public ScxSprite getSpriteByName(string name) {
+        return atlas.getByName(name);
+    }
+
+    public ScxSprite getSpriteByIndex(int index) {
+        return atlas.getByIndex(index);
+    }
+    
 }
