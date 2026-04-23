@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 /// SCX 图集
 public sealed class ScxSpriteAtlas {
@@ -7,14 +8,26 @@ public sealed class ScxSpriteAtlas {
 
     /// 精灵列表
     public readonly ScxSprite[] sprites;
+    
+    private readonly Dictionary<string, ScxSprite> namedSprites;
 
     public ScxSpriteAtlas(Texture2D texture, ScxSprite[] sprites) {
         this.texture = texture;
         this.sprites = sprites;
+        this.namedSprites = new Dictionary<string, ScxSprite>();
         for (var i = 0; i < this.sprites.Length; i++) {
             var sprite = this.sprites[i];
+            namedSprites[sprite.name] = sprite;
             sprite.uv = computeUV(texture.width, texture.height, sprite);
         }
+    }
+
+    public ScxSprite getByName(string name) {
+        return namedSprites[name];
+    }
+    
+    public ScxSprite getByIndex(int index) {
+        return sprites[index];
     }
 
     private static Vector2[] computeUV(int textureWidth, int textureHeight, ScxSprite sprite) {
