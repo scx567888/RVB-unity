@@ -102,12 +102,12 @@ public sealed class ScxSpriteRenderBatch {
     /// 更新 网格
     public void update() {
         // 更新网格
-        meshFilter.mesh.vertices = positions;
-        meshFilter.mesh.normals = normals;
-        meshFilter.mesh.uv = uvs;
+        mesh.vertices = positions;
+        mesh.normals = normals;
+        mesh.uv = uvs;
         // 索引 我们无需更新 
 
         // 更新包围盒
-        meshFilter.mesh.RecalculateBounds();
+        mesh.RecalculateBounds();
     }
 }
