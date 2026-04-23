@@ -6,6 +6,7 @@ public class ScxSpriteRenderUnit {
     public readonly int batchID;
     public readonly int index;
 
+    public ScxSprite sprite;
     public Vector3 position;
     public Quaternion rotation;
     public Vector3 scale;
@@ -18,6 +19,8 @@ public class ScxSpriteRenderUnit {
         this.batchID = batchID;
         this.index = index;
         
+        // 默认初始化第一个 
+        this.sprite = spriteRenderer.getSpriteByIndex(0);
         this.position = new Vector3(0, 0, 0);
         this.rotation = new Quaternion(0, 0, 0, 1);
         this.scale = new Vector3(1, 1, 1);
@@ -26,14 +29,16 @@ public class ScxSpriteRenderUnit {
 
     // UV
     public void setFrame(string name) {
-        var sprite = this.spriteRenderer.getSpriteByName(name);
+        this.sprite = this.spriteRenderer.getSpriteByName(name);
         this.renderBatch.setUVs(this.index, sprite.uv);
+        this.updateUnitVertices();
     }
 
     // UV
     public void setFrame(int index) {
-        var sprite = this.spriteRenderer.getSpriteByIndex(index);
+        this.sprite = this.spriteRenderer.getSpriteByIndex(index);
         this.renderBatch.setUVs(this.index, sprite.uv);
+        this.updateUnitVertices();
     }
 
     // 位置

@@ -137,7 +137,6 @@ public sealed class ScxSpriteRenderer {
         // 创建一个 SpriteRenderUnit
         var unit = new ScxSpriteRenderUnit(this, renderBatch, batchID, index);
         unit.setVisible(true);
-        unit.setFrame(0);
         return unit;
     }
 
