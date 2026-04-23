@@ -11,6 +11,9 @@ public class ScxSprite {
     /// 该图块在图集中的矩形区域
     private RectInt atlasRect;
     
+    /// 该图块在原图中的矩形区域
+    private RectInt sourceRect;  
+    
     /// 原图尺寸 (裁边前)
     private Vector2Int sourceSize;
 
