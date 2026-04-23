@@ -25,5 +25,5 @@ public sealed class ScxSprite {
         this.sourceSize = sourceSize;
         this.pivot = pivot;
     }
-    
+
 }
