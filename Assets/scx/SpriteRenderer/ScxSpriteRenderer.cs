@@ -169,4 +169,8 @@ public sealed class ScxSpriteRenderer {
         return atlas.getByIndex(index);
     }
     
+    public float getPixelsPerUnit() {
+        return this.pixelsPerUnit;
+    }
+    
 }
