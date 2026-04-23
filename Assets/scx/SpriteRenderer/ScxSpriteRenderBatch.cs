@@ -22,7 +22,7 @@ public sealed class ScxSpriteRenderBatch {
 
     private readonly Stack<int> freeIndex; // 空闲的 索引
 
-    public ScxSpriteRenderBatch(int capacity, GameObject parentNode, Material material) {
+    public ScxSpriteRenderBatch(int capacity, GameObject parentNode) {
         this.capacity = capacity;
 
         // 我们都是 四边形 小图 
@@ -72,7 +72,6 @@ public sealed class ScxSpriteRenderBatch {
         this.meshRenderer = this.node.AddComponent<MeshRenderer>();
         this.meshFilter = this.node.AddComponent<MeshFilter>();
         this.meshFilter.mesh = this.mesh;
-        this.meshRenderer.sharedMaterial = material;
 
         this.freeIndex = new Stack<int>(capacity);
         for (var i = 0; i < capacity; i++) {
@@ -80,7 +79,7 @@ public sealed class ScxSpriteRenderBatch {
         }
     }
 
-    // ********************* 索引相关 ***********************
+    // ********************* free 相关 ***********************
 
     public int allocate() {
         return this.freeIndex.Pop();
@@ -97,7 +96,27 @@ public sealed class ScxSpriteRenderBatch {
     public bool allFree() {
         return this.freeIndex.Count == this.capacity;
     }
-
+    
+    /// 更新 UVs
+    public void setUVs(int index, Vector2[] newUVs) {
+        // 计算 Unit 在 UVs 数组中的起始位置
+        var startIndex =  index * 4;
+        // 更新 UV
+        Array.Copy(newUVs, 0, this.uvs, startIndex, 4);
+    }
+    
+    /// 更新 Positions
+    public void setPositions(int index, Vector3[] newPositions) {
+        // 计算 Unit 在 UVs 数组中的起始位置
+        var startIndex =  index * 4;
+        // 更新 UV
+        Array.Copy(newPositions, 0, this.positions, startIndex, 4);
+    }
+    
+    /// 更新材质
+    public void setMaterial(Material material) {
+        this.meshRenderer.sharedMaterial = material;
+    }
 
     /// 更新 网格
     public void update() {
@@ -110,4 +129,5 @@ public sealed class ScxSpriteRenderBatch {
         // 更新包围盒
         mesh.RecalculateBounds();
     }
+    
 }
