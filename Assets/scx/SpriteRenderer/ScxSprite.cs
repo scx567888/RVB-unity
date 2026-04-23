@@ -2,7 +2,6 @@
 
 /// SCX 图块 (不支持旋转)
 public sealed class ScxSprite {
-
     /// 图块名称
     public readonly string name;
 
@@ -25,5 +24,4 @@ public sealed class ScxSprite {
         this.sourceSize = sourceSize;
         this.pivot = pivot;
     }
-
 }

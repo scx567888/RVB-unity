@@ -2,7 +2,6 @@
 
 /// SCX 图集
 public sealed class ScxSpriteAtlas {
-    
     /// 贴图
     public readonly Texture2D texture;
 
@@ -13,5 +12,4 @@ public sealed class ScxSpriteAtlas {
         this.texture = texture;
         this.sprites = sprites;
     }
-
 }
