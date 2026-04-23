@@ -1,8 +1,6 @@
 ﻿using UnityEngine;
 
-/// <summary>
 /// SCX 图块 (不支持旋转)
-/// </summary>
 public sealed class ScxSprite {
 
     /// 图块名称
