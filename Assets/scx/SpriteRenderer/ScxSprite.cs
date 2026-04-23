@@ -17,11 +17,16 @@ public sealed class ScxSprite {
     /// 归一化锚点, 通常 0~1
     public readonly Vector2 pivot;
 
+    /// UV 一般由 ScxSpriteAtlas 填充.
+    public Vector2[] uv;
+
     public ScxSprite(string name, RectInt atlasRect, RectInt sourceRect, Vector2Int sourceSize, Vector2 pivot) {
         this.name = name;
         this.atlasRect = atlasRect;
         this.sourceRect = sourceRect;
         this.sourceSize = sourceSize;
         this.pivot = pivot;
+        this.uv = null;
     }
+    
 }
