@@ -202,7 +202,7 @@ public class ScxSpriteAtlasBuilder {
             // 如果你导出的某个格式 pivot 实际是左上原点，再改成 new Vector2(f.pivot.x, 1f - f.pivot.y)
             Vector2 pivot = new Vector2(
                 f.pivot.x,
-                f.pivot.y
+                1f - f.pivot.y
             );
 
             // 名字你可以自己决定：
