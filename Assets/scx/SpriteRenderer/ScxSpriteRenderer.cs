@@ -6,7 +6,6 @@ using Object = UnityEngine.Object;
 namespace scx.SpriteRenderer {
     public sealed class ScxSpriteRenderer {
         private readonly ScxSpriteAtlas atlas;
-        private readonly float pixelsPerUnit;
         private Material material;
         private readonly int batchCapacity;
 
@@ -15,13 +14,17 @@ namespace scx.SpriteRenderer {
         private int nextBatchID; // 分块 ID
 
         // 这里同时使用两种方式存储 空间换时间
-        private readonly ScxSpriteRenderData[] _renderData0;
-        private readonly Dictionary<string, ScxSpriteRenderData> _renderData1;
+        private readonly ScxSpriteRenderData[] renderDatas0;
+        private readonly Dictionary<string, ScxSpriteRenderData> renderDatas1;
         private readonly string[] spriteNames;
 
-        public ScxSpriteRenderer(ScxSpriteAtlas atlas, float pixelsPerUnit, Material materialTemplate, int batchCapacity) {
+        public ScxSpriteRenderer(
+            ScxSpriteAtlas atlas,
+            float pixelsPerUnit,
+            Material materialTemplate,
+            int batchCapacity
+        ) {
             this.atlas = atlas;
-            this.pixelsPerUnit = pixelsPerUnit;
             this.material = createMaterial(atlas.texture, materialTemplate);
             this.batchCapacity = batchCapacity;
             this.node = new GameObject("ScxSpriteRenderer");
@@ -29,17 +32,21 @@ namespace scx.SpriteRenderer {
             this.nextBatchID = 0;
 
 
-            this._renderData1 = new Dictionary<string, ScxSpriteRenderData>();
+            // 初始化 渲染相关
+
+            this.renderDatas0 = new ScxSpriteRenderData[atlas.sprites.Length];
+            this.renderDatas1 = new Dictionary<string, ScxSpriteRenderData>();
+            this.spriteNames = new string[atlas.sprites.Length];
+
             var textureWidth = atlas.texture.width;
             var textureHeight = atlas.texture.height;
             for (var i = 0; i < atlas.sprites.Length; i++) {
                 var sprite = atlas.sprites[i];
-                _renderData1[sprite.name] = new ScxSpriteRenderData(sprite, textureWidth, textureHeight, pixelsPerUnit);
+                var data = new ScxSpriteRenderData(sprite, textureWidth, textureHeight, pixelsPerUnit);
+                renderDatas0[i] = data;
+                renderDatas1[sprite.name] = data;
+                spriteNames[i] = sprite.name;
             }
-
-            this._renderData0 = this._renderData1.Values.ToArray();
-
-            spriteNames = this._renderData1.Keys.ToArray();
         }
 
         // 适用于 URP 管线
@@ -181,21 +188,18 @@ namespace scx.SpriteRenderer {
                 batch.Value.update();
             }
         }
+        
+        public ScxSpriteRenderData getSpriteByIndex(int index) {
+            return renderDatas0[index];
+        }
 
         public ScxSpriteRenderData getSpriteByName(string name) {
-            return _renderData1[name];
+            return renderDatas1[name];
         }
 
-        public ScxSpriteRenderData getSpriteByIndex(int index) {
-            return _renderData0[index];
-        }
-
-        public string[] getFrameNames() {
+        public string[] getSpriteNames() {
             return spriteNames;
         }
 
-        public float getPixelsPerUnit() {
-            return this.pixelsPerUnit;
-        }
     }
 }
