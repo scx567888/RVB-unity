@@ -218,6 +218,7 @@ public class ScxSpriteRenderUnit {
             m01 * vx + m05 * vy + m09 * vz + m13,
             m02 * vx + m06 * vy + m10 * vz + m14
         );
+        
         this.renderBatch.setPositions(index,p0, p1, p2, p3);
     }
     
