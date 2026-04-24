@@ -118,7 +118,7 @@ namespace scx.SpriteRenderer {
             foreach (var chunk in this.batches) {
                 chunk.Value.destroy();
             }
-            
+
             if (this.material != null) {
                 Object.Destroy(this.material);
             }
@@ -196,13 +196,13 @@ namespace scx.SpriteRenderer {
                 batch.Value.update();
             }
         }
-        
+
         public void sortFrame(string[] name) {
             for (int i = 0; i < name.Length; i++) {
                 renderDatas0[i] = getSpriteByName(name[i]);
             }
         }
-        
+
         public ScxSpriteRenderData getSpriteByIndex(int index) {
             return renderDatas0[index];
         }
@@ -214,6 +214,5 @@ namespace scx.SpriteRenderer {
         public string[] getSpriteNames() {
             return spriteNames;
         }
-
     }
 }

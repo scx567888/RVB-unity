@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 
 namespace scx.SpriteRenderer {
-
     /// 运行时渲染缓存数据。
     ///
     /// 所有输入都基于统一规范:
@@ -102,15 +101,15 @@ namespace scx.SpriteRenderer {
             p0x = left;
             p0y = bottom;
             p0z = 0f;
-        
+
             p1x = right;
             p1y = bottom;
             p1z = 0f;
-        
+
             p2x = left;
             p2y = top;
             p2z = 0f;
-        
+
             p3x = right;
             p3y = top;
             p3z = 0f;
