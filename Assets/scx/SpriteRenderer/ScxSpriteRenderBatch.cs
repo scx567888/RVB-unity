@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace scx.SpriteRenderer {
     public sealed class ScxSpriteRenderBatch {
@@ -95,9 +94,9 @@ namespace scx.SpriteRenderer {
 
         public void destroy() {
             // 销毁 GPU buffer (否则会导致内存泄露)
-            Object.Destroy(this.mesh);
+            UnityEngine.Object.Destroy(this.mesh);
             // 销毁 Node
-            Object.Destroy(this.node);
+            UnityEngine.Object.Destroy(this.node);
         }
 
         // ********************* free 相关 ***********************
