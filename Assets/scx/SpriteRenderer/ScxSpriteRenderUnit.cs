@@ -13,10 +13,10 @@ namespace scx.SpriteRenderer {
         private Vector3 scale;
         private bool visible;
 
-        private Vector3 p0 = Vector3.zero;
-        private Vector3 p1 = Vector3.zero;
-        private Vector3 p2 = Vector3.zero;
-        private Vector3 p3 = Vector3.zero;
+        private Vector3 p0;
+        private Vector3 p1;
+        private Vector3 p2;
+        private Vector3 p3;
 
         public ScxSpriteRenderUnit(ScxSpriteRenderer spriteRenderer, ScxSpriteRenderBatch renderBatch, int batchID,
             int index) {
