@@ -6,15 +6,22 @@ using Object = UnityEngine.Object;
 public sealed class ScxSpriteRenderBatch {
     // 四边形的基础网格信息
     private static readonly Vector3[] BASE_NORMALS = { new(0, 0, -1), new(0, 0, -1), new(0, 0, -1), new(0, 0, -1) };
-    private static readonly Vector2[] BASE_UVS = { new(0, 0), new(1, 0), new(0, 1), new(1, 1) };
+
+    private static readonly Vector2[] BASE_UVS = {
+        new(0, 0), // 0 左下
+        new(1, 0), // 1 右下
+        new(0, 1), // 2 左上
+        new(1, 1) // 3 右上
+    };
+
     private static readonly int[] BASE_INDICES = { 0, 3, 1, 3, 0, 2 };
 
     private readonly int capacity; // 容量
 
-    private Vector3[] positions; // 整个网格的 顶点 数据
-    private Vector3[] normals; // 整个网格的 法线 数据
-    private Vector2[] uvs; // 整个网格的 UV 数据
-    private int[] indices; // 整个网格的 索引 数据
+    private readonly Vector3[] positions; // 整个网格的 顶点 数据
+    private readonly Vector3[] normals; // 整个网格的 法线 数据
+    private readonly Vector2[] uvs; // 整个网格的 UV 数据
+    private readonly int[] indices; // 整个网格的 索引 数据
 
     private readonly GameObject node; // 持有节点
     private readonly Mesh mesh; // 整个网格
