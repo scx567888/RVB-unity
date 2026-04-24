@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace scx.SpriteRenderer {
     public sealed class ScxSpriteRenderer {
@@ -120,18 +118,28 @@ namespace scx.SpriteRenderer {
             foreach (var chunk in this.batches) {
                 chunk.Value.destroy();
             }
+            
+            if (this.material != null) {
+                Object.Destroy(this.material);
+            }
 
             // 销毁 Node
-            Object.Destroy(this.node);
+            UnityEngine.Object.Destroy(this.node);
         }
 
         // ================ DynamicBatchRenderer 接口 ================
 
         // 材质
         public void setMaterialTemplate(Material materialTemplate) {
+            var oldMaterial = this.material;
             this.material = createMaterial(atlas.texture, materialTemplate);
+
             foreach (var batch in this.batches) {
                 batch.Value.setMaterial(this.material);
+            }
+
+            if (oldMaterial != null) {
+                Object.Destroy(oldMaterial);
             }
         }
 
