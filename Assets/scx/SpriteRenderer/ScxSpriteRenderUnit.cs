@@ -6,11 +6,13 @@ public class ScxSpriteRenderUnit {
     public readonly int batchID;
     public readonly int index;
 
-    public ScxSprite sprite;
+    public ScxSpriteRenderData sprite;
     public Vector3 position;
     public Quaternion rotation;
     public Vector3 scale;
     public bool visible;
+    
+    
 
     public ScxSpriteRenderUnit(ScxSpriteRenderer spriteRenderer, ScxSpriteRenderBatch renderBatch, int batchID,
         int index) {
@@ -25,20 +27,20 @@ public class ScxSpriteRenderUnit {
         this.rotation = new Quaternion(0, 0, 0, 1);
         this.scale = new Vector3(1, 1, 1);
         this.visible = false;
-        this.renderBatch.setUVs(this.index, this.sprite.uv);
+        this.renderBatch.setUVs(this.index, this.sprite.uv0,this.sprite.uv1,this.sprite.uv2,this.sprite.uv3);
     }
 
     // UV
     public void setFrame(string name) {
         this.sprite = this.spriteRenderer.getSpriteByName(name);
-        this.renderBatch.setUVs(this.index, sprite.uv);
+        this.renderBatch.setUVs(this.index, sprite.uv0,sprite.uv1,sprite.uv2,sprite.uv3);
         this.updateUnitVertices();
     }
 
     // UV
     public void setFrame(int index) {
         this.sprite = this.spriteRenderer.getSpriteByIndex(index);
-        this.renderBatch.setUVs(this.index, sprite.uv);
+        this.renderBatch.setUVs(this.index, sprite.uv0,sprite.uv1,sprite.uv2,sprite.uv3);
         this.updateUnitVertices();
     }
 
@@ -108,9 +110,7 @@ public class ScxSpriteRenderUnit {
         }
         else {
             // 通过将单元的所有顶点塌缩到 0 点(0, 0, 0), 使其在视觉上隐藏/移除
-            var vector3 = new[]
-                { new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0) };
-            this.renderBatch.setPositions(index, vector3);
+            this.renderBatch.setPositions(index, Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero);
         }
     }
 
@@ -130,57 +130,95 @@ public class ScxSpriteRenderUnit {
         if (!this.visible) {
             return;
         }
+        
 
+        var qx = rotation.x;
+        var qy = rotation.y;
+        var qz = rotation.z;
+        var qw = rotation.w;
+
+        var x2 = qx + qx;
+        var y2 = qy + qy;
+        var z2 = qz + qz;
+
+        var xx = qx * x2;
+        var xy = qx * y2;
+        var xz = qx * z2;
+        var yy = qy * y2;
+        var yz = qy * z2;
+        var zz = qz * z2;
+        var wx = qw * x2;
+        var wy = qw * y2;
+        var wz = qw * z2;
+
+        var sx = scale.x;
+        var sy = scale.y;
+        var sz = scale.z;
+
+        var m00 = (1 - (yy + zz)) * sx;
+        var m01 = (xy + wz) * sx;
+        var m02 = (xz - wy) * sx;
+
+        var m04 = (xy - wz) * sy;
+        var m05 = (1 - (xx + zz)) * sy;
+        var m06 = (yz + wx) * sy;
+
+        var m08 = (xz + wy) * sz;
+        var m09 = (yz - wx) * sz;
+        var m10 = (1 - (xx + yy)) * sz;
+
+        var m12 = position.x;
+        var m13 = position.y;
+        var m14 = position.z;
+            
+            
         var sprite = this.sprite;
-        var pixelsPerUnit = this.spriteRenderer.getPixelsPerUnit();
+        var rawP0=sprite.p0;
+        var rawP1=sprite.p1;
+        var rawP2=sprite.p2;
+        var rawP3=sprite.p3;
 
-        // 1. pivot 在原图中的像素位置
-        var pivotPixelX = sprite.pivot.x * sprite.sourceSize.x;
-        var pivotPixelY = sprite.pivot.y * sprite.sourceSize.y;
+        
+        var vx = rawP0.x;
+        var vy = rawP0.y;
+        var vz = rawP0.z;
 
-        // 2. 裁边后矩形在“以 pivot 为原点”的局部像素空间中的范围
-        var left = sprite.sourceRect.x - pivotPixelX;
-        var right = sprite.sourceRect.x + sprite.sourceRect.width - pivotPixelX;
-        var bottom = sprite.sourceRect.y - pivotPixelY;
-        var top = sprite.sourceRect.y + sprite.sourceRect.height - pivotPixelY;
-
-        // 3. 像素转单位
-        left /= pixelsPerUnit;
-        right /= pixelsPerUnit;
-        bottom /= pixelsPerUnit;
-        top /= pixelsPerUnit;
-
-        // 4. 生成局部四个顶点
-        // 顶点顺序:
-        // 0 = 左下
-        // 1 = 右下
-        // 2 = 左上
-        // 3 = 右上
-        var p0 = new Vector3(left,  bottom, 0);
-        var p1 = new Vector3(right, bottom, 0);
-        var p2 = new Vector3(left,  top,    0);
-        var p3 = new Vector3(right, top,    0);
-
-        // 5. 应用缩放
-        p0 = Vector3.Scale(p0, this.scale);
-        p1 = Vector3.Scale(p1, this.scale);
-        p2 = Vector3.Scale(p2, this.scale);
-        p3 = Vector3.Scale(p3, this.scale);
-
-        // 6. 应用旋转
-        p0 = this.rotation * p0;
-        p1 = this.rotation * p1;
-        p2 = this.rotation * p2;
-        p3 = this.rotation * p3;
-
-        // 7. 应用平移
-        p0 += this.position;
-        p1 += this.position;
-        p2 += this.position;
-        p3 += this.position;
-
-        // 8. 写回 batch
-        this.renderBatch.setPositions(this.index, new[] { p0, p1, p2, p3 });
+        // 更新 positions
+        var p0 = new Vector3(
+            m00 * vx + m04 * vy + m08 * vz + m12,
+            m01 * vx + m05 * vy + m09 * vz + m13,
+            m02 * vx + m06 * vy + m10 * vz + m14
+        );
+        
+         vx = rawP1.x;
+        vy = rawP1.y;
+         vz = rawP1.z;
+        
+        var p1= new Vector3(
+            m00 * vx + m04 * vy + m08 * vz + m12,
+            m01 * vx + m05 * vy + m09 * vz + m13,
+            m02 * vx + m06 * vy + m10 * vz + m14
+        );
+        
+         vx = rawP2.x;
+         vy = rawP2.y;
+         vz = rawP2.z;
+        var p2= new Vector3(
+            m00 * vx + m04 * vy + m08 * vz + m12,
+            m01 * vx + m05 * vy + m09 * vz + m13,
+            m02 * vx + m06 * vy + m10 * vz + m14
+        );
+        
+         vx = rawP3.x;
+         vy = rawP3.y;
+         vz = rawP3.z;
+        
+        var p3= new Vector3(
+            m00 * vx + m04 * vy + m08 * vz + m12,
+            m01 * vx + m05 * vy + m09 * vz + m13,
+            m02 * vx + m06 * vy + m10 * vz + m14
+        );
+        this.renderBatch.setPositions(index,p0, p1, p2, p3);
     }
     
     
