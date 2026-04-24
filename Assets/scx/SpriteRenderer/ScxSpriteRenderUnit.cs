@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Profiling;
 
 public class ScxSpriteRenderUnit {
     private ScxSpriteRenderer spriteRenderer;
@@ -11,8 +12,11 @@ public class ScxSpriteRenderUnit {
     public Quaternion rotation;
     public Vector3 scale;
     public bool visible;
-    
-    
+
+    private Vector3 p0=Vector3.zero;
+    private Vector3 p1=Vector3.zero;
+    private Vector3 p2=Vector3.zero;
+    private Vector3 p3=Vector3.zero;
 
     public ScxSpriteRenderUnit(ScxSpriteRenderer spriteRenderer, ScxSpriteRenderBatch renderBatch, int batchID,
         int index) {
@@ -154,6 +158,7 @@ public class ScxSpriteRenderUnit {
         var sx = scale.x;
         var sy = scale.y;
         var sz = scale.z;
+        
 
         var m00 = (1 - (yy + zz)) * sx;
         var m01 = (xy + wz) * sx;
@@ -183,41 +188,57 @@ public class ScxSpriteRenderUnit {
         var vy = rawP0.y;
         var vz = rawP0.z;
 
+        var px = m00 * vx + m04 * vy + m08 * vz + m12;
+        var py = m01 * vx + m05 * vy + m09 * vz + m13 ;
+        var pz = m02 * vx + m06 * vy + m10 * vz + m14;
+
         // 更新 positions
-        var p0 = new Vector3(
-            m00 * vx + m04 * vy + m08 * vz + m12,
-            m01 * vx + m05 * vy + m09 * vz + m13,
-            m02 * vx + m06 * vy + m10 * vz + m14
-        );
+         // p0 = new Vector3(px, py, pz);
+         p0.x = px;
+         p0.y =  py;
+         p0.z =  pz;
         
          vx = rawP1.x;
         vy = rawP1.y;
          vz = rawP1.z;
+
+         px = m00 * vx + m04 * vy + m08 * vz + m12;
+         py = m01 * vx + m05 * vy + m09 * vz + m13;
+         pz = m02 * vx + m06 * vy + m10 * vz + m14;
         
-        var p1= new Vector3(
-            m00 * vx + m04 * vy + m08 * vz + m12,
-            m01 * vx + m05 * vy + m09 * vz + m13,
-            m02 * vx + m06 * vy + m10 * vz + m14
-        );
+         // p1= new Vector3(px,py,pz);
+         p1.x = px;
+         p1.y =  py;
+         p1.z =  pz;
+         
         
          vx = rawP2.x;
          vy = rawP2.y;
          vz = rawP2.z;
-        var p2= new Vector3(
-            m00 * vx + m04 * vy + m08 * vz + m12,
-            m01 * vx + m05 * vy + m09 * vz + m13,
-            m02 * vx + m06 * vy + m10 * vz + m14
-        );
+
+         px = m00 * vx + m04 * vy + m08 * vz + m12;
+         py = m01 * vx + m05 * vy + m09 * vz + m13;
+         pz = m02 * vx + m06 * vy + m10 * vz + m14;
+         
+         // p2= new Vector3(px, py, pz);
+         p2.x = px;
+         p2.y =  py;
+         p2.z =  pz;
+         
         
          vx = rawP3.x;
          vy = rawP3.y;
          vz = rawP3.z;
+
+         px = m00 * vx + m04 * vy + m08 * vz + m12;
+         py = m01 * vx + m05 * vy + m09 * vz + m13;
+         pz = m02 * vx + m06 * vy + m10 * vz + m14;
         
-        var p3= new Vector3(
-            m00 * vx + m04 * vy + m08 * vz + m12,
-            m01 * vx + m05 * vy + m09 * vz + m13,
-            m02 * vx + m06 * vy + m10 * vz + m14
-        );
+         // p3= new Vector3(px, py, pz);
+         p3.x = px;
+         p3.y =  py;
+         p3.z =  pz;
+         
         
         this.renderBatch.setPositions(index,p0, p1, p2, p3);
     }
