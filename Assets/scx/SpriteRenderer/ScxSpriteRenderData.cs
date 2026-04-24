@@ -9,10 +9,10 @@ public class ScxSpriteRenderData {
     public readonly Vector2 uv3;
     
     
-    public readonly float left;
-    public readonly float right;
-    public readonly float bottom;
-    public readonly float top;
+    public readonly Vector3 p0;
+    public readonly Vector3 p1;
+    public readonly Vector3 p2;
+    public readonly Vector3 p3;
 
     public ScxSpriteRenderData(ScxSprite sprite, int textureWidth, int textureHeight, float pixelsPerUnit) {
         var rect = sprite.atlasRect;
@@ -30,22 +30,18 @@ public class ScxSpriteRenderData {
         
         
 
-        // 1. pivot 在原图中的像素位置
         var pivotPixelX = sprite.pivot.x * sprite.sourceSize.x;
         var pivotPixelY = sprite.pivot.y * sprite.sourceSize.y;
 
-        // 2. 裁边后矩形在“以 pivot 为原点”的局部像素空间中的范围
-        var _left = sprite.sourceRect.x - pivotPixelX;
-        var _right = sprite.sourceRect.x + sprite.sourceRect.width - pivotPixelX;
-        var _bottom = sprite.sourceRect.y - pivotPixelY;
-        var _top = sprite.sourceRect.y + sprite.sourceRect.height - pivotPixelY;
+        var left   = (sprite.sourceRect.x - pivotPixelX) / pixelsPerUnit;
+        var right  = (sprite.sourceRect.x + sprite.sourceRect.width - pivotPixelX) / pixelsPerUnit;
+        var bottom = (sprite.sourceRect.y - pivotPixelY) / pixelsPerUnit;
+        var top    = (sprite.sourceRect.y + sprite.sourceRect.height - pivotPixelY) / pixelsPerUnit;
 
-        // 3. 像素转单位
-        this.left = _left/pixelsPerUnit;
-        this.right = _right/pixelsPerUnit;
-        this.bottom = _bottom/pixelsPerUnit;
-        this.top = _top/pixelsPerUnit;
-        
+        p0 = new Vector3(left,  bottom, 0);
+        p1 = new Vector3(right, bottom, 0);
+        p2 = new Vector3(left,  top,    0);
+        p3 = new Vector3(right, top,    0);
         
     }
     
