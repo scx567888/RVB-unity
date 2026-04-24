@@ -197,6 +197,12 @@ namespace scx.SpriteRenderer {
             }
         }
         
+        public void sortFrame(string[] name) {
+            for (int i = 0; i < name.Length; i++) {
+                renderDatas0[i] = getSpriteByName(name[i]);
+            }
+        }
+        
         public ScxSpriteRenderData getSpriteByIndex(int index) {
             return renderDatas0[index];
         }
