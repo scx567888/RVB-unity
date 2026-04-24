@@ -111,19 +111,23 @@ public sealed class ScxSpriteRenderBatch {
     }
 
     /// 更新 UVs
-    public void setUVs(int index, Vector2[] newUVs) {
-        // 计算 Unit 在 UVs 数组中的起始位置
+    public void setUVs(int index, Vector2 uv0, Vector2 uv1, Vector2 uv2, Vector2 uv3) {
+        // 计算 Unit 在 uvs 数组中的起始位置
         var startIndex = index * 4;
-        // 更新 UV
-        Array.Copy(newUVs, 0, this.uvs, startIndex, 4);
+        this.uvs[startIndex + 0] = uv0;
+        this.uvs[startIndex + 1] = uv1;
+        this.uvs[startIndex + 2] = uv2;
+        this.uvs[startIndex + 3] = uv3;
     }
 
     /// 更新 Positions
-    public void setPositions(int index, Vector3[] newPositions) {
-        // 计算 Unit 在 UVs 数组中的起始位置
+    public void setPositions(int index, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3) {
+        // 计算 Unit 在 positions 数组中的起始位置
         var startIndex = index * 4;
-        // 更新 UV
-        Array.Copy(newPositions, 0, this.positions, startIndex, 4);
+        this.positions[startIndex + 0] = p0;
+        this.positions[startIndex + 1] = p1;
+        this.positions[startIndex + 2] = p2;
+        this.positions[startIndex + 3] = p3;
     }
 
     /// 更新材质
