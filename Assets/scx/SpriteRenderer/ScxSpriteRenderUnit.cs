@@ -134,7 +134,6 @@ public class ScxSpriteRenderUnit {
         if (!this.visible) {
             return;
         }
-        
 
         var qx = rotation.x;
         var qy = rotation.y;
@@ -176,72 +175,26 @@ public class ScxSpriteRenderUnit {
         var m13 = position.y;
         var m14 = position.z;
             
-            
         var sprite = this.sprite;
-        var rawP0=sprite.p0;
-        var rawP1=sprite.p1;
-        var rawP2=sprite.p2;
-        var rawP3=sprite.p3;
-
-        
-        var vx = rawP0.x;
-        var vy = rawP0.y;
-        var vz = rawP0.z;
-
-        var px = m00 * vx + m04 * vy + m08 * vz + m12;
-        var py = m01 * vx + m05 * vy + m09 * vz + m13 ;
-        var pz = m02 * vx + m06 * vy + m10 * vz + m14;
 
         // 更新 positions
-         // p0 = new Vector3(px, py, pz);
-         p0.x = px;
-         p0.y =  py;
-         p0.z =  pz;
+         p0.x = m00 * sprite.p0x + m04 * sprite.p0y + m08 * sprite.p0z + m12;
+         p0.y =  m01 * sprite.p0x + m05 * sprite.p0y + m09 * sprite.p0z + m13 ;
+         p0.z =  m02 * sprite.p0x + m06 * sprite.p0y + m10 * sprite.p0z + m14;
         
-         vx = rawP1.x;
-        vy = rawP1.y;
-         vz = rawP1.z;
-
-         px = m00 * vx + m04 * vy + m08 * vz + m12;
-         py = m01 * vx + m05 * vy + m09 * vz + m13;
-         pz = m02 * vx + m06 * vy + m10 * vz + m14;
-        
-         // p1= new Vector3(px,py,pz);
-         p1.x = px;
-         p1.y =  py;
-         p1.z =  pz;
+         p1.x = m00 * sprite.p1x + m04 * sprite.p1y + m08 * sprite.p1z + m12;
+         p1.y =  m01 * sprite.p1x + m05 * sprite.p1y + m09 * sprite.p1z + m13;
+         p1.z =  m02 * sprite.p1x + m06 * sprite.p1y + m10 * sprite.p1z + m14;
          
+         p2.x = m00 * sprite.p2x + m04 * sprite.p2y + m08 * sprite.p2z + m12;
+         p2.y =  m01 * sprite.p2x + m05 * sprite.p2y + m09 * sprite.p2z + m13;
+         p2.z =  m02 * sprite.p2x + m06 * sprite.p2y + m10 * sprite.p2z + m14;
         
-         vx = rawP2.x;
-         vy = rawP2.y;
-         vz = rawP2.z;
-
-         px = m00 * vx + m04 * vy + m08 * vz + m12;
-         py = m01 * vx + m05 * vy + m09 * vz + m13;
-         pz = m02 * vx + m06 * vy + m10 * vz + m14;
-         
-         // p2= new Vector3(px, py, pz);
-         p2.x = px;
-         p2.y =  py;
-         p2.z =  pz;
-         
-        
-         vx = rawP3.x;
-         vy = rawP3.y;
-         vz = rawP3.z;
-
-         px = m00 * vx + m04 * vy + m08 * vz + m12;
-         py = m01 * vx + m05 * vy + m09 * vz + m13;
-         pz = m02 * vx + m06 * vy + m10 * vz + m14;
-        
-         // p3= new Vector3(px, py, pz);
-         p3.x = px;
-         p3.y =  py;
-         p3.z =  pz;
-         
+         p3.x = m00 * sprite.p3x + m04 * sprite.p3y + m08 * sprite.p3z + m12;
+         p3.y =  m01 * sprite.p3x + m05 * sprite.p3y + m09 * sprite.p3z + m13;
+         p3.z =  m02 * sprite.p3x + m06 * sprite.p3y + m10 * sprite.p3z + m14;
         
         this.renderBatch.setPositions(index,p0, p1, p2, p3);
     }
-    
     
 }

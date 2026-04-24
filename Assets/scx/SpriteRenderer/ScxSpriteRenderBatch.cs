@@ -11,10 +11,10 @@ public sealed class ScxSpriteRenderBatch {
 
     private readonly int capacity; // 容量
 
-    private readonly Vector3[] positions; // 整个网格的 顶点 数据
-    private readonly Vector3[] normals; // 整个网格的 法线 数据
-    private readonly Vector2[] uvs; // 整个网格的 UV 数据
-    private readonly int[] indices; // 整个网格的 索引 数据
+    private Vector3[] positions; // 整个网格的 顶点 数据
+    private Vector3[] normals; // 整个网格的 法线 数据
+    private Vector2[] uvs; // 整个网格的 UV 数据
+    private int[] indices; // 整个网格的 索引 数据
 
     private readonly GameObject node; // 持有节点
     private readonly Mesh mesh; // 整个网格
@@ -137,11 +137,9 @@ public sealed class ScxSpriteRenderBatch {
 
     /// 更新 网格
     public void update() {
-        // 更新网格
-        mesh.vertices = positions;
-        mesh.normals = normals;
-        mesh.uv = uvs;
-        // 索引 我们无需更新 
+        // 更新网格 (索引和法线无需更新)
+        mesh.SetVertices(positions);
+        mesh.SetUVs(0, uvs);
 
         // 更新包围盒
         mesh.RecalculateBounds();
