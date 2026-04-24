@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using scx.SpriteRenderer;
+using UnityEngine;
 using UnityEngine.Profiling;
 
 public class ScxSpriteRenderUnit {
@@ -7,16 +8,16 @@ public class ScxSpriteRenderUnit {
     public readonly int batchID;
     public readonly int index;
 
-    public ScxSpriteRenderData sprite;
-    public Vector3 position;
-    public Quaternion rotation;
-    public Vector3 scale;
-    public bool visible;
+    private ScxSpriteRenderData sprite;
+    private Vector3 position;
+    private Quaternion rotation;
+    private Vector3 scale;
+    private bool visible;
 
-    private Vector3 p0=Vector3.zero;
-    private Vector3 p1=Vector3.zero;
-    private Vector3 p2=Vector3.zero;
-    private Vector3 p3=Vector3.zero;
+    private Vector3 p0 = Vector3.zero;
+    private Vector3 p1 = Vector3.zero;
+    private Vector3 p2 = Vector3.zero;
+    private Vector3 p3 = Vector3.zero;
 
     public ScxSpriteRenderUnit(ScxSpriteRenderer spriteRenderer, ScxSpriteRenderBatch renderBatch, int batchID,
         int index) {
@@ -24,27 +25,27 @@ public class ScxSpriteRenderUnit {
         this.renderBatch = renderBatch;
         this.batchID = batchID;
         this.index = index;
-        
+
         // 默认初始化第一个 
         this.sprite = spriteRenderer.getSpriteByIndex(0);
         this.position = new Vector3(0, 0, 0);
         this.rotation = new Quaternion(0, 0, 0, 1);
         this.scale = new Vector3(1, 1, 1);
         this.visible = false;
-        this.renderBatch.setUVs(this.index, this.sprite.uv0,this.sprite.uv1,this.sprite.uv2,this.sprite.uv3);
+        this.renderBatch.setUVs(this.index, this.sprite.uv0, this.sprite.uv1, this.sprite.uv2, this.sprite.uv3);
     }
 
     // UV
     public void setFrame(string name) {
         this.sprite = this.spriteRenderer.getSpriteByName(name);
-        this.renderBatch.setUVs(this.index, sprite.uv0,sprite.uv1,sprite.uv2,sprite.uv3);
+        this.renderBatch.setUVs(this.index, sprite.uv0, sprite.uv1, sprite.uv2, sprite.uv3);
         this.updateUnitVertices();
     }
 
     // UV
     public void setFrame(int index) {
         this.sprite = this.spriteRenderer.getSpriteByIndex(index);
-        this.renderBatch.setUVs(this.index, sprite.uv0,sprite.uv1,sprite.uv2,sprite.uv3);
+        this.renderBatch.setUVs(this.index, sprite.uv0, sprite.uv1, sprite.uv2, sprite.uv3);
         this.updateUnitVertices();
     }
 
@@ -114,7 +115,7 @@ public class ScxSpriteRenderUnit {
         }
         else {
             // 通过将单元的所有顶点塌缩到 0 点(0, 0, 0), 使其在视觉上隐藏/移除
-            this.renderBatch.setPositions(index, Vector3.zero,Vector3.zero,Vector3.zero,Vector3.zero);
+            this.renderBatch.setPositions(index, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero);
         }
     }
 
@@ -157,7 +158,7 @@ public class ScxSpriteRenderUnit {
         var sx = scale.x;
         var sy = scale.y;
         var sz = scale.z;
-        
+
 
         var m00 = (1 - (yy + zz)) * sx;
         var m01 = (xy + wz) * sx;
@@ -174,27 +175,26 @@ public class ScxSpriteRenderUnit {
         var m12 = position.x;
         var m13 = position.y;
         var m14 = position.z;
-            
+
         var sprite = this.sprite;
 
         // 更新 positions
-         p0.x = m00 * sprite.p0x + m04 * sprite.p0y + m08 * sprite.p0z + m12;
-         p0.y =  m01 * sprite.p0x + m05 * sprite.p0y + m09 * sprite.p0z + m13 ;
-         p0.z =  m02 * sprite.p0x + m06 * sprite.p0y + m10 * sprite.p0z + m14;
-        
-         p1.x = m00 * sprite.p1x + m04 * sprite.p1y + m08 * sprite.p1z + m12;
-         p1.y =  m01 * sprite.p1x + m05 * sprite.p1y + m09 * sprite.p1z + m13;
-         p1.z =  m02 * sprite.p1x + m06 * sprite.p1y + m10 * sprite.p1z + m14;
-         
-         p2.x = m00 * sprite.p2x + m04 * sprite.p2y + m08 * sprite.p2z + m12;
-         p2.y =  m01 * sprite.p2x + m05 * sprite.p2y + m09 * sprite.p2z + m13;
-         p2.z =  m02 * sprite.p2x + m06 * sprite.p2y + m10 * sprite.p2z + m14;
-        
-         p3.x = m00 * sprite.p3x + m04 * sprite.p3y + m08 * sprite.p3z + m12;
-         p3.y =  m01 * sprite.p3x + m05 * sprite.p3y + m09 * sprite.p3z + m13;
-         p3.z =  m02 * sprite.p3x + m06 * sprite.p3y + m10 * sprite.p3z + m14;
-        
-        this.renderBatch.setPositions(index,p0, p1, p2, p3);
+        p0.x = m00 * sprite.p0x + m04 * sprite.p0y + m08 * sprite.p0z + m12;
+        p0.y = m01 * sprite.p0x + m05 * sprite.p0y + m09 * sprite.p0z + m13;
+        p0.z = m02 * sprite.p0x + m06 * sprite.p0y + m10 * sprite.p0z + m14;
+
+        p1.x = m00 * sprite.p1x + m04 * sprite.p1y + m08 * sprite.p1z + m12;
+        p1.y = m01 * sprite.p1x + m05 * sprite.p1y + m09 * sprite.p1z + m13;
+        p1.z = m02 * sprite.p1x + m06 * sprite.p1y + m10 * sprite.p1z + m14;
+
+        p2.x = m00 * sprite.p2x + m04 * sprite.p2y + m08 * sprite.p2z + m12;
+        p2.y = m01 * sprite.p2x + m05 * sprite.p2y + m09 * sprite.p2z + m13;
+        p2.z = m02 * sprite.p2x + m06 * sprite.p2y + m10 * sprite.p2z + m14;
+
+        p3.x = m00 * sprite.p3x + m04 * sprite.p3y + m08 * sprite.p3z + m12;
+        p3.y = m01 * sprite.p3x + m05 * sprite.p3y + m09 * sprite.p3z + m13;
+        p3.z = m02 * sprite.p3x + m06 * sprite.p3y + m10 * sprite.p3z + m14;
+
+        this.renderBatch.setPositions(index, p0, p1, p2, p3);
     }
-    
 }
