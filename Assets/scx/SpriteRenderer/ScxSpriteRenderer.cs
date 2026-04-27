@@ -172,10 +172,11 @@ namespace scx.SpriteRenderer {
         public void destroyUnit(ScxSpriteRenderUnit unit) {
             var instance = unit.instance;
             var batch = instance.batch;
-            batch.release(instance);
-
             // 设为不可见
             unit.setVisible(false);
+            
+            batch.release(instance);
+            
             // 全部空闲 则回收整个 分块
             if (batch.allFree()) {
                 batch.destroy();
