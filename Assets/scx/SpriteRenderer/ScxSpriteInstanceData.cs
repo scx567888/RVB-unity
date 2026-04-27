@@ -22,6 +22,10 @@ public class ScxSpriteInstanceData {
     public ScxSpriteInstanceData(ScxSpriteRenderBatch batch, int index) {
         this.batch = batch;
         this.index = index;
+        this.position = new Vector3(0, 0, 0);
+        this.rotation = new Quaternion(0, 0, 0, 1);
+        this.scale = new Vector3(1, 1, 1);
+        this.visible = false;
     }
 
     public void onAllocate(int i) {
