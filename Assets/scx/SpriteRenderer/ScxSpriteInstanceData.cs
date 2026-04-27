@@ -36,6 +36,24 @@ public class ScxSpriteInstanceData {
     public void onRelease() {
         
     }
+    
+    // 可见性
+    public void setVisible(bool visible) {
+        // 如果和之前一样 跳过
+        if (this.visible == visible) {
+            return;
+        }
+
+        this.visible = visible;
+
+        if (this.visible) {
+            this.update();
+        }
+        else {
+            // 通过将单元的所有顶点塌缩到 0 点(0, 0, 0), 使其在视觉上隐藏/移除
+            this.batch.setPositions(index, Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero);
+        }
+    }
 
     public void update() {
         if (!visible) {
