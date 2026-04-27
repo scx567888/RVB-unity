@@ -27,19 +27,6 @@ public class ScxSpriteInstanceData {
         this.scale = new Vector3(1, 1, 1);
         this.visible = false;
     }
-
-    public void onAllocate(int i) {
-    }
-
-    public void onMove(int removeIndex) {
-    }
-
-    public void markAllDirty() {
-    }
-
-    public void onRelease() {
-        
-    }
     
     // 可见性
     public void setVisible(bool visible) {
