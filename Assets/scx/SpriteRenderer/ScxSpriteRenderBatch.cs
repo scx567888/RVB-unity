@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace scx.SpriteRenderer {
@@ -28,7 +27,11 @@ namespace scx.SpriteRenderer {
         private readonly MeshRenderer meshRenderer; // 网格渲染器
         private readonly MeshFilter meshFilter; // 网格渲染器 (Filter)
 
-        private readonly Stack<int> freeIndex; // 空闲的 索引
+        private readonly ScxSpriteInstanceData[] instances; // 实例列表
+        
+        // [0, usedCount) 是正在使用的
+        // [usedCount, capacity) 是空闲的
+        private int usedCount;
 
         public ScxSpriteRenderBatch(int capacity, GameObject parentNode) {
             this.capacity = capacity;
@@ -80,10 +83,12 @@ namespace scx.SpriteRenderer {
             this.meshFilter = this.node.AddComponent<MeshFilter>();
             this.meshFilter.sharedMesh = this.mesh;
 
-            this.freeIndex = new Stack<int>(capacity);
+            this.instances = new ScxSpriteInstanceData[capacity];
             for (var i = 0; i < capacity; i++) {
-                this.freeIndex.Push(i);
+                this.instances[i]=new ScxSpriteInstanceData(this,i);
             }
+
+            this.usedCount = 0;
         }
 
         // ********************* GameObject 相关 ***********************
@@ -101,20 +106,40 @@ namespace scx.SpriteRenderer {
 
         // ********************* free 相关 ***********************
 
-        public int allocate() {
-            return this.freeIndex.Pop();
+        // 我们保证外部调用前索引一定会被检查 (所以这里不做检查)
+        public ScxSpriteInstanceData allocate() {
+            var index = this.usedCount;
+            var instance = this.instances[index];
+
+            this.usedCount++;
+
+            return instance;
         }
 
-        public void release(int index) {
-            this.freeIndex.Push(index);
+        // 我们保证外部调用前参数一定会被检查 (所以这里不做检查)
+        public void release(ScxSpriteInstanceData instanceData) {
+            var removeIndex = instanceData.index;
+            var lastIndex = this.usedCount - 1;
+
+            var last = this.instances[lastIndex];
+
+            // 无条件把最后一个活跃对象放到 removeIndex
+            this.instances[removeIndex] = last;
+            last.index = removeIndex;
+
+            // 无条件把被释放对象放到 lastIndex
+            this.instances[lastIndex] = instanceData;
+            instanceData.index = lastIndex;
+
+            this.usedCount--;
         }
 
         public bool hasFree() {
-            return this.freeIndex.Count > 0;
+            return this.usedCount < this.capacity;
         }
 
         public bool allFree() {
-            return this.freeIndex.Count == this.capacity;
+            return this.usedCount == 0;
         }
 
         /// 更新 UVs
@@ -144,6 +169,11 @@ namespace scx.SpriteRenderer {
 
         /// 更新 网格
         public void update() {
+            
+            for (var i = 0; i < this.usedCount; i++) {
+                this.instances[i].update();
+            }
+            
             // 更新网格 (索引和法线无需更新)
             mesh.SetVertices(positions);
             mesh.SetUVs(0, uvs);
