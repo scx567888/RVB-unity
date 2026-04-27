@@ -11,7 +11,7 @@ namespace scx.SpriteRenderer {
     /// 该类会预计算两类数据:
     /// 1. UV（图集采样范围）
     /// 2. 以 pivot 为局部原点的四边形顶点坐标
-    public sealed class ScxSpriteRenderData {
+    public sealed class ScxSpriteGeometry {
         // UV 对应关系:
         // uv0 -> 左下
         // uv1 -> 右下
@@ -46,7 +46,7 @@ namespace scx.SpriteRenderer {
         public readonly float p3y;
         public readonly float p3z;
 
-        public ScxSpriteRenderData(
+        public ScxSpriteGeometry(
             ScxSprite sprite,
             int textureWidth,
             int textureHeight,
