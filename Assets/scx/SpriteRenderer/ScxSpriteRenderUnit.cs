@@ -8,6 +8,7 @@ namespace scx.SpriteRenderer {
 
         public ScxSpriteRenderUnit(ScxSpriteRenderer spriteRenderer, ScxSpriteInstanceData instance) {
             this.spriteRenderer = spriteRenderer;
+            this.instance = instance;
 
             // 默认初始化第一个 
             instance.geometry = this.spriteRenderer.getSpriteGeometryByIndex(0);

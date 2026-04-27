@@ -8,12 +8,11 @@ namespace scx.SpriteRenderer {
         private readonly int batchCapacity;
 
         private readonly GameObject node; // 持有节点
-        private readonly Dictionary<int, ScxSpriteRenderBatch> batches; // 分块列表
-        private int nextBatchID; // 分块 ID
+        private readonly List<ScxSpriteRenderBatch> batches; // 分块列表
 
         // 这里同时使用两种方式存储 空间换时间
-        private readonly ScxSpriteRenderData[] renderDatas0;
-        private readonly Dictionary<string, ScxSpriteRenderData> renderDatas1;
+        private readonly ScxSpriteGeometry[] geometries0;
+        private readonly Dictionary<string, ScxSpriteGeometry> geometries1;
         private readonly string[] spriteNames;
 
         public ScxSpriteRenderer(
@@ -26,23 +25,22 @@ namespace scx.SpriteRenderer {
             this.material = createMaterial(atlas.texture, materialTemplate);
             this.batchCapacity = batchCapacity;
             this.node = new GameObject("ScxSpriteRenderer");
-            this.batches = new Dictionary<int, ScxSpriteRenderBatch>();
-            this.nextBatchID = 0;
+            this.batches = new List<ScxSpriteRenderBatch>();
 
 
             // 初始化 渲染相关
 
-            this.renderDatas0 = new ScxSpriteRenderData[atlas.sprites.Length];
-            this.renderDatas1 = new Dictionary<string, ScxSpriteRenderData>();
+            this.geometries0 = new ScxSpriteGeometry[atlas.sprites.Length];
+            this.geometries1 = new Dictionary<string, ScxSpriteGeometry>();
             this.spriteNames = new string[atlas.sprites.Length];
 
             var textureWidth = atlas.texture.width;
             var textureHeight = atlas.texture.height;
             for (var i = 0; i < atlas.sprites.Length; i++) {
                 var sprite = atlas.sprites[i];
-                var data = new ScxSpriteRenderData(sprite, textureWidth, textureHeight, pixelsPerUnit);
-                renderDatas0[i] = data;
-                renderDatas1[sprite.name] = data;
+                var data = new ScxSpriteGeometry(sprite, textureWidth, textureHeight, pixelsPerUnit);
+                geometries0[i] = data;
+                geometries1[sprite.name] = data;
                 spriteNames[i] = sprite.name;
             }
         }
@@ -106,7 +104,7 @@ namespace scx.SpriteRenderer {
             this.node.layer = LayerMask.NameToLayer(name);
             // 处理子 layer
             foreach (var batch in this.batches) {
-                batch.Value.setLayer(this.node.layer);
+                batch.setLayer(this.node.layer);
             }
         }
 
@@ -116,7 +114,7 @@ namespace scx.SpriteRenderer {
 
         public void destroy() {
             foreach (var chunk in this.batches) {
-                chunk.Value.destroy();
+                chunk.destroy();
             }
 
             if (this.material != null) {
@@ -135,7 +133,7 @@ namespace scx.SpriteRenderer {
             this.material = createMaterial(atlas.texture, materialTemplate);
 
             foreach (var batch in this.batches) {
-                batch.Value.setMaterial(this.material);
+                batch.setMaterial(this.material);
             }
 
             if (oldMaterial != null) {
@@ -146,69 +144,64 @@ namespace scx.SpriteRenderer {
         // Unit
         public ScxSpriteRenderUnit createUnit() {
             // 寻找一个空位
-            ScxSpriteRenderBatch renderBatch = null;
-            int batchID = -1;
-            int index = -1;
+            ScxSpriteInstanceData instanceData = null;
 
             // 先尝试寻找一个空位
             foreach (var batch in this.batches) {
-                if (batch.Value.hasFree()) {
-                    renderBatch = batch.Value;
-                    batchID = batch.Key;
-                    index = renderBatch.allocate();
+                if (batch.hasFree()) {
+                    instanceData = batch.allocate();
                     break;
                 }
             }
 
             // 没找到任何符合的 创建 (扩容)
-            if (renderBatch == null) {
-                renderBatch = new ScxSpriteRenderBatch(this.batchCapacity, this.node);
-                renderBatch.setLayer(this.node.layer);
-                renderBatch.setMaterial(this.material);
-                batchID = this.nextBatchID++;
-                index = renderBatch.allocate();
-                this.batches.Add(batchID, renderBatch);
+            if (instanceData == null) {
+                var newBatch = new ScxSpriteRenderBatch(this.batchCapacity, this.node);
+                newBatch.setLayer(this.node.layer);
+                newBatch.setMaterial(this.material);
+                instanceData = newBatch.allocate();
+                this.batches.Add(newBatch);
             }
 
             // 创建一个 SpriteRenderUnit
-            var unit = new ScxSpriteRenderUnit(this, renderBatch, batchID, index);
+            var unit = new ScxSpriteRenderUnit(this, instanceData);
             unit.setVisible(true);
             return unit;
         }
 
         public void destroyUnit(ScxSpriteRenderUnit unit) {
-            // 获取分块
-            var batch = this.batches[unit.batchID];
-            // 回收 id
-            batch.release(unit.index);
+            var instance = unit.instance;
+            var batch = instance.batch;
+            batch.release(instance);
+
             // 设为不可见
             unit.setVisible(false);
             // 全部空闲 则回收整个 分块
             if (batch.allFree()) {
                 batch.destroy();
-                this.batches.Remove(unit.batchID);
+                this.batches.Remove(batch);
             }
         }
 
         // 更新
         public void update() {
             foreach (var batch in this.batches) {
-                batch.Value.update();
+                batch.update();
             }
         }
 
         public void sortFrame(string[] name) {
             for (int i = 0; i < name.Length; i++) {
-                renderDatas0[i] = getSpriteByName(name[i]);
+                geometries0[i] = getSpriteGeometryByName(name[i]);
             }
         }
 
-        public ScxSpriteRenderData getSpriteByIndex(int index) {
-            return renderDatas0[index];
+        public ScxSpriteGeometry getSpriteGeometryByIndex(int index) {
+            return geometries0[index];
         }
 
-        public ScxSpriteRenderData getSpriteByName(string name) {
-            return renderDatas1[name];
+        public ScxSpriteGeometry getSpriteGeometryByName(string name) {
+            return geometries1[name];
         }
 
         public string[] getSpriteNames() {
