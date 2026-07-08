@@ -31,6 +31,15 @@ public class Test : MonoBehaviour {
 
         this.scxSpriteRenderer.setParent(this.gameObject);
 
+        // 排序一下 内部 帧索引, 后续用 索引 setFrame 会快很多.
+        var sortedFrameName = new string[this.spriteNames.Length];
+
+        for (int i = 0; i < sortedFrameName.Length; i++) {
+            sortedFrameName[i] = "car (" + (i + 1) + ")";
+        }
+
+        this.scxSpriteRenderer.sortFrame(sortedFrameName);
+
         // 创建汽车
         this.cars = new List<Car>();
         for (var j = 0; j < 10000 * 5; j++) {
@@ -70,16 +79,14 @@ public class Test : MonoBehaviour {
         Parallel.For(0, cars.Count, i => {
             var car = cars[i];
             car.frameIndex++;
-            var frameName = "car (" + (car.frameIndex % this.spriteNames.Length + 1) + ")";
-            car.renderUnit.setFrame(frameName);
+            car.renderUnit.setFrame(car.frameIndex % this.spriteNames.Length);
         });
 
-        // // 传统方式
+        // 传统方式
         // foreach (var car in this.cars) {
         //     // 每个单元的帧索引累加
         //     car.frameIndex++;
-        //     var frameName = "car (" + (car.frameIndex % this.spriteNames.Length + 1) + ")";
-        //     car.renderUnit.setFrame(frameName);
+        //     car.renderUnit.setFrame(car.frameIndex % this.spriteNames.Length);
         // }
 
         this.scxSpriteRenderer.update();
