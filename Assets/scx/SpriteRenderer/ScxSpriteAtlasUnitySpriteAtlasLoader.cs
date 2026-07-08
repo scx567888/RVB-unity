@@ -34,23 +34,24 @@ namespace scx.SpriteRenderer {
 
             for (var i = 0; i < actualCount; i += 1) {
                 var unitySprite = unitySprites[i];
-
-                // 不支持图集打包阶段的旋转
-                if (unitySprite.packed && unitySprite.packingRotation != SpritePackingRotation.None) {
-                    throw new NotSupportedException(
-                        $"Sprite '{unitySprite.name}' uses packing rotation '{unitySprite.packingRotation}', " +
-                        "but ScxSprite currently does not support rotated sprites.");
+                
+                // 不支持多张 atlas texture
+                if (unitySprite.texture != atlasTexture) {
+                    throw new ArgumentException("不支持多张 atlas texture.", nameof(unitySpriteAtlas));
                 }
 
-                // 你的系统目前是 quad，不支持 tight packed polygon
-                if (unitySprite.packed && unitySprite.packingMode != SpritePackingMode.Rectangle) {
-                    // throw new NotSupportedException(
-                    // $"Sprite '{unitySprite.name}' uses packing mode '{unitySprite.packingMode}', " +
-                    // "but ScxSprite currently only supports rectangle packing.");
+                // 不支持图集打包阶段的旋转
+                if (unitySprite.packingRotation != SpritePackingRotation.None) {
+                    throw new ArgumentException("不支持图集打包阶段的旋转.", nameof(unitySpriteAtlas));
+                }
+
+                // 不支持 Tight Packing / 非矩形 Sprite Mesh.
+                if (unitySprite.packingMode != SpritePackingMode.Rectangle) {
+                    throw new ArgumentException("不支持 Tight Packing / 非矩形 Sprite Mesh.", nameof(unitySpriteAtlas));
                 }
 
                 // 当前 atlas 贴图中的矩形
-                // 注意：tight packed 时 textureRect 会抛异常，所以前面先拒绝了非 Rectangle
+                // 注意: tight packed 时 textureRect 会抛异常, 所以前面先拒绝了非 Rectangle
                 var textureRect = unitySprite.textureRect;
 
                 // 原始 Sprite 在原始贴图上的矩形
