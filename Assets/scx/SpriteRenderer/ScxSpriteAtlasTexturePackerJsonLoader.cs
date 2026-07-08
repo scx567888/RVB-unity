@@ -4,11 +4,9 @@ using UnityEngine;
 
 // todo 待优化
 namespace scx.SpriteRenderer {
-    
     /// ScxSpriteAtlas 加载器 
     /// 适用于 TexturePacker 导出的 JSON (frames 为数组格式)
     public static class ScxSpriteAtlasTexturePackerJsonLoader {
-        
         /// 将 TexturePacker 导出的 JSON (frames 为数组格式) 加载为 ScxSpriteAtlas
         public static ScxSpriteAtlas load(Texture2D texture, string json) {
             if (texture == null) {
@@ -92,10 +90,8 @@ namespace scx.SpriteRenderer {
 
             return new ScxSpriteAtlas(texture, sprites);
         }
-        
-        
-    
-        
+
+
         [Serializable]
         private class TpRoot {
             public TpFrame[] frames;
@@ -137,8 +133,5 @@ namespace scx.SpriteRenderer {
             public float x;
             public float y;
         }
-        
     }
-    
-    
 }
