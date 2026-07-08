@@ -67,9 +67,9 @@ namespace scx.SpriteRenderer {
             var pivotPixelX = sprite.pivot.x * sprite.sourceSize.x;
             var pivotPixelY = sprite.pivot.y * sprite.sourceSize.y;
             
-            // 3, 计算裁边后有效区域，相对 pivot 的局部边界（像素）
+            // 3, 计算裁边后有效区域，相对 pivot 的局部边界 (像素)
             //
-            // sourceRect 表示“有效图像区域在原图中的位置”，其坐标原点也是左下角。
+            // sourceRect 表示 "有效图像区域在原图中的位置", 其坐标原点也是左下角.
             //
             // left/right/bottom/top 的含义:
             // - left   : 有效区域左边界, 相对 pivot 的偏移
@@ -77,7 +77,7 @@ namespace scx.SpriteRenderer {
             // - bottom : 有效区域下边界, 相对 pivot 的偏移
             // - top    : 有效区域上边界, 相对 pivot 的偏移
             //
-            // 然后再除以 pixelsPerUnit，转换到世界单位。
+            // 然后再除以 pixelsPerUnit, 转换到世界单位.
             var left = (sprite.sourceRect.x - pivotPixelX) / pixelsPerUnit;
             var right = (sprite.sourceRect.x + sprite.sourceRect.width - pivotPixelX) / pixelsPerUnit;
             var bottom = (sprite.sourceRect.y - pivotPixelY) / pixelsPerUnit;
