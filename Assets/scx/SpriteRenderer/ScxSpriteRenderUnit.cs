@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 
 namespace scx.SpriteRenderer {
-    public class ScxSpriteRenderUnit {
+    /// ScxSpriteRenderUnit
+    public sealed class ScxSpriteRenderUnit {
         private ScxSpriteRenderer spriteRenderer;
         private ScxSpriteRenderBatch renderBatch;
         public readonly int batchID;
@@ -18,8 +19,12 @@ namespace scx.SpriteRenderer {
         private Vector3 p2;
         private Vector3 p3;
 
-        public ScxSpriteRenderUnit(ScxSpriteRenderer spriteRenderer, ScxSpriteRenderBatch renderBatch, int batchID,
-            int index) {
+        public ScxSpriteRenderUnit(
+            ScxSpriteRenderer spriteRenderer,
+            ScxSpriteRenderBatch renderBatch,
+            int batchID,
+            int index
+        ) {
             this.spriteRenderer = spriteRenderer;
             this.renderBatch = renderBatch;
             this.batchID = batchID;
