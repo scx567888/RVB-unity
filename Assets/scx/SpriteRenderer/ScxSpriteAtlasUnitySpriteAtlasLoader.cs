@@ -34,7 +34,7 @@ namespace scx.SpriteRenderer {
 
             for (var i = 0; i < actualCount; i += 1) {
                 var unitySprite = unitySprites[i];
-                
+
                 // 不支持多张 atlas texture
                 if (unitySprite.texture != atlasTexture) {
                     throw new ArgumentException("不支持多张 atlas texture.", nameof(unitySpriteAtlas));
