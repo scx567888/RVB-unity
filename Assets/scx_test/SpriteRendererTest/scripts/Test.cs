@@ -33,7 +33,7 @@ public class Test : MonoBehaviour {
 
         // 创建汽车
         this.cars = new List<Car>();
-        for (var j = 0; j < 1 * 5; j++) {
+        for (var j = 0; j < 10000 * 5; j++) {
             var spriteRenderUnit = this.scxSpriteRenderer.createUnit();
             spriteRenderUnit.setVisible(true);
             spriteRenderUnit.setPosition(Random.Range(-50, 50), Random.Range(-50, 50), Random.Range(-50, 50));
@@ -50,9 +50,9 @@ public class Test : MonoBehaviour {
 
     void Update() {
         // 绕 Y 轴旋转整个节点
-        // var euler = transform.eulerAngles;
-        // euler.y += 10f * Time.deltaTime;
-        // transform.eulerAngles = euler;
+        var euler = transform.eulerAngles;
+        euler.y += 10f * Time.deltaTime;
+        transform.eulerAngles = euler;
 
         // 测试更换材质
         if (time == 500) {
