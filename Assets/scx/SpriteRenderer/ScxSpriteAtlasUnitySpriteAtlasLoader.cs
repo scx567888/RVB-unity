@@ -5,6 +5,11 @@ using UnityEngine.U2D;
 namespace scx.SpriteRenderer {
     /// ScxSpriteAtlas 加载器 
     /// 适用于 Unity 自带的 SpriteAtlas 格式
+    /// 
+    /// 限制:
+    /// - 不支持图集打包阶段的旋转.
+    /// - 不支持 Tight Packing / 非矩形 Sprite Mesh.
+    /// - 不支持多张 atlas texture, 也就是一个 Unity SpriteAtlas 被拆成多个 texture page.
     public static class ScxSpriteAtlasUnitySpriteAtlasLoader {
         /// 将 Unity 自带的 SpriteAtlas 格式 加载为 ScxSpriteAtlas
         public static ScxSpriteAtlas load(SpriteAtlas unitySpriteAtlas) {
@@ -16,11 +21,11 @@ namespace scx.SpriteRenderer {
             var unitySprites = new Sprite[unitySpriteAtlas.spriteCount];
             var actualCount = unitySpriteAtlas.GetSprites(unitySprites);
 
-            if (actualCount == 0) {
+            if (actualCount <= 0) {
                 throw new ArgumentException("unitySpriteAtlas 至少要有一个 sprite.", nameof(unitySpriteAtlas));
             }
 
-            // 2, 我们采用 第一个 unitySprites 的贴图作为整个贴图.
+            // 2. 使用第一个 Sprite 的贴图作为 atlas 贴图
             // 这也意味着 我们不支持 unitySpriteAtlas 存在多个 pack
             var atlasTexture = unitySprites[0].texture;
 
@@ -30,7 +35,7 @@ namespace scx.SpriteRenderer {
             for (var i = 0; i < actualCount; i += 1) {
                 var unitySprite = unitySprites[i];
 
-                // 不支持旋转打包
+                // 不支持图集打包阶段的旋转
                 if (unitySprite.packed && unitySprite.packingRotation != SpritePackingRotation.None) {
                     throw new NotSupportedException(
                         $"Sprite '{unitySprite.name}' uses packing rotation '{unitySprite.packingRotation}', " +
@@ -72,7 +77,7 @@ namespace scx.SpriteRenderer {
                     Mathf.RoundToInt(originalRect.width),
                     Mathf.RoundToInt(originalRect.height)
                 );
-                
+
                 // pivot 像素 -> 归一化 pivot
                 var pivot = new Vector2(
                     unitySprite.pivot.x / originalRect.width,
