@@ -1,7 +1,6 @@
 ﻿using scx.SpriteRenderer;
 
 public class Car {
-
     public ScxSpriteRenderUnit renderUnit;
 
     public int frameIndex;
@@ -10,5 +9,4 @@ public class Car {
         this.renderUnit = renderUnit;
         this.frameIndex = frameIndex;
     }
-    
 }
