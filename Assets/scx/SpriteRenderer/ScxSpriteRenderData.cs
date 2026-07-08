@@ -59,14 +59,14 @@ namespace scx.SpriteRenderer {
             uv1 = new Vector2(uMax, vMin); // 右下
             uv2 = new Vector2(uMin, vMax); // 左上
             uv3 = new Vector2(uMax, vMax); // 右上
-            
+
             // 2, 计算 pivot 在原图中的像素位置
             //
             // pivot 是基于原图尺寸 sourceSize 的归一化锚点:
             // (0,0) = 原图左下角, (1,1) = 原图右上角
             var pivotPixelX = sprite.pivot.x * sprite.sourceSize.x;
             var pivotPixelY = sprite.pivot.y * sprite.sourceSize.y;
-            
+
             // 3, 计算裁边后有效区域，相对 pivot 的局部边界 (像素)
             //
             // sourceRect 表示 "有效图像区域在原图中的位置", 其坐标原点也是左下角.
@@ -82,7 +82,7 @@ namespace scx.SpriteRenderer {
             var right = (sprite.sourceRect.x + sprite.sourceRect.width - pivotPixelX) / pixelsPerUnit;
             var bottom = (sprite.sourceRect.y - pivotPixelY) / pixelsPerUnit;
             var top = (sprite.sourceRect.y + sprite.sourceRect.height - pivotPixelY) / pixelsPerUnit;
-            
+
             // 4, 生成局部四边形顶点
             //
             // 顶点顺序固定为:
