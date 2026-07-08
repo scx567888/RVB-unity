@@ -71,9 +71,8 @@ public class Test : MonoBehaviour {
         if (time == 1000) {
             this.scxSpriteRenderer.setMaterialTemplate(mainMaterial);
         }
-        else {
-            time++;
-        }
+
+        time++;
 
         // 多核并行执行方式
         Parallel.For(0, cars.Count, i => {
