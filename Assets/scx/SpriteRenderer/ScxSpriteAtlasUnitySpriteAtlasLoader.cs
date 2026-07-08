@@ -44,7 +44,7 @@ namespace scx.SpriteRenderer {
                 if (unitySprite.packingRotation != SpritePackingRotation.None) {
                     throw new ArgumentException("不支持图集打包阶段的旋转.", nameof(unitySpriteAtlas));
                 }
-                
+
                 // 不支持 Tight Packing / 非矩形 Sprite Mesh.
                 // 这里我们不用 unitySprite.packingMode != SpritePackingMode.Rectangle 判断, 这样不准确
                 // 我们通过 uv 数量进行判断
