@@ -8,6 +8,7 @@ namespace scx.SpriteRenderer {
     /// 
     /// 限制:
     /// - 不支持图集打包阶段的旋转.
+    /// - 不支持 Tight Packing / 非矩形 Sprite Mesh.
     /// - 不支持多张 atlas texture, 也就是一个 Unity SpriteAtlas 被拆成多个 texture page.
     public static class ScxSpriteAtlasUnitySpriteAtlasLoader {
         /// 将 Unity 自带的 SpriteAtlas 格式 加载为 ScxSpriteAtlas
@@ -42,6 +43,13 @@ namespace scx.SpriteRenderer {
                 // 不支持图集打包阶段的旋转
                 if (unitySprite.packingRotation != SpritePackingRotation.None) {
                     throw new ArgumentException("不支持图集打包阶段的旋转.", nameof(unitySpriteAtlas));
+                }
+                
+                // 不支持 Tight Packing / 非矩形 Sprite Mesh.
+                // 这里我们不用 unitySprite.packingMode != SpritePackingMode.Rectangle 判断, 这样不准确
+                // 我们通过 uv 数量进行判断
+                if (unitySprite.uv.Length != 4) {
+                    throw new ArgumentException("不支持 Tight Packing / 非矩形 Sprite Mesh.", nameof(unitySpriteAtlas));
                 }
 
                 // 当前 atlas 贴图中的矩形
