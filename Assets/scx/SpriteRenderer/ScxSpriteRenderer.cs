@@ -2,6 +2,7 @@
 using UnityEngine;
 
 namespace scx.SpriteRenderer {
+    /// ScxSpriteRenderer
     public sealed class ScxSpriteRenderer {
         private readonly ScxSpriteAtlas atlas;
         private Material material;
@@ -29,20 +30,18 @@ namespace scx.SpriteRenderer {
             this.batches = new Dictionary<int, ScxSpriteRenderBatch>();
             this.nextBatchID = 0;
 
-
             // 初始化 渲染相关
-
             this.renderDatas0 = new ScxSpriteRenderData[atlas.sprites.Length];
             this.renderDatas1 = new Dictionary<string, ScxSpriteRenderData>();
             this.spriteNames = new string[atlas.sprites.Length];
 
             var textureWidth = atlas.texture.width;
             var textureHeight = atlas.texture.height;
-            for (var i = 0; i < atlas.sprites.Length; i++) {
+            for (var i = 0; i < atlas.sprites.Length; i += 1) {
                 var sprite = atlas.sprites[i];
-                var data = new ScxSpriteRenderData(sprite, textureWidth, textureHeight, pixelsPerUnit);
-                renderDatas0[i] = data;
-                renderDatas1[sprite.name] = data;
+                var renderData = new ScxSpriteRenderData(sprite, textureWidth, textureHeight, pixelsPerUnit);
+                renderDatas0[i] = renderData;
+                renderDatas1[sprite.name] = renderData;
                 spriteNames[i] = sprite.name;
             }
         }

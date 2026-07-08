@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace scx.SpriteRenderer {
+    /// ScxSpriteRenderBatch.
     public sealed class ScxSpriteRenderBatch {
         // 四边形的基础网格信息
         private static readonly Vector3[] BASE_NORMALS = { new(0, 0, -1), new(0, 0, -1), new(0, 0, -1), new(0, 0, -1) };
