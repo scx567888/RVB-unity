@@ -319,7 +319,7 @@ MonoBehaviour:
   animationFPS: 30
   enableRotate: 0
   rotateSpeed: 1
-  targetPetCount: 1
+  targetPetCount: 5000
   maxPetCount: 50000
 --- !u!1 &944232595
 GameObject:
