@@ -9,4 +9,9 @@ public class Pet {
         this.renderUnit = renderUnit;
         this.frameIndex = frameIndex;
     }
+
+    public void destroy() {
+        renderUnit.destroy();
+    }
+    
 }

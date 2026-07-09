@@ -29,43 +29,43 @@ public class RVB : MonoBehaviour {
     
     // 动画播放帧率
     [SerializeField]
-    private float animationFPS = 60f;
+    private float animationFPS = 30f;
 
     // 动画计时器
     private float animationTimer = 0f;
     
     [SerializeField]
-    private bool enableRotate = true;
+    private bool enableRotate = false;
 
     [SerializeField]
-    private float rotateSpeed = 10f;
+    private float rotateSpeed = 1f;
+    
+    [SerializeField]
+    private int targetPetCount = 500;
+
+    [SerializeField]
+    private int maxPetCount = 50000;
+
+    private int lastTargetPetCount = -1;
 
     void Start() {
-        // 创建渲染器
-        var scxSpriteAtlas = SheepSpriteAtlasLoader.load(texture,json.text);
+        var scxSpriteAtlas = SheepSpriteAtlasLoader.load(texture, json.text);
         this.scxSpriteRenderer = new ScxSpriteRenderer(scxSpriteAtlas, 200, mainMaterial, 5000);
         this.spriteNames = this.scxSpriteRenderer.getSpriteNames();
 
         this.scxSpriteRenderer.setParent(this.gameObject);
 
-        // 创建
         this.pets = new List<Pet>();
-        for (var j = 0; j < 10000 * 5; j++) {
-            var spriteRenderUnit = this.scxSpriteRenderer.createUnit();
-            spriteRenderUnit.setVisible(true);
-            spriteRenderUnit.setPosition(Random.Range(-50, 50), Random.Range(-50, 50), Random.Range(-50, 50));
 
-            spriteRenderUnit.setFrame(this.spriteNames[0]);
-            // 给每个单元一个随机起始帧索引
-            var obj = new Pet(spriteRenderUnit, Random.Range(0, this.spriteNames.Length));
-            this.pets.Add(obj);
-        }
+        SetPetCount(targetPetCount);
     }
 
     // 计数器
     private int time = 0;
 
     void Update() {
+        UpdatePetCount();
+        
         UpdateRotate();
 
         // 测试更换材质
@@ -131,6 +131,70 @@ public class RVB : MonoBehaviour {
         var euler = transform.eulerAngles;
         euler.y += rotateSpeed * Time.deltaTime;
         transform.eulerAngles = euler;
+    }
+    
+    public void SetPetCount(int count) {
+        if (scxSpriteRenderer == null || spriteNames == null || spriteNames.Length == 0) {
+            return;
+        }
+
+        count = Mathf.Clamp(count, 0, maxPetCount);
+
+        // 数量增加：向 ScxSpriteRenderer 申请新的 unit
+        while (pets.Count < count) {
+            AddOnePet();
+        }
+
+        // 数量减少：把 unit 还给 ScxSpriteRenderer
+        while (pets.Count > count) {
+            RemoveLastPet();
+        }
+
+        targetPetCount = count;
+        lastTargetPetCount = count;
+    }
+    
+    private void AddOnePet() {
+        var spriteRenderUnit = this.scxSpriteRenderer.createUnit();
+
+        spriteRenderUnit.setVisible(true);
+        // spriteRenderUnit.setPosition(
+        //     Random.Range(-50f, 50f),
+        //     Random.Range(-50f, 50f),
+        //     Random.Range(-50f, 50f)
+        // );
+        
+        spriteRenderUnit.setPosition(
+            Random.Range(-50f, 50f),
+            0,
+            Random.Range(-50f, 50f)
+        );
+
+        spriteRenderUnit.setFrame(this.spriteNames[0]);
+
+        var pet = new Pet(
+            spriteRenderUnit,
+            Random.Range(0, this.spriteNames.Length)
+        );
+
+        pets.Add(pet);
+    }
+    
+    private void RemoveLastPet() {
+        int lastIndex = pets.Count - 1;
+        var pet = pets[lastIndex];
+
+        // 先从自己的列表移除
+        pets.RemoveAt(lastIndex);
+
+        // 再还给 ScxSpriteRenderer
+        pet.destroy();
+    }
+    
+    private void UpdatePetCount() {
+        if (targetPetCount != lastTargetPetCount) {
+            SetPetCount(targetPetCount);
+        }
     }
     
 }
