@@ -267,7 +267,7 @@ GameObject:
   - component: {fileID: 678313043}
   - component: {fileID: 678313044}
   m_Layer: 0
-  m_Name: Node
+  m_Name: System
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -312,14 +312,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 186455c1c76e4e8bb13887be77e39a70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  texture: {fileID: 2800000, guid: 96bd0466d8ed4380a11f3c90fa0ba723, type: 3}
-  json: {fileID: 4900000, guid: fb1270a142324cc995990f45815a375d, type: 3}
+  texture: {fileID: 2800000, guid: 48f1255034b34ff8b1cd4dc2aac1909f, type: 3}
+  json: {fileID: 4900000, guid: 9cbfdd52c2c54ff6a6171c3df3098c5d, type: 3}
   mainMaterial: {fileID: 2100000, guid: de552a8032c24a2b826d1da4ff7198d9, type: 2}
   highlightMaterial: {fileID: 2100000, guid: 354b83e8760f5654f86b342c00b5e4a2, type: 2}
   animationFPS: 30
   enableRotate: 0
   rotateSpeed: 1
-  targetPetCount: 5000
+  targetPetCount: 20000
   maxPetCount: 50000
 --- !u!1 &944232595
 GameObject:
@@ -620,8 +620,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1390086338}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -10}
+  m_LocalRotation: {x: -0.016187051, y: 0.0014580962, z: 0.000060669092, w: 0.9998679}
+  m_LocalPosition: {x: 1.6198717, y: 4.4936185, z: -57.966747}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -645,6 +645,6 @@ SceneRoots:
   m_Roots:
   - {fileID: 1390086341}
   - {fileID: 944232597}
-  - {fileID: 678313041}
   - {fileID: 69758575}
   - {fileID: 1313464461}
+  - {fileID: 678313041}
