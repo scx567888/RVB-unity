@@ -26,11 +26,24 @@ public class RVB : MonoBehaviour {
     private List<Pet> pets;
 
     private string[] spriteNames;
+    
+    // 动画播放帧率
+    [SerializeField]
+    private float animationFPS = 60f;
+
+    // 动画计时器
+    private float animationTimer = 0f;
+    
+    [SerializeField]
+    private bool enableRotate = true;
+
+    [SerializeField]
+    private float rotateSpeed = 10f;
 
     void Start() {
         // 创建渲染器
         var scxSpriteAtlas = SheepSpriteAtlasLoader.load(texture,json.text);
-        this.scxSpriteRenderer = new ScxSpriteRenderer(scxSpriteAtlas, 300, mainMaterial, 5000);
+        this.scxSpriteRenderer = new ScxSpriteRenderer(scxSpriteAtlas, 200, mainMaterial, 5000);
         this.spriteNames = this.scxSpriteRenderer.getSpriteNames();
 
         this.scxSpriteRenderer.setParent(this.gameObject);
@@ -53,10 +66,7 @@ public class RVB : MonoBehaviour {
     private int time = 0;
 
     void Update() {
-        // 绕 Y 轴旋转整个节点
-        var euler = transform.eulerAngles;
-        euler.y += 10f * Time.deltaTime;
-        transform.eulerAngles = euler;
+        UpdateRotate();
 
         // 测试更换材质
         if (time == 500) {
@@ -69,20 +79,58 @@ public class RVB : MonoBehaviour {
 
         time++;
 
-        // 多核并行执行方式
-        Parallel.For(0, pets.Count, i => {
-            var car = pets[i];
-            car.frameIndex++;
-            car.renderUnit.setFrame(car.frameIndex % this.spriteNames.Length);
-        });
-
-        // 传统方式
-        // foreach (var car in this.cars) {
-        //     // 每个单元的帧索引累加
-        //     car.frameIndex++;
-        //     car.renderUnit.setFrame(car.frameIndex % this.spriteNames.Length);
-        // }
+        // 按指定 FPS 播放动画
+        UpdateAnimationByFps(animationFPS);
+       
 
         this.scxSpriteRenderer.update();
     }
+    
+    private void UpdateAnimationByFps(float fps) {
+        if (fps <= 0f) {
+            return;
+        }
+
+        animationTimer += Time.deltaTime;
+
+        float frameInterval = 1f / fps;
+
+        if (animationTimer < frameInterval) {
+            return;
+        }
+
+        int step = Mathf.FloorToInt(animationTimer / frameInterval);
+        animationTimer -= step * frameInterval;
+
+        // 多核并行执行方式
+        Parallel.For(0, pets.Count, i => {
+            var pet = pets[i];
+
+            pet.frameIndex += step;
+
+            int index = pet.frameIndex % spriteNames.Length;
+            pet.renderUnit.setFrame(spriteNames[index]);
+        });
+
+        // // 传统方式
+        // foreach (var pet in this.pets) {
+        //
+        //     pet.frameIndex += step;
+        //
+        //     int index = pet.frameIndex % spriteNames.Length;
+        //     pet.renderUnit.setFrame(spriteNames[index]);
+        // }
+        
+    }
+    
+    private void UpdateRotate() {
+        if (!enableRotate) {
+            return;
+        }
+
+        var euler = transform.eulerAngles;
+        euler.y += rotateSpeed * Time.deltaTime;
+        transform.eulerAngles = euler;
+    }
+    
 }
