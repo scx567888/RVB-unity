@@ -39,10 +39,10 @@ namespace scx.SpriteRenderer {
             var textureHeight = atlas.texture.height;
             for (var i = 0; i < atlas.sprites.Length; i += 1) {
                 var sprite = atlas.sprites[i];
-                var renderData = new ScxSpriteRenderData(sprite, textureWidth, textureHeight, pixelsPerUnit);
+                var renderData = sprite.createSpriteRenderData(textureWidth, textureHeight, pixelsPerUnit);
                 renderDatas0[i] = renderData;
-                renderDatas1[sprite.name] = renderData;
-                spriteNames[i] = sprite.name;
+                renderDatas1[sprite.name()] = renderData;
+                spriteNames[i] = sprite.name();
             }
         }
 

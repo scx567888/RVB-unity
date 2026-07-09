@@ -90,7 +90,7 @@ namespace scx.SpriteRenderer {
                 // 这里注意移除 unity 添加的 (Clone) 后缀
                 var name = unitySprite.name.Substring(0, unitySprite.name.Length - "(Clone)".Length);
 
-                scxSprites[i] = new ScxSprite(
+                scxSprites[i] = new SimpleScxSprite(
                     name,
                     atlasRect,
                     sourceRect,

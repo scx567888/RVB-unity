@@ -79,7 +79,7 @@ namespace scx.SpriteRenderer {
                 // B. 去掉扩展名，仅保留文件名: "yellow_attack (1)"
                 string name = Path.GetFileNameWithoutExtension(f.filename);
 
-                sprites[i] = new ScxSprite(
+                sprites[i] = new SimpleScxSprite(
                     name,
                     atlasRect,
                     sourceRect,

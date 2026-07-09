@@ -42,66 +42,28 @@ namespace scx.SpriteRenderer {
         public readonly float p3z;
 
         public ScxSpriteRenderData(
-            ScxSprite sprite,
-            int textureWidth,
-            int textureHeight,
-            float pixelsPerUnit
+            Vector2 uv0, Vector2 uv1, Vector2 uv2, Vector2 uv3,
+            float p0x, float p0y, float p0z,
+            float p1x, float p1y, float p1z,
+            float p2x, float p2y, float p2z,
+            float p3x, float p3y, float p3z
         ) {
-            // 1, 计算 UV
-            //
-            // atlasRect 基于图集左下角为原点，因此可以直接映射到 0~1 UV.
-            var uMin = (float)sprite.atlasRect.x / textureWidth;
-            var vMin = (float)sprite.atlasRect.y / textureHeight;
-            var uMax = (float)(sprite.atlasRect.x + sprite.atlasRect.width) / textureWidth;
-            var vMax = (float)(sprite.atlasRect.y + sprite.atlasRect.height) / textureHeight;
-
-            uv0 = new Vector2(uMin, vMin); // 左下
-            uv1 = new Vector2(uMax, vMin); // 右下
-            uv2 = new Vector2(uMin, vMax); // 左上
-            uv3 = new Vector2(uMax, vMax); // 右上
-
-            // 2, 计算 pivot 在原图中的像素位置
-            //
-            // pivot 是基于原图尺寸 sourceSize 的归一化锚点:
-            // (0,0) = 原图左下角, (1,1) = 原图右上角
-            var pivotPixelX = sprite.pivot.x * sprite.sourceSize.x;
-            var pivotPixelY = sprite.pivot.y * sprite.sourceSize.y;
-
-            // 3, 计算裁边后有效区域，相对 pivot 的局部边界 (像素)
-            //
-            // sourceRect 表示 "有效图像区域在原图中的位置", 其坐标原点也是左下角.
-            //
-            // left/right/bottom/top 的含义:
-            // - left   : 有效区域左边界, 相对 pivot 的偏移
-            // - right  : 有效区域右边界, 相对 pivot 的偏移
-            // - bottom : 有效区域下边界, 相对 pivot 的偏移
-            // - top    : 有效区域上边界, 相对 pivot 的偏移
-            //
-            // 然后再除以 pixelsPerUnit, 转换到世界单位.
-            var left = (sprite.sourceRect.x - pivotPixelX) / pixelsPerUnit;
-            var right = (sprite.sourceRect.x + sprite.sourceRect.width - pivotPixelX) / pixelsPerUnit;
-            var bottom = (sprite.sourceRect.y - pivotPixelY) / pixelsPerUnit;
-            var top = (sprite.sourceRect.y + sprite.sourceRect.height - pivotPixelY) / pixelsPerUnit;
-
-            // 4, 生成局部四边形顶点
-            //
-            // 顶点顺序固定为:
-            // p0 左下, p1 右下, p2 左上, p3 右上
-            p0x = left;
-            p0y = bottom;
-            p0z = 0f;
-
-            p1x = right;
-            p1y = bottom;
-            p1z = 0f;
-
-            p2x = left;
-            p2y = top;
-            p2z = 0f;
-
-            p3x = right;
-            p3y = top;
-            p3z = 0f;
+            this.uv0 = uv0;
+            this.uv1 = uv1;
+            this.uv2 = uv2;
+            this.uv3 = uv3;
+            this.p0x = p0x;
+            this.p0y = p0y;
+            this.p0z = p0z;
+            this.p1x = p1x;
+            this.p1y = p1y;
+            this.p1z = p1z;
+            this.p2x = p2x;
+            this.p2y = p2y;
+            this.p2z = p2z;
+            this.p3x = p3x;
+            this.p3y = p3y;
+            this.p3z = p3z;
         }
     }
 }
