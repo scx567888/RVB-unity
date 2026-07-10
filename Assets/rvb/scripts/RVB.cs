@@ -41,7 +41,7 @@ public class RVB : MonoBehaviour {
     private float rotateSpeed = 1f;
     
     [SerializeField]
-    private int targetPetCount = 500;
+    private int targetPetCount = 5000;
 
     [SerializeField]
     private int maxPetCount = 50000;
@@ -49,8 +49,8 @@ public class RVB : MonoBehaviour {
     private int lastTargetPetCount = -1;
 
     void Start() {
-        var scxSpriteAtlas = SheepSpriteAtlasLoader.load(texture, json.text);
-        this.scxSpriteRenderer = new ScxSpriteRenderer(scxSpriteAtlas, 200, mainMaterial, 5000);
+        var scxSpriteAtlas = SheepSpriteAtlasLoader.loadRole(texture, json.text);
+        this.scxSpriteRenderer = new ScxSpriteRenderer(scxSpriteAtlas, 100, mainMaterial, 5000);
         this.spriteNames = this.scxSpriteRenderer.getSpriteNames();
 
         this.scxSpriteRenderer.setParent(this.gameObject);
@@ -105,20 +105,20 @@ public class RVB : MonoBehaviour {
         // 多核并行执行方式
         Parallel.For(0, pets.Count, i => {
             var pet = pets[i];
-
+        
             pet.frameIndex += step;
-
+        
             int index = pet.frameIndex % spriteNames.Length;
-            pet.renderUnit.setFrame(spriteNames[index]);
+            pet.renderUnit.setFrame(index);
         });
 
-        // // 传统方式
+        // 传统方式
         // foreach (var pet in this.pets) {
         //
         //     pet.frameIndex += step;
         //
         //     int index = pet.frameIndex % spriteNames.Length;
-        //     pet.renderUnit.setFrame(spriteNames[index]);
+        //     pet.renderUnit.setFrame(index);
         // }
         
     }
