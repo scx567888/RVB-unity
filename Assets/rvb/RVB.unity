@@ -312,15 +312,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 186455c1c76e4e8bb13887be77e39a70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  texture: {fileID: 2800000, guid: 48f1255034b34ff8b1cd4dc2aac1909f, type: 3}
-  json: {fileID: 4900000, guid: 9cbfdd52c2c54ff6a6171c3df3098c5d, type: 3}
+  texture: {fileID: 2800000, guid: 1c0de061f13b47d9af7b52cb6634175b, type: 3}
+  json: {fileID: 4900000, guid: c0cc824fb78642bd86f9fb96058f2608, type: 3}
   mainMaterial: {fileID: 2100000, guid: de552a8032c24a2b826d1da4ff7198d9, type: 2}
   highlightMaterial: {fileID: 2100000, guid: 354b83e8760f5654f86b342c00b5e4a2, type: 2}
   animationFPS: 30
   enableRotate: 0
   rotateSpeed: 1
-  targetPetCount: 20000
-  maxPetCount: 50000
+  targetPetCount: 300000
+  maxPetCount: 500000
 --- !u!1 &944232595
 GameObject:
   m_ObjectHideFlags: 0
@@ -529,7 +529,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 100, y: 100, z: 100}
+  m_LocalScale: {x: 1000, y: 1000, z: 1000}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -546,6 +546,7 @@ GameObject:
   - component: {fileID: 1390086340}
   - component: {fileID: 1390086339}
   - component: {fileID: 1390086342}
+  - component: {fileID: 1390086343}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -620,8 +621,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1390086338}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.016187051, y: 0.0014580962, z: 0.000060669092, w: 0.9998679}
-  m_LocalPosition: {x: 1.6198717, y: 4.4936185, z: -57.966747}
+  m_LocalRotation: {x: 0.0017119464, y: -0.9900142, z: 0.14053331, w: 0.01092791}
+  m_LocalPosition: {x: 2.165701, y: 85.57434, z: 578.73376}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -639,6 +640,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1390086343
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1390086338}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1af280eaf2681ae4e8405f9e71db2045, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveSpeed: 10
+  fastMoveMultiplier: 3
+  scrollSpeedStep: 1
+  minMoveSpeed: 1
+  maxMoveSpeed: 50
+  mouseSensitivity: 2
+  minPitch: -89
+  maxPitch: 89
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

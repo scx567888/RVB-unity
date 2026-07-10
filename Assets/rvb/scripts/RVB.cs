@@ -44,13 +44,13 @@ public class RVB : MonoBehaviour {
     private int targetPetCount = 500;
 
     [SerializeField]
-    private int maxPetCount = 50000;
+    private int maxPetCount = 500000;
 
     private int lastTargetPetCount = -1;
 
     void Start() {
         var scxSpriteAtlas = SheepSpriteAtlasLoader.load(texture, json.text);
-        this.scxSpriteRenderer = new ScxSpriteRenderer(scxSpriteAtlas, 200, mainMaterial, 5000);
+        this.scxSpriteRenderer = new ScxSpriteRenderer(scxSpriteAtlas, 100, mainMaterial, 5000);
         this.spriteNames = this.scxSpriteRenderer.getSpriteNames();
 
         this.scxSpriteRenderer.setParent(this.gameObject);
@@ -105,20 +105,20 @@ public class RVB : MonoBehaviour {
         // 多核并行执行方式
         Parallel.For(0, pets.Count, i => {
             var pet = pets[i];
-
+        
             pet.frameIndex += step;
-
+        
             int index = pet.frameIndex % spriteNames.Length;
-            pet.renderUnit.setFrame(spriteNames[index]);
+            pet.renderUnit.setFrame(index);
         });
 
-        // // 传统方式
+        // 传统方式
         // foreach (var pet in this.pets) {
         //
         //     pet.frameIndex += step;
         //
         //     int index = pet.frameIndex % spriteNames.Length;
-        //     pet.renderUnit.setFrame(spriteNames[index]);
+        //     pet.renderUnit.setFrame(index);
         // }
         
     }
@@ -165,9 +165,9 @@ public class RVB : MonoBehaviour {
         // );
         
         spriteRenderUnit.setPosition(
-            Random.Range(-50f, 50f),
+            Random.Range(-500f, 500f),
             0,
-            Random.Range(-50f, 50f)
+            Random.Range(-500f, 500f)
         );
 
         spriteRenderUnit.setFrame(this.spriteNames[0]);
