@@ -41,15 +41,15 @@ public class RVB : MonoBehaviour {
     private float rotateSpeed = 1f;
     
     [SerializeField]
-    private int targetPetCount = 500;
+    private int targetPetCount = 5000;
 
     [SerializeField]
-    private int maxPetCount = 500000;
+    private int maxPetCount = 50000;
 
     private int lastTargetPetCount = -1;
 
     void Start() {
-        var scxSpriteAtlas = SheepSpriteAtlasLoader.load(texture, json.text);
+        var scxSpriteAtlas = SheepSpriteAtlasLoader.loadRole(texture, json.text);
         this.scxSpriteRenderer = new ScxSpriteRenderer(scxSpriteAtlas, 100, mainMaterial, 5000);
         this.spriteNames = this.scxSpriteRenderer.getSpriteNames();
 
@@ -165,9 +165,9 @@ public class RVB : MonoBehaviour {
         // );
         
         spriteRenderUnit.setPosition(
-            Random.Range(-500f, 500f),
+            Random.Range(-50f, 50f),
             0,
-            Random.Range(-500f, 500f)
+            Random.Range(-50f, 50f)
         );
 
         spriteRenderUnit.setFrame(this.spriteNames[0]);
