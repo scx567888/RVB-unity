@@ -5,7 +5,7 @@ using UnityEngine;
 namespace rvb.utils {
     
     [Serializable]
-    public class SheepSprite : ScxSprite {
+    public class SheepRoleSprite : ScxSprite {
 
         public string _name;
 
