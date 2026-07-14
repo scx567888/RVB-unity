@@ -1,125 +1,179 @@
 ﻿using System;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace rvb.scripts {
-    public class UtilAck {
-        
-    /**
-     * @type {SheepMgr}
-     */
+   public static class UtilAck
+{
     public static SheepMgr system;
 
-    public   static void  ackTar(PetView e,PetView t) {
-        let i;
-        let s = e.conf;
+    public static void ackTar(PetView e, PetView t)
+    {
+        float i = e.conf.atk;
 
-        i = s.atk;
-
-        if (e.curAtkBuff) {
-            i = Math.Floor(i * (1 + e.curAtkBuff / 100));
+        if (e.curAtkBuff != 0)
+        {
+            i = Mathf.Floor(i * (1f + e.curAtkBuff / 100f));
         }
 
-        if (Util.isCanAckByRole(e, t)) {
-            this.hurtByRole(e, t, i)
+        if (Util.isCanAckByRole(e, t))
+        {
+            hurtByRole(e, t, i);
         }
 
-        if (0 != e.roleId && 0 != t.roleId) {
-            
-            var xnyn= Util.getXnYn(t.posX, t.posY);
+        if (e.roleId != 0 && t.roleId != 0)
+        {
+            (int xn, int yn) block = Util.getXnYn(t.posX, t.posY);
 
-            var xn = xnyn.xn;
-            var yn = xnyn.yn;
-
-            UtilFind.forfeachBlocksByAckView(e.camp, xn, yn, e.conf.splitN, s => {
-                if (!s.isDie && 0 != s.roleId && s.camp == t.camp && s.id != t.id && s.curHp > 0) {
-                    let o = t.posX - s.posX;
-                    let l = t.posY - s.posY;
-                    if (Math.sqrt(o * o + l * l) <= t.conf.collideR + s.conf.collideR + e.conf.spiltR) {
-                        this.hurtByRole(e, s, i)
+            UtilFind.forfeachBlocksByAckView(e.camp, block.xn, block.yn, e.conf.splitN, target =>
+            {
+                if (!target.isDie && target.roleId != 0 && target.camp == t.camp && target.id != t.id && target.curHp > 0)
+                {
+                    float o = t.posX - target.posX;
+                    float l = t.posY - target.posY;
+                    if (Mathf.Sqrt(o * o + l * l) <= t.conf.collideR + target.conf.collideR + e.conf.spiltR)
+                    {
+                        hurtByRole(e, target, i);
                     }
                 }
-            })
-
+            });
         }
     }
 
-    public  static void  ackMe(e, t = 1, i = 1, s = 10, o = 0, l = []) {
-        let n = i, r = e.conf;
-        SheepConfig;
-        n *= r.atk;
-        e.curAtkBuff && (n = Math.floor(n * (1 + e.curAtkBuff / 100)));
-        let {xn: a, yn: c} = Util.getXnYn(e.posX, e.posY);
-        UtilFind.forfeachBlocksByAckView(e.camp, a, c, s, (i => {
-            if (-1 == l.indexOf(i.conf.roleType) && i.curHp > 0) {
-                let s = e.posX - i.posX, l = e.posY - i.posY, r = Math.sqrt(s * s + l * l);
-                r <= e.conf.collideR + i.conf.collideR + e.conf.spiltR * t && (this.hurtByRole(e, i, n), o && (s /= r, l /= r, i.impulseX = -s * o, i.impulseY = -l * o))
-            }
-        }))
-    }
+    public static void ackMe(
+        PetView e,
+        float t = 1f,
+        float i = 1f,
+        int s = 10,
+        float o = 0f,
+        IList<SheepRoleType> l = null
+    )
+    {
+        float n = i;
+        n *= e.conf.atk;
 
-    public static void  hitBackMe(e, t = 1, i = 10, s) {
-        let {xn: o, yn: l} = Util.getXnYn(e.posX, e.posY);
-        UtilFind.forfeachBlocksByAckView(e.camp, o, l, i, (i => {
-            if (i.curHp > 0) {
-                let o = e.posX - i.posX, l = e.posY - i.posY, n = Math.sqrt(o * o + l * l);
-                n <= e.conf.collideR + i.conf.collideR + e.conf.spiltR * t && s && (o /= n, l /= n, i.impulseX = -o * s, i.impulseY = -l * s)
-            }
-        }))
-    }
-
-    /**
-     *
-     * @param e
-     * @param t {PetView}
-     * @param i
-     */
-    public static void  hurtByRole(PetView e,PetView t, i) {
-        let s = SheepRoleRestraint.getById(t.conf.roleType).hitRate[e.conf.roleType];
-        i = Math.max(1, Math.floor(i * s));
-        let o = t.subCurHp(i);
-        if (o > 0 && o <= i) {
-
-        }
-    }
-
-    /**
-     *
-     * @param e
-     * @param t {PetView}
-     * @param i
-     */
-    public static void  hurtByBullet(e, t, i) {
-        let s = SheepRoleRestraint.getById(t.conf.roleType).hitRate[e.conf.roleType];
-        i = Math.max(1, Math.floor(i * s));
-        let o = t.subCurHp(i);
-        if (o > 0 && o <= i) {
-
-        }
-    }
-
-    /**
-     *
-     * @param e
-     * @param petSkin {PetView}
-     * @param i
-     * @returns {boolean}
-     */
-    public static void  isCanAckByBullet(e,PetView petSkin, i) {
-        let s = !petSkin.isDie;
-        if (0 == s) return s;
-        let o = petSkin.state;
-        if (0 != petSkin.roleId && (o == SheepRoleState.In || o == SheepRoleState.Dead || o == SheepRoleState.Merge || o == SheepRoleState.Res || o == SheepRoleState.Killer)) return !1;
-        let l = petSkin.camp != e.camp;
-        if (0 == l) return l;
-        if (e.conf.atkShapeType == SheepBulletAtkShapeType.Ring) {
-            let s = e.x, o = e.y, l = petSkin.posX - s, n = petSkin.posY - o, r = l * l + n * n, a = Math.sqrt(r), c = e.conf;
-            return a < c.maxRadiuses[i] && a > c.minRadiuses[i]
-        }
+        if (e.curAtkBuff != 0)
         {
-            let i = e.x, s = e.y, o = petSkin.posX - i, l = petSkin.posY - s, n = o * o + l * l;
-            return Math.sqrt(n) < e.conf.atkR
+            n = Mathf.Floor(n * (1f + e.curAtkBuff / 100f));
+        }
+
+        if (l == null)
+        {
+            l = new SheepRoleType[0];
+        }
+
+        (int xn, int yn) block = Util.getXnYn(e.posX, e.posY);
+        UtilFind.forfeachBlocksByAckView(e.camp, block.xn, block.yn, s, target =>
+        {
+            if (!l.Contains(target.conf.roleType) && target.curHp > 0)
+            {
+                float targetX = e.posX - target.posX;
+                float targetY = e.posY - target.posY;
+                float distance = Mathf.Sqrt(targetX * targetX + targetY * targetY);
+                if (distance <= e.conf.collideR + target.conf.collideR + e.conf.spiltR * t)
+                {
+                    hurtByRole(e, target, n);
+                    if (o != 0f)
+                    {
+                        targetX /= distance;
+                        targetY /= distance;
+                        target.impulseX = -targetX * o;
+                        target.impulseY = -targetY * o;
+                    }
+                }
+            }
+        });
+    }
+
+    public static void hitBackMe(PetView e, float t = 1f, int i = 10, float s = 0f)
+    {
+        (int xn, int yn) block = Util.getXnYn(e.posX, e.posY);
+        UtilFind.forfeachBlocksByAckView(e.camp, block.xn, block.yn, i, target =>
+        {
+            if (target.curHp > 0)
+            {
+                float o = e.posX - target.posX;
+                float l = e.posY - target.posY;
+                float n = Mathf.Sqrt(o * o + l * l);
+                if (n <= e.conf.collideR + target.conf.collideR + e.conf.spiltR * t && s != 0f)
+                {
+                    o /= n;
+                    l /= n;
+                    target.impulseX = -o * s;
+                    target.impulseY = -l * s;
+                }
+            }
+        });
+    }
+
+    public static void hurtByRole(PetView e, PetView t, float i)
+    {
+        float s = SheepRoleRestraint.getById(t.conf.roleType).hitRate[(int)e.conf.roleType];
+        int damage = Mathf.Max(1, Mathf.FloorToInt(i * s));
+        float o = t.subCurHp(damage);
+        if (o > 0 && o <= damage)
+        {
         }
     }
 
-
+    public static void hurtByBullet(dynamic e, PetView t, float i)
+    {
+        float s = SheepRoleRestraint.getById(t.conf.roleType).hitRate[(int)e.conf.roleType];
+        int damage = Mathf.Max(1, Mathf.FloorToInt(i * s));
+        float o = t.subCurHp(damage);
+        if (o > 0 && o <= damage)
+        {
+        }
     }
+
+    public static bool isCanAckByBullet(dynamic e, PetView petSkin, int i)
+    {
+        bool s = !petSkin.isDie;
+        if (!s)
+        {
+            return s;
+        }
+
+        SheepRoleState o = petSkin.state;
+        if (
+            petSkin.roleId != 0 &&
+            (
+                o == SheepRoleState.In ||
+                o == SheepRoleState.Dead ||
+                o == SheepRoleState.Merge ||
+                o == SheepRoleState.Res ||
+                o == SheepRoleState.Killer
+            )
+        )
+        {
+            return false;
+        }
+
+        bool l = petSkin.camp != e.camp;
+        if (!l)
+        {
+            return l;
+        }
+
+        if (e.conf.atkShapeType == SheepBulletAtkShapeType.Ring)
+        {
+            float bulletX = e.x;
+            float bulletY = e.y;
+            float targetX = petSkin.posX - bulletX;
+            float targetY = petSkin.posY - bulletY;
+            float distanceSqr = targetX * targetX + targetY * targetY;
+            float distance = Mathf.Sqrt(distanceSqr);
+            return distance < e.conf.maxRadiuses[i] && distance > e.conf.minRadiuses[i];
+        }
+
+        {
+            float bulletX = e.x;
+            float bulletY = e.y;
+            float targetX = petSkin.posX - bulletX;
+            float targetY = petSkin.posY - bulletY;
+            float distanceSqr = targetX * targetX + targetY * targetY;
+            return Mathf.Sqrt(distanceSqr) < e.conf.atkR;
+        }
+    }
+}
 }

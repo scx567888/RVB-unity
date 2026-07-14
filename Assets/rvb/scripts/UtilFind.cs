@@ -1,618 +1,830 @@
-﻿namespace rvb.scripts {
-    public class UtilFind {
-        
-    /**
-     * @type {SheepMgr}
-     */
+﻿using System;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace rvb.scripts {
+    public static class UtilFind
+{
     public static SheepMgr system;
 
-    /**
-     *
-     * @param petSkin {PetView}
-     * @param findR
-     */
-    public static void  findTar(PetView petSkin, findR = 0) {
-        let i = petSkin.posX;
-        let o = petSkin.posY;
-        let {xn: xn, yn: yn} = Util.getXnYn(i, o);
-        let r = null;
-        let a = null;
-        let c = 0;
-        findR = findR || petSkin.conf.findR;
-        this.forNearBlocksByAckView(petSkin, xn, yn, findR, targetPetView => {
-            if (!targetPetView.isDie && targetPetView.camp != petSkin.camp && 0 != targetPetView.roleId) {
-                if (Util.isCanAckByRole(petSkin, targetPetView)) {
+    public static Dictionary<string, PetView> findTar(PetView petSkin, int findR = 0)
+    {
+        float i = petSkin.posX;
+        float o = petSkin.posY;
+        (int xn, int yn) block = Util.getXnYn(i, o);
+        int xn = block.xn;
+        int yn = block.yn;
+        PetView r = null;
+        PetView a = null;
+        float c = 0f;
+
+        if (findR == 0)
+        {
+            findR = petSkin.conf.findR;
+        }
+
+        forNearBlocksByAckView(petSkin, xn, yn, findR, targetPetView =>
+        {
+            if (!targetPetView.isDie && targetPetView.camp != petSkin.camp && targetPetView.roleId != 0)
+            {
+                if (Util.isCanAckByRole(petSkin, targetPetView))
+                {
                     r = targetPetView;
-                    return !0;
+                    return true;
                 }
-                if (petSkin.conf.isFindMoveTar && !a && Util.isCanMove(petSkin, targetPetView)) {
-                    let i = targetPetView.posX - petSkin.posX;
-                    let s = targetPetView.posY - petSkin.posY;
-                    c = i * i + s * s;
-                    a = targetPetView
-                } else if (petSkin.conf.isFindMoveTar && a && Util.isCanMove(petSkin, targetPetView)) {
-                    let i = targetPetView.posX - petSkin.posX, s = targetPetView.posY - petSkin.posY, o = i * i + s * s;
-                    if (o < c) {
-                        c = o;
-                        a = targetPetView
+
+                if (petSkin.conf.isFindMoveTar && a == null && Util.isCanMove(petSkin, targetPetView))
+                {
+                    float tx = targetPetView.posX - petSkin.posX;
+                    float ty = targetPetView.posY - petSkin.posY;
+                    c = tx * tx + ty * ty;
+                    a = targetPetView;
+                }
+                else if (petSkin.conf.isFindMoveTar && a != null && Util.isCanMove(petSkin, targetPetView))
+                {
+                    float tx = targetPetView.posX - petSkin.posX;
+                    float ty = targetPetView.posY - petSkin.posY;
+                    float distance = tx * tx + ty * ty;
+                    if (distance < c)
+                    {
+                        c = distance;
+                        a = targetPetView;
                     }
                 }
-                return !1
+
+                return false;
             }
-            return !1
-        })
-        if (r) {
+
+            return false;
+        });
+
+        if (r != null)
+        {
             petSkin.tarPosX = r.posX;
-            petSkin.tarPosY = r.posY
-            return {atkTar: r};
+            petSkin.tarPosY = r.posY;
+            return new Dictionary<string, PetView> { { "atkTar", r } };
         }
-        let backBoss = Util.getBackBoss(petSkin.camp);
-        if (Util.isCanAckByRole(petSkin, backBoss)) {
+
+        PetView backBoss = Util.getBackBoss(petSkin.camp);
+        if (Util.isCanAckByRole(petSkin, backBoss))
+        {
             petSkin.tarPosX = backBoss.posX;
             petSkin.tarPosY = backBoss.posY;
-            return {atkTar: backBoss};
+            return new Dictionary<string, PetView> { { "atkTar", backBoss } };
         }
-        if (a) {
-            return {moveTar: a};
+
+        if (a != null)
+        {
+            return new Dictionary<string, PetView> { { "moveTar", a } };
         }
-        if (petSkin.state == SheepRoleState.Spurt && !petSkin.conf.skillSpurt) {
-            let t = null;
-            this.findNearBlocksByCollisionView(petSkin, xn, yn, petSkin.conf.findR, i => {
-                if (i.state == SheepRoleState.Move) {
-                    let s = i.posX - petSkin.posX;
-                    let o = i.posY - petSkin.posY;
-                    let l = s * s + o * o;
-                    let n = i.conf.collideR + petSkin.conf.collideR;
-                    if (l < n * n * .25) {
-                        t = i
-                        return !0
+
+        if (petSkin.state == SheepRoleState.Spurt && !petSkin.conf.skillSpurt)
+        {
+            PetView t = null;
+            findNearBlocksByCollisionView(petSkin, xn, yn, petSkin.conf.findR, target =>
+            {
+                if (target.state == SheepRoleState.Move)
+                {
+                    float s = target.posX - petSkin.posX;
+                    float targetY = target.posY - petSkin.posY;
+                    float distance = s * s + targetY * targetY;
+                    float radius = target.conf.collideR + petSkin.conf.collideR;
+                    if (distance < radius * radius * 0.25f)
+                    {
+                        t = target;
+                        return true;
                     }
                 }
-                return !1
-            })
-            if (t) {
-                return {moveTar: t}
+
+                return false;
+            });
+
+            if (t != null)
+            {
+                return new Dictionary<string, PetView> { { "moveTar", t } };
             }
         }
-        return petSkin.state != SheepRoleState.Spurt || petSkin.camp == SheepCamp.Red && petSkin.posX > petSkin.conf.runEndX || petSkin.camp == SheepCamp.Blue && petSkin.posX < petSkin.conf.runEndX ? {moveBoss: backBoss} : {}
+
+        if (
+            petSkin.state != SheepRoleState.Spurt ||
+            petSkin.camp == SheepCamp.Red && petSkin.posX > petSkin.conf.runEndX ||
+            petSkin.camp == SheepCamp.Blue && petSkin.posX < petSkin.conf.runEndX
+        )
+        {
+            return new Dictionary<string, PetView> { { "moveBoss", backBoss } };
+        }
+
+        return new Dictionary<string, PetView>();
     }
 
-    /**
-     *
-     * @param petSkin {PetView}
-     * @return {*}
-     */
-    public  static void  findNearAck(PetView petSkin) {
-        let t = petSkin.posX;
-        let i = petSkin.posY;
-        let {xn: xn, yn: yn} = Util.getXnYn(t, i);
-        let l = null;
-        this.findNearBlocksByAckView(petSkin, xn, yn, petSkin.conf.findR, t => {
-            if (!t.isDie && t.camp != petSkin.camp && 0 != t.roleId && Util.isCanAckByRole(petSkin, t)) {
-                l = t;
-                return true
+    public static PetView findNearAck(PetView petSkin)
+    {
+        float t = petSkin.posX;
+        float i = petSkin.posY;
+        (int xn, int yn) block = Util.getXnYn(t, i);
+        PetView l = null;
+
+        findNearBlocksByAckView(petSkin, block.xn, block.yn, petSkin.conf.findR, target =>
+        {
+            if (!target.isDie && target.camp != petSkin.camp && target.roleId != 0 && Util.isCanAckByRole(petSkin, target))
+            {
+                l = target;
+                return true;
             }
+
             return false;
-        })
-        if (l) {
+        });
+
+        if (l != null)
+        {
             return l;
         }
-        if (null == l) {
-            let t = Util.getBackBoss(petSkin.camp);
-            if (Util.isCanAckByRole(petSkin, t)) {
-                l = t
+
+        if (l == null)
+        {
+            PetView target = Util.getBackBoss(petSkin.camp);
+            if (Util.isCanAckByRole(petSkin, target))
+            {
+                l = target;
             }
         }
-        return l
+
+        return l;
     }
 
-    public  static void  findFarAck(PetView e, findR) {
-        int posX = e.posX;
-        int posY = e.posY;
-        let {xn: xn, yn: yn} = Util.getXnYn(posX, posY);
-        let n = null;
-        this.findFarBlocksByAckView(e, xn, yn, findR, e => {
-            n = e
+    public static PetView findFarAck(PetView e, int findR)
+    {
+        float posX = e.posX;
+        float posY = e.posY;
+        (int xn, int yn) block = Util.getXnYn(posX, posY);
+        PetView n = null;
+
+        findFarBlocksByAckView(e, block.xn, block.yn, findR, target =>
+        {
+            n = target;
             return true;
-        })
-        if (null == n) {
-            let t = Util.getBackBoss(e.camp);
-            Util.isCanAckByRole(e, t) && (n = t)
+        });
+
+        if (n == null)
+        {
+            PetView t = Util.getBackBoss(e.camp);
+            if (Util.isCanAckByRole(e, t))
+            {
+                n = t;
+            }
         }
-        return n
+
+        return n;
     }
 
-    public static void  findRandomAck(e, findR) {
-        let i = e.posX;
-        let s = e.posY;
-        let {xn: o, yn: l} = Util.getXnYn(i, s);
-        let n = null;
-        this.findRandomBlocksByAckView(e, o, l, findR, e => {
-            n = e
+    public static PetView findRandomAck(PetView e, int findR)
+    {
+        float i = e.posX;
+        float s = e.posY;
+        (int xn, int yn) block = Util.getXnYn(i, s);
+        PetView n = null;
+
+        findRandomBlocksByAckView(e, block.xn, block.yn, findR, target =>
+        {
+            n = target;
             return true;
-        })
-        if (null == n) {
-            let t = Util.getBackBoss(e.camp);
-            Util.isCanAckByRole(e, t) && (n = t)
+        });
+
+        if (n == null)
+        {
+            PetView t = Util.getBackBoss(e.camp);
+            if (Util.isCanAckByRole(e, t))
+            {
+                n = t;
+            }
         }
-        return n
+
+        return n;
     }
 
-    /**
-     *
-     * @param petView {PetView}
-     * @param targetPetView {PetView}
-     * @return {number}
-     */
-    public  static void  getAtkRank(PetView petView,PetView targetPetView) {
-        if (petView.conf.findAtkSort) {
-            for (let i = 0; i < petView.conf.findAtkSort.length; i++) {
-                if (petView.conf.findAtkSort[i] == targetPetView.conf.roleType) {
+    public static int getAtkRank(PetView petView, PetView targetPetView)
+    {
+        if (petView.conf.findAtkSort != null)
+        {
+            for (int i = 0; i < petView.conf.findAtkSort.Length; i++)
+            {
+                if (petView.conf.findAtkSort[i] == targetPetView.conf.roleType)
+                {
                     return i;
                 }
             }
         }
-        return 100
+
+        return 100;
     }
 
-    /**
-     *
-     * @param petView {PetView}
-     * @param targetPetView {PetView}
-     * @returns {null}
-     */
-    public  static void  findSortAck(PetView petView,PetView targetPetView) {
-        let posX = petView.posX;
-        let posY = petView.posY;
-        let {xn: o, yn: l} = Util.getXnYn(posX, posY);
-        let n = null;
-        let r = 100;
-        let a = 0;
-        petView.conf.findAtkSort && (a = petView.conf.findAtkSort[0]);
-        this.findNearBlocksByAckView(petView, o, l, targetPetView, (t => {
-            if (!Util.isCanAckByRole(petView, t)) {
-                return !1;
-            }
-            if (null == n) {
-                n = t;
-                r = this.getAtkRank(petView, t)
-                return !1;
-            }
-            if (t.roleId == a) {
-                n = t
-                return !0;
-            }
+    public static PetView findSortAck(PetView petView, int targetPetView)
+    {
+        float posX = petView.posX;
+        float posY = petView.posY;
+        (int xn, int yn) block = Util.getXnYn(posX, posY);
+        PetView n = null;
+        int r = 100;
+        SheepRoleType a = default(SheepRoleType);
+
+        if (petView.conf.findAtkSort != null)
+        {
+            a = petView.conf.findAtkSort[0];
+        }
+
+        findNearBlocksByAckView(petView, block.xn, block.yn, targetPetView, t =>
+        {
+            if (!Util.isCanAckByRole(petView, t))
             {
-                let i = t;
-                let s = this.getAtkRank(petView, t);
-                s < r && (n = i, r = s)
-                return !1
-            }
-        }))
-        if (null == n) {
-            let t = Util.getBackBoss(petView.camp);
-            Util.isCanAckByRole(petView, t) && (n = t)
-        }
-        return n
-    }
-
-    /**
-     *
-     * @param petSkin {PetView}
-     * @param findR
-     * @return {null}
-     */
-    public  static void  findSortAck1(PetView petSkin, findR) {
-        let i = petSkin.posX;
-        let s = petSkin.posY;
-        let {xn: xn, yn: yn} = Util.getXnYn(i, s);
-        let n = null;
-        let r = 100;
-        let a = 0;
-        if (petSkin.conf.findAtkSort) {
-            a = petSkin.conf.findAtkSort[0];
-        }
-        this.findNearBlocksByAckView(petSkin, xn, yn, findR, t => {
-            if (null == n) {
-                n = t;
-                r = this.getAtkRank(petSkin, t)
                 return false;
             }
 
-            if (t.roleId == a) {
-                n = t
+            if (n == null)
+            {
+                n = t;
+                r = getAtkRank(petView, t);
+                return false;
+            }
+
+            if (t.roleId == (int)a)
+            {
+                n = t;
                 return true;
             }
 
-
-            let i = t;
-            let s = this.getAtkRank(petSkin, t);
-            if (s < r) {
-                n = i;
-                r = s
+            PetView target = t;
+            int s = getAtkRank(petView, t);
+            if (s < r)
+            {
+                n = target;
+                r = s;
             }
-            return false
 
-        })
-        if (null == n) {
-            let backBoss = Util.getBackBoss(petSkin.camp);
-            Util.isCanAckByRole(petSkin, backBoss) && (n = backBoss)
+            return false;
+        });
+
+        if (n == null)
+        {
+            PetView t = Util.getBackBoss(petView.camp);
+            if (Util.isCanAckByRole(petView, t))
+            {
+                n = t;
+            }
         }
-        return n
+
+        return n;
     }
 
-    public  static void  foreachFront(PetView e, t, i = 0, o = 30) {
-        let l = e.posX;
-        let n = e.posY;
-        let {xn: r, yn: a} = Util.getXnYn(l, n);
-        let c = e.tarPosX - l;
-        let f = e.tarPosY - n;
-        const h = Math.sqrt(c * c + f * f);
+    public static PetView findSortAck1(PetView petSkin, int findR)
+    {
+        float i = petSkin.posX;
+        float s = petSkin.posY;
+        (int xn, int yn) block = Util.getXnYn(i, s);
+        PetView n = null;
+        int r = 100;
+        SheepRoleType a = default(SheepRoleType);
 
-        if (h > 0) {
+        if (petSkin.conf.findAtkSort != null)
+        {
+            a = petSkin.conf.findAtkSort[0];
+        }
+
+        findNearBlocksByAckView(petSkin, block.xn, block.yn, findR, t =>
+        {
+            if (n == null)
+            {
+                n = t;
+                r = getAtkRank(petSkin, t);
+                return false;
+            }
+
+            if (t.roleId == (int)a)
+            {
+                n = t;
+                return true;
+            }
+
+            PetView target = t;
+            int rank = getAtkRank(petSkin, t);
+            if (rank < r)
+            {
+                n = target;
+                r = rank;
+            }
+
+            return false;
+        });
+
+        if (n == null)
+        {
+            PetView backBoss = Util.getBackBoss(petSkin.camp);
+            if (Util.isCanAckByRole(petSkin, backBoss))
+            {
+                n = backBoss;
+            }
+        }
+
+        return n;
+    }
+
+    public static void foreachFront(PetView e, Action<PetView> t, int i = 0, float o = 30f)
+    {
+        float l = e.posX;
+        float n = e.posY;
+        (int xn, int yn) block = Util.getXnYn(l, n);
+        float c = e.tarPosX - l;
+        float f = e.tarPosY - n;
+        float h = Mathf.Sqrt(c * c + f * f);
+
+        if (h > 0f)
+        {
             c /= h;
             f /= h;
-            i = i || e.conf.findR;
-        } else {
-            c = e.camp === SheepCamp.Red ? 1 : -1;
-            f = 0;
-            i = i || e.conf.findR;
+            if (i == 0)
+            {
+                i = e.conf.findR;
+            }
+        }
+        else
+        {
+            c = e.camp == SheepCamp.Red ? 1f : -1f;
+            f = 0f;
+            if (i == 0)
+            {
+                i = e.conf.findR;
+            }
         }
 
-        const p = Math.cos(o * Math.PI / 180);
-        let u = null;
-        let d = 1 / 0;
-        this.forNearBlocksByAckView(e, r, a, i, i => {
-            if (!i.isDie && i.camp != e.camp && 0 != i.roleId && Util.isCanAckByRole(e, i)) {
-                const e = i.posX - l;
-                const s = i.posY - n;
-                const o = e * e + s * s;
-                const r = Math.sqrt(e * e + s * s);
-                if (0 != r) {
-                    if ((e * c + s * f) / r > p && o < d) {
-                        d = o;
-                        u = i;
-                        t(u)
+        float p = Mathf.Cos(o * Mathf.PI / 180f);
+        PetView u = null;
+        float d = float.PositiveInfinity;
+
+        forNearBlocksByAckView(e, block.xn, block.yn, i, target =>
+        {
+            if (!target.isDie && target.camp != e.camp && target.roleId != 0 && Util.isCanAckByRole(e, target))
+            {
+                float targetX = target.posX - l;
+                float targetY = target.posY - n;
+                float distanceSqr = targetX * targetX + targetY * targetY;
+                float distance = Mathf.Sqrt(targetX * targetX + targetY * targetY);
+                if (distance != 0f)
+                {
+                    if ((targetX * c + targetY * f) / distance > p && distanceSqr < d)
+                    {
+                        d = distanceSqr;
+                        u = target;
+                        t(u);
                     }
                 }
-                return false
+
+                return false;
             }
-            return false
-        })
+
+            return false;
+        });
     }
 
-    public static  void forfeachBlocksByAckView(int camp,int xn,int yn,int splitN, callback) {
+    public static void forfeachBlocksByAckView(SheepCamp camp, int xn, int yn, int splitN, Action<PetView> callback)
+    {
         camp = camp == SheepCamp.Red ? SheepCamp.Blue : SheepCamp.Red;
-        let r = this.system.attackViews[camp];
-        let a = this.system.attackView1s[camp];
-        this.forfeachBlocks(r, a, xn, yn, splitN, callback)
+        dynamic r = system.attackViews[(int)camp];
+        dynamic a = system.attackView1s[(int)camp];
+        forfeachBlocks(r, a, xn, yn, splitN, callback);
     }
 
-    /**
-     *
-     * @param petSkin {PetView}
-     * @param xn
-     * @param yn
-     * @param splitN
-     * @param callback {(PetView)=>{}}
-     */
-    public static void  forfeachBlocksByCollView(PetView petSkin,int xn,int yn,int splitN, callback) {
-        var camp = petSkin.camp;
-        var n = UtilFind.system.collisionViews[camp][petSkin.conf.collideId];
-        var r = UtilFind.system.collisionView1s[camp][petSkin.conf.collideId];
-        this.forfeachBlocks(n, r, xn, yn, splitN, callback)
+    public static void forfeachBlocksByCollView(PetView petSkin, int xn, int yn, int splitN, Action<PetView> callback)
+    {
+        SheepCamp camp = petSkin.camp;
+        dynamic n = system.collisionViews[(int)camp][petSkin.conf.collideId];
+        dynamic r = system.collisionView1s[(int)camp][petSkin.conf.collideId];
+        forfeachBlocks(n, r, xn, yn, splitN, callback);
     }
 
-    /**
-     *
-     * @param e
-     * @param t
-     * @param xn
-     * @param yn
-     * @param splitN
-     * @param callback {(PetView)=>{}}
-     */
-    public  static void  forfeachBlocks(e, t,int xn,int yn,int splitN, callback) {
-        for (let n = -splitN; n <= splitN; n++) {
-            for (let r = -splitN; r <= splitN; r++) {
-                if (xn + n < 0 || xn + n >= SheepConfig.line_w) {
+    public static void forfeachBlocks(dynamic e, dynamic t, int xn, int yn, int splitN, Action<PetView> callback)
+    {
+        for (int n = -splitN; n <= splitN; n++)
+        {
+            for (int r = -splitN; r <= splitN; r++)
+            {
+                if (xn + n < 0 || xn + n >= SheepConfig.line_w)
+                {
                     continue;
                 }
-                if (yn + r < 0 || yn + r >= SheepConfig.line_w) {
+
+                if (yn + r < 0 || yn + r >= SheepConfig.line_w)
+                {
                     continue;
                 }
-                let blockIndex = Util.getIndexByXnYn(xn + n, yn + r);
-                this.system.forEachBlock(e, t, blockIndex, (petIndex => {
-                    let t = this.system.getPetView(petIndex);
-                    if (t) {
-                        callback(t);
-                        t = null;
+
+                int blockIndex = Util.getIndexByXnYn(xn + n, yn + r);
+                system.forEachBlock(e, t, blockIndex, (Action<int>)(petIndex =>
+                {
+                    PetView petView = system.getPetView(petIndex);
+                    if (petView != null)
+                    {
+                        callback(petView);
+                        petView = null;
                     }
-                }))
+                }));
             }
         }
     }
 
-    public  static  void forNearBlocksByCollView(e, t, i, s, callback) {
-        let l = e.camp;
-        let n = this.system.collisionViews[l][e.conf.collideId];
-        let r = this.system.collisionView1s[l][e.conf.collideId];
-        return this.forNearBlocks(n, r, t, i, s, callback);
+    public static bool forNearBlocksByCollView(PetView e, int t, int i, int s, Func<PetView, bool> callback)
+    {
+        SheepCamp l = e.camp;
+        dynamic n = system.collisionViews[(int)l][e.conf.collideId];
+        dynamic r = system.collisionView1s[(int)l][e.conf.collideId];
+        return forNearBlocks(n, r, t, i, s, callback);
     }
 
-    /**
-     *
-     * @param e
-     * @param t
-     * @param i
-     * @param s
-     * @param findR
-     * @param callback {(PetView)=>{}}
-     * @return {boolean}
-     */
-    public static void  forNearBlocks(e, t, i, s, findR, callback) {
-        let n = 0;
-        let r = (i, s) => {
-            let o = Util.getIndexByXnYn(i, s);
-            return o < 0 || o >= SheepConfig.line_w * SheepConfig.line_w || this.system.findBlock(e, t, o, (petIndex => {
-                let petView = this.system.getPetView(petIndex);
-                if (petView) {
-                    let e = callback(petView);
+    public static bool forNearBlocks(dynamic e, dynamic t, int i, int s, int findR, Func<PetView, bool> callback)
+    {
+        int n = 0;
+
+        Func<int, int, bool> r = (blockX, blockY) =>
+        {
+            int o = Util.getIndexByXnYn(blockX, blockY);
+            if (o < 0 || o >= SheepConfig.line_w * SheepConfig.line_w)
+            {
+                return false;
+            }
+
+            system.findBlock(e, t, o, (Func<int, bool>)(petIndex =>
+            {
+                PetView petView = system.getPetView(petIndex);
+                if (petView != null)
+                {
+                    bool result = callback(petView);
                     petView = null;
-                    return e;
+                    return result;
                 }
-                return !1
-            })), !1
+
+                return false;
+            }));
+
+            return false;
         };
-        for (let e = 0; e <= findR; e++) {
-            if (e) {
-                let e = {x: i - n, y: s + n}, t = {x: i + n, y: s + n}, o = {x: i + n, y: s - n},
-                    l = {x: i - n, y: s - n};
-                if (Math.random() < .5) {
-                    for (let i = e.x; i < t.x; i++) if (r(i, e.y)) return !0;
-                    for (let e = t.y; e > o.y; e--) if (r(t.x, e)) return !0;
-                    for (let e = o.x; e > l.x; e--) if (r(e, o.y)) return !0;
-                    for (let t = l.y; t < e.y; t++) if (r(l.x, t)) return !0
-                } else {
-                    for (let i = t.x; i > e.x; i--) if (r(i, e.y)) return !0;
-                    for (let t = e.y; t > l.y; t--) if (r(l.x, t)) return !0;
-                    for (let e = l.x; e < o.x; e++) if (r(e, o.y)) return !0;
-                    for (let e = o.y; e < t.y; e++) if (r(t.x, e)) return !0
+
+        for (int ring = 0; ring <= findR; ring++)
+        {
+            if (ring != 0)
+            {
+                Vector2Int topLeft = new Vector2Int(i - n, s + n);
+                Vector2Int topRight = new Vector2Int(i + n, s + n);
+                Vector2Int bottomRight = new Vector2Int(i + n, s - n);
+                Vector2Int bottomLeft = new Vector2Int(i - n, s - n);
+
+                if (UnityEngine.Random.value < 0.5f)
+                {
+                    for (int x = topLeft.x; x < topRight.x; x++)
+                    {
+                        if (r(x, topLeft.y)) return true;
+                    }
+
+                    for (int y = topRight.y; y > bottomRight.y; y--)
+                    {
+                        if (r(topRight.x, y)) return true;
+                    }
+
+                    for (int x = bottomRight.x; x > bottomLeft.x; x--)
+                    {
+                        if (r(x, bottomRight.y)) return true;
+                    }
+
+                    for (int y = bottomLeft.y; y < topLeft.y; y++)
+                    {
+                        if (r(bottomLeft.x, y)) return true;
+                    }
                 }
-            } else if (r(i, s)) return !0;
-            n += 1
+                else
+                {
+                    for (int x = topRight.x; x > topLeft.x; x--)
+                    {
+                        if (r(x, topLeft.y)) return true;
+                    }
+
+                    for (int y = topLeft.y; y > bottomLeft.y; y--)
+                    {
+                        if (r(bottomLeft.x, y)) return true;
+                    }
+
+                    for (int x = bottomLeft.x; x < bottomRight.x; x++)
+                    {
+                        if (r(x, bottomRight.y)) return true;
+                    }
+
+                    for (int y = bottomRight.y; y < topRight.y; y++)
+                    {
+                        if (r(topRight.x, y)) return true;
+                    }
+                }
+            }
+            else if (r(i, s))
+            {
+                return true;
+            }
+
+            n += 1;
         }
-        return !1
+
+        return false;
     }
 
-    /**
-     *
-     * @param e
-     * @param t
-     * @param i
-     * @param o
-     * @param callback {(PetView)=>{}}
-     * @return {boolean}
-     */
-    public static void  forNearBlocksByAckView(e, t, i, o, callback) {
-        let camp = e.camp;
+    public static bool forNearBlocksByAckView(PetView e, int t, int i, int o, Func<PetView, bool> callback)
+    {
+        SheepCamp camp = e.camp;
         camp = camp == SheepCamp.Red ? SheepCamp.Blue : SheepCamp.Red;
-        let r = this.system.attackViews[camp];
-        let a = this.system.attackView1s[camp];
-        return this.forNearBlocks(r, a, t, i, o, callback)
+        dynamic r = system.attackViews[(int)camp];
+        dynamic a = system.attackView1s[(int)camp];
+        return forNearBlocks(r, a, t, i, o, callback);
     }
 
-    public static void  findNearBlocksByAckView(PetView e, xn, yn, o, callback) {
-        let camp = e.camp;
+    public static bool findNearBlocksByAckView(PetView e, int xn, int yn, int o, Func<PetView, bool> callback)
+    {
+        SheepCamp camp = e.camp;
         camp = camp == SheepCamp.Red ? SheepCamp.Blue : SheepCamp.Red;
-        let r = this.system.attackViews[camp];
-        let a = this.system.attackView1s[camp];
-        return this.findNearBlocks(r, a, xn, yn, o, callback)
+        dynamic r = system.attackViews[(int)camp];
+        dynamic a = system.attackView1s[(int)camp];
+        return findNearBlocks(r, a, xn, yn, o, callback);
     }
 
-    /**
-     *
-     * @param petSkin {PetView}
-     * @param xn
-     * @param yn
-     * @param findR
-     * @param callback
-     * @return {*}
-     */
-    public  static void  findFarBlocksByAckView(PetView petSkin, xn, yn, findR, callback) {
-        let camp = petSkin.camp;
+    public static bool findFarBlocksByAckView(PetView petSkin, int xn, int yn, int findR, Func<PetView, bool> callback)
+    {
+        SheepCamp camp = petSkin.camp;
         camp = camp == SheepCamp.Red ? SheepCamp.Blue : SheepCamp.Red;
-        let r = this.system.attackViews[camp];
-        let a = this.system.attackView1s[camp];
-        return this.findFarBlocks(r, a, xn, yn, findR, callback)
+        dynamic r = system.attackViews[(int)camp];
+        dynamic a = system.attackView1s[(int)camp];
+        return findFarBlocks(r, a, xn, yn, findR, callback);
     }
 
-    public static void  findRandomBlocksByAckView(e, t, i, findR, callback) {
-        let camp = e.camp;
+    public static bool findRandomBlocksByAckView(PetView e, int t, int i, int findR, Func<PetView, bool> callback)
+    {
+        SheepCamp camp = e.camp;
         camp = camp == SheepCamp.Red ? SheepCamp.Blue : SheepCamp.Red;
-        let r = this.system.attackViews[camp];
-        let a = this.system.attackView1s[camp];
-        return this.findRandomBlocks(r, a, t, i, findR, callback)
+        dynamic r = system.attackViews[(int)camp];
+        dynamic a = system.attackView1s[(int)camp];
+        return findRandomBlocks(r, a, t, i, findR, callback);
     }
 
-    public static void  findNearBlocksByCollisionView(e, xn, yn, s, callback) {
-        let camp = e.camp;
-        let n = this.system.collisionViews[camp][e.conf.collideId];
-        let r = this.system.collisionView1s[camp][e.conf.collideId];
-        return this.findNearBlocks(n, r, xn, yn, s, callback)
+    public static bool findNearBlocksByCollisionView(PetView e, int xn, int yn, int s, Func<PetView, bool> callback)
+    {
+        SheepCamp camp = e.camp;
+        dynamic n = system.collisionViews[(int)camp][e.conf.collideId];
+        dynamic r = system.collisionView1s[(int)camp][e.conf.collideId];
+        return findNearBlocks(n, r, xn, yn, s, callback);
     }
 
-    public  static void  findNearBlocks(e, t, xn, yn, o, callback) {
-        let n = 0;
-        let r = (xn, yn) => {
-            let blockIndex = Util.getIndexByXnYn(xn, yn);
-            return !(blockIndex < 0 || blockIndex >= SheepConfig.line_w * SheepConfig.line_w) && this.system.findBlock(e, t, blockIndex, (petIndex => {
-                let petView = this.system.getPetView(petIndex);
-                if (petView) {
-                    let e = callback(petView);
+    public static bool findNearBlocks(dynamic e, dynamic t, int xn, int yn, int o, Func<PetView, bool> callback)
+    {
+        int n = 0;
+
+        Func<int, int, bool> r = (blockX, blockY) =>
+        {
+            int blockIndex = Util.getIndexByXnYn(blockX, blockY);
+            return !(blockIndex < 0 || blockIndex >= SheepConfig.line_w * SheepConfig.line_w) &&
+                   system.findBlock(e, t, blockIndex, (Func<int, bool>)(petIndex =>
+                   {
+                       PetView petView = system.getPetView(petIndex);
+                       if (petView != null)
+                       {
+                           bool result = callback(petView);
+                           petView = null;
+                           return result;
+                       }
+
+                       return false;
+                   }));
+        };
+
+        for (int ring = 0; ring <= o; ring++)
+        {
+            if (ring != 0)
+            {
+                Vector2Int topLeft = new Vector2Int(xn - n, yn + n);
+                Vector2Int topRight = new Vector2Int(xn + n, yn + n);
+                Vector2Int bottomRight = new Vector2Int(xn + n, yn - n);
+                Vector2Int bottomLeft = new Vector2Int(xn - n, yn - n);
+
+                if (UnityEngine.Random.value < 0.5f)
+                {
+                    for (int x = topLeft.x; x < topRight.x; x++)
+                    {
+                        if (r(x, topLeft.y)) return true;
+                    }
+
+                    for (int y = topRight.y; y > bottomRight.y; y--)
+                    {
+                        if (r(topRight.x, y)) return true;
+                    }
+
+                    for (int x = bottomRight.x; x > bottomLeft.x; x--)
+                    {
+                        if (r(x, bottomRight.y)) return true;
+                    }
+
+                    for (int y = bottomLeft.y; y < topLeft.y; y++)
+                    {
+                        if (r(bottomLeft.x, y)) return true;
+                    }
+                }
+                else
+                {
+                    for (int x = topRight.x; x > topLeft.x; x--)
+                    {
+                        if (r(x, topLeft.y)) return true;
+                    }
+
+                    for (int y = topLeft.y; y > bottomLeft.y; y--)
+                    {
+                        if (r(bottomLeft.x, y)) return true;
+                    }
+
+                    for (int x = bottomLeft.x; x < bottomRight.x; x++)
+                    {
+                        if (r(x, bottomRight.y)) return true;
+                    }
+
+                    for (int y = bottomRight.y; y < topRight.y; y++)
+                    {
+                        if (r(topRight.x, y)) return true;
+                    }
+                }
+            }
+            else if (r(xn, yn))
+            {
+                return true;
+            }
+
+            n += 1;
+        }
+
+        return false;
+    }
+
+    public static bool findFarBlocks(dynamic e, dynamic t, int xn, int yn, int o, Func<PetView, bool> callback)
+    {
+        Func<int, int, bool> n = (blockX, blockY) =>
+        {
+            int s = Util.getIndexByXnYn(blockX, blockY);
+            if (s < 0 || s >= SheepConfig.line_w * SheepConfig.line_w)
+            {
+                return false;
+            }
+
+            dynamic block = system.getBlockByIndex(e, s);
+            return block.Len != 0;
+        };
+
+        Func<int, int, bool> a = (blockX, blockY) =>
+        {
+            int blockIndex = Util.getIndexByXnYn(blockX, blockY);
+            return system.findBlock(e, t, blockIndex, (Func<int, bool>)(petIndex =>
+            {
+                PetView petView = system.getPetView(petIndex);
+                if (petView != null)
+                {
+                    bool result = callback(petView);
                     petView = null;
-                    return e;
+                    return result;
                 }
-                return !1
-            }))
-        };
-        for (let e = 0; e <= o; e++) {
-            if (e) {
-                let e = {x: xn - n, y: yn + n};
-                let t = {x: xn + n, y: yn + n};
-                let o = {x: xn + n, y: yn - n};
-                let l = {x: xn - n, y: yn - n};
-                if (Math.random() < .5) {
-                    for (let i = e.x; i < t.x; i++) {
-                        if (r(i, e.y)) {
-                            return !0;
-                        }
-                    }
-                    for (let e = t.y; e > o.y; e--) {
-                        if (r(t.x, e)) {
-                            return !0;
-                        }
-                    }
-                    for (let e = o.x; e > l.x; e--) {
-                        if (r(e, o.y)) {
-                            return !0;
-                        }
-                    }
-                    for (let t = l.y; t < e.y; t++) {
-                        if (r(l.x, t)) {
-                            return !0
-                        }
-                    }
-                } else {
-                    for (let i = t.x; i > e.x; i--) {
-                        if (r(i, e.y)) {
-                            return !0;
-                        }
-                    }
-                    for (let t = e.y; t > l.y; t--) {
-                        if (r(l.x, t)) {
-                            return !0;
-                        }
-                    }
-                    for (let e = l.x; e < o.x; e++) {
-                        if (r(e, o.y)) {
-                            return !0;
-                        }
-                    }
-                    for (let e = o.y; e < t.y; e++) {
-                        if (r(t.x, e)) {
-                            return !0
-                        }
-                    }
-                }
-            } else if (r(xn, yn)) {
-                return !0;
-            }
-            n += 1
-        }
-        return !1
-    }
 
-    public static void  findFarBlocks(e, t, xn, yn, o, callback) {
-        let n = (xn, yn) => {
-            let s = Util.getIndexByXnYn(xn, yn);
-            return !(s < 0 || s >= SheepConfig.line_w * SheepConfig.line_w || !this.system.getBlockByIndex(e, s).Len)
+                return false;
+            }));
         };
-        let a = (xn, yn) => {
-            let blockIndex = Util.getIndexByXnYn(xn, yn);
-            return this.system.findBlock(e, t, blockIndex, (petIndex => {
-                let t = this.system.getPetView(petIndex);
-                if (t) {
-                    let e = callback(t);
-                    t = null;
-                    return e;
+
+        for (int ring = o; ring > 0; ring--)
+        {
+            Vector2Int topLeft = new Vector2Int(xn - ring, yn + ring);
+            Vector2Int topRight = new Vector2Int(xn + ring, yn + ring);
+            Vector2Int bottomRight = new Vector2Int(xn + ring, yn - ring);
+            Vector2Int bottomLeft = new Vector2Int(xn - ring, yn - ring);
+            HashSet<Vector2Int> c = new HashSet<Vector2Int>();
+
+            for (int x = topLeft.x; x < topRight.x; x++)
+            {
+                if (n(x, topLeft.y)) c.Add(new Vector2Int(x, topLeft.y));
+            }
+
+            for (int y = topRight.y; y > bottomRight.y; y--)
+            {
+                if (n(topRight.x, y)) c.Add(new Vector2Int(topRight.x, y));
+            }
+
+            for (int x = bottomRight.x; x > bottomLeft.x; x--)
+            {
+                if (n(x, bottomRight.y)) c.Add(new Vector2Int(x, bottomRight.y));
+            }
+
+            for (int y = bottomLeft.y; y < topLeft.y; y++)
+            {
+                if (n(bottomLeft.x, y)) c.Add(new Vector2Int(bottomLeft.x, y));
+            }
+
+            while (c.Count != 0)
+            {
+                List<Vector2Int> points = new List<Vector2Int>();
+                foreach (Vector2Int point in c)
+                {
+                    points.Add(point);
                 }
-                return !1
-            }))
-        };
-        for (let e = o; e > 0; e--) {
-            let t = {x: xn - e, y: yn + e};
-            let o = {x: xn + e, y: yn + e};
-            let l = {x: xn + e, y: yn - e};
-            let r = {x: xn - e, y: yn - e};
-            let c = new Set;
-            for (let e = t.x; e < o.x; e++) {
-                n(e, t.y) && c.add({x: e, y: t.y});
-            }
-            for (let e = o.y; e > l.y; e--) {
-                n(o.x, e) && c.add({x: o.x, y: e});
-            }
-            for (let e = l.x; e > r.x; e--) {
-                n(e, l.y) && c.add({x: e, y: l.y});
-            }
-            for (let e = r.y; e < t.y; e++) {
-                n(r.x, e) && c.add({x: r.x, y: e});
-            }
-            for (; c.size;) {
-                let e = [];
-                c.forEach(t => {
-                    e.push(t)
-                });
-                let t = Math.floor(Math.random() * c.size);
-                let i = e[t];
-                if (a(i.x, i.y)) {
-                    return !0;
+
+                int randomIndex = UnityEngine.Random.Range(0, c.Count);
+                Vector2Int pointToCheck = points[randomIndex];
+                if (a(pointToCheck.x, pointToCheck.y))
+                {
+                    return true;
                 }
-                c.delete(i)
+
+                c.Remove(pointToCheck);
             }
         }
-        return !(!n(xn, yn) || 1 != a(xn, yn))
+
+        return n(xn, yn) && a(xn, yn);
     }
 
-    public  static void  findRandomBlocks(e, t, i, s, findR, callback) {
-        let n = (xn, yn) => {
-            let blockIndex = Util.getIndexByXnYn(xn, yn);
-            return !(blockIndex < 0 || blockIndex >= SheepConfig.line_w * SheepConfig.line_w || !this.system.getBlockByIndex(e, blockIndex).Len)
+    public static bool findRandomBlocks(dynamic e, dynamic t, int i, int s, int findR, Func<PetView, bool> callback)
+    {
+        Func<int, int, bool> n = (blockX, blockY) =>
+        {
+            int blockIndex = Util.getIndexByXnYn(blockX, blockY);
+            if (blockIndex < 0 || blockIndex >= SheepConfig.line_w * SheepConfig.line_w)
+            {
+                return false;
+            }
+
+            dynamic block = system.getBlockByIndex(e, blockIndex);
+            return block.Len != 0;
         };
-        let a = (xn, yn) => {
-            let blockIndex = Util.getIndexByXnYn(xn, yn);
-            return this.system.findBlock(e, t, blockIndex, (petIndex => {
-                let petSkin = this.system.getPetView(petIndex);
-                if (petSkin) {
-                    let e = callback(petSkin);
+
+        Func<int, int, bool> a = (blockX, blockY) =>
+        {
+            int blockIndex = Util.getIndexByXnYn(blockX, blockY);
+            return system.findBlock(e, t, blockIndex, (Func<int, bool>)(petIndex =>
+            {
+                PetView petSkin = system.getPetView(petIndex);
+                if (petSkin != null)
+                {
+                    bool result = callback(petSkin);
                     petSkin = null;
-                    return e;
+                    return result;
                 }
-                return !1
-            }))
+
+                return false;
+            }));
         };
-        let c = [];
-        for (let e = 0; e <= findR; e++) {
-            c.push(e);
+
+        List<int> c = new List<int>();
+        for (int ring = 0; ring <= findR; ring++)
+        {
+            c.Add(ring);
         }
-        c.sort((e, t) => Math.random() - .5);
-        for (let e = 0; e <= findR; e++) {
-            let t = c[e];
-            let o = {x: i - t, y: s + t};
-            let l = {x: i + t, y: s + t};
-            let r = {x: i + t, y: s - t};
-            let f = {x: i - t, y: s - t};
-            let h = [];
-            for (let e = o.x; e < l.x; e++) {
-                n(e, o.y) && h.push({x: e, y: o.y});
+
+        c.Sort((left, right) => UnityEngine.Random.value < 0.5f ? -1 : 1);
+
+        for (int ringIndex = 0; ringIndex <= findR; ringIndex++)
+        {
+            int ring = c[ringIndex];
+            Vector2Int topLeft = new Vector2Int(i - ring, s + ring);
+            Vector2Int topRight = new Vector2Int(i + ring, s + ring);
+            Vector2Int bottomRight = new Vector2Int(i + ring, s - ring);
+            Vector2Int bottomLeft = new Vector2Int(i - ring, s - ring);
+            List<Vector2Int> h = new List<Vector2Int>();
+
+            for (int x = topLeft.x; x < topRight.x; x++)
+            {
+                if (n(x, topLeft.y)) h.Add(new Vector2Int(x, topLeft.y));
             }
-            for (let e = l.y; e > r.y; e--) {
-                n(l.x, e) && h.push({x: l.x, y: e});
+
+            for (int y = topRight.y; y > bottomRight.y; y--)
+            {
+                if (n(topRight.x, y)) h.Add(new Vector2Int(topRight.x, y));
             }
-            for (let e = r.x; e > f.x; e--) {
-                n(e, r.y) && h.push({x: e, y: r.y});
+
+            for (int x = bottomRight.x; x > bottomLeft.x; x--)
+            {
+                if (n(x, bottomRight.y)) h.Add(new Vector2Int(x, bottomRight.y));
             }
-            for (let e = f.y; e < o.y; e++) {
-                n(f.x, e) && h.push({x: f.x, y: e});
+
+            for (int y = bottomLeft.y; y < topLeft.y; y++)
+            {
+                if (n(bottomLeft.x, y)) h.Add(new Vector2Int(bottomLeft.x, y));
             }
-            for (h.sort(((e, t) => Math.random() - .5)); h.length;) {
-                let e = h.pop();
-                if (a(e.x, e.y)) {
-                    return !0
+
+            h.Sort((left, right) => UnityEngine.Random.value < 0.5f ? -1 : 1);
+            while (h.Count != 0)
+            {
+                int lastIndex = h.Count - 1;
+                Vector2Int point = h[lastIndex];
+                h.RemoveAt(lastIndex);
+                if (a(point.x, point.y))
+                {
+                    return true;
                 }
             }
         }
-        return !1
+
+        return false;
     }
-    }
+}
 }
