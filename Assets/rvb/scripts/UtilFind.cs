@@ -82,7 +82,7 @@
      * @param petSkin {PetView}
      * @return {*}
      */
-    public  static void  findNearAck(petSkin) {
+    public  static void  findNearAck(PetView petSkin) {
         let t = petSkin.posX;
         let i = petSkin.posY;
         let {xn: xn, yn: yn} = Util.getXnYn(t, i);
@@ -402,7 +402,7 @@
         return this.forNearBlocks(r, a, t, i, o, callback)
     }
 
-    public static void  findNearBlocksByAckView(e, xn, yn, o, callback) {
+    public static void  findNearBlocksByAckView(PetView e, xn, yn, o, callback) {
         let camp = e.camp;
         camp = camp == SheepCamp.Red ? SheepCamp.Blue : SheepCamp.Red;
         let r = this.system.attackViews[camp];

@@ -3,6 +3,10 @@
 namespace rvb.scripts {
     public class Util {
 
+        
+        public static bool isInitViewBoss = false;
+        public static Object view_boss_red = null;
+        public static Object view_boss_blue = null;
 
         /**
          * @type {SheepMgr}
@@ -17,7 +21,7 @@ public    static void getXnYnByIndex(e) {
     }
 
     // 根据 空间坐标 获取 格子坐标
-    public static void getXnYn(x, y) {
+    public static int getXnYn(int x,int y) {
         return {
             xn: Math.floor(x / SheepConfig.d + SheepConfig.h / SheepConfig.d / 2),
             yn: Math.floor(y / SheepConfig.d + SheepConfig.w / SheepConfig.d / 2)
@@ -41,9 +45,9 @@ public    static void getXnYnByIndex(e) {
     }
 
     // 根据 空间坐标 获取 索引 (只是组合方法)
-    public  static void  getIndexByXY(x, y) {
-        let i = Util.getXnYn(x, y);
-        return Util.getIndexByXnYn(i.xn, i.yn)
+    public  static void  getIndexByXY(int x,int y) {
+        var i = Util.getXnYn(x, y);
+        return Util.getIndexByXnYn(i.xn, i.yn);
     }
 
     /**
@@ -201,8 +205,8 @@ public    static void getXnYnByIndex(e) {
     }
 
     // 重置 攻击 cd
-    public static void  resetAtkCd(e, t) {
-        e.curAckCd = t
+    public static void  resetAtkCd(PetView e, t) {
+        e.curAckCd = t;
     }
 
     /**
@@ -210,7 +214,7 @@ public    static void getXnYnByIndex(e) {
      * @param camp
      * @return {PetView}
      */
-    public static void  getBackBoss(camp) {
+    public static void  getBackBoss(int camp) {
         if (!this.isInitViewBoss) {
             this.isInitViewBoss = true;
             this.view_boss_red = this.system.getPetView(SheepCamp.Red);
@@ -230,7 +234,7 @@ public    static void getXnYnByIndex(e) {
      * @param i
      * @param o
      */
-    public  static void  moveTar(e, t, i, o) {
+    public  static void  moveTar(PetView e, t, i, o) {
         // todo 这个是什么意思 某种跳过开关吗?
         if (!o) {
             return;
