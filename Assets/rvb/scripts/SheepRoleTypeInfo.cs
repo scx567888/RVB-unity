@@ -1,13 +1,11 @@
 using System;
 using System.Collections.Generic;
 
-namespace rvb.scripts
-{
+namespace rvb.scripts {
     /// <summary>
     /// 兵种静态配置。这里只保存原始配置数据，不保存单个单位的运行时状态。
     /// </summary>
-    public class SheepRoleTypeInfo
-    {
+    public class SheepRoleTypeInfo {
         public int id;
         public string[] name = Array.Empty<string>();
         public string pla = string.Empty;
@@ -30,6 +28,7 @@ namespace rvb.scripts
 
         // 血量
         public float hp;
+
         // 攻击力
         public int atk;
 
@@ -44,6 +43,7 @@ namespace rvb.scripts
 
         // 溅射格子数
         public int splitN;
+
         // 溅射半径
         public int spiltR;
 
@@ -58,13 +58,12 @@ namespace rvb.scripts
         public int hitBackDistance;
         public int isLoongStopDistance;
         public int loongStopDistanceR;
-        public static SheepRoleTypeInfo GetById(int id)
-        {
+
+        public static SheepRoleTypeInfo getById(int id) {
             return SheepRoleTypeInfos.GetById(id);
         }
 
-        public static bool TryGetById(int id, out SheepRoleTypeInfo info)
-        {
+        public static bool TryGetById(int id, out SheepRoleTypeInfo info) {
             return SheepRoleTypeInfos.TryGetById(id, out info);
         }
     }
@@ -72,11 +71,9 @@ namespace rvb.scripts
     /// <summary>
     /// 全部兵种配置。字段名称与逆向得到的原始 JavaScript 配置保持一致。
     /// </summary>
-    public static class SheepRoleTypeInfos
-    {
+    public static class SheepRoleTypeInfos {
         // 炮车 / 炮车
-        public static readonly SheepRoleTypeInfo pao_che = new()
-        {
+        public static readonly SheepRoleTypeInfo pao_che = new() {
             id = 23,
             pla = "dy",
             roleType = SheepRoleType.pao_che,
@@ -138,8 +135,7 @@ namespace rvb.scripts
         };
 
         // 黄金炮车 / 黄金炮车
-        public static readonly SheepRoleTypeInfo huang_jin_pao_che = new()
-        {
+        public static readonly SheepRoleTypeInfo huang_jin_pao_che = new() {
             id = 29,
             pla = "dy",
             roleType = SheepRoleType.pao_che,
@@ -201,8 +197,7 @@ namespace rvb.scripts
         };
 
         // 旋风斩 / 旋风斩
-        public static readonly SheepRoleTypeInfo xuan_feng_zhan = new()
-        {
+        public static readonly SheepRoleTypeInfo xuan_feng_zhan = new() {
             id = 19,
             pla = "dy",
             roleType = SheepRoleType.xuan_feng_zhan,
@@ -261,8 +256,7 @@ namespace rvb.scripts
         };
 
         // 大旋风斩 / 大旋风斩
-        public static readonly SheepRoleTypeInfo da_xuan_feng_zhan = new()
-        {
+        public static readonly SheepRoleTypeInfo da_xuan_feng_zhan = new() {
             id = 26,
             pla = "dy",
             roleType = SheepRoleType.xuan_feng_zhan,
@@ -321,8 +315,7 @@ namespace rvb.scripts
         };
 
         // 先锋兵 / 先锋兵
-        public static readonly SheepRoleTypeInfo xian_feng_bing = new()
-        {
+        public static readonly SheepRoleTypeInfo xian_feng_bing = new() {
             id = 7,
             pla = "dy",
             roleType = SheepRoleType.xuan_feng_zhan,
@@ -372,8 +365,7 @@ namespace rvb.scripts
         };
 
         // 小兵 / 小兵
-        public static readonly SheepRoleTypeInfo xiao_bing = new()
-        {
+        public static readonly SheepRoleTypeInfo xiao_bing = new() {
             id = 22,
             pla = "dy",
             roleType = SheepRoleType.xiao_bing,
@@ -427,8 +419,7 @@ namespace rvb.scripts
         };
 
         // 刺客 / 刺客
-        public static readonly SheepRoleTypeInfo ci_ke = new()
-        {
+        public static readonly SheepRoleTypeInfo ci_ke = new() {
             id = 16,
             pla = "dy",
             roleType = SheepRoleType.ci_ke,
@@ -478,8 +469,7 @@ namespace rvb.scripts
         };
 
         // 大刺客 / 大刺客
-        public static readonly SheepRoleTypeInfo da_ci_ke = new()
-        {
+        public static readonly SheepRoleTypeInfo da_ci_ke = new() {
             id = 17,
             pla = "dy",
             roleType = SheepRoleType.ci_ke,
@@ -529,8 +519,7 @@ namespace rvb.scripts
         };
 
         // 刺客 / 刺客
-        public static readonly SheepRoleTypeInfo ci_ke_1 = new()
-        {
+        public static readonly SheepRoleTypeInfo ci_ke_1 = new() {
             id = 102,
             pla = "dy",
             roleType = SheepRoleType.ci_ke,
@@ -580,8 +569,7 @@ namespace rvb.scripts
         };
 
         // 盾兵 / 盾兵
-        public static readonly SheepRoleTypeInfo dun_bing = new()
-        {
+        public static readonly SheepRoleTypeInfo dun_bing = new() {
             id = 18,
             pla = "dy",
             roleType = SheepRoleType.dun_bing,
@@ -639,8 +627,7 @@ namespace rvb.scripts
         };
 
         // 重甲盾兵 / 重甲盾兵
-        public static readonly SheepRoleTypeInfo zhong_jia_dun_bing = new()
-        {
+        public static readonly SheepRoleTypeInfo zhong_jia_dun_bing = new() {
             id = 25,
             pla = "dy",
             roleType = SheepRoleType.dun_bing,
@@ -698,8 +685,7 @@ namespace rvb.scripts
         };
 
         // 重甲盾兵 / 重甲盾兵
-        public static readonly SheepRoleTypeInfo zhong_jia_dun_bing_1 = new()
-        {
+        public static readonly SheepRoleTypeInfo zhong_jia_dun_bing_1 = new() {
             id = 104,
             pla = "dy",
             roleType = SheepRoleType.dun_bing,
@@ -757,8 +743,7 @@ namespace rvb.scripts
         };
 
         // 弓箭手 / 弓箭手
-        public static readonly SheepRoleTypeInfo gong_jian_shou = new()
-        {
+        public static readonly SheepRoleTypeInfo gong_jian_shou = new() {
             id = 21,
             pla = "dy",
             roleType = SheepRoleType.gong_jian_shou,
@@ -819,8 +804,7 @@ namespace rvb.scripts
         };
 
         // 游侠 / 游侠
-        public static readonly SheepRoleTypeInfo you_xia = new()
-        {
+        public static readonly SheepRoleTypeInfo you_xia = new() {
             id = 28,
             pla = "dy",
             roleType = SheepRoleType.gong_jian_shou,
@@ -881,8 +865,7 @@ namespace rvb.scripts
         };
 
         // 游侠 / 游侠
-        public static readonly SheepRoleTypeInfo you_xia_1 = new()
-        {
+        public static readonly SheepRoleTypeInfo you_xia_1 = new() {
             id = 103,
             pla = "dy",
             roleType = SheepRoleType.gong_jian_shou,
@@ -943,8 +926,7 @@ namespace rvb.scripts
         };
 
         // 冲锋兵 / 冲锋兵
-        public static readonly SheepRoleTypeInfo chong_feng_bing = new()
-        {
+        public static readonly SheepRoleTypeInfo chong_feng_bing = new() {
             id = 20,
             pla = "dy",
             roleType = SheepRoleType.chong_feng_bing,
@@ -994,8 +976,7 @@ namespace rvb.scripts
         };
 
         // 大冲锋兵 / 大冲锋兵
-        public static readonly SheepRoleTypeInfo da_chong_feng_bing = new()
-        {
+        public static readonly SheepRoleTypeInfo da_chong_feng_bing = new() {
             id = 27,
             pla = "dy",
             roleType = SheepRoleType.chong_feng_bing,
@@ -1045,8 +1026,7 @@ namespace rvb.scripts
         };
 
         // 大冲锋兵 / 大冲锋兵
-        public static readonly SheepRoleTypeInfo da_chong_feng_bing_1 = new()
-        {
+        public static readonly SheepRoleTypeInfo da_chong_feng_bing_1 = new() {
             id = 106,
             pla = "dy",
             roleType = SheepRoleType.chong_feng_bing,
@@ -1096,8 +1076,7 @@ namespace rvb.scripts
         };
 
         // 羊神 / 狼神
-        public static readonly SheepRoleTypeInfo yang_shen = new()
-        {
+        public static readonly SheepRoleTypeInfo yang_shen = new() {
             id = 24,
             pla = "dy",
             roleType = SheepRoleType.yang_shen,
@@ -1156,8 +1135,7 @@ namespace rvb.scripts
         };
 
         // 麒麟 / 麒麟
-        public static readonly SheepRoleTypeInfo qi_lin = new()
-        {
+        public static readonly SheepRoleTypeInfo qi_lin = new() {
             id = 30,
             pla = "dy",
             roleType = SheepRoleType.qi_lin,
@@ -1207,8 +1185,7 @@ namespace rvb.scripts
         };
 
         // Boss
-        public static readonly SheepRoleTypeInfo boss = new()
-        {
+        public static readonly SheepRoleTypeInfo boss = new() {
             id = 0,
             pla = "all",
             roleType = SheepRoleType.boss,
@@ -1254,8 +1231,7 @@ namespace rvb.scripts
             findAtkSort = new int[] { },
         };
 
-        private static readonly SheepRoleTypeInfo[] _data =
-        {
+        private static readonly SheepRoleTypeInfo[] _data = {
             boss,
             xian_feng_bing,
             ci_ke,
@@ -1283,29 +1259,23 @@ namespace rvb.scripts
 
         public static IReadOnlyList<SheepRoleTypeInfo> All => _data;
 
-        public static SheepRoleTypeInfo GetById(int id)
-        {
-            if (_map.TryGetValue(id, out SheepRoleTypeInfo info))
-            {
+        public static SheepRoleTypeInfo GetById(int id) {
+            if (_map.TryGetValue(id, out SheepRoleTypeInfo info)) {
                 return info;
             }
 
             throw new KeyNotFoundException($"没有找到 SheepRoleTypeInfo，id = {id}");
         }
 
-        public static bool TryGetById(int id, out SheepRoleTypeInfo info)
-        {
+        public static bool TryGetById(int id, out SheepRoleTypeInfo info) {
             return _map.TryGetValue(id, out info);
         }
 
-        private static Dictionary<int, SheepRoleTypeInfo> CreateMap()
-        {
+        private static Dictionary<int, SheepRoleTypeInfo> CreateMap() {
             var map = new Dictionary<int, SheepRoleTypeInfo>(_data.Length);
 
-            foreach (SheepRoleTypeInfo info in _data)
-            {
-                if (map.ContainsKey(info.id))
-                {
+            foreach (SheepRoleTypeInfo info in _data) {
+                if (map.ContainsKey(info.id)) {
                     throw new InvalidOperationException($"重复的兵种配置 ID：{info.id}");
                 }
 
