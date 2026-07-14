@@ -273,7 +273,8 @@ namespace rvb.scripts {
 
                 for (int y = -S; y <= S; ++y) {
                     for (int v = -S; v <= S; ++v) {
-                        e.comImages.mesh_block.addFrameBlockCamp(blockIndex, camp);
+                        // todo 这里需要一些处理
+                        // e.comImages.mesh_block.addFrameBlockCamp(blockIndex, camp);
                     }
                 }
 
