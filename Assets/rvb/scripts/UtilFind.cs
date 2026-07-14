@@ -296,10 +296,10 @@
      * @param splitN
      * @param callback {(PetView)=>{}}
      */
-    public static void  forfeachBlocksByCollView(petSkin, xn, yn, splitN, callback) {
-        let camp = petSkin.camp;
-        let n = this.system.collisionViews[camp][petSkin.conf.collideId];
-        let r = this.system.collisionView1s[camp][petSkin.conf.collideId];
+    public static void  forfeachBlocksByCollView(PetView petSkin,int xn,int yn,int splitN, callback) {
+        var camp = petSkin.camp;
+        var n = UtilFind.system.collisionViews[camp][petSkin.conf.collideId];
+        var r = UtilFind.system.collisionView1s[camp][petSkin.conf.collideId];
         this.forfeachBlocks(n, r, xn, yn, splitN, callback)
     }
 
