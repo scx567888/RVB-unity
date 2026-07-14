@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
 
-namespace rvb.scripts
-{
-    public sealed class SheepBullet
-    {
+namespace rvb.scripts {
+    public sealed class SheepBullet {
         public int id;
         public string name = string.Empty;
         public int roleType;
@@ -32,22 +30,18 @@ namespace rvb.scripts
 
         public static IReadOnlyList<SheepBullet> List => SheepBullets.All;
 
-        public static SheepBullet GetById(int id)
-        {
+        public static SheepBullet GetById(int id) {
             return SheepBullets.GetById(id);
         }
 
-        public static bool TryGetById(int id, out SheepBullet bullet)
-        {
+        public static bool TryGetById(int id, out SheepBullet bullet) {
             return SheepBullets.TryGetById(id, out bullet);
         }
     }
 
-    public static class SheepBullets
-    {
+    public static class SheepBullets {
         // 弓箭
-        public static readonly SheepBullet bullet_1 = new()
-        {
+        public static readonly SheepBullet bullet_1 = new() {
             id = 1,
             name = "弓箭",
             roleType = 3,
@@ -75,8 +69,7 @@ namespace rvb.scripts
         };
 
         // 技能弓箭
-        public static readonly SheepBullet bullet_2 = new()
-        {
+        public static readonly SheepBullet bullet_2 = new() {
             id = 2,
             name = "技能弓箭",
             roleType = 3,
@@ -104,8 +97,7 @@ namespace rvb.scripts
         };
 
         // 抛
-        public static readonly SheepBullet bullet_3 = new()
-        {
+        public static readonly SheepBullet bullet_3 = new() {
             id = 3,
             name = "抛",
             roleType = 7,
@@ -133,8 +125,7 @@ namespace rvb.scripts
         };
 
         // 抛
-        public static readonly SheepBullet bullet_4 = new()
-        {
+        public static readonly SheepBullet bullet_4 = new() {
             id = 4,
             name = "抛",
             roleType = 1,
@@ -162,8 +153,7 @@ namespace rvb.scripts
         };
 
         // 抛
-        public static readonly SheepBullet bullet_5 = new()
-        {
+        public static readonly SheepBullet bullet_5 = new() {
             id = 5,
             name = "抛",
             roleType = 1,
@@ -191,8 +181,7 @@ namespace rvb.scripts
         };
 
         // 抛
-        public static readonly SheepBullet bullet_6 = new()
-        {
+        public static readonly SheepBullet bullet_6 = new() {
             id = 6,
             name = "抛",
             roleType = 1,
@@ -220,8 +209,7 @@ namespace rvb.scripts
         };
 
         // 抛
-        public static readonly SheepBullet bullet_7 = new()
-        {
+        public static readonly SheepBullet bullet_7 = new() {
             id = 7,
             name = "抛",
             roleType = 1,
@@ -249,8 +237,7 @@ namespace rvb.scripts
         };
 
         // 抛
-        public static readonly SheepBullet bullet_8 = new()
-        {
+        public static readonly SheepBullet bullet_8 = new() {
             id = 8,
             name = "抛",
             roleType = 1,
@@ -278,8 +265,7 @@ namespace rvb.scripts
         };
 
         // 小抛
-        public static readonly SheepBullet bullet_9 = new()
-        {
+        public static readonly SheepBullet bullet_9 = new() {
             id = 9,
             name = "小抛",
             roleType = 1,
@@ -307,8 +293,7 @@ namespace rvb.scripts
         };
 
         // 音波
-        public static readonly SheepBullet bullet_10 = new()
-        {
+        public static readonly SheepBullet bullet_10 = new() {
             id = 10,
             name = "音波",
             roleType = 1,
@@ -336,8 +321,7 @@ namespace rvb.scripts
         };
 
         // 飞棍
-        public static readonly SheepBullet bullet_11 = new()
-        {
+        public static readonly SheepBullet bullet_11 = new() {
             id = 11,
             name = "飞棍",
             roleType = 1,
@@ -365,8 +349,7 @@ namespace rvb.scripts
         };
 
         // 爆炸效果子弹（投石车右）
-        public static readonly SheepBullet bullet_12 = new()
-        {
+        public static readonly SheepBullet bullet_12 = new() {
             id = 12,
             name = "爆炸效果子弹（投石车右）",
             roleType = 7,
@@ -394,8 +377,7 @@ namespace rvb.scripts
         };
 
         // 爆炸效果子弹（弓箭）
-        public static readonly SheepBullet bullet_13 = new()
-        {
+        public static readonly SheepBullet bullet_13 = new() {
             id = 13,
             name = "爆炸效果子弹（弓箭）",
             roleType = 3,
@@ -423,8 +405,7 @@ namespace rvb.scripts
         };
 
         // 爆炸效果自爆（小兵）
-        public static readonly SheepBullet bullet_14 = new()
-        {
+        public static readonly SheepBullet bullet_14 = new() {
             id = 14,
             name = "爆炸效果自爆（小兵）",
             roleType = 1,
@@ -452,8 +433,7 @@ namespace rvb.scripts
         };
 
         // 抛
-        public static readonly SheepBullet bullet_15 = new()
-        {
+        public static readonly SheepBullet bullet_15 = new() {
             id = 15,
             name = "抛",
             roleType = 7,
@@ -481,8 +461,7 @@ namespace rvb.scripts
         };
 
         // 爆炸效果子弹（投石车左）
-        public static readonly SheepBullet bullet_16 = new()
-        {
+        public static readonly SheepBullet bullet_16 = new() {
             id = 16,
             name = "爆炸效果子弹（投石车左）",
             roleType = 7,
@@ -510,8 +489,7 @@ namespace rvb.scripts
         };
 
         // 测试弓箭
-        public static readonly SheepBullet bullet_100 = new()
-        {
+        public static readonly SheepBullet bullet_100 = new() {
             id = 100,
             name = "测试弓箭",
             roleType = 1,
@@ -539,8 +517,7 @@ namespace rvb.scripts
         };
 
         // 测试冰爆术子弹
-        public static readonly SheepBullet bullet_101 = new()
-        {
+        public static readonly SheepBullet bullet_101 = new() {
             id = 101,
             name = "测试冰爆术子弹",
             roleType = 1,
@@ -568,8 +545,7 @@ namespace rvb.scripts
         };
 
         // 测试剑雨子弹
-        public static readonly SheepBullet bullet_102 = new()
-        {
+        public static readonly SheepBullet bullet_102 = new() {
             id = 102,
             name = "测试剑雨子弹",
             roleType = 1,
@@ -597,8 +573,7 @@ namespace rvb.scripts
         };
 
         // 测试鬼火子弹
-        public static readonly SheepBullet bullet_103 = new()
-        {
+        public static readonly SheepBullet bullet_103 = new() {
             id = 103,
             name = "测试鬼火子弹",
             roleType = 1,
@@ -626,8 +601,7 @@ namespace rvb.scripts
         };
 
         // 测试导弹子弹
-        public static readonly SheepBullet bullet_104 = new()
-        {
+        public static readonly SheepBullet bullet_104 = new() {
             id = 104,
             name = "测试导弹子弹",
             roleType = 1,
@@ -655,8 +629,7 @@ namespace rvb.scripts
         };
 
         // 金箍棒
-        public static readonly SheepBullet bullet_105 = new()
-        {
+        public static readonly SheepBullet bullet_105 = new() {
             id = 105,
             name = "金箍棒",
             roleType = 10,
@@ -684,8 +657,7 @@ namespace rvb.scripts
         };
 
         // 手掌
-        public static readonly SheepBullet bullet_106 = new()
-        {
+        public static readonly SheepBullet bullet_106 = new() {
             id = 106,
             name = "手掌",
             roleType = 10,
@@ -713,8 +685,7 @@ namespace rvb.scripts
         };
 
         // 小金箍棒
-        public static readonly SheepBullet bullet_107 = new()
-        {
+        public static readonly SheepBullet bullet_107 = new() {
             id = 107,
             name = "小金箍棒",
             roleType = 1,
@@ -742,8 +713,7 @@ namespace rvb.scripts
         };
 
         // 小手掌
-        public static readonly SheepBullet bullet_108 = new()
-        {
+        public static readonly SheepBullet bullet_108 = new() {
             id = 108,
             name = "小手掌",
             roleType = 1,
@@ -771,8 +741,7 @@ namespace rvb.scripts
         };
 
         // 火球
-        public static readonly SheepBullet bullet_109 = new()
-        {
+        public static readonly SheepBullet bullet_109 = new() {
             id = 109,
             name = "火球",
             roleType = 11,
@@ -800,8 +769,7 @@ namespace rvb.scripts
         };
 
         // 火球爆炸
-        public static readonly SheepBullet bullet_110 = new()
-        {
+        public static readonly SheepBullet bullet_110 = new() {
             id = 110,
             name = "火球爆炸",
             roleType = 11,
@@ -829,8 +797,7 @@ namespace rvb.scripts
         };
 
         // 火球二
-        public static readonly SheepBullet bullet_111 = new()
-        {
+        public static readonly SheepBullet bullet_111 = new() {
             id = 111,
             name = "火球二",
             roleType = 11,
@@ -858,8 +825,7 @@ namespace rvb.scripts
         };
 
         // 火球爆炸二
-        public static readonly SheepBullet bullet_112 = new()
-        {
+        public static readonly SheepBullet bullet_112 = new() {
             id = 112,
             name = "火球爆炸二",
             roleType = 11,
@@ -886,8 +852,7 @@ namespace rvb.scripts
             minRadiuses = System.Array.Empty<int>()
         };
 
-        public static readonly SheepBullet[] All =
-        {
+        public static readonly SheepBullet[] All = {
             bullet_1,
             bullet_2,
             bullet_3,
@@ -921,29 +886,23 @@ namespace rvb.scripts
 
         private static readonly Dictionary<int, SheepBullet> Map = BuildMap();
 
-        public static SheepBullet GetById(int id)
-        {
-            if (!Map.TryGetValue(id, out SheepBullet bullet))
-            {
+        public static SheepBullet GetById(int id) {
+            if (!Map.TryGetValue(id, out SheepBullet bullet)) {
                 throw new KeyNotFoundException($"不存在 SheepBullet 配置，ID: {id}");
             }
 
             return bullet;
         }
 
-        public static bool TryGetById(int id, out SheepBullet bullet)
-        {
+        public static bool TryGetById(int id, out SheepBullet bullet) {
             return Map.TryGetValue(id, out bullet);
         }
 
-        private static Dictionary<int, SheepBullet> BuildMap()
-        {
+        private static Dictionary<int, SheepBullet> BuildMap() {
             var map = new Dictionary<int, SheepBullet>(All.Length);
 
-            foreach (SheepBullet bullet in All)
-            {
-                if (!map.TryAdd(bullet.id, bullet))
-                {
+            foreach (SheepBullet bullet in All) {
+                if (!map.TryAdd(bullet.id, bullet)) {
                     throw new InvalidOperationException($"SheepBullet 存在重复 ID: {bullet.id}");
                 }
             }
