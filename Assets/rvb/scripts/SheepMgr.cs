@@ -23,7 +23,7 @@ namespace rvb.scripts {
         public int loongHp = 10000;
 
         // 红蓝 boss
-        public boss = [null, null];
+        public PetView[] boss;
 
         // 地块比例
         public float plotRatio = 0.5f;
@@ -32,63 +32,54 @@ namespace rvb.scripts {
         public SheepRoomState state = SheepRoomState.Ready;
 
         // 尝试角色 (todo 但是是哪一种? 当前在场上的? )
-        public pets = [new Set, new Set];
+        public object pets ;
 
         public int gameIndex = 0;
         public int gameStartTimerForBuff = 0;
-        public int cameraEulerAngles = v3();
+        public Vector3 cameraEulerAngles = new Vector3();
         public int endTime = 0;
-        public int preBuffs = [[], []];
-        public Buff[] buffs = [[], []];
-        public int countNewBuffs = [0, 0];
-        public int countBuffs = [0, 0];
-        public int countShowBuffs = [0, 0];
+        public int[][] preBuffs ;
+        public Buff[] buffs ;
+        public int[] countNewBuffs ;
+        public int[] countBuffs ;
+        public int[] countShowBuffs ;
 
         // 反击时刻标识符 (防止多次触发反击时刻)
-        public flagLongBuffs = [false, false];
+        public bool[] flagLongBuffs ;
 
-        public petStartCounts = [new Map, new Map];
-        public god_view_pets = [];
-        public perfStat = {
-            redNums: [0, 0, 0, 0, 0, 0, 0, 0],
-            blueNums: [0, 0, 0, 0, 0, 0, 0, 0],
-        };
+        public object[] petStartCounts;
+        public PetView[] god_view_pets ;
+        public object perfStat;
 
-    public view_pets = [];
-    public view_bullets = [];
-    public pre_view_bullets = [];
-    public updateTime = undefined;
-    public petsAdd = [];
-    public petsDel = [];
-    public petCount = 0;
-    public bulletsDel = [];
-    public bulletCount = 0;
-    public bulletId = 0;
+    public object view_pets ;
+    public object view_bullets ;
+    public object pre_view_bullets ;
+    public object updateTime ;
+    public object petsAdd ;
+    public object petsDel ;
+    public object petCount ;
+    public object bulletsDel ;
+    public object bulletCount ;
+    public object bulletId ;
 
-    public logic_counts = [1, 1];
+    public int[] logic_counts ;
 
-    public bullte_creates = [];
+    public int[] bullte_creates ;
 
-    public pre_blocks = new Map;
-    public isChangeCollsionFlags = null;
-    public isChangeAckFlags = null;
+    public object pre_blocks;
+    public object isChangeCollsionFlags = null;
+    public object isChangeAckFlags = null;
 
-    public MaxCount = SheepConfig.line_w * SheepConfig.line_w
+    public object MaxCount = SheepConfig.line_w * SheepConfig.line_w;
 
-    public attackViews = [
-            new Array(this.MaxCount),
-            new Array(this.MaxCount),
-        ];
+    public int[][] attackViews;
 
-    public attackView1s = [
-            new Array(SheepConfig.MaxPetCount),
-            new Array(SheepConfig.MaxPetCount)
-        ];
-
-    public collisionViews = [[], []];
+    public int[][] attackView1s;
+    
+    public int[][] collisionViews ;
         
 
-    public collisionView1s = [[], []];
+    public int[][] collisionView1s;
         
 
         /**
@@ -96,14 +87,14 @@ namespace rvb.scripts {
          * key 是 类型 id
          * @type {Map<Number,SheepCallInfo>}
          */
-        public redCallInfos = new Map();
+        public Dictionary<int,SheepCallInfo> redCallInfos ;
 
         /**
          * 蓝方召唤池
          * key 是 类型 id
          * @type {Map<Number,SheepCallInfo>}
          */
-        public blueCallInfos = new Map();
+        public Dictionary<int,SheepCallInfo> blueCallInfos;
 
         /**
          * 是否自动出兵
@@ -116,17 +107,17 @@ namespace rvb.scripts {
         /**
          * @type ComSheepImages
          */
-        public comImages=null;
+        public object comImages;
 
-        public cur_rob_role_index;
-        public cur_rob_bullet_index;
-        public cur_rob_role_mesh_index;
-        public cur_rob_bullet_mesh_index;
-        public cur_rob_star_mesh_index;
-        public roleMaxIndex;
-        public bulletMaxIndex;
-        public preBulletIndex;
-        public curIndexImages;
+        public int cur_rob_role_index;
+        public int cur_rob_bullet_index;
+        public int cur_rob_role_mesh_index;
+        public int cur_rob_bullet_mesh_index;
+        public int cur_rob_star_mesh_index;
+        public int roleMaxIndex;
+        public int bulletMaxIndex;
+        public int preBulletIndex;
+        public object curIndexImages;
         public int redBuffCount;
         public int blueBuffCount;
 
@@ -152,20 +143,20 @@ namespace rvb.scripts {
         this.loongHp = 10000;
 
         // 红蓝 boss
-        this.boss = [null, null];
+        this.boss = new PetView[]{null, null};
 
         // 地块比例
-        this.plotRatio = 0.5;
+        this.plotRatio = 0.5f;
 
         // 核心状态机
         this.state = SheepRoomState.Ready;
 
         // 尝试角色 (todo 但是是哪一种? 当前在场上的? )
-        this.pets = [new Set, new Set];
+        this.pets = new object[]{null,null};
 
         this.gameIndex = 0;
         this.gameStartTimerForBuff = 0;
-        this.cameraEulerAngles = v3();
+        this.cameraEulerAngles = new Vector3();
         this.endTime = 0;
         this.preBuffs = [[], []];
         this.buffs = [[], []];
@@ -253,11 +244,11 @@ namespace rvb.scripts {
          */
         this.comImages=null;
 
-        this.cur_rob_role_index;
-        this.cur_rob_bullet_index;
-        this.cur_rob_role_mesh_index;
-        this.cur_rob_bullet_mesh_index;
-        this.cur_rob_star_mesh_index;
+        this.cur_rob_role_index=0;
+        this.cur_rob_bullet_index=0;
+        this.cur_rob_role_mesh_index=0;
+        this.cur_rob_bullet_mesh_index=0;
+        this.cur_rob_star_mesh_index=0;
         this.roleMaxIndex;
         this.bulletMaxIndex;
         this.preBulletIndex;
