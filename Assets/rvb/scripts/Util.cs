@@ -149,14 +149,15 @@ public    static void getXnYnByIndex(e) {
      * @param y
      * @returns {*}
      */
-    public static void  dirTarByPos(PetView e, x, y) {
-        let s = x - e.posX;
-        let o = y - e.posY;
-        let l = Math.sqrt(s * s + o * o);
+    public static double[]  dirTarByPos(PetView e,int x,int y) {
+        int s = x - e.posX;
+        int o = y - e.posY;
+        double l = Math.Sqrt(s * s + o * o);
         if (0 == l) {
-            l = 1
+            l = 1;
         }
-        return [s / l, o / l]
+
+        return new []{s / l, o / l};
     }
 
     // 返回两点之间的距离
