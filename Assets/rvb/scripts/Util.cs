@@ -328,13 +328,13 @@ namespace rvb.scripts {
                 // 碰撞了多少非冲刺单位的 计数器
                 int notSpurtCount = 0;
 
-                if (!e.isConnNot) {
+                if (!e.isNotConn) {
                     UtilFind.forfeachBlocksByCollView(e, xn, yn, e.conf.detectCollideR, s => {
                         if (collideCount >= 20) {
                             return;
                         }
 
-                        if (s.isConnNot) {
+                        if (s.isNotConn) {
                             return;
                         }
 
