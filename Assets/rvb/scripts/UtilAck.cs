@@ -1,4 +1,6 @@
-﻿namespace rvb.scripts {
+﻿using System;
+
+namespace rvb.scripts {
     public class UtilAck {
         
     /**
@@ -13,7 +15,7 @@
         i = s.atk;
 
         if (e.curAtkBuff) {
-            i = Math.floor(i * (1 + e.curAtkBuff / 100));
+            i = Math.Floor(i * (1 + e.curAtkBuff / 100));
         }
 
         if (Util.isCanAckByRole(e, t)) {
@@ -21,8 +23,11 @@
         }
 
         if (0 != e.roleId && 0 != t.roleId) {
+            
+            var xnyn= Util.getXnYn(t.posX, t.posY);
 
-            let {xn: xn, yn: yn} = Util.getXnYn(t.posX, t.posY);
+            var xn = xnyn.xn;
+            var yn = xnyn.yn;
 
             UtilFind.forfeachBlocksByAckView(e.camp, xn, yn, e.conf.splitN, s => {
                 if (!s.isDie && 0 != s.roleId && s.camp == t.camp && s.id != t.id && s.curHp > 0) {

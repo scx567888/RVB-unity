@@ -281,7 +281,7 @@
         })
     }
 
-    public static  void forfeachBlocksByAckView(camp, xn, yn, splitN, callback) {
+    public static  void forfeachBlocksByAckView(int camp,int xn,int yn,int splitN, callback) {
         camp = camp == SheepCamp.Red ? SheepCamp.Blue : SheepCamp.Red;
         let r = this.system.attackViews[camp];
         let a = this.system.attackView1s[camp];
@@ -312,7 +312,7 @@
      * @param splitN
      * @param callback {(PetView)=>{}}
      */
-    public  static void  forfeachBlocks(e, t, xn, yn, splitN, callback) {
+    public  static void  forfeachBlocks(e, t,int xn,int yn,int splitN, callback) {
         for (let n = -splitN; n <= splitN; n++) {
             for (let r = -splitN; r <= splitN; r++) {
                 if (xn + n < 0 || xn + n >= SheepConfig.line_w) {

@@ -168,7 +168,7 @@ public    static void getXnYnByIndex(e) {
     }
 
     // 返回两个单位之间的距离
-    public  static void  disByRole(PetView e,PetView t) {
+    public  static double  disByRole(PetView e,PetView t) {
         int i = e.posX;
         int s = e.posY;
         int o = t.posX - i;
@@ -178,12 +178,12 @@ public    static void getXnYnByIndex(e) {
 
     // 以 e / t 的概率返回 true
     public  static void  numToBool(e, t = 1000) {
-        return Math.random() * t < e
+        return Math.random() * t < e;
     }
 
     // 是否处于攻击 cd
-    public static void  isAtkCd(PetView e) {
-        return e.curAckCd > 0
+    public static bool  isAtkCd(PetView e) {
+        return e.curAckCd > 0;
     }
 
     /**
@@ -192,8 +192,8 @@ public    static void getXnYnByIndex(e) {
      * @param t
      * @returns {*}
      */
-    public  static void  subAtkCd(PetView viewPet, t) {
-        let i = viewPet.curAckCd;
+    public  static float  subAtkCd(PetView viewPet,float t) {
+        float i = viewPet.curAckCd;
         if (0 != i) {
             i -= t;
             if (i < 0) {
@@ -207,7 +207,7 @@ public    static void getXnYnByIndex(e) {
     }
 
     // 重置 攻击 cd
-    public static void  resetAtkCd(PetView e, t) {
+    public static void  resetAtkCd(PetView e,float t) {
         e.curAckCd = t;
     }
 
@@ -216,16 +216,16 @@ public    static void getXnYnByIndex(e) {
      * @param camp
      * @return {PetView}
      */
-    public static void  getBackBoss(int camp) {
+    public static Object  getBackBoss(int camp) {
         if (!this.isInitViewBoss) {
             this.isInitViewBoss = true;
             this.view_boss_red = this.system.getPetView(SheepCamp.Red);
             this.view_boss_blue = this.system.getPetView(SheepCamp.Blue);
         }
         if (camp == SheepCamp.Red) {
-            return this.view_boss_blue
+            return Util.view_boss_blue;
         } else {
-            return this.view_boss_red
+            return Util.view_boss_red;
         }
     }
 
