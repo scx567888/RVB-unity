@@ -57,7 +57,7 @@ public    static void getXnYnByIndex(e) {
      * @param i
      * @returns {boolean}
      */
-    public  static void  isCanAckByRole(e, t, i = 1) {
+    public  static void  isCanAckByRole(PetView e,PetView t, i = 1) {
         //判断单位是否死亡
         let o = !t.isDie;
         if (0 == o) {
@@ -114,7 +114,7 @@ public    static void getXnYnByIndex(e) {
      * @param targetPetSkin {PetView}
      * @return {boolean}
      */
-    public  static void  isCanMove(petSkin, targetPetSkin) {
+    public  static void  isCanMove(PetView petSkin,PetView targetPetSkin) {
         let i = SheepConfig;
         let o = targetPetSkin.camp;
         return !(o == SheepCamp.Red && targetPetSkin.posX < -i.limitSearchBorderX ||
@@ -128,7 +128,7 @@ public    static void getXnYnByIndex(e) {
      * @param e {PetView}
      * @param t {PetView}
      */
-    public  static void  dirTar(e, t) {
+    public  static void  dirTar(PetView e,PetView t) {
         let i = e.posX;
         let s = e.posY;
         let o = t.posX - i;
@@ -150,7 +150,7 @@ public    static void getXnYnByIndex(e) {
      * @param y
      * @returns {*}
      */
-    public static void  dirTarByPos(e, x, y) {
+    public static void  dirTarByPos(PetView e, x, y) {
         let s = x - e.posX;
         let o = y - e.posY;
         let l = Math.sqrt(s * s + o * o);
@@ -168,7 +168,7 @@ public    static void getXnYnByIndex(e) {
     }
 
     // 返回两个单位之间的距离
-    public  static void  disByRole(e, t) {
+    public  static void  disByRole(PetView e,PetView t) {
         let i = e.posX;
         let s = e.posY;
         let o = t.posX - i;
@@ -182,7 +182,7 @@ public    static void getXnYnByIndex(e) {
     }
 
     // 是否处于攻击 cd
-    public static void  isAtkCd(e) {
+    public static void  isAtkCd(PetView e) {
         return e.curAckCd > 0
     }
 
@@ -192,16 +192,18 @@ public    static void getXnYnByIndex(e) {
      * @param t
      * @returns {*}
      */
-    public  static void  subAtkCd(viewPet, t) {
+    public  static void  subAtkCd(PetView viewPet, t) {
         let i = viewPet.curAckCd;
         if (0 != i) {
             i -= t;
             if (i < 0) {
                 i = 0;
             }
-            viewPet.curAckCd = i
+
+            viewPet.curAckCd = i;
         }
-        return i
+
+        return i;
     }
 
     // 重置 攻击 cd
