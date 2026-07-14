@@ -37,8 +37,8 @@ namespace rvb.scripts {
         public float dirY = 0;
         public int tarIndex = 0;
         public int tarId = 0;
-        public int curHp = 0;
-        public double curAtkBuff = 0;
+        public float curHp = 0;
+        public float curAtkBuff = 0;
         public int curAckFrame = 0;
         public float curAckCd = 0;
         public bool isHeavyAtk = false;
@@ -114,7 +114,7 @@ namespace rvb.scripts {
                     viewPet.animType = SheepRoleAnimType.Idle;
                     viewPet.animFrame = UnityEngine.Random.Range(0, 10);
                 }
-                else if (conf.skillIn) {
+                else if (conf.skillIn!=0) {
                     viewPet.state = SheepRoleState.In;
                     viewPet.subState = SheepRoleSubState.In;
                     viewPet.animType = SheepRoleAnimType.In;
@@ -209,8 +209,8 @@ namespace rvb.scripts {
             buff_index = buffIndex;
             view_pet = viewPet;
 
-            foreach (dynamic e in sheepMgr.buffs.Values) {
-                foreach (dynamic item in e.Values) {
+            foreach (var e in sheepMgr.buffs) {
+                foreach (var item in e) {
                     double i = (item.time - sheepMgr.gameStartTimerForBuff) / 1e3;
 
                     int r = item.count;
@@ -219,13 +219,12 @@ namespace rvb.scripts {
                 }
             }
 
-            if (sheepMgr.state == SheepRoomState.Start &&
-                viewPet.conf.roleType == SheepRoleType.yang_shen) {
+            if (sheepMgr.state == SheepRoomState.Start && viewPet.conf.roleType == SheepRoleType.yang_shen) {
                 sheepMgr.god_view_pets.Add(viewPet);
             }
         }
 
-        public void updateSkin(dynamic e, dynamic t, dynamic n, double o) {
+        public void updateSkin(dynamic e, SheepMgr t, SheepMgr n, double o) {
             PetView a = this;
             PetView i = a.view_pet;
             int buffIndex = a.buff_index;
@@ -236,7 +235,7 @@ namespace rvb.scripts {
 
             bool isDie = i.isDie;
             int blockIndex = i.blockIndex;
-            int curHp = i.curHp;
+            float curHp = i.curHp;
 
             if (isDie) {
                 return;
@@ -257,7 +256,7 @@ namespace rvb.scripts {
                 }
 
                 if (i.conf.deadAnimType != null && i.conf.deadAnimType.Length != 0) {
-                    i.animType = arrOn(i.conf.deadAnimType);
+                    i.animType= (SheepRoleAnimType)arrOn(i.conf.deadAnimType);
                 }
 
                 if (i.conf.roleType == SheepRoleType.xiao_bing) {
@@ -320,7 +319,7 @@ namespace rvb.scripts {
                         n
                     );
 
-                    double addAtk =
+                    float addAtk =
                         n *
                         SheepConfig.buffAtkIncreaseRate *
                         100;
@@ -330,13 +329,13 @@ namespace rvb.scripts {
                         addAtk: addAtk
                     );
 
-                    var arg = ((int addHp, double addAtk))buff.arg;
+                    var arg = ((int addHp, float addAtk))buff.arg;
 
                     e.curHp += arg.addHp;
                     e.curAtkBuff += arg.addAtk;
                 },
                 buff => {
-                    var arg = ((int addHp, double addAtk))buff.arg;
+                    var arg = ((int addHp, float addAtk))buff.arg;
 
                     e.curHp -= arg.addHp;
                     e.curAtkBuff -= arg.addAtk;
@@ -357,8 +356,8 @@ namespace rvb.scripts {
             }
         }
 
-        public int subCurHp(int t) {
-            int old = curHp;
+        public float subCurHp(int t) {
+            float old = curHp;
             curHp -= t;
             return old;
         }
