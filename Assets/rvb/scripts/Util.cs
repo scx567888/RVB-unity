@@ -13,12 +13,12 @@ namespace rvb.scripts {
          */
         public static SheepMgr system;
 
-public    static void getXnYnByIndex(e) {
-        return {
-            yn: Math.floor(e / SheepConfig.line_w),
-            xn: e % SheepConfig.line_w
+        public static XnYn getXnYnByIndex(int e) {
+          return new XnYn() {
+            yn= Math.Floor(e / SheepConfig.line_w),
+            xn= e % SheepConfig.line_w
+          };
         }
-    }
 
     // 根据 空间坐标 获取 格子坐标
     public static XnYn getXnYn(int x,int y) {
