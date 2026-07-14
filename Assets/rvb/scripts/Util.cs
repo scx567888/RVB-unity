@@ -21,11 +21,11 @@ public    static void getXnYnByIndex(e) {
     }
 
     // 根据 空间坐标 获取 格子坐标
-    public static int getXnYn(int x,int y) {
-        return {
-            xn: Math.floor(x / SheepConfig.d + SheepConfig.h / SheepConfig.d / 2),
-            yn: Math.floor(y / SheepConfig.d + SheepConfig.w / SheepConfig.d / 2)
-        }
+    public static XnYn getXnYn(int x,int y) {
+        return new  XnYn() {
+            xn= Math.Floor(x / SheepConfig.d + SheepConfig.h / SheepConfig.d / 2),
+            yn= Math.Floor(y / SheepConfig.d + SheepConfig.w / SheepConfig.d / 2)
+        };
     }
 
     // 根据格子坐标 获取 index
