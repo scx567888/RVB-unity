@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
 
-namespace rvb.scripts
-{
-    public sealed class SheepSkillSubCallBullets
-    {
+namespace rvb.scripts {
+    public class SheepSkillSubCallBullets {
         public int id;
         public string name = string.Empty;
         public int isAnim;
@@ -22,22 +20,18 @@ namespace rvb.scripts
 
         public static IReadOnlyList<SheepSkillSubCallBullets> List => SheepSkillSubCallBulletsConfigs.All;
 
-        public static SheepSkillSubCallBullets GetById(int id)
-        {
+        public static SheepSkillSubCallBullets getById(int id) {
             return SheepSkillSubCallBulletsConfigs.GetById(id);
         }
 
-        public static bool TryGetById(int id, out SheepSkillSubCallBullets config)
-        {
+        public static bool TryGetById(int id, out SheepSkillSubCallBullets config) {
             return SheepSkillSubCallBulletsConfigs.TryGetById(id, out config);
         }
     }
 
-    public static class SheepSkillSubCallBulletsConfigs
-    {
+    public static class SheepSkillSubCallBulletsConfigs {
         // 召唤冰雹
-        public static readonly SheepSkillSubCallBullets config_80001 = new()
-        {
+        public static readonly SheepSkillSubCallBullets config_80001 = new() {
             id = 80001,
             name = "召唤冰雹",
             isAnim = 0,
@@ -55,8 +49,7 @@ namespace rvb.scripts
         };
 
         // 召唤剑雨
-        public static readonly SheepSkillSubCallBullets config_80002 = new()
-        {
+        public static readonly SheepSkillSubCallBullets config_80002 = new() {
             id = 80002,
             name = "召唤剑雨",
             isAnim = 0,
@@ -74,8 +67,7 @@ namespace rvb.scripts
         };
 
         // 召唤鬼火
-        public static readonly SheepSkillSubCallBullets config_80003 = new()
-        {
+        public static readonly SheepSkillSubCallBullets config_80003 = new() {
             id = 80003,
             name = "召唤鬼火",
             isAnim = 0,
@@ -93,8 +85,7 @@ namespace rvb.scripts
         };
 
         // 召唤导弹
-        public static readonly SheepSkillSubCallBullets config_80004 = new()
-        {
+        public static readonly SheepSkillSubCallBullets config_80004 = new() {
             id = 80004,
             name = "召唤导弹",
             isAnim = 0,
@@ -112,8 +103,7 @@ namespace rvb.scripts
         };
 
         // 音波
-        public static readonly SheepSkillSubCallBullets config_80005 = new()
-        {
+        public static readonly SheepSkillSubCallBullets config_80005 = new() {
             id = 80005,
             name = "音波",
             isAnim = 1,
@@ -130,8 +120,7 @@ namespace rvb.scripts
             len = 0
         };
 
-        public static readonly SheepSkillSubCallBullets[] All =
-        {
+        public static readonly SheepSkillSubCallBullets[] All = {
             config_80001,
             config_80002,
             config_80003,
@@ -141,29 +130,23 @@ namespace rvb.scripts
 
         private static readonly Dictionary<int, SheepSkillSubCallBullets> Map = BuildMap();
 
-        public static SheepSkillSubCallBullets GetById(int id)
-        {
-            if (!Map.TryGetValue(id, out SheepSkillSubCallBullets config))
-            {
+        public static SheepSkillSubCallBullets GetById(int id) {
+            if (!Map.TryGetValue(id, out SheepSkillSubCallBullets config)) {
                 throw new KeyNotFoundException($"不存在 SheepSkillSubCallBullets 配置，ID: {id}");
             }
 
             return config;
         }
 
-        public static bool TryGetById(int id, out SheepSkillSubCallBullets config)
-        {
+        public static bool TryGetById(int id, out SheepSkillSubCallBullets config) {
             return Map.TryGetValue(id, out config);
         }
 
-        private static Dictionary<int, SheepSkillSubCallBullets> BuildMap()
-        {
+        private static Dictionary<int, SheepSkillSubCallBullets> BuildMap() {
             var map = new Dictionary<int, SheepSkillSubCallBullets>(All.Length);
 
-            foreach (SheepSkillSubCallBullets config in All)
-            {
-                if (!map.TryAdd(config.id, config))
-                {
+            foreach (SheepSkillSubCallBullets config in All) {
+                if (!map.TryAdd(config.id, config)) {
                     throw new InvalidOperationException($"SheepSkillSubCallBullets 存在重复 ID: {config.id}");
                 }
             }
