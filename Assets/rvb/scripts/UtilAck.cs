@@ -6,7 +6,7 @@
      */
     public static SheepMgr system;
 
-    public   static void  ackTar(e, t) {
+    public   static void  ackTar(PetView e,PetView t) {
         let i;
         let s = e.conf;
 
@@ -67,7 +67,7 @@
      * @param t {PetView}
      * @param i
      */
-    public static void  hurtByRole(e, t, i) {
+    public static void  hurtByRole(PetView e,PetView t, i) {
         let s = SheepRoleRestraint.getById(t.conf.roleType).hitRate[e.conf.roleType];
         i = Math.max(1, Math.floor(i * s));
         let o = t.subCurHp(i);
@@ -98,7 +98,7 @@
      * @param i
      * @returns {boolean}
      */
-    public static void  isCanAckByBullet(e, petSkin, i) {
+    public static void  isCanAckByBullet(e,PetView petSkin, i) {
         let s = !petSkin.isDie;
         if (0 == s) return s;
         let o = petSkin.state;

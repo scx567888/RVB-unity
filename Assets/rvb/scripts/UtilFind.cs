@@ -106,9 +106,9 @@
         return l
     }
 
-    public  static void  findFarAck(e, findR) {
-        let posX = e.posX;
-        let posY = e.posY;
+    public  static void  findFarAck(PetView e, findR) {
+        int posX = e.posX;
+        int posY = e.posY;
         let {xn: xn, yn: yn} = Util.getXnYn(posX, posY);
         let n = null;
         this.findFarBlocksByAckView(e, xn, yn, findR, e => {
@@ -161,7 +161,7 @@
      * @param targetPetView {PetView}
      * @returns {null}
      */
-    public  static void  findSortAck(petView, targetPetView) {
+    public  static void  findSortAck(PetView petView,PetView targetPetView) {
         let posX = petView.posX;
         let posY = petView.posY;
         let {xn: o, yn: l} = Util.getXnYn(posX, posY);
@@ -419,7 +419,7 @@
      * @param callback
      * @return {*}
      */
-    public  static void  findFarBlocksByAckView(petSkin, xn, yn, findR, callback) {
+    public  static void  findFarBlocksByAckView(PetView petSkin, xn, yn, findR, callback) {
         let camp = petSkin.camp;
         camp = camp == SheepCamp.Red ? SheepCamp.Blue : SheepCamp.Red;
         let r = this.system.attackViews[camp];
