@@ -11,7 +11,7 @@
      * @param petSkin {PetView}
      * @param findR
      */
-    public static void  findTar(petSkin, findR = 0) {
+    public static void  findTar(PetView petSkin, findR = 0) {
         let i = petSkin.posX;
         let o = petSkin.posY;
         let {xn: xn, yn: yn} = Util.getXnYn(i, o);
@@ -144,7 +144,7 @@
      * @param targetPetView {PetView}
      * @return {number}
      */
-    public  static void  getAtkRank(petView, targetPetView) {
+    public  static void  getAtkRank(PetView petView,PetView targetPetView) {
         if (petView.conf.findAtkSort) {
             for (let i = 0; i < petView.conf.findAtkSort.length; i++) {
                 if (petView.conf.findAtkSort[i] == targetPetView.conf.roleType) {
@@ -202,7 +202,7 @@
      * @param findR
      * @return {null}
      */
-    public  static void  findSortAck1(petSkin, findR) {
+    public  static void  findSortAck1(PetView petSkin, findR) {
         let i = petSkin.posX;
         let s = petSkin.posY;
         let {xn: xn, yn: yn} = Util.getXnYn(i, s);
@@ -241,7 +241,7 @@
         return n
     }
 
-    public  static void  foreachFront(e, t, i = 0, o = 30) {
+    public  static void  foreachFront(PetView e, t, i = 0, o = 30) {
         let l = e.posX;
         let n = e.posY;
         let {xn: r, yn: a} = Util.getXnYn(l, n);
