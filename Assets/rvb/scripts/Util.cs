@@ -4,10 +4,10 @@ namespace rvb.scripts {
     public class Util {
 
 
-    /**
-     * @type {SheepMgr}
-     */
-    static system
+        /**
+         * @type {SheepMgr}
+         */
+        public static SheepMgr system;
 
 public    static void getXnYnByIndex(e) {
         return {
@@ -26,7 +26,7 @@ public    static void getXnYnByIndex(e) {
 
     // 根据格子坐标 获取 index
     // 具有边界保护
-    public   static void  getIndexByXnYn(xn, yn) {
+    public   static int  getIndexByXnYn(int xn,int yn) {
         if (xn < 0) {
             xn = 0;
         } else if (xn >= SheepConfig.line_w) {

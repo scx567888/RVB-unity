@@ -4,7 +4,7 @@
     /**
      * @type {SheepMgr}
      */
-    public static system;
+    public static SheepMgr system;
 
     /**
      *
