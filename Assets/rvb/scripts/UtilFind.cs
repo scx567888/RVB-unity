@@ -4,14 +4,14 @@
     /**
      * @type {SheepMgr}
      */
-    static system;
+    public static system;
 
     /**
      *
      * @param petSkin {PetView}
      * @param findR
      */
-    static findTar(petSkin, findR = 0) {
+    public static findTar(petSkin, findR = 0) {
         let i = petSkin.posX;
         let o = petSkin.posY;
         let {xn: xn, yn: yn} = Util.getXnYn(i, o);
@@ -82,7 +82,7 @@
      * @param petSkin {PetView}
      * @return {*}
      */
-    static findNearAck(petSkin) {
+    public  static findNearAck(petSkin) {
         let t = petSkin.posX;
         let i = petSkin.posY;
         let {xn: xn, yn: yn} = Util.getXnYn(t, i);
@@ -106,7 +106,7 @@
         return l
     }
 
-    static findFarAck(e, findR) {
+    public  static findFarAck(e, findR) {
         let posX = e.posX;
         let posY = e.posY;
         let {xn: xn, yn: yn} = Util.getXnYn(posX, posY);
@@ -122,7 +122,7 @@
         return n
     }
 
-    static findRandomAck(e, findR) {
+    public static findRandomAck(e, findR) {
         let i = e.posX;
         let s = e.posY;
         let {xn: o, yn: l} = Util.getXnYn(i, s);
@@ -144,7 +144,7 @@
      * @param targetPetView {PetView}
      * @return {number}
      */
-    static getAtkRank(petView, targetPetView) {
+    public  static getAtkRank(petView, targetPetView) {
         if (petView.conf.findAtkSort) {
             for (let i = 0; i < petView.conf.findAtkSort.length; i++) {
                 if (petView.conf.findAtkSort[i] == targetPetView.conf.roleType) {
@@ -161,7 +161,7 @@
      * @param targetPetView {PetView}
      * @returns {null}
      */
-    static findSortAck(petView, targetPetView) {
+    public  static findSortAck(petView, targetPetView) {
         let posX = petView.posX;
         let posY = petView.posY;
         let {xn: o, yn: l} = Util.getXnYn(posX, posY);
@@ -202,7 +202,7 @@
      * @param findR
      * @return {null}
      */
-    static findSortAck1(petSkin, findR) {
+    public  static findSortAck1(petSkin, findR) {
         let i = petSkin.posX;
         let s = petSkin.posY;
         let {xn: xn, yn: yn} = Util.getXnYn(i, s);
@@ -241,7 +241,7 @@
         return n
     }
 
-    static foreachFront(e, t, i = 0, o = 30) {
+    public  static foreachFront(e, t, i = 0, o = 30) {
         let l = e.posX;
         let n = e.posY;
         let {xn: r, yn: a} = Util.getXnYn(l, n);
@@ -281,7 +281,7 @@
         })
     }
 
-    static forfeachBlocksByAckView(camp, xn, yn, splitN, callback) {
+    public static forfeachBlocksByAckView(camp, xn, yn, splitN, callback) {
         camp = camp == SheepCamp.Red ? SheepCamp.Blue : SheepCamp.Red;
         let r = this.system.attackViews[camp];
         let a = this.system.attackView1s[camp];
@@ -296,7 +296,7 @@
      * @param splitN
      * @param callback {(PetView)=>{}}
      */
-    static forfeachBlocksByCollView(petSkin, xn, yn, splitN, callback) {
+    public static forfeachBlocksByCollView(petSkin, xn, yn, splitN, callback) {
         let camp = petSkin.camp;
         let n = this.system.collisionViews[camp][petSkin.conf.collideId];
         let r = this.system.collisionView1s[camp][petSkin.conf.collideId];
@@ -312,7 +312,7 @@
      * @param splitN
      * @param callback {(PetView)=>{}}
      */
-    static forfeachBlocks(e, t, xn, yn, splitN, callback) {
+    public  static forfeachBlocks(e, t, xn, yn, splitN, callback) {
         for (let n = -splitN; n <= splitN; n++) {
             for (let r = -splitN; r <= splitN; r++) {
                 if (xn + n < 0 || xn + n >= SheepConfig.line_w) {
@@ -333,7 +333,7 @@
         }
     }
 
-    static forNearBlocksByCollView(e, t, i, s, callback) {
+    public  static forNearBlocksByCollView(e, t, i, s, callback) {
         let l = e.camp;
         let n = this.system.collisionViews[l][e.conf.collideId];
         let r = this.system.collisionView1s[l][e.conf.collideId];
@@ -350,7 +350,7 @@
      * @param callback {(PetView)=>{}}
      * @return {boolean}
      */
-    static forNearBlocks(e, t, i, s, findR, callback) {
+    public static forNearBlocks(e, t, i, s, findR, callback) {
         let n = 0;
         let r = (i, s) => {
             let o = Util.getIndexByXnYn(i, s);
@@ -394,7 +394,7 @@
      * @param callback {(PetView)=>{}}
      * @return {boolean}
      */
-    static forNearBlocksByAckView(e, t, i, o, callback) {
+    public static forNearBlocksByAckView(e, t, i, o, callback) {
         let camp = e.camp;
         camp = camp == SheepCamp.Red ? SheepCamp.Blue : SheepCamp.Red;
         let r = this.system.attackViews[camp];
@@ -402,7 +402,7 @@
         return this.forNearBlocks(r, a, t, i, o, callback)
     }
 
-    static findNearBlocksByAckView(e, xn, yn, o, callback) {
+    public static findNearBlocksByAckView(e, xn, yn, o, callback) {
         let camp = e.camp;
         camp = camp == SheepCamp.Red ? SheepCamp.Blue : SheepCamp.Red;
         let r = this.system.attackViews[camp];
@@ -419,7 +419,7 @@
      * @param callback
      * @return {*}
      */
-    static findFarBlocksByAckView(petSkin, xn, yn, findR, callback) {
+    public  static findFarBlocksByAckView(petSkin, xn, yn, findR, callback) {
         let camp = petSkin.camp;
         camp = camp == SheepCamp.Red ? SheepCamp.Blue : SheepCamp.Red;
         let r = this.system.attackViews[camp];
@@ -427,7 +427,7 @@
         return this.findFarBlocks(r, a, xn, yn, findR, callback)
     }
 
-    static findRandomBlocksByAckView(e, t, i, findR, callback) {
+    public static findRandomBlocksByAckView(e, t, i, findR, callback) {
         let camp = e.camp;
         camp = camp == SheepCamp.Red ? SheepCamp.Blue : SheepCamp.Red;
         let r = this.system.attackViews[camp];
@@ -435,14 +435,14 @@
         return this.findRandomBlocks(r, a, t, i, findR, callback)
     }
 
-    static findNearBlocksByCollisionView(e, xn, yn, s, callback) {
+    public static findNearBlocksByCollisionView(e, xn, yn, s, callback) {
         let camp = e.camp;
         let n = this.system.collisionViews[camp][e.conf.collideId];
         let r = this.system.collisionView1s[camp][e.conf.collideId];
         return this.findNearBlocks(n, r, xn, yn, s, callback)
     }
 
-    static findNearBlocks(e, t, xn, yn, o, callback) {
+    public  static findNearBlocks(e, t, xn, yn, o, callback) {
         let n = 0;
         let r = (xn, yn) => {
             let blockIndex = Util.getIndexByXnYn(xn, yn);
@@ -513,7 +513,7 @@
         return !1
     }
 
-    static findFarBlocks(e, t, xn, yn, o, callback) {
+    public static findFarBlocks(e, t, xn, yn, o, callback) {
         let n = (xn, yn) => {
             let s = Util.getIndexByXnYn(xn, yn);
             return !(s < 0 || s >= SheepConfig.line_w * SheepConfig.line_w || !this.system.getBlockByIndex(e, s).Len)
@@ -564,7 +564,7 @@
         return !(!n(xn, yn) || 1 != a(xn, yn))
     }
 
-    static findRandomBlocks(e, t, i, s, findR, callback) {
+    public  static findRandomBlocks(e, t, i, s, findR, callback) {
         let n = (xn, yn) => {
             let blockIndex = Util.getIndexByXnYn(xn, yn);
             return !(blockIndex < 0 || blockIndex >= SheepConfig.line_w * SheepConfig.line_w || !this.system.getBlockByIndex(e, blockIndex).Len)

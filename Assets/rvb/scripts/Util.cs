@@ -9,7 +9,7 @@ namespace rvb.scripts {
      */
     static system
 
-    static getXnYnByIndex(e) {
+public    static getXnYnByIndex(e) {
         return {
             yn: Math.floor(e / SheepConfig.line_w),
             xn: e % SheepConfig.line_w
@@ -17,7 +17,7 @@ namespace rvb.scripts {
     }
 
     // 根据 空间坐标 获取 格子坐标
-    static getXnYn(x, y) {
+    public static getXnYn(x, y) {
         return {
             xn: Math.floor(x / SheepConfig.d + SheepConfig.h / SheepConfig.d / 2),
             yn: Math.floor(y / SheepConfig.d + SheepConfig.w / SheepConfig.d / 2)
@@ -26,7 +26,7 @@ namespace rvb.scripts {
 
     // 根据格子坐标 获取 index
     // 具有边界保护
-    static getIndexByXnYn(xn, yn) {
+    public   static getIndexByXnYn(xn, yn) {
         if (xn < 0) {
             xn = 0;
         } else if (xn >= SheepConfig.line_w) {
@@ -41,7 +41,7 @@ namespace rvb.scripts {
     }
 
     // 根据 空间坐标 获取 索引 (只是组合方法)
-    static getIndexByXY(x, y) {
+    public  static getIndexByXY(x, y) {
         let i = Util.getXnYn(x, y);
         return Util.getIndexByXnYn(i.xn, i.yn)
     }
@@ -53,7 +53,7 @@ namespace rvb.scripts {
      * @param i
      * @returns {boolean}
      */
-    static isCanAckByRole(e, t, i = 1) {
+    public  static isCanAckByRole(e, t, i = 1) {
         //判断单位是否死亡
         let o = !t.isDie;
         if (0 == o) {
@@ -110,7 +110,7 @@ namespace rvb.scripts {
      * @param targetPetSkin {PetView}
      * @return {boolean}
      */
-    static isCanMove(petSkin, targetPetSkin) {
+    public  static isCanMove(petSkin, targetPetSkin) {
         let i = SheepConfig;
         let o = targetPetSkin.camp;
         return !(o == SheepCamp.Red && targetPetSkin.posX < -i.limitSearchBorderX ||
@@ -124,7 +124,7 @@ namespace rvb.scripts {
      * @param e {PetView}
      * @param t {PetView}
      */
-    static dirTar(e, t) {
+    public  static dirTar(e, t) {
         let i = e.posX;
         let s = e.posY;
         let o = t.posX - i;
@@ -146,7 +146,7 @@ namespace rvb.scripts {
      * @param y
      * @returns {*}
      */
-    static dirTarByPos(e, x, y) {
+    public static dirTarByPos(e, x, y) {
         let s = x - e.posX;
         let o = y - e.posY;
         let l = Math.sqrt(s * s + o * o);
@@ -157,14 +157,14 @@ namespace rvb.scripts {
     }
 
     // 返回两点之间的距离
-    static dis(x, y, x1, y1) {
+    public static dis(x, y, x1, y1) {
         let o = x1 - x;
         let l = y1 - y;
         return Math.sqrt(o * o + l * l)
     }
 
     // 返回两个单位之间的距离
-    static disByRole(e, t) {
+    public  static disByRole(e, t) {
         let i = e.posX;
         let s = e.posY;
         let o = t.posX - i;
@@ -173,12 +173,12 @@ namespace rvb.scripts {
     }
 
     // 以 e / t 的概率返回 true
-    static numToBool(e, t = 1000) {
+    public  static numToBool(e, t = 1000) {
         return Math.random() * t < e
     }
 
     // 是否处于攻击 cd
-    static isAtkCd(e) {
+    public static isAtkCd(e) {
         return e.curAckCd > 0
     }
 
@@ -188,7 +188,7 @@ namespace rvb.scripts {
      * @param t
      * @returns {*}
      */
-    static subAtkCd(viewPet, t) {
+    public  static subAtkCd(viewPet, t) {
         let i = viewPet.curAckCd;
         if (0 != i) {
             i -= t;
@@ -201,7 +201,7 @@ namespace rvb.scripts {
     }
 
     // 重置 攻击 cd
-    static resetAtkCd(e, t) {
+    public static resetAtkCd(e, t) {
         e.curAckCd = t
     }
 
@@ -210,7 +210,7 @@ namespace rvb.scripts {
      * @param camp
      * @return {PetView}
      */
-    static getBackBoss(camp) {
+    public static getBackBoss(camp) {
         if (!this.isInitViewBoss) {
             this.isInitViewBoss = true;
             this.view_boss_red = this.system.getPetView(SheepCamp.Red);
@@ -230,7 +230,7 @@ namespace rvb.scripts {
      * @param i
      * @param o
      */
-    static moveTar(e, t, i, o) {
+    public  static moveTar(e, t, i, o) {
         // todo 这个是什么意思 某种跳过开关吗?
         if (!o) {
             return;
