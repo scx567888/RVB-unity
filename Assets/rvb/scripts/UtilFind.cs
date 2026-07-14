@@ -66,7 +66,7 @@ namespace rvb.scripts {
                 return new Dictionary<string, PetView> { { "moveTar", a } };
             }
 
-            if (petSkin.state == SheepRoleState.Spurt && petSkin.conf.skillSpurt != 0) {
+            if (petSkin.state == SheepRoleState.Spurt && petSkin.conf.skillSpurt == 0) {
                 PetView t = null;
                 findNearBlocksByCollisionView(petSkin, xn, yn, petSkin.conf.findR, target => {
                     if (target.state == SheepRoleState.Move) {
