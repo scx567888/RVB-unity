@@ -41,11 +41,12 @@ public    static void getXnYnByIndex(e) {
         } else if (yn >= SheepConfig.line_h) {
             yn = SheepConfig.line_h - 1;
         }
-        return xn * SheepConfig.line_w + yn
+
+        return xn * SheepConfig.line_w + yn;
     }
 
     // 根据 空间坐标 获取 索引 (只是组合方法)
-    public  static void  getIndexByXY(int x,int y) {
+    public  static int  getIndexByXY(int x,int y) {
         var i = Util.getXnYn(x, y);
         return Util.getIndexByXnYn(i.xn, i.yn);
     }
@@ -57,14 +58,14 @@ public    static void getXnYnByIndex(e) {
      * @param i
      * @returns {boolean}
      */
-    public  static void  isCanAckByRole(PetView e,PetView t, i = 1) {
+    public  static bool  isCanAckByRole(PetView e,PetView t,int i = 1) {
         //判断单位是否死亡
-        let o = !t.isDie;
+        bool o = !t.isDie;
         if (0 == o) {
             return o;
         }
 
-        let l = t.state;
+        int l = t.state;
         if (
             0 != t.roleId &&
             (
@@ -79,33 +80,32 @@ public    static void getXnYnByIndex(e) {
         }
 
         // 阵营判断
-        let r = e.camp;
-        let a = t.camp;
+        int r = e.camp;
+        int a = t.camp;
         if (a != r == 0) {
             return false;
         }
 
         // 越界判断
-        let c = SheepConfig;
-        if (a == SheepCamp.Red && t.posX < -c.limitSearchBorderX) {
+        if (a == SheepCamp.Red && t.posX < -SheepConfig.limitSearchBorderX) {
             return false;
         }
-        if (a == SheepCamp.Blue && t.posX > c.limitSearchBorderX) {
+        if (a == SheepCamp.Blue && t.posX > SheepConfig.limitSearchBorderX) {
             return false;
         }
 
         //距离判断
-        let f = e.posX;
-        let h = e.posY;
-        let p = t.posX - f;
-        let u = t.posY - h;
-        let d = p * p + u * u;
-        let g = Math.sqrt(d);
+        int f = e.posX;
+        int h = e.posY;
+        int p = t.posX - f;
+        int u = t.posY - h;
+        int d = p * p + u * u;
+        double g = Math.Sqrt(d);
 
         //攻击范围判断
-        let S = e.conf;
-        let m = t.conf;
-        return g < S.atkR * i + S.collideR + m.collideR
+        var S = e.conf;
+        var m = t.conf;
+        return g < S.atkR * i + S.collideR + m.collideR;
     }
 
     /**
@@ -114,13 +114,12 @@ public    static void getXnYnByIndex(e) {
      * @param targetPetSkin {PetView}
      * @return {boolean}
      */
-    public  static void  isCanMove(PetView petSkin,PetView targetPetSkin) {
-        let i = SheepConfig;
-        let o = targetPetSkin.camp;
-        return !(o == SheepCamp.Red && targetPetSkin.posX < -i.limitSearchBorderX ||
-            o == SheepCamp.Blue && targetPetSkin.posX > i.limitSearchBorderX ||
-            targetPetSkin.isDie ||
-            targetPetSkin.camp == petSkin.camp)
+    public  static int  isCanMove(PetView petSkin,PetView targetPetSkin) {
+        int o = targetPetSkin.camp;
+        return !(o == SheepCamp.Red && targetPetSkin.posX < -SheepConfig.limitSearchBorderX ||
+                 o == SheepCamp.Blue && targetPetSkin.posX > SheepConfig.limitSearchBorderX ||
+                 targetPetSkin.isDie ||
+                 targetPetSkin.camp == petSkin.camp);
     }
 
     /**
@@ -129,16 +128,16 @@ public    static void getXnYnByIndex(e) {
      * @param t {PetView}
      */
     public  static void  dirTar(PetView e,PetView t) {
-        let i = e.posX;
-        let s = e.posY;
-        let o = t.posX - i;
-        let l = t.posY - s;
-        let r = Math.sqrt(o * o + l * l);
+        int i = e.posX;
+        int s = e.posY;
+        int o = t.posX - i;
+        int l = t.posY - s;
+        double r = Math.Sqrt(o * o + l * l);
         if (r == 0) {
             r = 1;
         }
-        let a = o / r;
-        let c = l / r;
+        double a = o / r;
+        double c = l / r;
         e.dirX = a;
         e.dirY = c;
     }
