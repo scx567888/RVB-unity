@@ -6,7 +6,7 @@
      */
     public static system;
 
-    public   static ackTar(e, t) {
+    public   static void  ackTar(e, t) {
         let i;
         let s = e.conf;
 
@@ -37,7 +37,7 @@
         }
     }
 
-    public  static ackMe(e, t = 1, i = 1, s = 10, o = 0, l = []) {
+    public  static void  ackMe(e, t = 1, i = 1, s = 10, o = 0, l = []) {
         let n = i, r = e.conf;
         SheepConfig;
         n *= r.atk;
@@ -51,7 +51,7 @@
         }))
     }
 
-    public static hitBackMe(e, t = 1, i = 10, s) {
+    public static void  hitBackMe(e, t = 1, i = 10, s) {
         let {xn: o, yn: l} = Util.getXnYn(e.posX, e.posY);
         UtilFind.forfeachBlocksByAckView(e.camp, o, l, i, (i => {
             if (i.curHp > 0) {
@@ -67,7 +67,7 @@
      * @param t {PetView}
      * @param i
      */
-    public static hurtByRole(e, t, i) {
+    public static void  hurtByRole(e, t, i) {
         let s = SheepRoleRestraint.getById(t.conf.roleType).hitRate[e.conf.roleType];
         i = Math.max(1, Math.floor(i * s));
         let o = t.subCurHp(i);
@@ -82,7 +82,7 @@
      * @param t {PetView}
      * @param i
      */
-    public static hurtByBullet(e, t, i) {
+    public static void  hurtByBullet(e, t, i) {
         let s = SheepRoleRestraint.getById(t.conf.roleType).hitRate[e.conf.roleType];
         i = Math.max(1, Math.floor(i * s));
         let o = t.subCurHp(i);
@@ -98,7 +98,7 @@
      * @param i
      * @returns {boolean}
      */
-    public static isCanAckByBullet(e, petSkin, i) {
+    public static void  isCanAckByBullet(e, petSkin, i) {
         let s = !petSkin.isDie;
         if (0 == s) return s;
         let o = petSkin.state;

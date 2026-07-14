@@ -9,7 +9,7 @@ namespace rvb.scripts {
      */
     static system
 
-public    static getXnYnByIndex(e) {
+public    static void getXnYnByIndex(e) {
         return {
             yn: Math.floor(e / SheepConfig.line_w),
             xn: e % SheepConfig.line_w
@@ -17,7 +17,7 @@ public    static getXnYnByIndex(e) {
     }
 
     // 根据 空间坐标 获取 格子坐标
-    public static getXnYn(x, y) {
+    public static void getXnYn(x, y) {
         return {
             xn: Math.floor(x / SheepConfig.d + SheepConfig.h / SheepConfig.d / 2),
             yn: Math.floor(y / SheepConfig.d + SheepConfig.w / SheepConfig.d / 2)
@@ -26,7 +26,7 @@ public    static getXnYnByIndex(e) {
 
     // 根据格子坐标 获取 index
     // 具有边界保护
-    public   static getIndexByXnYn(xn, yn) {
+    public   static void  getIndexByXnYn(xn, yn) {
         if (xn < 0) {
             xn = 0;
         } else if (xn >= SheepConfig.line_w) {
@@ -41,7 +41,7 @@ public    static getXnYnByIndex(e) {
     }
 
     // 根据 空间坐标 获取 索引 (只是组合方法)
-    public  static getIndexByXY(x, y) {
+    public  static void  getIndexByXY(x, y) {
         let i = Util.getXnYn(x, y);
         return Util.getIndexByXnYn(i.xn, i.yn)
     }
@@ -53,7 +53,7 @@ public    static getXnYnByIndex(e) {
      * @param i
      * @returns {boolean}
      */
-    public  static isCanAckByRole(e, t, i = 1) {
+    public  static void  isCanAckByRole(e, t, i = 1) {
         //判断单位是否死亡
         let o = !t.isDie;
         if (0 == o) {
@@ -110,7 +110,7 @@ public    static getXnYnByIndex(e) {
      * @param targetPetSkin {PetView}
      * @return {boolean}
      */
-    public  static isCanMove(petSkin, targetPetSkin) {
+    public  static void  isCanMove(petSkin, targetPetSkin) {
         let i = SheepConfig;
         let o = targetPetSkin.camp;
         return !(o == SheepCamp.Red && targetPetSkin.posX < -i.limitSearchBorderX ||
@@ -124,7 +124,7 @@ public    static getXnYnByIndex(e) {
      * @param e {PetView}
      * @param t {PetView}
      */
-    public  static dirTar(e, t) {
+    public  static void  dirTar(e, t) {
         let i = e.posX;
         let s = e.posY;
         let o = t.posX - i;
@@ -146,7 +146,7 @@ public    static getXnYnByIndex(e) {
      * @param y
      * @returns {*}
      */
-    public static dirTarByPos(e, x, y) {
+    public static void  dirTarByPos(e, x, y) {
         let s = x - e.posX;
         let o = y - e.posY;
         let l = Math.sqrt(s * s + o * o);
@@ -157,14 +157,14 @@ public    static getXnYnByIndex(e) {
     }
 
     // 返回两点之间的距离
-    public static dis(x, y, x1, y1) {
+    public static void  dis(x, y, x1, y1) {
         let o = x1 - x;
         let l = y1 - y;
         return Math.sqrt(o * o + l * l)
     }
 
     // 返回两个单位之间的距离
-    public  static disByRole(e, t) {
+    public  static void  disByRole(e, t) {
         let i = e.posX;
         let s = e.posY;
         let o = t.posX - i;
@@ -173,12 +173,12 @@ public    static getXnYnByIndex(e) {
     }
 
     // 以 e / t 的概率返回 true
-    public  static numToBool(e, t = 1000) {
+    public  static void  numToBool(e, t = 1000) {
         return Math.random() * t < e
     }
 
     // 是否处于攻击 cd
-    public static isAtkCd(e) {
+    public static void  isAtkCd(e) {
         return e.curAckCd > 0
     }
 
@@ -188,7 +188,7 @@ public    static getXnYnByIndex(e) {
      * @param t
      * @returns {*}
      */
-    public  static subAtkCd(viewPet, t) {
+    public  static void  subAtkCd(viewPet, t) {
         let i = viewPet.curAckCd;
         if (0 != i) {
             i -= t;
@@ -201,7 +201,7 @@ public    static getXnYnByIndex(e) {
     }
 
     // 重置 攻击 cd
-    public static resetAtkCd(e, t) {
+    public static void  resetAtkCd(e, t) {
         e.curAckCd = t
     }
 
@@ -210,7 +210,7 @@ public    static getXnYnByIndex(e) {
      * @param camp
      * @return {PetView}
      */
-    public static getBackBoss(camp) {
+    public static void  getBackBoss(camp) {
         if (!this.isInitViewBoss) {
             this.isInitViewBoss = true;
             this.view_boss_red = this.system.getPetView(SheepCamp.Red);
@@ -230,7 +230,7 @@ public    static getXnYnByIndex(e) {
      * @param i
      * @param o
      */
-    public  static moveTar(e, t, i, o) {
+    public  static void  moveTar(e, t, i, o) {
         // todo 这个是什么意思 某种跳过开关吗?
         if (!o) {
             return;
