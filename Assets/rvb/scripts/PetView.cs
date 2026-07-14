@@ -5,100 +5,79 @@ using static rvb.scripts.SheepMgr;
 using static rvb.scripts.SheepModes;
 
 namespace rvb.scripts {
-    /// <summary>
-    /// 与原 JS 文件中的 BuffID 常量对象对应。
-    /// </summary>
     public enum BuffID {
         GeneralOrder = 0,
         CardBuff = 1
     }
 
     /// <summary>
-    /// GeneralOrder Buff 写入 buff.arg 的数据。
-    /// </summary>
-    public sealed class GeneralOrderBuffArg {
-        public int addHp;
-        public float addAtk;
-    }
-
-    /// <summary>
-    /// 单位数据定义。
-    /// 字段名、方法名和主要执行顺序均保持原 JS 写法。
+    /// 单位数据定义
     /// </summary>
     public class PetView {
-
         public int id = 0;
         public bool isActive = false;
         public bool isDie;
         public SheepCamp camp = (SheepCamp)0;
         public int roleId = 0;
-        public int skinId = 0;
+        public int? skinId = 0;
         public SheepRoleState state = (SheepRoleState)0;
         public SheepRoleSubState subState = (SheepRoleSubState)0;
         public int isLock = 0;
         public int frame = 0;
-        public float posBefX = 0f;
-        public float posBefY = 0f;
-        public float animX = 0f;
-        public float animY = 0f;
-        public float animZ = 0f;
-        public float posX = 0f;
-        public float posY = 0f;
+        public float posBefX = 0;
+        public float posBefY = 0;
+        public float animX = 0;
+        public float animY = 0;
+        public float animZ = 0;
+        public float posX = 0;
+        public float posY = 0;
         public int befBlockIndex = 0;
         public int blockIndex = 0;
-        public float dirX = 0f;
-        public float dirY = 0f;
+        public float dirX = 0;
+        public float dirY = 0;
         public int tarIndex = 0;
         public int tarId = 0;
-        public float curHp = 0f;
-        public float curAtkBuff = 0f;
+        public int curHp = 0;
+        public double curAtkBuff = 0;
         public int curAckFrame = 0;
-        public float curAckCd = 0f;
+        public float curAckCd = 0;
         public bool isHeavyAtk = false;
         public bool isNotConn = false;
         public bool isBoom = false;
         public SheepRoleAnimType _animType = (SheepRoleAnimType)0;
         public int animFrame = 0;
-        public float tarPosX = 0f;
-        public float tarPosY = 0f;
-        public float impulseX = 0f;
-        public float impulseY = 0f;
+        public float tarPosX = 0;
+        public float tarPosY = 0;
+        public float impulseX = 0;
+        public float impulseY = 0;
         public int readySkillId = 0;
-        public float energy = 0f;
+        public int energy = 0;
 
         public SheepRoleTypeInfo conf;
 
-        // constructor 中出现、但没有在类字段区显式声明的 JS 成员。
         public int index;
-        public List<object> uids;
+        public List<int> uids;
         public int buff_index;
         public PetView view_pet;
         public float scale;
-
-        // 请在接入项目后将 dynamic 替换为现有 Buff Attacher 的实际类型。
-        // 需要具有 addIndependBuff、updateTimer、clear 方法。
         public BuffTimeAttacher attacher;
-
         public int petId;
         public Vector3? pos;
         public Vector3? position;
 
+
         public PetView(int t) {
             index = t;
-
-            // 原 JS 先取一次配置，随后又把 conf 设为 undefined。
-            // 此处保留其执行顺序和最终结果。
             conf = SheepRoleTypeInfo.getById(roleId);
-
-            uids = new List<object>();
-            skinId = 0;
+            uids = new List<int>();
+            skinId = null;
             buff_index = -1;
             view_pet = null;
-            scale = 1f;
+            scale = 1;
             attacher = null;
-            camp = (SheepCamp)0;
-            state = (SheepRoleState)0;
-            petId = 0;
+            camp = default;
+            state = default;
+            petId = default;
             conf = null;
             pos = null;
             isDie = false;
@@ -106,24 +85,18 @@ namespace rvb.scripts {
             position = null;
         }
 
-        private static T arrOn<T>(IReadOnlyList<T> values) {
-            int index = UnityEngine.Random.Range(0, values.Count);
-            return values[index];
+        private static T arrOn<T>(T[] r) {
+            return r[UnityEngine.Random.Range(0, r.Length)];
         }
 
         public void init(int buffIndex, PetView viewPet) {
             viewPet.clear();
 
-            if (!position.HasValue) {
-                // JS 在 position 为 null 时访问 position.x 会直接报错。
-                throw new InvalidOperationException("PetView.position 尚未设置，无法执行 init。");
-            }
-
             Vector3 a = position.Value;
             int x = Mathf.FloorToInt(a.x);
             int y = Mathf.FloorToInt(a.y);
 
-            int blockIndex = sheepMgr.getBlockIndex(new Vector3(x, y, 0f));
+            int blockIndex = sheepMgr.getBlockIndex(new Vector3(x, y, 0));
 
             viewPet.id = sheepMgr.getNextPetId();
 
@@ -131,7 +104,7 @@ namespace rvb.scripts {
             viewPet.isDie = false;
             viewPet.camp = camp;
             viewPet.roleId = petId;
-            viewPet.skinId = skinId != 0 ? skinId : 0;
+            viewPet.skinId = skinId ?? 0;
             viewPet.conf = conf;
 
             if (petId != 0) {
@@ -141,7 +114,7 @@ namespace rvb.scripts {
                     viewPet.animType = SheepRoleAnimType.Idle;
                     viewPet.animFrame = UnityEngine.Random.Range(0, 10);
                 }
-                else if (conf.skillIn != 0) {
+                else if (conf.skillIn) {
                     viewPet.state = SheepRoleState.In;
                     viewPet.subState = SheepRoleSubState.In;
                     viewPet.animType = SheepRoleAnimType.In;
@@ -162,7 +135,7 @@ namespace rvb.scripts {
                     viewPet.state = conf.startState;
                     viewPet.subState = SheepRoleSubState.Spurt;
 
-                    if (conf.isSpurtAnim != 0) {
+                    if (conf.isSpurtAnim) {
                         viewPet.animType = SheepRoleAnimType.Spurt;
                         viewPet.animFrame = UnityEngine.Random.Range(0, 10);
                     }
@@ -185,6 +158,7 @@ namespace rvb.scripts {
 
             if (petId != 0 && sheepMgr.state == SheepRoomState.Start) {
                 var m = sheepMgr.getPetStartEndPos(petId, camp);
+
                 viewPet.tarPosX = m.x;
                 viewPet.tarPosY = m.y;
                 viewPet.animY = m.y;
@@ -192,24 +166,20 @@ namespace rvb.scripts {
                 viewPet.posY = m.y;
             }
 
-            var formation = SheepRoleFormation.getById(conf.formationId);
-            float d = camp == SheepCamp.Red ? 1f : -1f;
+            var l = SheepRoleFormation.getById(conf.formationId);
+            float d = camp == SheepCamp.Red ? 1 : -1;
 
-            if (
-                formation.formationType == SheepRoleFormationType.RectangleTidy ||
-                formation.formationType == SheepRoleFormationType.RectangleRandom
-            ) {
+            if (l.formationType == SheepRoleFormationType.RectangleTidy ||
+                l.formationType == SheepRoleFormationType.RectangleRandom) {
                 viewPet.dirX = d;
-                viewPet.dirY = 0f;
+                viewPet.dirY = 0;
             }
-            else if (
-                formation.formationType == SheepRoleFormationType.AngleTidy ||
-                formation.formationType == SheepRoleFormationType.AngleRandom
-            ) {
+            else if (l.formationType == SheepRoleFormationType.AngleTidy ||
+                     l.formationType == SheepRoleFormationType.AngleRandom) {
                 Vector3 g = new Vector3(
-                    d * (float)sheepMode.loongX - x,
-                    -y,
-                    0f
+                    d * sheepMode.loongX - x,
+                    0 - y,
+                    0
                 ).normalized;
 
                 viewPet.dirX = g.x;
@@ -226,7 +196,7 @@ namespace rvb.scripts {
             viewPet.tarIndex = -1;
             viewPet.tarId = -1;
             viewPet.curHp = conf.hp;
-            viewPet.curAtkBuff = 0f;
+            viewPet.curAtkBuff = 0;
 
             if (isBoom) {
                 viewPet.isConnNot = true;
@@ -239,28 +209,23 @@ namespace rvb.scripts {
             buff_index = buffIndex;
             view_pet = viewPet;
 
-            // 对应 JS：sheepMgr.buffs.forEach(group => group.forEach(buff => ...))
-            foreach (var buffGroup in sheepMgr.buffs) {
-                foreach (var buff in buffGroup) {
-                    float time = (buff.time - sheepMgr.gameStartTimerForBuff) / 1000f;
-                    int count = buff.count;
-                    addGeneralOrderBuff(viewPet, time, count);
+            foreach (dynamic e in sheepMgr.buffs.Values) {
+                foreach (dynamic item in e.Values) {
+                    double i = (item.time - sheepMgr.gameStartTimerForBuff) / 1e3;
+
+                    int r = item.count;
+
+                    addGeneralOrderBuff(viewPet, i, r);
                 }
             }
 
-            if (
-                sheepMgr.state == SheepRoomState.Start &&
-                viewPet.conf.roleType == SheepRoleType.yang_shen
-            ) {
+            if (sheepMgr.state == SheepRoomState.Start &&
+                viewPet.conf.roleType == SheepRoleType.yang_shen) {
                 sheepMgr.god_view_pets.Add(viewPet);
             }
         }
 
-        /// <summary>
-        /// e、t、n 在原 JS 中没有提供类型信息。
-        /// dynamic 只用于保持原成员访问方式；接入时可替换为项目中的实际类型。
-        /// </summary>
-        public void updateSkin(object e, SheepMgr t, SheepMgr n, float o) {
+        public void updateSkin(dynamic e, dynamic t, dynamic n, double o) {
             PetView a = this;
             PetView i = a.view_pet;
             int buffIndex = a.buff_index;
@@ -271,13 +236,13 @@ namespace rvb.scripts {
 
             bool isDie = i.isDie;
             int blockIndex = i.blockIndex;
-            float curHp = i.curHp;
+            int curHp = i.curHp;
 
             if (isDie) {
                 return;
             }
 
-            if (curHp <= 0f) {
+            if (curHp <= 0) {
                 isDie = true;
                 i.isDie = isDie;
                 i.state = SheepRoleState.Dead;
@@ -291,8 +256,8 @@ namespace rvb.scripts {
                     i.animType = SheepRoleAnimType.Dead;
                 }
 
-                if (i.conf.deadAnimType != null && i.conf.deadAnimType.Length > 0) {
-                    i.animType = (SheepRoleAnimType)arrOn(i.conf.deadAnimType);
+                if (i.conf.deadAnimType != null && i.conf.deadAnimType.Length != 0) {
+                    i.animType = arrOn(i.conf.deadAnimType);
                 }
 
                 if (i.conf.roleType == SheepRoleType.xiao_bing) {
@@ -303,29 +268,30 @@ namespace rvb.scripts {
             }
 
             if (!isDie) {
-                t.mainPreAddBlock(blockIndex, buffIndex, camp, a.conf.collideId);
+                t.mainPreAddBlock( blockIndex, buffIndex, camp, a.conf.collideId );
 
                 int S = i.conf.detectCollideR;
 
                 for (int y = -S; y <= S; ++y) {
                     for (int v = -S; v <= S; ++v) {
-                        // 原 JS 循环中没有使用 y/v，重复添加同一个 blockIndex。
                         e.comImages.mesh_block.addFrameBlockCamp(blockIndex, camp);
                     }
                 }
 
-                Vector3 B = new Vector3(i.animX, i.animY, 0f);
+                Vector3 B = new Vector3(i.animX, i.animY, 0);
+
                 a.position = B;
             }
 
             if (!isDie) {
-                int countNewBuff = (int)n.countNewBuffs[(int)camp];
+                int countNewBuff = n.countNewBuffs[(int)camp];
+
                 if (countNewBuff != 0) {
                     addGeneralOrderBuff(i, SheepConfig.buffLastTime, countNewBuff);
                 }
             }
 
-            attacher.updateTimer(o / 1000f);
+            attacher.updateTimer(o / 1e3);
         }
 
         public void onDead() {
@@ -334,53 +300,65 @@ namespace rvb.scripts {
             attacher.clear();
         }
 
-        public void onRes(object e, SheepMgr t) {
+        public void onRes(dynamic e, SheepMgr t) {
             view_pet.isActive = false;
             t.buff_del_pet(buff_index);
             sheepMgr.delPet(this);
             view_pet = null;
         }
 
-        public void addGeneralOrderBuff(PetView e, float t, int n) {
+        public void addGeneralOrderBuff(PetView e, double t, int n) {
             PetView o = this;
 
             attacher.addIndependBuff(
-                (int)BuffID.GeneralOrder,
+                BuffID.GeneralOrder,
                 t,
-                (Action<i>)(buff => {
-                    var arg = new GeneralOrderBuffArg {
-                        addHp = Mathf.FloorToInt(
-                            o.conf.hp * SheepConfig.buffHpIncreaseRate * n
-                        ),
-                        addAtk = n * SheepConfig.buffAtkIncreaseRate * 100f
-                    };
+                buff => {
+                    int addHp = (int)Math.Floor(
+                        o.conf.hp *
+                        SheepConfig.buffHpIncreaseRate *
+                        n
+                    );
 
-                    buff.arg = arg;
+                    double addAtk =
+                        n *
+                        SheepConfig.buffAtkIncreaseRate *
+                        100;
+
+                    buff.arg = (
+                        addHp: addHp,
+                        addAtk: addAtk
+                    );
+
+                    var arg = ((int addHp, double addAtk))buff.arg;
+
                     e.curHp += arg.addHp;
                     e.curAtkBuff += arg.addAtk;
-                }),
-                (Action<i>)(buff => {
-                    GeneralOrderBuffArg arg = (GeneralOrderBuffArg)buff.arg;
+                },
+                buff => {
+                    var arg = ((int addHp, double addAtk))buff.arg;
+
                     e.curHp -= arg.addHp;
                     e.curAtkBuff -= arg.addAtk;
-                })
+                }
             );
         }
 
         public bool isConnNot {
-            set => isNotConn = value;
+            set { isNotConn = value; }
         }
 
         public SheepRoleAnimType animType {
-            get => _animType;
+            get { return _animType; }
+
             set {
                 _animType = value;
                 animFrame = 0;
             }
         }
 
-        public float subCurHp(float t) {
-            float old = curHp;
+        public int subCurHp(int t) {
+            int old = curHp;
             curHp -= t;
             return old;
         }
@@ -389,14 +367,21 @@ namespace rvb.scripts {
             posBefX = posX;
             posBefY = posY;
 
-            int befIndex = Util.getIndexByXY(posBefX, posBefY);
+            int befBlockIndex = Util.getIndexByXY(
+                posBefX,
+                posBefY
+            );
 
             posX = x;
             posY = y;
 
-            int newBlockIndex = Util.getIndexByXY(posX, posY);
-            befBlockIndex = befIndex;
-            blockIndex = newBlockIndex;
+            int blockIndex = Util.getIndexByXY(
+                posX,
+                posY
+            );
+
+            this.befBlockIndex = befBlockIndex;
+            this.blockIndex = blockIndex;
         }
 
         public void clear() {
@@ -410,34 +395,34 @@ namespace rvb.scripts {
             subState = (SheepRoleSubState)0;
             isLock = 0;
             frame = 0;
-            posBefX = 0f;
-            posBefY = 0f;
-            animX = 0f;
-            animY = 0f;
-            animZ = 0f;
-            posX = 0f;
-            posY = 0f;
+            posBefX = 0;
+            posBefY = 0;
+            animX = 0;
+            animY = 0;
+            animZ = 0;
+            posX = 0;
+            posY = 0;
             befBlockIndex = 0;
             blockIndex = 0;
-            dirX = 0f;
-            dirY = 0f;
+            dirX = 0;
+            dirY = 0;
             tarIndex = 0;
             tarId = 0;
-            curHp = 0f;
-            curAtkBuff = 0f;
+            curHp = 0;
+            curAtkBuff = 0;
             curAckFrame = 0;
-            curAckCd = 0f;
+            curAckCd = 0;
             isHeavyAtk = false;
             isNotConn = false;
             isBoom = false;
             _animType = (SheepRoleAnimType)0;
             animFrame = 0;
-            tarPosX = 0f;
-            tarPosY = 0f;
-            impulseX = 0f;
-            impulseY = 0f;
+            tarPosX = 0;
+            tarPosY = 0;
+            impulseX = 0;
+            impulseY = 0;
             readySkillId = 0;
-            energy = 0f;
+            energy = 0;
         }
     }
 }
