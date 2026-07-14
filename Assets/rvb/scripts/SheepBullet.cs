@@ -30,7 +30,7 @@ namespace rvb.scripts {
 
         public static IReadOnlyList<SheepBullet> List => SheepBullets.All;
 
-        public static SheepBullet GetById(int id) {
+        public static SheepBullet getById(int id) {
             return SheepBullets.GetById(id);
         }
 
