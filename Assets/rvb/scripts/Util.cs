@@ -161,19 +161,19 @@ public    static void getXnYnByIndex(e) {
     }
 
     // 返回两点之间的距离
-    public static void  dis(x, y, x1, y1) {
-        let o = x1 - x;
-        let l = y1 - y;
-        return Math.sqrt(o * o + l * l)
+    public static double  dis(int x,int y,int x1,int y1) {
+        int o = x1 - x;
+        int l = y1 - y;
+        return Math.Sqrt(o * o + l * l);
     }
 
     // 返回两个单位之间的距离
     public  static void  disByRole(PetView e,PetView t) {
-        let i = e.posX;
-        let s = e.posY;
-        let o = t.posX - i;
-        let l = t.posY - s;
-        return Math.sqrt(o * o + l * l)
+        int i = e.posX;
+        int s = e.posY;
+        int o = t.posX - i;
+        int l = t.posY - s;
+        return Math.Sqrt(o * o + l * l);
     }
 
     // 以 e / t 的概率返回 true
