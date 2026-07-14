@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace rvb.scripts
-{
-    public sealed class SheepSkillSubBoom
-    {
+namespace rvb.scripts {
+    public sealed class SheepSkillSubBoom {
         public int id;
         public string name = string.Empty;
         public int isAnim;
@@ -21,22 +19,18 @@ namespace rvb.scripts
 
         public static IReadOnlyList<SheepSkillSubBoom> List => SheepSkillSubBooms.All;
 
-        public static SheepSkillSubBoom getById(int id)
-        {
+        public static SheepSkillSubBoom getById(int id) {
             return SheepSkillSubBooms.GetById(id);
         }
 
-        public static bool TryGetById(int id, out SheepSkillSubBoom config)
-        {
+        public static bool TryGetById(int id, out SheepSkillSubBoom config) {
             return SheepSkillSubBooms.TryGetById(id, out config);
         }
     }
 
-    public static class SheepSkillSubBooms
-    {
+    public static class SheepSkillSubBooms {
         // 小河马冲锋爆炸
-        public static readonly SheepSkillSubBoom skill_10001 = new()
-        {
+        public static readonly SheepSkillSubBoom skill_10001 = new() {
             id = 10001,
             name = "小河马冲锋爆炸",
             isAnim = 0,
@@ -53,8 +47,7 @@ namespace rvb.scripts
         };
 
         // 河马冲锋爆炸
-        public static readonly SheepSkillSubBoom skill_10002 = new()
-        {
+        public static readonly SheepSkillSubBoom skill_10002 = new() {
             id = 10002,
             name = "河马冲锋爆炸",
             isAnim = 0,
@@ -71,8 +64,7 @@ namespace rvb.scripts
         };
 
         // 小老虎落地爆炸
-        public static readonly SheepSkillSubBoom skill_10003 = new()
-        {
+        public static readonly SheepSkillSubBoom skill_10003 = new() {
             id = 10003,
             name = "小老虎落地爆炸",
             isAnim = 0,
@@ -89,8 +81,7 @@ namespace rvb.scripts
         };
 
         // 老虎落地爆炸
-        public static readonly SheepSkillSubBoom skill_10004 = new()
-        {
+        public static readonly SheepSkillSubBoom skill_10004 = new() {
             id = 10004,
             name = "老虎落地爆炸",
             isAnim = 0,
@@ -107,8 +98,7 @@ namespace rvb.scripts
         };
 
         // 大河马冲锋爆炸
-        public static readonly SheepSkillSubBoom skill_10005 = new()
-        {
+        public static readonly SheepSkillSubBoom skill_10005 = new() {
             id = 10005,
             name = "大河马冲锋爆炸",
             isAnim = 1,
@@ -125,8 +115,7 @@ namespace rvb.scripts
         };
 
         // 大河马攻击爆炸
-        public static readonly SheepSkillSubBoom skill_10006 = new()
-        {
+        public static readonly SheepSkillSubBoom skill_10006 = new() {
             id = 10006,
             name = "大河马攻击爆炸",
             isAnim = 1,
@@ -143,8 +132,7 @@ namespace rvb.scripts
         };
 
         // 新版河马冲锋爆炸
-        public static readonly SheepSkillSubBoom skill_10007 = new()
-        {
+        public static readonly SheepSkillSubBoom skill_10007 = new() {
             id = 10007,
             name = "新版河马冲锋爆炸",
             isAnim = 0,
@@ -161,8 +149,7 @@ namespace rvb.scripts
         };
 
         // 骑兵冲锋爆炸
-        public static readonly SheepSkillSubBoom skill_10008 = new()
-        {
+        public static readonly SheepSkillSubBoom skill_10008 = new() {
             id = 10008,
             name = "骑兵冲锋爆炸",
             isAnim = 1,
@@ -179,8 +166,7 @@ namespace rvb.scripts
         };
 
         // 旋转攻击爆炸
-        public static readonly SheepSkillSubBoom skill_10009 = new()
-        {
+        public static readonly SheepSkillSubBoom skill_10009 = new() {
             id = 10009,
             name = "旋转攻击爆炸",
             isAnim = 1,
@@ -197,8 +183,7 @@ namespace rvb.scripts
         };
 
         // 麒麟冲锋爆炸
-        public static readonly SheepSkillSubBoom skill_10010 = new()
-        {
+        public static readonly SheepSkillSubBoom skill_10010 = new() {
             id = 10010,
             name = "麒麟冲锋爆炸",
             isAnim = 1,
@@ -214,8 +199,7 @@ namespace rvb.scripts
             endSkill = 0
         };
 
-        public static readonly SheepSkillSubBoom[] All =
-        {
+        public static readonly SheepSkillSubBoom[] All = {
             skill_10001,
             skill_10002,
             skill_10003,
@@ -230,29 +214,23 @@ namespace rvb.scripts
 
         private static readonly Dictionary<int, SheepSkillSubBoom> Map = BuildMap();
 
-        public static SheepSkillSubBoom GetById(int id)
-        {
-            if (!Map.TryGetValue(id, out SheepSkillSubBoom config))
-            {
+        public static SheepSkillSubBoom GetById(int id) {
+            if (!Map.TryGetValue(id, out SheepSkillSubBoom config)) {
                 throw new KeyNotFoundException($"不存在 SheepSkillSubBoom 配置，ID: {id}");
             }
 
             return config;
         }
 
-        public static bool TryGetById(int id, out SheepSkillSubBoom config)
-        {
+        public static bool TryGetById(int id, out SheepSkillSubBoom config) {
             return Map.TryGetValue(id, out config);
         }
 
-        private static Dictionary<int, SheepSkillSubBoom> BuildMap()
-        {
+        private static Dictionary<int, SheepSkillSubBoom> BuildMap() {
             var map = new Dictionary<int, SheepSkillSubBoom>(All.Length);
 
-            foreach (SheepSkillSubBoom config in All)
-            {
-                if (!map.TryAdd(config.id, config))
-                {
+            foreach (SheepSkillSubBoom config in All) {
+                if (!map.TryAdd(config.id, config)) {
                     throw new InvalidOperationException($"SheepSkillSubBoom 存在重复 ID: {config.id}");
                 }
             }
