@@ -5,7 +5,7 @@ public class BulletView {
     public int roleUid = 0;
     public bool isDie = false;
     public int _bulletId = 0;
-    public int camp = 0;
+    public SheepCamp camp = 0;
     public float x = 0;
     public float y = 0;
     public float z = 0;
