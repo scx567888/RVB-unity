@@ -1287,9 +1287,9 @@ namespace rvb.scripts {
         }
     }
 
-    public void update_role_state_in(petSkin){
-        if (petSkin.conf.skillIn) {
-            let t = SheepSkill.getById(petSkin.conf.skillIn);
+    public void update_role_state_in(PetView petSkin){
+        if (petSkin.conf.skillIn!=0) {
+            SheepSkill t = SheepSkill.getById(petSkin.conf.skillIn);
             if (t.skillType == SheepSkillType.Boom) {
                 let i = SheepSkillSubBoom.getById(t.id);
                 if (1 == petSkin.animFrame) {
@@ -1316,7 +1316,7 @@ namespace rvb.scripts {
                         petSkin.animY = 0;
                     }
                     petSkin.readySkillId = i.id;
-                    petSkin.isLock = 1
+                    petSkin.isLock = true;
                 }
             }
         }
@@ -1724,7 +1724,7 @@ namespace rvb.scripts {
      * @param t
      * @param s
      */
-    public void update_role_state_start(petSkin, t, s) {
+    public void update_role_state_start(PetView petSkin,bool t,float s) {
         if (this.state == SheepRoomState.Start) {
             if (t) {
                 let t = petSkin.posX;
