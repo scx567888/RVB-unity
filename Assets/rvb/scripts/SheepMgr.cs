@@ -2293,13 +2293,13 @@ namespace rvb.scripts {
         })
     }
 
-    public void forEachBlock(IndexLen[] e,int[] t,int blockIndex,Action<int> callback) {
-        var blockByIndex = this.getBlockByIndex(e, blockIndex);
+    public void forEachBlock(IndexLen[] ee,int[] t,int blockIndex,Action<int> callback) {
+        var blockByIndex = this.getBlockByIndex(ee, blockIndex);
         var o = blockByIndex.Index;
         var l = blockByIndex.Len;
-        if (l) {
-            for (let e = 0; e < l; e++) {
-                callback(t[o + e])
+        if (l!=0) {
+            for (var e = 0; e < l; e++) {
+                callback(t[o + e]);
             }
         }
     }
