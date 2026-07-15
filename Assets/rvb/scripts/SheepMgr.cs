@@ -1,114 +1,94 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using UnityEditor.PackageManager;
+using Stopwatch = System.Diagnostics.Stopwatch;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Diagnostics;
+using static rvb.scripts.BullteCreate;
 using static rvb.scripts.SheepModes;
 
 namespace rvb.scripts {
+    /// <summary>
+    /// 羊了个羊战斗逻辑管理器。
+    ///
+    /// 说明：原 Cocos 版本把逻辑、渲染和 SheepCtl 组件混在一起。
+    /// 本版本保留战斗逻辑，渲染相关调用均为可选 dynamic 桥接或回调，
+    /// 因而可以接入你自己的 SheepCtl/渲染实现。
+    /// </summary>
     public class SheepMgr {
-        // 是否自动出兵
+        public static SheepMgr sheepMgr = new SheepMgr(false);
+        public static SheepMgr inc;
+
         public bool isAutoCall = true;
-
-        // 自动出兵计时器
-        public int autoTime = 0;
-
-        // 游戏模式 (外部会设置)
+        public float autoTime = 0f;
         public int gameMode = 0;
-
-        // 时间模式 (外部会设置)
         public int timeMode = 2;
-
-        // boss 血量 (外部会设置)
         public int loongHp = 10000;
 
-        // 红蓝 boss
-        public PetView[] boss;
+        /// <summary>可选的外部 Boss 显示/控制组件；核心逻辑不依赖它。</summary>
+        public dynamic[] boss = new dynamic[2];
 
-        // 地块比例
         public float plotRatio = 0.5f;
-
-        // 核心状态机
+        public int plotRatioIndex;
         public SheepRoomState state = SheepRoomState.Ready;
 
-        // 尝试角色 (todo 但是是哪一种? 当前在场上的? )
-        public List<PetView>[] pets;
+        /// <summary>普通单位源对象。Boss 固定占用 view_pets 的 0、1 下标，不放入此集合。</summary>
+        public HashSet<PetView>[] pets;
 
-        public int gameIndex = 0;
-        public int gameStartTimerForBuff = 0;
-        public Vector3 cameraEulerAngles = new Vector3();
-        public int endTime = 0;
-        public int[][] preBuffs;
-        public Buff[][] buffs;
+        public int gameIndex;
+        public float gameStartTimerForBuff;
+        public Vector3 cameraEulerAngles = Vector3.zero;
+        public long endTime;
+
+        public List<int>[] preBuffs;
+        public List<Buff>[] buffs;
         public int[] countNewBuffs;
         public int[] countBuffs;
         public int[] countShowBuffs;
-
-        // 反击时刻标识符 (防止多次触发反击时刻)
         public bool[] flagLongBuffs;
 
-        public int[] petStartCounts;
+        public Dictionary<int, int>[] petStartCounts;
         public List<PetView> god_view_pets;
         public PerfStat perfStat;
 
         public PetView[] view_pets;
         public BulletView[] view_bullets;
         public BulletView[] pre_view_bullets;
-        public object updateTime;
-        public List<PetView> petsAdd;
-        public object petsDel;
+
+        public long updateTime;
+
+        /// <summary>
+        /// 待加入对象需要提供 init(int, PetView)。普通单位 PetView 已满足；
+        /// 自定义 Boss/组件也可以通过 dynamic 接入。
+        /// </summary>
+        public List<dynamic> petsAdd;
+        public Stack<int> petsDel;
         public int petCount;
-        public List<int> bulletsDel;
-        public object bulletCount;
-        public object bulletId;
+
+        public Stack<int> bulletsDel;
+        public int bulletCount;
+        public int bulletId;
 
         public int[] logic_counts;
+        public List<BullteCreate> bullte_creates;
 
-        public BullteCreate[] bullte_creates;
+        /// <summary>blockIndex -> camp -> collideId -> petIndex 列表。</summary>
+        public Dictionary<int, Dictionary<int, Dictionary<int, List<int>>>> pre_blocks;
 
-        public Dictionary<int,object[]> pre_blocks;
-        public object isChangeCollsionFlags = null;
-        public object isChangeAckFlags = null;
+        public bool[][] isChangeCollsionFlags;
+        public bool[] isChangeAckFlags;
 
-        public object MaxCount = SheepConfig.line_w * SheepConfig.line_w;
-
+        public int MaxCount;
         public IndexLen[][] attackViews;
-
         public int[][] attackView1s;
-
         public IndexLen[][][] collisionViews;
-
-
         public int[][][] collisionView1s;
 
-
-        /**
-         * 红方召唤池
-         * key 是 类型 id
-         * @type {Map<Number,SheepCallInfo>}
-         */
         public Dictionary<int, SheepCallInfo> redCallInfos;
-
-        /**
-         * 蓝方召唤池
-         * key 是 类型 id
-         * @type {Map<Number,SheepCallInfo>}
-         */
         public Dictionary<int, SheepCallInfo> blueCallInfos;
 
-        /**
-         * 是否自动出兵
-         * @type {boolean}
-         */
-
-
-        // ************************ 以下待整理 **************************
-
-        /**
-         * @type ComSheepImages
-         */
-        public object comImages;
-
+        /// <summary>可选原渲染桥接对象（ComSheepImages 或你自己的实现）。</summary>
+        public dynamic comImages;
         public int cur_rob_role_index;
         public int cur_rob_bullet_index;
         public int cur_rob_role_mesh_index;
@@ -117,2299 +97,2598 @@ namespace rvb.scripts {
         public int roleMaxIndex;
         public int bulletMaxIndex;
         public int preBulletIndex;
-        public object curIndexImages;
+        public dynamic curIndexImages;
         public int redBuffCount;
         public int blueBuffCount;
-
-        // 角色 id 分配器
         public int petId;
 
-        public int plotRatioIndex;
+        /// <summary>逻辑侧 Boss 当前已结算生命。</summary>
+        public float[] bossHp;
+        public long[] bossBackStateTime;
 
-        public SheepMgr() {
-            // 是否自动出兵
-            this.isAutoCall = true;
+        /// <summary>若 SheepCtl 已自行推进 Buff 时钟，可设为 false。</summary>
+        public bool advanceGameClockInGameUpdate = true;
 
-            // 自动出兵计时器
-            this.autoTime = 0;
+        // -------------------- 可选桥接回调 --------------------
+        public Action<SheepRoomState> OnRoomStateChanged;
+        public Action OnRoomStateEnd;
+        public Action OnGameStartHook;
+        public Action<PetView> OnRoleRender;
+        public Action<BulletView> OnBulletRender;
+        public Action OnFrameBlockStart;
+        public Action<SheepMgr> OnFrameBlockEnd;
+        public Action<SheepCamp, float, float> OnBossHpChanged;
+        public Action<SheepCamp> OnCounterStarted;
+        public Action<SheepCamp> OnCounterFinished;
+        public Action<int> OnCameraShake;
+        public Func<PetView, int> AnimationFrameCountResolver;
+        public Func<SheepCamp, bool> BossShieldConsumer;
 
-            // 游戏模式 (外部会设置)
-            this.gameMode = 0;
+        public SheepMgr() : this(true) { }
 
-            // 时间模式 (外部会设置)
-            this.timeMode = 2;
-
-            // boss 血量 (外部会设置)
-            this.loongHp = 10000;
-
-            // 红蓝 boss
-            this.boss = new PetView[] { null, null };
-
-            // 地块比例
-            this.plotRatio = 0.5f;
-
-            // 核心状态机
-            this.state = SheepRoomState.Ready;
-
-            // 尝试角色 (todo 但是是哪一种? 当前在场上的? )
-            this.pets = new object[] { null, null };
-
-            this.gameIndex = 0;
-            this.gameStartTimerForBuff = 0;
-            this.cameraEulerAngles = new Vector3();
-            this.endTime = 0;
-            this.preBuffs = null;
-            this.buffs = null;
-            this.countNewBuffs = null;
-            this.countBuffs = null;
-            this.countShowBuffs = null;
-
-            // 反击时刻标识符 (防止多次触发反击时刻)
-            this.flagLongBuffs = null;
-
-            this.petStartCounts = null;
-            this.god_view_pets = null;
-            this.perfStat = null;
-
-            this.view_pets = null;
-            this.view_bullets = null;
-            this.pre_view_bullets = null;
-            this.updateTime = null;
-            this.petsAdd = null;
-            this.petsDel = null;
-            this.petCount = 0;
-            this.bulletsDel = null;
-            this.bulletCount = 0;
-            this.bulletId = 0;
-
-            this.logic_counts = null;
-
-            this.bullte_creates = null;
-
-            this.pre_blocks = null;
-            this.isChangeCollsionFlags = null;
-            this.isChangeAckFlags = null;
-
-            this.MaxCount = SheepConfig.line_w * SheepConfig.line_w;
-
-            this.attackViews = null;
-
-            this.attackView1s = null;
-
-            this.collisionViews = null;
-            for (var e = 0; e < SheepConfig.MaxGroupCount; e++) {
+        private SheepMgr(bool registerSingleton) {
+            if (registerSingleton || sheepMgr == null) {
+                sheepMgr = this;
             }
 
-            this.collisionView1s = null;
-            for (var e = 0; e < SheepConfig.MaxGroupCount; e++) {
+            pets = new[] {
+                new HashSet<PetView>(),
+                new HashSet<PetView>()
+            };
+
+            preBuffs = new[] {
+                new List<int>(),
+                new List<int>()
+            };
+            buffs = new[] {
+                new List<Buff>(),
+                new List<Buff>()
+            };
+            countNewBuffs = new int[2];
+            countBuffs = new int[2];
+            countShowBuffs = new int[2];
+            flagLongBuffs = new bool[2];
+
+            petStartCounts = new[] {
+                new Dictionary<int, int>(),
+                new Dictionary<int, int>()
+            };
+            god_view_pets = new List<PetView>();
+            perfStat = new PerfStat {
+                redNums = new int[16],
+                blueNums = new int[16]
+            };
+
+            view_pets = new PetView[SheepConfig.MaxPetCount];
+            view_bullets = new BulletView[SheepConfig.MaxBulletCount];
+            pre_view_bullets = new BulletView[SheepConfig.MaxBulletCount];
+
+            petsAdd = new List<dynamic>();
+            petsDel = new Stack<int>();
+            bulletsDel = new Stack<int>();
+            logic_counts = new[] { 1, 1 };
+            bullte_creates = new List<BullteCreate>();
+            pre_blocks = new Dictionary<int, Dictionary<int, Dictionary<int, List<int>>>>();
+
+            MaxCount = SheepConfig.line_w * SheepConfig.line_h;
+            attackViews = new[] {
+                new IndexLen[MaxCount],
+                new IndexLen[MaxCount]
+            };
+            attackView1s = new[] {
+                new int[SheepConfig.MaxPetCount],
+                new int[SheepConfig.MaxPetCount]
+            };
+
+            collisionViews = new IndexLen[2][][];
+            collisionView1s = new int[2][][];
+            for (int camp = 0; camp < 2; camp++) {
+                collisionViews[camp] = new IndexLen[SheepConfig.MaxGroupCount][];
+                collisionView1s[camp] = new int[SheepConfig.MaxGroupCount][];
+                for (int group = 0; group < SheepConfig.MaxGroupCount; group++) {
+                    collisionViews[camp][group] = new IndexLen[MaxCount];
+                    collisionView1s[camp][group] = new int[SheepConfig.MaxPetCount];
+                }
             }
 
-            /**
-             * 红方召唤池
-             * key 是 类型 id
-             * @type {Map<Number,SheepCallInfo>}
-             */
-            this.redCallInfos = null;
+            redCallInfos = new Dictionary<int, SheepCallInfo>();
+            blueCallInfos = new Dictionary<int, SheepCallInfo>();
+            bossHp = new[] { (float)loongHp, (float)loongHp };
+            bossBackStateTime = new long[2];
 
-            /**
-             * 蓝方召唤池
-             * key 是 类型 id
-             * @type {Map<Number,SheepCallInfo>}
-             */
-            this.blueCallInfos = null;
-
-            /**
-             * 是否自动出兵
-             * @type {boolean}
-             */
-
-
-            // ************************ 以下待整理 **************************
-
-            /**
-             * @type ComSheepImages
-             */
-            this.comImages = null;
-
-            this.cur_rob_role_index = 0;
-            this.cur_rob_bullet_index = 0;
-            this.cur_rob_role_mesh_index = 0;
-            this.cur_rob_bullet_mesh_index = 0;
-            this.cur_rob_star_mesh_index = 0;
-            this.roleMaxIndex = 0;
-            this.bulletMaxIndex = 0;
-            this.preBulletIndex = 0;
-            this.curIndexImages = 0;
-            this.redBuffCount = 0;
-            this.blueBuffCount = 0;
-
-            // 角色 id 分配器
-            this.petId = 0;
-
-
-            // 绑定 system
             Util.system = this;
             UtilFind.system = this;
             UtilAck.system = this;
+            inc = this;
+        }
+
+        private static long NowMs() => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+        private static void IgnoreExternal(Action action) {
+            try {
+                action?.Invoke();
+            }
+            catch {
+                // 外部显示桥接是可选的，缺少成员时不应中断核心逻辑。
+            }
+        }
+
+        private static T ReadExternal<T>(Func<T> getter, T fallback = default) {
+            try {
+                return getter != null ? getter() : fallback;
+            }
+            catch {
+                return fallback;
+            }
+        }
+
+        private static int CampIndex(SheepCamp camp) => (int)camp;
+
+        private static int RoleTypeIndex(SheepRoleType roleType) => (int)roleType;
+
+        private void EnsurePerfCapacity(int roleIndex) {
+            if (roleIndex < 0) return;
+            if (roleIndex >= perfStat.redNums.Length) {
+                Array.Resize(ref perfStat.redNums, roleIndex + 4);
+            }
+            if (roleIndex >= perfStat.blueNums.Length) {
+                Array.Resize(ref perfStat.blueNums, roleIndex + 4);
+            }
+        }
+
+        private void RaiseRoomEnd() {
+            OnRoomStateEnd?.Invoke();
         }
 
         public void onGameStart() {
-            this.gameStartTimerForBuff = 0;
-            this.clearPets();
-            this.clearCallPets();
-            this.petStartCounts.forEach((function(e, t) {
-                e.clear();
-            }));
-            this.preBuffs = new int[][] {
-                new int[] { },
-                new int[] { },
-            };
-            this.buffs = new Buff[][] {
-                new Buff[] { },
-                new Buff[] { },
-            };
-            ;
-            this.countNewBuffs = new int[] { 0, 0 };
-            this.countBuffs = new int[] { 0, 0 };
-            this.countShowBuffs = new int[] { 0, 0 };
-            this.flagLongBuffs = new bool[] { false, false };
-            // todo 待处理
-            // var e = SheepCtl.instance;
-            // e.comMatch.updateWinloops();
+            gameStartTimerForBuff = 0f;
+            autoTime = 0f;
+            clearPets();
+            clearCallPets();
+            foreach (Dictionary<int, int> counts in petStartCounts) {
+                counts.Clear();
+            }
+            foreach (List<int> list in preBuffs) list.Clear();
+            foreach (List<Buff> list in buffs) list.Clear();
+            Array.Clear(countNewBuffs, 0, countNewBuffs.Length);
+            Array.Clear(countBuffs, 0, countBuffs.Length);
+            Array.Clear(countShowBuffs, 0, countShowBuffs.Length);
+            Array.Clear(flagLongBuffs, 0, flagLongBuffs.Length);
+            Array.Clear(bossBackStateTime, 0, bossBackStateTime.Length);
+            bossHp[0] = loongHp;
+            bossHp[1] = loongHp;
+            OnGameStartHook?.Invoke();
         }
 
         public void onGameRun() {
-            this.god_view_pets.forEach((function(e) {
-                e.state = SheepRoleState.Palm, e.subState = SheepRoleSubState.Palm, e.animType =
-                    SheepRoleAnimType.Palm, e.readySkillId = 70002
-            }));
+            foreach (PetView pet in god_view_pets) {
+                if (pet == null || pet.isDie) continue;
+                pet.state = SheepRoleState.Palm;
+                pet.subState = SheepRoleSubState.Palm;
+                pet.animType = SheepRoleAnimType.Palm;
+                pet.readySkillId = 70002;
+            }
         }
 
         public void onGameEnd() {
-            this.god_view_pets = new PetView[] { };
+            god_view_pets.Clear();
         }
 
-        public void setState(SheepRoomState e) {
-            this.state = e;
-            Debug.Log("房间状态改变" + e);
-            // todo 待处理
-            // eventBus.emit(EventType.RoomState, {state: e})
+        public void setState(SheepRoomState newState) {
+            state = newState;
+            Debug.Log("房间状态改变: " + newState);
+            OnRoomStateChanged?.Invoke(newState);
         }
 
-        public void addPet(PetView e, SheepCamp camp) {
-            this.pets[(int)camp].Add(e);
-            if (camp == SheepCamp.Red) {
-                this.perfStat.redNums[(int)e.conf.roleType]++;
+        public void addPet(PetView pet, SheepCamp camp) {
+            if (pet == null) return;
+            pets[CampIndex(camp)].Add(pet);
+            int roleIndex = RoleTypeIndex(pet.conf.roleType);
+            EnsurePerfCapacity(roleIndex);
+            if (camp == SheepCamp.Red) perfStat.redNums[roleIndex]++;
+            else perfStat.blueNums[roleIndex]++;
+        }
+
+        public void delPet(PetView pet) {
+            if (pet == null) return;
+            bool removed = pets[0].Remove(pet) | pets[1].Remove(pet);
+            if (!removed || pet.conf == null) return;
+            int roleIndex = RoleTypeIndex(pet.conf.roleType);
+            EnsurePerfCapacity(roleIndex);
+            if (pet.camp == SheepCamp.Red) {
+                perfStat.redNums[roleIndex] = Math.Max(0, perfStat.redNums[roleIndex] - 1);
             }
             else {
-                this.perfStat.blueNums[(int)e.conf.roleType]++;
-            }
-        }
-
-        public void delPet(PetView e) {
-            this.pets[(int)SheepCamp.Red].Remove(e);
-            this.pets[(int)SheepCamp.Blue].Remove(e);
-            if (e.camp == SheepCamp.Red) {
-                this.perfStat.redNums[(int)e.conf.roleType]--;
-            }
-            else {
-                this.perfStat.blueNums[(int)e.conf.roleType]--;
+                perfStat.blueNums[roleIndex] = Math.Max(0, perfStat.blueNums[roleIndex] - 1);
             }
         }
 
         public void clearPets() {
-            this.pets[(int)SheepCamp.Red].Clear();
-            this.pets[(int)SheepCamp.Blue].Clear();
-            this.perfStat.redNums = new int[] { 0, 0, 0, 0, 0, 0, 0, 0 };
-            this.perfStat.blueNums = new int[] { 0, 0, 0, 0, 0, 0, 0, 0 };
+            pets[0].Clear();
+            pets[1].Clear();
+            perfStat.redNums = new int[Math.Max(16, perfStat.redNums?.Length ?? 0)];
+            perfStat.blueNums = new int[Math.Max(16, perfStat.blueNums?.Length ?? 0)];
         }
 
-        public int getBlockIndex(Vector3 e) {
-            var t = Math.Floor(e.x / SheepConfig.d + SheepConfig.w / SheepConfig.d / 2);
-            var o = Math.Floor(e.y / SheepConfig.d + SheepConfig.h / SheepConfig.d / 2);
-            return (int)(t * SheepConfig.line_w + o);
+        public int getBlockIndex(Vector3 position) {
+            int xn = Mathf.FloorToInt(position.x / SheepConfig.d + SheepConfig.w / (float)SheepConfig.d / 2f);
+            int yn = Mathf.FloorToInt(position.y / SheepConfig.d + SheepConfig.h / (float)SheepConfig.d / 2f);
+            return Util.getIndexByXnYn(xn, yn);
         }
 
-        public int getNextPetId() {
-            return ++this.petId;
-        }
+        public int getNextPetId() => ++petId;
 
-        public int rob_role(int t) {
-            var old = this.cur_rob_role_index;
-            this.cur_rob_role_index += t;
+        public int rob_role(int count) {
+            int old = cur_rob_role_index;
+            cur_rob_role_index += count;
             return old;
         }
 
-        public int rob_bullet(int t) {
-            var old = this.cur_rob_bullet_index;
-            this.cur_rob_bullet_index += t;
+        public int rob_bullet(int count) {
+            int old = cur_rob_bullet_index;
+            cur_rob_bullet_index += count;
             return old;
         }
 
-        public int rob_pre_bullet(int t) {
-            var old = this.preBulletIndex;
-            this.preBulletIndex += t;
+        public int rob_pre_bullet(int count) {
+            int old = preBulletIndex;
+            preBulletIndex += count;
             return old;
         }
 
         public void clearPetViews() {
-            foreach (var element in this.view_pets) {
-                element.clear();
+            for (int i = 0; i < view_pets.Length; i++) {
+                view_pets[i]?.clear();
             }
         }
 
-        /**
-    *
-    * @param petIndex
-    * @returns {PetView}
-    */
         public PetView getPetView(int petIndex) {
-            if (petIndex < 0 || petIndex >= SheepConfig.MaxPetCount) {
-                return null;
-            }
-
-            var pet = this.view_pets[petIndex];
+            if (petIndex < 0 || petIndex >= SheepConfig.MaxPetCount) return null;
+            PetView pet = view_pets[petIndex];
             if (pet == null) {
                 pet = new PetView(petIndex);
-                this.view_pets[petIndex] = pet;
+                view_pets[petIndex] = pet;
             }
-
             return pet;
         }
 
         public void clearViewBullets() {
-            foreach (var viewElement in this.view_bullets) {
-                viewElement.clear();
-            }
-
-            foreach (var viewElement in this.pre_view_bullets) {
-                viewElement.clear();
-            }
+            for (int i = 0; i < view_bullets.Length; i++) view_bullets[i]?.clear();
+            for (int i = 0; i < pre_view_bullets.Length; i++) pre_view_bullets[i]?.clear();
         }
 
-        /**
-     *
-     * @param e
-     * @returns {BulletView}
-     */
-        public BulletView getBulletView(int e) {
-            if (e < 0 || e >= SheepConfig.MaxBulletCount) {
-                return null;
-            }
-
-            var bullet = this.view_bullets[e];
+        public BulletView getBulletView(int index) {
+            if (index < 0 || index >= SheepConfig.MaxBulletCount) return null;
+            BulletView bullet = view_bullets[index];
             if (bullet == null) {
                 bullet = new BulletView();
-                this.view_bullets[e] = bullet;
+                view_bullets[index] = bullet;
             }
-
             return bullet;
         }
 
-        /**
-     *
-     * @param e
-     * @returns {BulletView}
-     */
-        public BulletView getBulletPreView(int e) {
-            if (e < 0 || e >= SheepConfig.MaxBulletCount) {
-                return null;
-            }
-
-            var bullet = this.pre_view_bullets[e];
+        public BulletView getBulletPreView(int index) {
+            if (index < 0 || index >= SheepConfig.MaxBulletCount) return null;
+            BulletView bullet = pre_view_bullets[index];
             if (bullet == null) {
                 bullet = new BulletView();
-                this.pre_view_bullets[e] = bullet;
+                pre_view_bullets[index] = bullet;
             }
-
             return bullet;
         }
 
-        /**
-     *
-     * @param e
-     * @param bulletId
-     * @param view_pet {PetView}
-     * @param view_tar_pet {PetView}
-     * @param l
-     */
-        public void copyBulletPreView(int e, int bulletId, PetView view_pet, PetView view_tar_pet, Info l = null) {
-            var n = SheepBullet.getById(bulletId);
-            var r = view_pet != null ? view_pet.camp == SheepCamp.Red ? n.startOffsetX : -n.startOffsetX : 0;
-            var preBullet = this.getBulletPreView(e);
-            preBullet.bulletId = bulletId;
-            preBullet.roleUid = view_pet != null ? view_pet.id : 0;
-            preBullet.roleIndex = view_pet != null ? view_pet.index : 0;
+        public void copyBulletPreView(
+            int index,
+            int newBulletId,
+            PetView viewPet,
+            PetView targetPet,
+            Info info = null
+        ) {
+            SheepBullet config = SheepBullet.getById(newBulletId);
+            float startOffsetX = viewPet != null
+                ? (viewPet.camp == SheepCamp.Red ? config.startOffsetX : -config.startOffsetX)
+                : 0f;
 
+            BulletView preBullet = getBulletPreView(index);
+            if (preBullet == null) return;
 
-            preBullet.camp = view_pet != null ? view_pet.camp : l.camp;
-            if (view_tar_pet != null && 0 == view_tar_pet.roleId) {
-                preBullet.tarRoleIndex = view_tar_pet.index;
-            }
-            else {
-                preBullet.tarRoleIndex = -1;
-            }
+            preBullet.clear();
+            preBullet.bulletId = newBulletId;
+            preBullet.roleUid = viewPet?.id ?? 0;
+            preBullet.roleIndex = viewPet?.index ?? 0;
+            preBullet.camp = viewPet != null ? viewPet.camp : (info?.camp ?? SheepCamp.Red);
+            preBullet.tarRoleIndex = targetPet != null && targetPet.roleId == 0 ? targetPet.index : -1;
 
-            if (n.moveType == SheepBulletMoveType.Fixed) {
-                var t = l && l.startX || view_pet && view_pet.posX || 0;
-                preBullet.x = t;
-                var s = l && l.startY || view_pet && view_pet.posY || 0;
-                preBullet.y = s;
-
-                preBullet.startY = n.startOffsetY;
-                preBullet.z = 0 + n.startOffsetZ;
-                preBullet.dirX = 0;
-                preBullet.dirY = 0;
-                preBullet.dirZ = 1;
-            }
-            else if (n.moveType == SheepBulletMoveType.LineDir) {
-                preBullet.x = view_pet.posX + r;
-                preBullet.y = view_pet.posY + n.startOffsetY;
-                preBullet.z = 0 + n.startOffsetZ;
-                preBullet.dirX = view_pet.dirX;
-                preBullet.dirY = view_pet.dirY;
-            }
-            else if (n.moveType == SheepBulletMoveType.CurvePosFrame) {
-                var t = view_pet != null ? view_pet.posX : l.startX;
-                var s = view_pet != null ? view_pet.posY : l.startY;
-                var c = view_tar_pet != null ? view_tar_pet.posX : view_pet.tarPosX;
-                var f = view_tar_pet != null ? view_tar_pet.posY : view_pet.tarPosY;
-                preBullet.x = t + r;
-                preBullet.y = s + n.startOffsetY;
-                preBullet.z = 0 + n.startOffsetZ;
-                preBullet.startX = t + r;
-                preBullet.startY = s + n.startOffsetY;
-                preBullet.startZ = 0 + n.startOffsetZ;
-                preBullet.endX = c;
-                preBullet.endY = f;
-                preBullet.endZ = 0 + n.endOffsetZ;
-                preBullet.dirX = 0;
-                preBullet.dirY = 0;
-                preBullet.z = 1;
-            }
-            else if (n.moveType == SheepBulletMoveType.DirAngle) {
-                preBullet.x = view_pet.posX + r;
-                preBullet.y = view_pet.posY + n.startOffsetY;
-                preBullet.z = 0 + n.startOffsetZ;
-                preBullet.dirX = l.dirX;
-                preBullet.dirY = l.dirY;
-                preBullet.dirZ = l.dirZ;
-            }
-            else if (n.moveType == SheepBulletMoveType.RadiusAngle) {
-                preBullet.x = view_pet.posX + r;
-                preBullet.y = view_pet.posY + n.startOffsetY;
-                preBullet.z = 0 + n.startOffsetZ;
-                preBullet.startX = view_pet.posX + r;
-                preBullet.startY = view_pet.posY + n.startOffsetY;
-                preBullet.startZ = 0 + n.startOffsetZ;
-                preBullet.dirX = l.dirX;
-                preBullet.dirY = l.dirY;
-                preBullet.dirZ = l.dirZ;
-                preBullet.angle = l.angle;
-            }
-            else if (n.moveType == SheepBulletMoveType.LineDirEndPos) {
-                preBullet.x = l.startX;
-                preBullet.y = l.startY;
-                preBullet.z = l.startZ;
-                preBullet.startX = l.startX;
-                preBullet.startY = l.startY;
-                preBullet.startZ = l.startZ;
-                preBullet.endX = l.endX;
-                preBullet.endY = l.endY;
-                preBullet.endZ = l.endZ;
-                if (l.dirX || l.dirY || l.dirZ) {
-                    preBullet.dirX = l.dirX;
-                    preBullet.dirY = l.dirY;
-                    preBullet.dirZ = l.dirZ;
+            SheepBulletMoveType moveType = (SheepBulletMoveType)config.moveType;
+            switch (moveType) {
+                case SheepBulletMoveType.Fixed: {
+                    preBullet.x = info != null ? info.startX : (viewPet?.posX ?? 0f);
+                    preBullet.y = info != null ? info.startY : (viewPet?.posY ?? 0f);
+                    preBullet.startX = preBullet.x;
+                    preBullet.startY = preBullet.y;
+                    preBullet.startZ = config.startOffsetZ;
+                    preBullet.z = config.startOffsetZ;
+                    preBullet.dirX = 0f;
+                    preBullet.dirY = 0f;
+                    preBullet.dirZ = 1f;
+                    break;
                 }
-                else {
-                    var t = l.endX - l.startX;
-                    var i = l.endY - l.startY;
-                    var s = l.endZ - l.startZ;
-                    var o = Math.Sqrt(t * t + i * i);
-                    preBullet.dirX = (float)(t / o);
-                    preBullet.dirY = (float)(i / o);
-                    preBullet.dirZ = (float)(s / o);
+                case SheepBulletMoveType.LineDir: {
+                    if (viewPet == null) throw new InvalidOperationException("LineDir 子弹需要 viewPet");
+                    preBullet.x = viewPet.posX + startOffsetX;
+                    preBullet.y = viewPet.posY + config.startOffsetY;
+                    preBullet.z = config.startOffsetZ;
+                    preBullet.startX = preBullet.x;
+                    preBullet.startY = preBullet.y;
+                    preBullet.startZ = preBullet.z;
+                    preBullet.dirX = viewPet.dirX;
+                    preBullet.dirY = viewPet.dirY;
+                    break;
+                }
+                case SheepBulletMoveType.CurvePosFrame: {
+                    if (viewPet == null && info == null) {
+                        throw new InvalidOperationException("CurvePosFrame 子弹需要 viewPet 或 info");
+                    }
+                    float startX = viewPet != null ? viewPet.posX : info.startX;
+                    float startY = viewPet != null ? viewPet.posY : info.startY;
+                    float endX = targetPet != null
+                        ? targetPet.posX
+                        : (info != null && info.hasEnd
+                            ? info.endX
+                            : (viewPet != null ? viewPet.tarPosX : startX));
+                    float endY = targetPet != null
+                        ? targetPet.posY
+                        : (info != null && info.hasEnd
+                            ? info.endY
+                            : (viewPet != null ? viewPet.tarPosY : startY));
+
+                    preBullet.x = startX + startOffsetX;
+                    preBullet.y = startY + config.startOffsetY;
+                    preBullet.z = config.startOffsetZ;
+                    preBullet.startX = preBullet.x;
+                    preBullet.startY = preBullet.y;
+                    preBullet.startZ = preBullet.z;
+                    preBullet.endX = endX;
+                    preBullet.endY = endY;
+                    preBullet.endZ = config.endOffsetZ;
+                    preBullet.dirX = 0f;
+                    preBullet.dirY = 0f;
+                    preBullet.dirZ = 1f;
+                    break;
+                }
+                case SheepBulletMoveType.DirAngle: {
+                    if (viewPet == null || info == null) {
+                        throw new InvalidOperationException("DirAngle 子弹需要 viewPet 和 info");
+                    }
+                    preBullet.x = viewPet.posX + startOffsetX;
+                    preBullet.y = viewPet.posY + config.startOffsetY;
+                    preBullet.z = config.startOffsetZ;
+                    preBullet.startX = preBullet.x;
+                    preBullet.startY = preBullet.y;
+                    preBullet.startZ = preBullet.z;
+                    preBullet.dirX = info.dirX;
+                    preBullet.dirY = info.dirY;
+                    preBullet.dirZ = info.dirZ;
+                    break;
+                }
+                case SheepBulletMoveType.RadiusAngle: {
+                    if (viewPet == null || info == null) {
+                        throw new InvalidOperationException("RadiusAngle 子弹需要 viewPet 和 info");
+                    }
+                    preBullet.x = viewPet.posX + startOffsetX;
+                    preBullet.y = viewPet.posY + config.startOffsetY;
+                    preBullet.z = config.startOffsetZ;
+                    preBullet.startX = preBullet.x;
+                    preBullet.startY = preBullet.y;
+                    preBullet.startZ = preBullet.z;
+                    preBullet.dirX = info.dirX;
+                    preBullet.dirY = info.dirY;
+                    preBullet.dirZ = info.dirZ;
+                    preBullet.angle = info.angle;
+                    break;
+                }
+                case SheepBulletMoveType.LineDirEndPos:
+                case SheepBulletMoveType.LinePosFrame: {
+                    if (info == null) {
+                        throw new InvalidOperationException(moveType + " 子弹需要 info");
+                    }
+                    preBullet.x = info.startX;
+                    preBullet.y = info.startY;
+                    preBullet.z = info.startZ;
+                    preBullet.startX = info.startX;
+                    preBullet.startY = info.startY;
+                    preBullet.startZ = info.startZ;
+                    preBullet.endX = info.endX;
+                    preBullet.endY = info.endY;
+                    preBullet.endZ = info.endZ;
+
+                    if (moveType == SheepBulletMoveType.LineDirEndPos &&
+                        (Mathf.Abs(info.dirX) > Mathf.Epsilon ||
+                         Mathf.Abs(info.dirY) > Mathf.Epsilon ||
+                         Mathf.Abs(info.dirZ) > Mathf.Epsilon)) {
+                        preBullet.dirX = info.dirX;
+                        preBullet.dirY = info.dirY;
+                        preBullet.dirZ = info.dirZ;
+                    }
+                    else {
+                        float dx = info.endX - info.startX;
+                        float dy = info.endY - info.startY;
+                        float dz = info.endZ - info.startZ;
+                        float length = Mathf.Sqrt(dx * dx + dy * dy + dz * dz);
+                        if (length > Mathf.Epsilon) {
+                            preBullet.dirX = dx / length;
+                            preBullet.dirY = dy / length;
+                            preBullet.dirZ = dz / length;
+                        }
+                    }
+                    break;
+                }
+                default: {
+                    if (viewPet == null) throw new InvalidOperationException("该子弹类型需要 viewPet");
+                    preBullet.x = viewPet.posX + startOffsetX;
+                    preBullet.y = viewPet.posY + config.startOffsetY;
+                    preBullet.z = config.startOffsetZ;
+                    preBullet.startX = preBullet.x;
+                    preBullet.startY = preBullet.y;
+                    preBullet.startZ = preBullet.z;
+                    preBullet.dirX = 0f;
+                    preBullet.dirY = 0f;
+                    preBullet.dirZ = 1f;
+                    break;
                 }
             }
-            else if (n.moveType == SheepBulletMoveType.LinePosFrame) {
-                preBullet.x = l.startX;
-                preBullet.y = l.startY;
-                preBullet.z = l.startZ;
-                preBullet.startX = l.startX;
-                preBullet.startY = l.startY;
-                preBullet.startZ = l.startZ;
-                preBullet.endX = l.endX;
-                preBullet.endY = l.endY;
-                preBullet.endZ = l.endZ;
-                var t = l.endX - l.startX;
-                var i = l.endY - l.startY;
-                var s = l.endZ - l.startZ;
-                var o = Math.Sqrt(t * t + i * i);
-                preBullet.dirX = (float)(t / o);
-                preBullet.dirY = (float)(i / o);
-                preBullet.dirZ = (float)(s / o);
-            }
-            else {
-                preBullet.x = view_pet.posX + r;
-                preBullet.y = view_pet.posY + n.startOffsetY;
-                preBullet.z = 0 + n.startOffsetZ;
-                preBullet.dirX = 0;
-                preBullet.dirY = 0;
-                preBullet.dirZ = 1;
-            }
 
-            preBullet.atkVue = view_pet != null ? view_pet.conf.atk : l.atk;
+            preBullet.atkVue = viewPet != null
+                ? viewPet.conf.atk
+                : (info?.atk ?? 0f);
             preBullet.frame = 0;
+            preBullet.isDie = false;
         }
-        
-        /**
-  *
-  * @param sheepCtl {SheepCtl}
-  * @returns {Promise<void>}
-  */
-        public void game_run(object sheepCtl) {
 
-            // 清理游戏数据
-            this.game_clear();
+        public async Task game_run(dynamic sheepCtl, CancellationToken cancellationToken = default) {
+            game_clear();
+            mainClearBlocks();
 
-            this.mainClearBlocks();
+            int runGameIndex = gameIndex;
+            updateTime = NowMs();
 
-            let i = sheepMgr.gameIndex;
-
-            this.updateTime = Date.now();
-
-            //只有 游戏处于运行中 或者 局数未改变
-            while (i === sheepMgr.gameIndex && (sheepMgr.state == SheepRoomState.Run || sheepMgr.state == SheepRoomState.Start)) {
-
+            while (!cancellationToken.IsCancellationRequested &&
+                   runGameIndex == gameIndex &&
+                   (state == SheepRoomState.Run || state == SheepRoomState.Start)) {
                 try {
-                    let lastUpdateTime = this.updateTime
-                    this.updateTime = Date.now();
-
-                    let diff = this.updateTime - lastUpdateTime;
+                    long lastUpdateTime = updateTime;
+                    updateTime = NowMs();
+                    long diff = updateTime - lastUpdateTime;
 
                     if (diff >= 100) {
-                        console.warn("主线程更新逻辑耗时过长: " + diff + "ms");
+                        Debug.LogWarning("主线程更新逻辑耗时过长: " + diff + "ms");
                     }
 
                     if (diff < 33) {
-                        await new Promise(e => setTimeout(e, 33 - diff));
+                        await Task.Delay((int)(33 - diff), cancellationToken);
                     }
 
-                    if (this.comImages.isHasFreeImage()) {
-                        let o = Date.now() - lastUpdateTime;
-                        await this.game_update(sheepMgr, sheepCtl, o);
+                    bool canStep = true;
+                    if (comImages != null) {
+                        canStep = ReadExternal(() => (bool)comImages.isHasFreeImage(), true);
                     }
 
-                } catch (e) {
-                    console.error("主线程更新逻辑错误:", e);
+                    if (canStep) {
+                        float deltaMs = Mathf.Max(1f, NowMs() - lastUpdateTime);
+                        game_update(this, sheepCtl, deltaMs);
+                    }
+                }
+                catch (OperationCanceledException) {
+                    return;
+                }
+                catch (Exception exception) {
+                    Debug.LogError("主线程更新逻辑错误: " + exception);
                     return;
                 }
             }
         }
-        
-        /**
-     *
-     * @param sheepMgr {SheepMgr}
-     * @param sheepCtl {SheepCtl}
-     * @param i 时间
-     * @returns {Promise<void>}
-     */
-        public void game_update(SheepMgr sheepMgr,object sheepCtl,float i) {
+
+        public void game_update(SheepMgr manager, dynamic sheepCtl, float deltaMs) {
+            if (manager == null) manager = this;
             try {
-                // 处理召唤兵
-                this.consume(sheepCtl, i);
-
-                this.buff_add_pets();
-
-                this.buff_add_bullets();
-
-                // 要处理的总数量
-                let n = sheepMgr.pets[SheepCamp.Red].size + sheepMgr.pets[SheepCamp.Blue].size
-                if (n <= 0) {
-                    return
+                if (advanceGameClockInGameUpdate && manager.state == SheepRoomState.Run) {
+                    manager.gameStartTimerForBuff += deltaMs;
                 }
 
-                this.cur_rob_role_index = 0;
-                this.cur_rob_bullet_index = 0;
+                consume(sheepCtl, deltaMs);
+                buff_add_pets();
+                buff_add_bullets();
 
-                this.curIndexImages = this.comImages.startAdd();
+                int unitCount = manager.pets[0].Count + manager.pets[1].Count;
+                if (unitCount <= 0 && manager.petCount <= 2) {
+                    update_merge_workers(manager, sheepCtl, deltaMs);
+                    return;
+                }
 
-                // 执行主逻辑
-                this.role_logic();
+                cur_rob_role_index = 0;
+                cur_rob_bullet_index = 0;
 
-                this.comImages.endAdd();
+                if (comImages != null) {
+                    curIndexImages = ReadExternal<dynamic>(() => comImages.startAdd(), null);
+                }
 
-                this.update_merge_workers(sheepMgr, sheepCtl, i);
+                role_logic();
 
-            } catch (err) {
-                console.error("update逻辑错误", err);
-                throw err;
+                if (comImages != null) {
+                    IgnoreExternal(() => comImages.endAdd());
+                }
+
+                update_merge_workers(manager, sheepCtl, deltaMs);
+            }
+            catch (Exception exception) {
+                Debug.LogError("update逻辑错误: " + exception);
+                throw;
             }
         }
-        
-        /**
-     *
-     * @param sheepMgr {SheepMgr}
-     * @param sheepCtl {SheepCtl}
-     * @param dt
-     */
-    public void update_merge_workers(SheepMgr sheepMgr,object sheepCtl,float dt) {
-            
-        var isEnd = false;
 
-        const now = Date.now();
+        private int ResolveAnimationFrameCount(PetView source, dynamic sheepCtl) {
+            if (source?.view_pet == null) return 1;
+            if (AnimationFrameCountResolver != null) {
+                int count = AnimationFrameCountResolver(source.view_pet);
+                if (count > 0) return count;
+            }
 
-        this.mainClearBlocks()
-        sheepCtl.comImages.mesh_block.onFrameUpdateStart();
-
-
-        if (sheepMgr.endTime && sheepMgr.endTime < Date.now()) {
-            eventBus.emit(EventType.RoomStateEnd);
-            isEnd = true
-            sheepMgr.endTime = 0
-            return;
+            return ReadExternal(() => {
+                int camp = CampIndex(source.camp);
+                int skin = source.skinId ?? 0;
+                int anim = (int)source.view_pet.animType;
+                dynamic frames = sheepCtl.comImages.roles_framess[camp][skin][anim];
+                return Math.Max(1, Convert.ToInt32(frames.length));
+            }, 1);
         }
 
+        public void update_merge_workers(SheepMgr manager, dynamic sheepCtl, float deltaMs) {
+            if (manager == null) manager = this;
+            long now = NowMs();
 
-        sheepMgr.countNewBuffs = [0, 0];
-        sheepMgr.countBuffs = [0, 0];
-        sheepMgr.countShowBuffs = [0, 0];
+            mainClearBlocks();
+            OnFrameBlockStart?.Invoke();
+            IgnoreExternal(() => sheepCtl.comImages.mesh_block.onFrameUpdateStart());
 
-        // console.log(sheepMgr.buffs)
-        sheepMgr.buffs.forEach((r, s) => {
-
-            if (r.length && r[0].time < sheepMgr.gameStartTimerForBuff) {
-                r.shift();
-                sheepMgr.buffs[s] = r;
-            }
-
-            for (const o of r) {
-                sheepMgr.countBuffs[s] += o.count || SheepConfig.counterBuffNumber;
-                sheepMgr.countShowBuffs[s] += o.count
-            }
-
-        });
-
-        sheepMgr.preBuffs.forEach((r, s) => {
-            if (!r.length) {
+            if (manager.endTime > 0 && manager.endTime < now) {
+                manager.endTime = 0;
+                RaiseRoomEnd();
                 return;
             }
 
-            let sum = 0;
-            let hasZero = false;
+            Array.Clear(manager.countNewBuffs, 0, 2);
+            Array.Clear(manager.countBuffs, 0, 2);
+            Array.Clear(manager.countShowBuffs, 0, 2);
 
-            for (const f of r) {
-                if (0 == f) {
-                    hasZero = true;
+            for (int camp = 0; camp < 2; camp++) {
+                List<Buff> activeBuffs = manager.buffs[camp];
+                while (activeBuffs.Count > 0 && activeBuffs[0].time < manager.gameStartTimerForBuff) {
+                    activeBuffs.RemoveAt(0);
                 }
-                sum += f
+
+                foreach (Buff buff in activeBuffs) {
+                    manager.countBuffs[camp] += buff.count != 0
+                        ? buff.count
+                        : SheepConfig.counterBuffNumber;
+                    manager.countShowBuffs[camp] += buff.count;
+                }
             }
 
-            if (hasZero) {
+            for (int camp = 0; camp < 2; camp++) {
+                List<int> pending = manager.preBuffs[camp];
+                if (pending.Count == 0) continue;
 
-                sheepMgr.buffs[s].push({
-                    time: sheepMgr.gameStartTimerForBuff + 1000 * SheepConfig.counterTime,
-                    count: 0
-                });
+                int sum = 0;
+                bool hasCounterMarker = false;
+                foreach (int value in pending) {
+                    if (value == 0) hasCounterMarker = true;
+                    sum += value;
+                }
 
-                if (r.length > 1) {
-                    sheepMgr.buffs[s].push({
-                        time: sheepMgr.gameStartTimerForBuff + 1000 * SheepConfig.buffLastTime,
-                        count: sum
+                if (hasCounterMarker) {
+                    manager.buffs[camp].Add(new Buff {
+                        time = Mathf.RoundToInt(manager.gameStartTimerForBuff + 1000f * SheepConfig.counterTime),
+                        count = 0
+                    });
+                    if (pending.Count > 1) {
+                        manager.buffs[camp].Add(new Buff {
+                            time = Mathf.RoundToInt(manager.gameStartTimerForBuff + 1000f * SheepConfig.buffLastTime),
+                            count = sum
+                        });
+                    }
+                }
+                else {
+                    manager.buffs[camp].Add(new Buff {
+                        time = Mathf.RoundToInt(manager.gameStartTimerForBuff + 1000f * SheepConfig.buffLastTime),
+                        count = sum
                     });
                 }
 
-            } else {
-                sheepMgr.buffs[s].push({
-                    time: sheepMgr.gameStartTimerForBuff + 1000 * SheepConfig.buffLastTime,
-                    count: sum
-                });
+                pending.Clear();
+                manager.countNewBuffs[camp] += sum;
             }
 
-            sheepMgr.preBuffs[s] = [];
-            sheepMgr.countNewBuffs[s] += sum
+            if (updateBoss(manager, sheepCtl, deltaMs, now)) return;
 
-        });
+            List<PetView> allPets = new List<PetView>(manager.pets[0].Count + manager.pets[1].Count);
+            allPets.AddRange(manager.pets[0]);
+            allPets.AddRange(manager.pets[1]);
 
-        isEnd = this.updateBoss(sheepMgr, sheepCtl, dt,  now)
+            int redActiveBuffAnimCount = 0;
+            int blueActiveBuffAnimCount = 0;
 
-        if (isEnd) {
-            return;
-        }
+            foreach (PetView source in allPets) {
+                if (source == null || source.buff_index == -1 || source.view_pet == null) continue;
 
-        let h = [];
-        sheepMgr.pets.forEach(e => e.forEach(e => h.push(e)));
-        let _ = false;
-        if (!sheepMgr.cameraEulerAngles.equals(sheepCtl.cameraCtl.camera.node.eulerAngles)) {
-            _ = true;
-            sheepMgr.cameraEulerAngles = sheepCtl.cameraCtl.camera.node.eulerAngles.clone();
-        }
+                source.updateSkin(sheepCtl, this, manager, deltaMs);
+                PetView view = source.view_pet;
+                if (view == null) continue;
 
-        let b = 0;
-        let I = 0;
+                SheepRoleState roleState = view.state;
+                int animationFrameCount = ResolveAnimationFrameCount(source, sheepCtl);
+                int lastFrame = Math.Max(0, animationFrameCount - 1);
 
-        let x = h;
-
-        for (let B = 0; B < x.length; B++) {
-            let y = x[B];
-            if (y.buff_index == -1) {
-                continue;
-            }
-
-            y.updateSkin(sheepCtl, this, sheepMgr, dt);
-
-            let M;
-            let D = y.view_pet;
-            let A = D.state;
-            let P = D.animType;
-            let W = D.animFrame;
-
-            const fgs = sheepCtl.comImages.roles_framess[y.camp];
-
-            const ghg = fgs[y.skinId];
-
-            M = ghg[P];
-
-            if (null == M) {
-                console.warn("找不到动画", SheepCamp[y.camp], y.skinId, SheepRoleAnimType[P]);
-            }
-
-            if (A == SheepRoleState.In && W >= M.length - 1) {
-                let E = SheepSkill.getById(D.readySkillId);
-                if (E) {
-                    if (E.skillType == SheepSkillType.Boom) {
-                        let F = SheepSkillSubBoom.getById(E.id);
-                        D.state = SheepRoleState.Boom;
-                        if (F.isAnim) {
-                            D.animType = SheepRoleAnimType.Boom
-                        } else {
-                            D.animType = SheepRoleAnimType.Idle
+                if (roleState == SheepRoleState.In && view.animFrame >= lastFrame) {
+                    if (SheepSkill.TryGetById(view.readySkillId, out SheepSkill skill)) {
+                        if (skill.skillType == SheepSkillType.Boom) {
+                            SheepSkillSubBoom boom = SheepSkillSubBoom.getById(skill.id);
+                            view.state = SheepRoleState.Boom;
+                            view.animType = boom.isAnim != 0 ? SheepRoleAnimType.Boom : SheepRoleAnimType.Idle;
                         }
                     }
-                } else {
-                    D.state = SheepRoleState.Move;
-                    D.animType = SheepRoleAnimType.Idle
+                    else {
+                        view.state = SheepRoleState.Move;
+                        view.animType = SheepRoleAnimType.Idle;
+                    }
                 }
-            } else if (A == SheepRoleState.Dead && W >= M.length - 1) {
-                D.state = SheepRoleState.Res;
-                D.animType = SheepRoleAnimType.None;
-                y.onRes(sheepCtl, sheepMgr)
-            } else if (A == SheepRoleState.Up && W >= M.length - 1) {
-                D.state = SheepRoleState.In;
-                D.animType = SheepRoleAnimType.In;
-            } else if (A == SheepRoleState.Buff) {
-                let V = SheepSkillSubBuff.getById(D.readySkillId);
-                let U = D.animFrame;
-                if (U > V.buffStratFrame && U < V.buffEndFrame) {
-                    if (y.camp == SheepCamp.Blue) {
-                        I += 1
-                    } else {
-                        b += 1
+                else if (roleState == SheepRoleState.Dead && view.animFrame >= lastFrame) {
+                    view.state = SheepRoleState.Res;
+                    view.animType = SheepRoleAnimType.None;
+                    source.onRes(sheepCtl, manager);
+                }
+                else if (roleState == SheepRoleState.Up && view.animFrame >= lastFrame) {
+                    view.state = SheepRoleState.In;
+                    view.animType = SheepRoleAnimType.In;
+                }
+                else if (roleState == SheepRoleState.Buff) {
+                    SheepSkillSubBuff buff = SheepSkillSubBuff.getById(view.readySkillId);
+                    if (view.animFrame > buff.buffStratFrame && view.animFrame < buff.buffEndFrame) {
+                        if (source.camp == SheepCamp.Blue) blueActiveBuffAnimCount++;
+                        else redActiveBuffAnimCount++;
                     }
                 }
             }
 
+            for (int index = 0; index < bulletCount; index++) {
+                BulletView bullet = getBulletView(index);
+                if (bullet == null || bullet.isDie || bullet.conf == null) continue;
+
+                if (bullet.frame >= bullet.conf.endFrame) {
+                    bullet.isDie = true;
+                    buff_del_bullet(index);
+                    continue;
+                }
+
+                PetView owner = getPetView(bullet.roleIndex);
+                int split = owner?.conf?.splitN ?? 0;
+                for (int x = -split; x <= split; x++) {
+                    for (int y = -split; y <= split; y++) {
+                        int blockIndex = Util.getIndexByXY(bullet.x + x, bullet.y + y);
+                        IgnoreExternal(() => sheepCtl.comImages.mesh_block.addFrameBlockCamp(blockIndex, bullet.camp));
+                    }
+                }
+            }
+
+            mainSyncBlocksToWokers();
+            OnFrameBlockEnd?.Invoke(manager);
+            IgnoreExternal(() => sheepCtl.comImages.mesh_block.onFrameUpdateEnd(manager));
+
+            redBuffCount = redActiveBuffAnimCount;
+            blueBuffCount = blueActiveBuffAnimCount;
+            roleMaxIndex = petCount;
+            bulletMaxIndex = bulletCount;
         }
 
-        var j = 0;
-        for (let G = 0; G < this.bulletCount; ++G) {
-            let X = this.getBulletView(G);
-            if (X.isDie) {
-                continue;
-            }
-
-            if (X.frame >= X.conf.endFrame) {
-                X.isDie = !0;
-                this.buff_del_bullet(G);
-            } else {
-
-                let z = this.getPetView(X.roleIndex).conf.splitN;
-
-                for (let O = -z; O <= z; ++O) {
-                    for (let Q = -z; Q <= z; ++Q) {
-                        let Z = Util.getIndexByXY(X.x + O, X.y + Q);
-                        sheepCtl.comImages.mesh_block.addFrameBlockCamp(Z, X.camp)
-                    }
-                }
-                ++j
-            }
+        private void InitializeBossView(SheepCamp camp) {
+            int index = CampIndex(camp);
+            PetView view = getPetView(index);
+            view.clear();
+            view.id = getNextPetId();
+            view.isActive = true;
+            view.isDie = false;
+            view.camp = camp;
+            view.roleId = 0;
+            view.skinId = 0;
+            view.conf = SheepRoleTypeInfo.getById(0);
+            view.state = (SheepRoleState)(int)SheepBossState.Ready;
+            view.subState = SheepRoleSubState.None;
+            view.animType = SheepRoleAnimType.Idle;
+            view.curHp = loongHp;
+            view.posX = camp == SheepCamp.Red ? -sheepMode.loongX : sheepMode.loongX;
+            view.posY = 0f;
+            view.posBefX = view.posX;
+            view.posBefY = view.posY;
+            view.animX = view.posX;
+            view.animY = view.posY;
+            view.blockIndex = Util.getIndexByXY(view.posX, view.posY);
+            view.befBlockIndex = view.blockIndex;
+            view.dirX = camp == SheepCamp.Red ? 1f : -1f;
+            view.dirY = 0f;
+            bossHp[index] = ReadExternal(() => Convert.ToSingle(boss[index].curHp), (float)loongHp);
+            view.curHp = bossHp[index];
         }
 
-        this.mainSyncBlocksToWokers();
-        sheepCtl.comImages.mesh_block.onFrameUpdateEnd(sheepMgr);
-        this.redBuffCount = b;
-        this.blueBuffCount = I;
-
-        if (isEnd) {
-            return;
+        private void SetBossProgress(int camp, float value) {
+            bossHp[camp] = value;
+            IgnoreExternal(() => boss[camp].comProgress.setVue(value));
+            IgnoreExternal(() => boss[camp].curHp = value);
         }
 
-        this.roleMaxIndex = this.petCount;
-        this.bulletMaxIndex = this.bulletCount
-
-    }
-        
-        public void updateBoss(SheepMgr sheepMgr,object sheepCtl,float dt,  c) {
-        var isEnd = false;
-        sheepMgr.boss.forEach((t, index, n) => {
-
-            var viewPet = this.getPetView(index);
-            var camp = viewPet.camp;
-            var state = viewPet.state;
-
-            if (state == SheepBossState.Ready) {
-
-                viewPet.curHp = t.curHp;
-                t.comProgress.setVue(t.curHp);
-                viewPet.state = SheepBossState.NomalRun;
-
-            }
-            else if (state == SheepBossState.AwakeAnim || state == SheepBossState.UnAwakeAnim) {
-
-                t.comProgress.setVue(t.comProgress._vue)
-
-            }
-            else if (state == SheepBossState.Dead) {
-
-            }
-            else {
-                let curHp = viewPet.curHp;
-                if (curHp <= 0) {
-                    curHp = 0;
-                }
-
-                let d = t.comProgress._vue;
-                let _ = d - curHp;
-
-                if (_ && curHp) {
-
-                    let S = sheepMgr.countBuffs[1 - camp];
-                    if (S > 0) {
-                        let b = 1 + SheepConfig.buffDragonDamageIncreseRate * S;
-                        b += 0;
-                        _ = Math.floor(_ * b)
-                        curHp = d - _;
-                        viewPet.curHp = curHp
-                    }
-
-                    let I = sheepMgr.countBuffs[camp];
-                    if (I > 0) {
-                        let B = Math.pow(1 - SheepConfig.buffDragonReduceRate, I);
-                        B -= 0;
-                        if (B < 1 - SheepConfig.buffDragonMaxReduceRate) {
-                            B = 1 - SheepConfig.buffDragonMaxReduceRate;
-                        }
-
-                        _ = Math.floor(_ * B)
-                        curHp = d - _;
-                        viewPet.curHp = curHp
-                    }
-
-                }
-
-                if (t.subShield() && _ > 1) {
-                    curHp = d - 1
-                    if (curHp < 0) {
-                        curHp = 0;
-                    }
-
-                    _ = 1;
-                    viewPet.curHp = curHp;
-                }
-
-                if (curHp != d) {
-                    t.comProgress.setVue(curHp);
-                    t.curHp = curHp;
-                    SheepAnims.showBossBlood(sheepCtl, t, _);
-                    t.hitAnim();
-                }
-
-                let R = sheepMgr.countShowBuffs[camp];
-                let M = sheepMgr.countBuffs[camp];
-
-                if (!sheepMgr.flagLongBuffs[camp] && curHp < sheepMgr.loongHp * SheepConfig.counterHpRatio) {
-                    sheepMgr.flagLongBuffs[camp] = true;
-                    t.backStateTime = c;
-                    sheepMgr.preBuffs[camp].push(0);
-                    sheepCtl.comMatch.showDoubleAnim(camp);
-                    sheepCtl.comUIAnim.backAnim(camp);
-                    sheepCtl.cameraCtl.onShake(SheepConfig.shockBeginNumber)
-                }
-                else if (t.backStateTime && c - t.backStateTime > 12e4 && M - R == 0) {
-                    t.backStateTime = 0;
-                    sheepCtl.comMatch.hideDoubleAnim(camp);
-                    sheepCtl.comUIAnim.backSuccessAnim(camp);
-                    sheepCtl.cameraCtl.onShake(SheepConfig.shockEndNumber)
-                }
-
-                if (curHp <= 0) {
-                    viewPet.state = SheepBossState.Dead;
-                    viewPet.isDie = !0;
-                    t.curHp = 0;
-                    eventBus.emit(EventType.RoomStateEnd)
-                    isEnd = true
-                    return;
-                }
-
-                viewPet.curAckFrame;
-
-                let T = 0;
-                let D = sheepMgr.plotRatio;
-
-                for (let A = 0; A < SheepConfig.loongStateSwitching.length; A++) {
-                    if (D <= SheepConfig.loongStateSwitching[A]) {
-                        T = A;
-                        break
-                    }
-                }
-
-                sheepMgr.plotRatioIndex = T;
-                t.updateState(sheepCtl, sheepMgr, T + 1);
-                t.updateStateJJL(sheepCtl, sheepMgr, T + 1)
-
-            }
-        });
-        return isEnd;
-    }
-        
-        
-    /**
-     *
-     * @param e {PetView}
-     */
-    public void pre_add_pet(PetView e) {
-        this.petsAdd.Add(e);
-    }
-
-    public void buff_add_pets() {
-        if (this.petsAdd.Count <= 0) {
-            return;
+        private bool ConsumeBossShield(SheepCamp camp) {
+            if (BossShieldConsumer != null) return BossShieldConsumer(camp);
+            int index = CampIndex(camp);
+            return ReadExternal(() => (bool)boss[index].subShield(), false);
         }
 
-        for (; this.petsAdd.Count!=0;) {
-            var e = this.petsDel.pop();
-            if (null == e) {
-                if (this.petCount >= SheepConfig.MaxPetCount - 1) {
-                    console.warn("预加入怪物加入buff超过最大数量", this.petCount, SheepConfig.MaxPetCount);
+        public bool updateBoss(SheepMgr manager, dynamic sheepCtl, float deltaMs, long now) {
+            bool ended = false;
+
+            for (int index = 0; index < 2; index++) {
+                PetView viewPet = getPetView(index);
+                if (viewPet == null || !viewPet.isActive) continue;
+
+                SheepCamp camp = viewPet.camp;
+                SheepBossState bossState = (SheepBossState)(int)viewPet.state;
+
+                if (bossState == SheepBossState.Ready) {
+                    float initialHp = ReadExternal(() => Convert.ToSingle(boss[index].curHp), (float)loongHp);
+                    viewPet.curHp = initialHp;
+                    SetBossProgress(index, initialHp);
+                    viewPet.state = (SheepRoleState)(int)SheepBossState.NomalRun;
+                    continue;
+                }
+
+                if (bossState == SheepBossState.AwakeAnim || bossState == SheepBossState.UnAwakeAnim) {
+                    SetBossProgress(index, bossHp[index]);
+                    continue;
+                }
+
+                if (bossState == SheepBossState.Dead) continue;
+
+                float currentHp = Mathf.Max(0f, viewPet.curHp);
+                float previousHp = bossHp[index];
+                float damage = previousHp - currentHp;
+
+                if (damage > 0f && currentHp > 0f) {
+                    int attackBuffCount = manager.countBuffs[1 - index];
+                    if (attackBuffCount > 0) {
+                        float multiplier = 1f + SheepConfig.buffDragonDamageIncreseRate * attackBuffCount;
+                        damage = Mathf.Floor(damage * multiplier);
+                        currentHp = previousHp - damage;
+                        viewPet.curHp = currentHp;
+                    }
+
+                    int defenceBuffCount = manager.countBuffs[index];
+                    if (defenceBuffCount > 0) {
+                        float multiplier = Mathf.Pow(1f - SheepConfig.buffDragonReduceRate, defenceBuffCount);
+                        multiplier = Mathf.Max(multiplier, 1f - SheepConfig.buffDragonMaxReduceRate);
+                        damage = Mathf.Floor(damage * multiplier);
+                        currentHp = previousHp - damage;
+                        viewPet.curHp = currentHp;
+                    }
+                }
+
+                // 原版会先调用 subShield()，再判断本次伤害是否大于 1。
+                bool consumedShield = ConsumeBossShield(camp);
+                if (consumedShield && damage > 1f) {
+                    damage = 1f;
+                    currentHp = Mathf.Max(0f, previousHp - 1f);
+                    viewPet.curHp = currentHp;
+                }
+
+                if (!Mathf.Approximately(currentHp, previousHp)) {
+                    SetBossProgress(index, currentHp);
+                    OnBossHpChanged?.Invoke(camp, currentHp, damage);
+                    IgnoreExternal(() => boss[index].hitAnim());
+                }
+
+                int visibleBuffCount = manager.countShowBuffs[index];
+                int totalBuffCount = manager.countBuffs[index];
+
+                if (!manager.flagLongBuffs[index] &&
+                    currentHp < manager.loongHp * SheepConfig.counterHpRatio) {
+                    manager.flagLongBuffs[index] = true;
+                    manager.bossBackStateTime[index] = now;
+                    manager.preBuffs[index].Add(0);
+                    OnCounterStarted?.Invoke(camp);
+                    OnCameraShake?.Invoke(SheepConfig.shockBeginNumber);
+                    IgnoreExternal(() => boss[index].backStateTime = now);
+                    IgnoreExternal(() => sheepCtl.comMatch.showDoubleAnim(camp));
+                    IgnoreExternal(() => sheepCtl.comUIAnim.backAnim(camp));
+                    IgnoreExternal(() => sheepCtl.cameraCtl.onShake(SheepConfig.shockBeginNumber));
+                }
+                else if (manager.bossBackStateTime[index] > 0 &&
+                         now - manager.bossBackStateTime[index] > 120000 &&
+                         totalBuffCount - visibleBuffCount == 0) {
+                    manager.bossBackStateTime[index] = 0;
+                    OnCounterFinished?.Invoke(camp);
+                    OnCameraShake?.Invoke(SheepConfig.shockEndNumber);
+                    IgnoreExternal(() => boss[index].backStateTime = 0);
+                    IgnoreExternal(() => sheepCtl.comMatch.hideDoubleAnim(camp));
+                    IgnoreExternal(() => sheepCtl.comUIAnim.backSuccessAnim(camp));
+                    IgnoreExternal(() => sheepCtl.cameraCtl.onShake(SheepConfig.shockEndNumber));
+                }
+
+                if (currentHp <= 0f) {
+                    viewPet.state = (SheepRoleState)(int)SheepBossState.Dead;
+                    viewPet.isDie = true;
+                    SetBossProgress(index, 0f);
+                    ended = true;
+                    RaiseRoomEnd();
                     break;
                 }
 
-                e = this.petCount++;
-            }
-            let t = this.petsAdd.shift();
-            let r = this.getPetView(e);
-            t.init(e, r);
-        }
-    }
-
-    public void buff_del_pet(int e) {
-        let pet = this.getPetView(e);
-        pet.isDie = true;
-        pet.id = 0;
-        this.petsDel.push(e)
-    }
-
-    public void clear_pets() {
-        this.cur_rob_role_index = 0;
-        this.roleMaxIndex = 0;
-        this.petCount = 0;
-        this.petsAdd=[];
-        this.petsDel.length = 0
-    }
-
-    public void buff_add_bullets() {
-        var e = this.preBulletIndex;
-        if (e!=0) {
-            for (; e!=0;) {
-                let t = this.bulletsDel.pop();
-                if (null == t) {
-                    if (this.bulletCount >= SheepConfig.MaxBulletCount - 1) {
-                        warn("预加入子弹加入buff超过最大数量", this.bulletCount, SheepConfig.MaxBulletCount);
-                        break
-                    }
-                    t = this.bulletCount++
-                }
-                --e;
-
-                this.getBulletView(t).init(++this.bulletId,this.pre_view_bullets[ e] )
-            }
-            this.preBulletIndex = 0
-        }
-    }
-
-    public void buff_del_bullet(e) {
-        let bullet = this.getBulletView(e);
-        bullet.id = 0;
-        this.bulletsDel.push(e)
-    }
-
-    public void clear_bullets() {
-        this.cur_rob_bullet_index = 0;
-        this.bulletMaxIndex = 0;
-        this.bulletCount = 0;
-        this.bulletsDel.Clear();
-    }
-
-    public void game_clear() {
-        this.clearBlocks();
-        this.clearPetViews();
-        this.preBulletIndex = 0;
-        this.clearViewBullets();
-        this.clear_pets();
-        this.clear_bullets();
-        this.pre_add_pet(sheepMgr.boss[SheepCamp.Red]);
-        this.pre_add_pet(sheepMgr.boss[SheepCamp.Blue])
-    }
-
-    public void role_logic() {
-        var t = Date.now();
-        this.logic_counts[SheepCamp.Red] = this.redBuffCount > 0 ? 2 : 1;
-        this.logic_counts[SheepCamp.Blue] = this.blueBuffCount > 0 ? 2 : 1;
-        let curIndexImages = this.curIndexImages;
-        let o = 0;
-        if (this.roleMaxIndex!=0) {
-            o = this.rob_role_task(this.roleMaxIndex, curIndexImages);
-        }
-        int l = 0;
-        if (this.bulletMaxIndex!=0) {
-            l = this.rob_bullet_task(this.bulletMaxIndex, curIndexImages);
-        }
-        if (this.bullte_creates.Length!=0) {
-            var e = this.rob_pre_bullet(this.bullte_creates.Length);
-            foreach (var t in this.bullte_creates) {
-                let i = e++;
-                if (i > SheepConfig.MaxBulletCount) {
-                    break;
-                }
-                this.copyBulletPreView(i, t.bulletId, t.view_pet, t.view_tar_pet, t.info)
-            }
-
-            this.bullte_creates = [];
-        }
-        bool n = true;
-
-        n = true;
-
-        let r = Date.now() - t;
-        if (r > 33) {
-            console.log(`${self.name} count_role:${o} count_bullet:${l}  耗时:${r}ms`)
-        }
-        return {
-            time: r,
-            isEndWorker: n
-        }
-    }
-
-    public void rob_role_task(count, curIndexImages) {
-        let start = this.rob_role(count);
-        const end = start + count;
-        let i = this.update_role(start, end);
-        this.comImages.update_role(curIndexImages);
-        return i;
-    }
-
-    public int rob_bullet_task(int count, curIndexImages) {
-        var start = this.rob_bullet(count);
-        const end = start + count;
-        var i = this.update_bullet(start, end);
-        this.comImages.update_bullet(curIndexImages);
-        return i;
-    }
-
-    public void update_role(int start,int end) {
-        for (int i = start; i < end; i++) {
-            let viewPet = this.getPetView(i);
-            if (!viewPet.isActive) {
-                viewPet = null;
-                continue;
-            }
-            let t = viewPet.isDie;
-            if (0 == viewPet.roleId) {
-                var f = this.update_frame(viewPet);
-                if (!t && f) {
-                    this.update_boss_state(viewPet);
-                }
-
-                this.update_role_anim(viewPet);
-            } else {
-                let i = viewPet.camp, s = this.logic_counts[i];
-                for (let i = 0; i < s; i++) {
-                    let i = this.update_frame(viewPet);
-                    if (!t) {
-                        this.update_role_state(viewPet, i);
-                    }
-                    this.update_role_anim(viewPet)
-                }
-                let o = viewPet;
-                this.comImages.addRole(o);
-            }
-            viewPet = null
-        }
-        return end - start
-    }
-
-    public int update_bullet(int start,int end) {
-        for (int i = start; i < end; i++) {
-            if (i >= SheepConfig.MaxBulletCount) {
-                return i - start;
-            }
-            let t = this.getBulletView(i);
-            if (t.isDie) {
-                continue;
-            }
-            if (t.id && t.conf.animId) {
-                let e = t;
-                this.comImages.addBullet(e)
-            }
-            let {xn: s, yn: o} = Util.getXnYn(t.x, t.y), l = t.frame, n = t.conf;
-            {
-                let e = t.conf.atkFrames;
-                if (e) for (let i = 0; i < e.length; i++) {
-                    const n = e[i];
-                    if (-1 == n || n == l) {
-                        if (0 == t.tarRoleIndex || 1 == t.tarRoleIndex) {
-                            let o = this.getPetView(t.tarRoleIndex);
-                            UtilAck.isCanAckByBullet(t, o, i) && UtilAck.hurtByBullet(t, o, t.atkVue )
-                        } else UtilFind.forfeachBlocksByAckView(t.camp, s, o, t.conf.findR, (e => {
-                            UtilAck.isCanAckByBullet(t, e, i) && UtilAck.hurtByBullet(t, e, t.atkVue)
-                        }));
-                        break
+                int stateIndex = 0;
+                for (int thresholdIndex = 0; thresholdIndex < SheepConfig.loongStateSwitching.Length; thresholdIndex++) {
+                    if (manager.plotRatio <= SheepConfig.loongStateSwitching[thresholdIndex]) {
+                        stateIndex = thresholdIndex;
+                        break;
                     }
                 }
-                switch (t.conf.moveType) {
+
+                manager.plotRatioIndex = stateIndex;
+                int visualState = stateIndex + 1;
+                IgnoreExternal(() => boss[index].updateState(sheepCtl, manager, visualState));
+                IgnoreExternal(() => boss[index].updateStateJJL(sheepCtl, manager, visualState));
+            }
+
+            return ended;
+        }
+
+        public void pre_add_pet(dynamic source) {
+            if (source != null) petsAdd.Add(source);
+        }
+
+        public void buff_add_pets() {
+            while (petsAdd.Count > 0) {
+                int index;
+                if (petsDel.Count > 0) {
+                    index = petsDel.Pop();
+                }
+                else {
+                    if (petCount >= SheepConfig.MaxPetCount) {
+                        Debug.LogWarning($"预加入怪物超过最大数量: {petCount}/{SheepConfig.MaxPetCount}");
+                        break;
+                    }
+                    index = petCount++;
+                }
+
+                dynamic source = petsAdd[0];
+                petsAdd.RemoveAt(0);
+                PetView view = getPetView(index);
+                source.init(index, view);
+            }
+        }
+
+        public void buff_del_pet(int index) {
+            PetView pet = getPetView(index);
+            if (pet == null) return;
+            pet.isDie = true;
+            pet.id = 0;
+            petsDel.Push(index);
+        }
+
+        public void clear_pets() {
+            cur_rob_role_index = 0;
+            roleMaxIndex = 0;
+            petCount = 0;
+            petsAdd.Clear();
+            petsDel.Clear();
+        }
+
+        public void buff_add_bullets() {
+            int pendingCount = preBulletIndex;
+            while (pendingCount > 0) {
+                int index;
+                if (bulletsDel.Count > 0) {
+                    index = bulletsDel.Pop();
+                }
+                else {
+                    if (bulletCount >= SheepConfig.MaxBulletCount) {
+                        Debug.LogWarning($"预加入子弹超过最大数量: {bulletCount}/{SheepConfig.MaxBulletCount}");
+                        break;
+                    }
+                    index = bulletCount++;
+                }
+
+                pendingCount--;
+                BulletView preview = pre_view_bullets[pendingCount];
+                if (preview != null) {
+                    getBulletView(index).init(++bulletId, preview);
+                }
+            }
+            preBulletIndex = 0;
+        }
+
+        public void buff_del_bullet(int index) {
+            BulletView bullet = getBulletView(index);
+            if (bullet == null || bullet.id == 0) return;
+            bullet.id = 0;
+            bullet.isDie = true;
+            bulletsDel.Push(index);
+        }
+
+        public void clear_bullets() {
+            cur_rob_bullet_index = 0;
+            bulletMaxIndex = 0;
+            bulletCount = 0;
+            bulletsDel.Clear();
+        }
+
+        public void game_clear() {
+            clearBlocks();
+            clearPetViews();
+            preBulletIndex = 0;
+            clearViewBullets();
+            clear_pets();
+            clear_bullets();
+
+            InitializeBossView(SheepCamp.Red);
+            InitializeBossView(SheepCamp.Blue);
+            petCount = 2;
+            roleMaxIndex = 2;
+        }
+
+        public (long time, bool isEndWorker) role_logic() {
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            logic_counts[CampIndex(SheepCamp.Red)] = redBuffCount > 0 ? 2 : 1;
+            logic_counts[CampIndex(SheepCamp.Blue)] = blueBuffCount > 0 ? 2 : 1;
+
+            int roleCount = roleMaxIndex > 0 ? rob_role_task(roleMaxIndex, curIndexImages) : 0;
+            int activeBulletCount = bulletMaxIndex > 0 ? rob_bullet_task(bulletMaxIndex, curIndexImages) : 0;
+
+            if (bullte_creates.Count > 0) {
+                int previewIndex = rob_pre_bullet(bullte_creates.Count);
+                foreach (BullteCreate request in bullte_creates) {
+                    if (previewIndex >= SheepConfig.MaxBulletCount) break;
+                    copyBulletPreView(
+                        previewIndex++,
+                        request.bulletId,
+                        request.view_pet,
+                        request.view_tar_pet,
+                        request.info
+                    );
+                }
+                bullte_creates.Clear();
+            }
+
+            stopwatch.Stop();
+            if (stopwatch.ElapsedMilliseconds > 33) {
+                Debug.Log($"count_role:{roleCount} count_bullet:{activeBulletCount} 耗时:{stopwatch.ElapsedMilliseconds}ms");
+            }
+            return (stopwatch.ElapsedMilliseconds, true);
+        }
+
+        public int rob_role_task(int count, dynamic currentImages) {
+            int start = rob_role(count);
+            int end = start + count;
+            int updated = update_role(start, end);
+            if (comImages != null) IgnoreExternal(() => comImages.update_role(currentImages));
+            return updated;
+        }
+
+        public int rob_bullet_task(int count, dynamic currentImages) {
+            int start = rob_bullet(count);
+            int end = start + count;
+            int updated = update_bullet(start, end);
+            if (comImages != null) IgnoreExternal(() => comImages.update_bullet(currentImages));
+            return updated;
+        }
+
+        public int update_role(int start, int end) {
+            int safeEnd = Math.Min(end, SheepConfig.MaxPetCount);
+            for (int index = start; index < safeEnd; index++) {
+                PetView viewPet = getPetView(index);
+                if (viewPet == null || !viewPet.isActive) continue;
+
+                bool wasDead = viewPet.isDie;
+                if (viewPet.roleId == 0) {
+                    bool logicTick = update_frame(viewPet);
+                    if (!wasDead && logicTick) update_boss_state(viewPet);
+                    update_role_anim(viewPet);
+                    continue;
+                }
+
+                int camp = CampIndex(viewPet.camp);
+                int loops = Math.Max(1, logic_counts[camp]);
+                for (int loop = 0; loop < loops; loop++) {
+                    bool logicTick = update_frame(viewPet);
+                    if (!wasDead) update_role_state(viewPet, logicTick);
+                    update_role_anim(viewPet);
+                }
+
+                OnRoleRender?.Invoke(viewPet);
+                if (comImages != null) IgnoreExternal(() => comImages.addRole(viewPet));
+            }
+            return safeEnd - start;
+        }
+
+        public int update_bullet(int start, int end) {
+            int safeEnd = Math.Min(end, SheepConfig.MaxBulletCount);
+            for (int index = start; index < safeEnd; index++) {
+                BulletView bullet = getBulletView(index);
+                if (bullet == null || bullet.isDie || bullet.conf == null) continue;
+
+                if (bullet.id != 0 && bullet.conf.animId != 0) {
+                    OnBulletRender?.Invoke(bullet);
+                    if (comImages != null) IgnoreExternal(() => comImages.addBullet(bullet));
+                }
+
+                (int xn, int yn) block = Util.getXnYn(bullet.x, bullet.y);
+                int frame = bullet.frame;
+                SheepBullet config = bullet.conf;
+
+                int[] attackFrames = config.atkFrames;
+                if (attackFrames != null) {
+                    for (int attackIndex = 0; attackIndex < attackFrames.Length; attackIndex++) {
+                        int attackFrame = attackFrames[attackIndex];
+                        if (attackFrame != -1 && attackFrame != frame) continue;
+
+                        if (bullet.tarRoleIndex == 0 || bullet.tarRoleIndex == 1) {
+                            PetView target = getPetView(bullet.tarRoleIndex);
+                            if (target != null && UtilAck.isCanAckByBullet(bullet, target, attackIndex)) {
+                                UtilAck.hurtByBullet(bullet, target, bullet.atkVue);
+                            }
+                        }
+                        else {
+                            UtilFind.forfeachBlocksByAckView(
+                                bullet.camp,
+                                block.xn,
+                                block.yn,
+                                config.findR,
+                                target => {
+                                    if (UtilAck.isCanAckByBullet(bullet, target, attackIndex)) {
+                                        UtilAck.hurtByBullet(bullet, target, bullet.atkVue);
+                                    }
+                                }
+                            );
+                        }
+                        break;
+                    }
+                }
+
+                switch ((SheepBulletMoveType)config.moveType) {
                     case SheepBulletMoveType.Fixed:
                         break;
+
                     case SheepBulletMoveType.LineDir:
-                        t.x = t.x + t.dirX * n.speed * .033, t.y = t.y + t.dirY * n.speed * .033;
+                        bullet.x += bullet.dirX * config.speed * 0.033f;
+                        bullet.y += bullet.dirY * config.speed * 0.033f;
                         break;
-                    case SheepBulletMoveType.LinePosFrame:
-                        t.x = t.startX + (t.endX - t.startX) * l / n.moveTimeFrame, t.y = t.startY + (t.endY - t.startY) * l / n.moveTimeFrame, t.z = t.startZ + (t.endZ - t.startZ) * l / n.moveTimeFrame;
+
+                    case SheepBulletMoveType.LinePosFrame: {
+                        float denominator = Math.Max(1, config.moveTimeFrame);
+                        float progress = frame / denominator;
+                        bullet.x = Mathf.LerpUnclamped(bullet.startX, bullet.endX, progress);
+                        bullet.y = Mathf.LerpUnclamped(bullet.startY, bullet.endY, progress);
+                        bullet.z = Mathf.LerpUnclamped(bullet.startZ, bullet.endZ, progress);
                         break;
+                    }
+
                     case SheepBulletMoveType.LineTarFrame:
                         break;
-                    case SheepBulletMoveType.CurvePosFrame:
-                        let e = (t.startX + t.endX) / 2, i = (t.startY + t.endY) / 2, s = n.curveHigh,
-                            o = t.startX + (e - t.startX) * l / n.moveTimeFrame,
-                            r = e + (t.endX - e) * l / n.moveTimeFrame,
-                            a = t.startY + (i - t.startY) * l / n.moveTimeFrame,
-                            c = i + (t.endY - i) * l / n.moveTimeFrame,
-                            f = t.startZ + (s - t.startZ) * l / n.moveTimeFrame,
-                            h = s + (t.endZ - s) * l / n.moveTimeFrame;
-                        t.x = o + (r - o) * l / n.moveTimeFrame, t.y = a + (c - a) * l / n.moveTimeFrame, t.z = f + (h - f) * l / n.moveTimeFrame;
-                        let p = t.endX - t.startX > 0 ? 1 : -1, u = .2 * p, d = .8, g = p, S = 0, m = -.2 * p,
-                            y = -.8, k = u + (g - u) * l / n.endFrame, B = d + (S - d) * l / n.endFrame,
-                            w = g + (m - g) * l / n.endFrame, R = S + (y - S) * l / n.endFrame;
-                        t.dirX = k + (w - k) * l / n.endFrame, t.dirY = 0, t.dirZ = B + (R - B) * l / n.endFrame;
+
+                    case SheepBulletMoveType.CurvePosFrame: {
+                        float denominator = Math.Max(1, config.moveTimeFrame);
+                        float progress = frame / denominator;
+                        float middleX = (bullet.startX + bullet.endX) * 0.5f;
+                        float middleY = (bullet.startY + bullet.endY) * 0.5f;
+                        float high = config.curveHigh;
+
+                        float leftX = Mathf.LerpUnclamped(bullet.startX, middleX, progress);
+                        float rightX = Mathf.LerpUnclamped(middleX, bullet.endX, progress);
+                        float leftY = Mathf.LerpUnclamped(bullet.startY, middleY, progress);
+                        float rightY = Mathf.LerpUnclamped(middleY, bullet.endY, progress);
+                        float leftZ = Mathf.LerpUnclamped(bullet.startZ, high, progress);
+                        float rightZ = Mathf.LerpUnclamped(high, bullet.endZ, progress);
+
+                        bullet.x = Mathf.LerpUnclamped(leftX, rightX, progress);
+                        bullet.y = Mathf.LerpUnclamped(leftY, rightY, progress);
+                        bullet.z = Mathf.LerpUnclamped(leftZ, rightZ, progress);
+
+                        float directionSign = bullet.endX - bullet.startX > 0f ? 1f : -1f;
+                        float endProgress = frame / (float)Math.Max(1, config.endFrame);
+                        float firstX = Mathf.LerpUnclamped(0.2f * directionSign, directionSign, endProgress);
+                        float firstZ = Mathf.LerpUnclamped(0.8f, 0f, endProgress);
+                        float secondX = Mathf.LerpUnclamped(directionSign, -0.2f * directionSign, endProgress);
+                        float secondZ = Mathf.LerpUnclamped(0f, -0.8f, endProgress);
+                        bullet.dirX = Mathf.LerpUnclamped(firstX, secondX, endProgress);
+                        bullet.dirY = 0f;
+                        bullet.dirZ = Mathf.LerpUnclamped(firstZ, secondZ, endProgress);
                         break;
+                    }
+
                     case SheepBulletMoveType.CurveTarFrame:
                         break;
+
                     case SheepBulletMoveType.LineDirEndPos:
-                        t.x = t.x + t.dirX * n.speed * .033, t.y = t.y + t.dirY * n.speed * .033, t.z = t.z + t.dirZ * n.speed * .033;
+                        bullet.x += bullet.dirX * config.speed * 0.033f;
+                        bullet.y += bullet.dirY * config.speed * 0.033f;
+                        bullet.z += bullet.dirZ * config.speed * 0.033f;
                         break;
-                    case SheepBulletMoveType.RadiusAngle:
-                        t.angle += n.speed;
-                        let x = t.roleUid, _ = this.getPetView(t.roleIndex);
-                        x == _.id ? (t.x = _.animX + n.radius * Math.cos(t.angle), t.y = _.animY + n.radius * Math.sin(t.angle)) : t.isDie = !0;
+
+                    case SheepBulletMoveType.RadiusAngle: {
+                        bullet.angle += config.speed;
+                        PetView owner = getPetView(bullet.roleIndex);
+                        if (owner != null && bullet.roleUid == owner.id) {
+                            bullet.x = owner.animX + config.radius * Mathf.Cos(bullet.angle);
+                            bullet.y = owner.animY + config.radius * Mathf.Sin(bullet.angle);
+                        }
+                        else {
+                            bullet.isDie = true;
+                        }
                         break;
+                    }
+
                     case SheepBulletMoveType.DirAngle:
-                        t.x = t.x + t.dirX * n.speed * .033, t.y = t.y + t.dirY * n.speed * .033, t.z = t.z + t.dirZ * n.speed * .033
+                        bullet.x += bullet.dirX * config.speed * 0.033f;
+                        bullet.y += bullet.dirY * config.speed * 0.033f;
+                        bullet.z += bullet.dirZ * config.speed * 0.033f;
+                        break;
                 }
-                t.frame = l + 1
-            }
-            let r = n.createBulletID;
-            if (r && n.createBulletFrame == l) {
-                let e = this.getPetView(t.roleIndex), i = this.getPetView(t.tarRoleIndex);
-                this.bullte_creates.push({
-                    view_pet: e,
-                    bulletId: r,
-                    view_tar_pet: i,
-                    info: {startX: t.x, startY: t.y, startZ: 100}
-                })
-            }
-            t = null
-        }
 
-        return end - start;
-    }
+                bullet.frame = frame + 1;
 
-    /**
-     *
-     * @param viewPet {PetView}
-     * @returns {boolean}
-     */
-    public bool update_frame(PetView viewPet) {
-        var frame = viewPet.frame;
-        var loopFrame = SheepConfig.loopFrame;
-        var i = frame % loopFrame == loopFrame - 1;
-        var posBefX = viewPet.posBefX;
-        var posBefY = viewPet.posBefY;
-        var posX = viewPet.posX;
-        var posY = viewPet.posY;
-        if (!viewPet.isDie) {
-            viewPet.animX = posBefX + (posX - posBefX) * (frame % loopFrame) / loopFrame;
-            viewPet.animY = posBefY + (posY - posBefY) * (frame % loopFrame) / loopFrame;
-        }
-        frame += 1;
-        viewPet.frame = frame;
-        if (!viewPet.isDie && i) {
-            viewPet.logicMove(posX, posY);
-        }
-
-        return i;
-    }
-
-    public void update_boss_state(e) {
-        switch (e.state) {
-            case SheepBossState.NomalRun:
-            case SheepBossState.AwakeRun:
-            case SheepBossState.BackRun:
-                let t = e.conf, i = e.curAckFrame;
-                if (0 == i) {
-                    let {xn: i, yn: o} = Util.getXnYn(e.posX, e.posY);
-                    let l = false;
-                    UtilFind.findNearBlocksByAckView(e, i, o, Math.floor(t.findR * SheepConfig.loongExaminationRangeBet), (t => {
-                        return !!l || !!Util.isCanAckByRole(e, t) && (l = !0, !0);
-                    }));
-                    if (!l) {
-                        break
-                    }
-                }
-                i += 1;
-                e.curAckFrame = i
-                if (i == Math.floor(t.readyAtks[0] / 3)) {
-                    let {xn: i, yn: s} = Util.getXnYn(e.posX, e.posY);
-                    UtilFind.forfeachBlocksByAckView(e.camp, i, s, t.findR, (t => {
-                        Util.isCanAckByRole(e, t) && UtilAck.hurtByRole(e, t, e.conf.atk)
-                    }))
-                }
-                i >= Math.floor(1e3 * t.atkCd / 100) && (e.curAckFrame = 0)
-        }
-    }
-
-    public void update_role_state_in(PetView petSkin){
-        if (petSkin.conf.skillIn!=0) {
-            SheepSkill t = SheepSkill.getById(petSkin.conf.skillIn);
-            if (t.skillType == SheepSkillType.Boom) {
-                let i = SheepSkillSubBoom.getById(t.id);
-                if (1 == petSkin.animFrame) {
-                    let t = petSkin.camp == SheepCamp.Red ? -1200 : 1200;
-                    let {xn: o, yn: l} = Util.getXnYn(t, 0);
-                    let n = null;
-                    UtilFind.findNearBlocksByAckView(petSkin, o, l, 100, e => {
-                        n = e
-                        return true;
+                if (config.createBulletID != 0 && config.createBulletFrame == frame) {
+                    PetView owner = getPetView(bullet.roleIndex);
+                    PetView target = getPetView(bullet.tarRoleIndex);
+                    bullte_creates.Add(new BullteCreate {
+                        view_pet = owner,
+                        bulletId = config.createBulletID,
+                        view_tar_pet = target,
+                        info = new Info {
+                            startX = bullet.x,
+                            startY = bullet.y,
+                            startZ = 100f,
+                            hasStart = true
+                        }
                     });
-                    if (n) {
-                        petSkin.posBefX = petSkin.posX;
-                        petSkin.posBefY = petSkin.posY;
-                        petSkin.posX = n.posX;
-                        petSkin.posY = n.posY;
-                        petSkin.animX = petSkin.posX;
-                        petSkin.animY = petSkin.posY;
-                    } else {
-                        petSkin.posBefX = t;
-                        petSkin.posBefY = 0;
-                        petSkin.posX = t;
-                        petSkin.posY = 0;
-                        petSkin.animX = t;
-                        petSkin.animY = 0;
-                    }
-                    petSkin.readySkillId = i.id;
-                    petSkin.isLock = true;
                 }
             }
+            return safeEnd - start;
         }
-    }
 
-    public void update_role_state_move(PetView petSkin,bool t,int i){
-        if (petSkin.isLock) {
-            return;
-        }
-        let {atkTar: s, moveTar: o, moveBoss: l} = UtilFind.findTar(petSkin);
-        if (s) {
-            petSkin.state = SheepRoleState.Attack;
-            petSkin.subState = SheepRoleSubState.AttackAwait;
-            return
-        }
-        if (o) {
-            petSkin.subState = SheepRoleSubState.MoveTar;
-            Util.moveTar(petSkin, o, i, t);
-            return
-        }
-        if (l) {
-            petSkin.subState = SheepRoleSubState.MoveBoss;
-            Util.moveTar(petSkin, l, i, t);
-            return
-        }
-        console.error("移动状态没有目标??")
-    }
+        public bool update_frame(PetView viewPet) {
+            int frame = viewPet.frame;
+            int loopFrame = Math.Max(1, SheepConfig.loopFrame);
+            bool logicTick = frame % loopFrame == loopFrame - 1;
 
-    public void update_role_state_attack(PetView petSkin,bool t,float i){
-        let o = petSkin.conf.atkMoveType;
-        if (petSkin.conf.isLoongStopDistance) {
-            var t = sheepMode;
-            let i = petSkin.conf.loongStopDistanceR;
-            Util.dis(petSkin.posX, petSkin.posY, petSkin.camp === SheepCamp.Red ? t.loongX : -t.loongX, 0) <= i && (o = SheepRoleAtkMoveType.None)
+            if (!viewPet.isDie) {
+                float progress = (frame % loopFrame) / (float)loopFrame;
+                viewPet.animX = Mathf.LerpUnclamped(viewPet.posBefX, viewPet.posX, progress);
+                viewPet.animY = Mathf.LerpUnclamped(viewPet.posBefY, viewPet.posY, progress);
+            }
+
+            viewPet.frame = frame + 1;
+            if (!viewPet.isDie && logicTick) {
+                viewPet.logicMove(viewPet.posX, viewPet.posY);
+            }
+            return logicTick;
         }
-        if (petSkin.subState == SheepRoleSubState.AttackAwait) {
-            if (!Util.isAtkCd(petSkin)) {
-                petSkin.subState = SheepRoleSubState.AttackAnim;
-                petSkin.animType = SheepRoleAnimType.Attack;
-            }
-        } else if (petSkin.subState == SheepRoleSubState.AttackAnim) {
-            let t = petSkin.conf;
-            let i = t.finishAtk;
-            let atkCd = t.atkCd;
-            let l = petSkin.animFrame;
-            let n = t.readyAtks;
-            for (const i of n) {
-                if (l == i) {
-                    let i = null;
-                    if (petSkin.conf.atkType == SheepRoleAtkType.Nearest) {
-                        i = UtilFind.findNearAck(petSkin);
-                    } else if (petSkin.conf.atkType == SheepRoleAtkType.Throw) {
-                        i = UtilFind.findSortAck(petSkin, petSkin.conf.findR)
-                        if (petSkin.conf.roleType == SheepRoleType.pao_che) {
-                            let t = Util.getBackBoss(petSkin.camp);
-                            Util.isCanAckByRole(petSkin, t) && (i = t)
-                        }
-                    } else {
-                        i = UtilFind.findNearAck(petSkin);
+
+        public void update_boss_state(PetView bossView) {
+            SheepBossState bossState = (SheepBossState)(int)bossView.state;
+            switch (bossState) {
+                case SheepBossState.NomalRun:
+                case SheepBossState.AwakeRun:
+                case SheepBossState.BackRun: {
+                    SheepRoleTypeInfo config = bossView.conf;
+                    int attackFrame = bossView.curAckFrame;
+                    if (attackFrame == 0) {
+                        (int xn, int yn) block = Util.getXnYn(bossView.posX, bossView.posY);
+                        bool hasTarget = false;
+                        UtilFind.findNearBlocksByAckView(
+                            bossView,
+                            block.xn,
+                            block.yn,
+                            Mathf.FloorToInt(config.findR * SheepConfig.loongExaminationRangeBet),
+                            target => {
+                                if (!hasTarget && Util.isCanAckByRole(bossView, target)) {
+                                    hasTarget = true;
+                                    return true;
+                                }
+                                return false;
+                            }
+                        );
+                        if (!hasTarget) break;
                     }
-                    if (t.bullet && 0 != t.bullet.length) {
-                        if (i) {
-                            this.bullte_creates.push({
-                                view_pet: petSkin,
-                                bulletId: t.bullet[petSkin.camp == SheepCamp.Red ? 0 : 1],
-                                view_tar_pet: i
-                            });
-                        } else {
-                            this.bullte_creates.push({
-                                view_pet: petSkin,
-                                bulletId: t.bullet[petSkin.camp == SheepCamp.Red ? 0 : 1]
-                            });
-                        }
-                    } else {
-                        i && UtilAck.ackTar(petSkin, i);
+
+                    attackFrame++;
+                    bossView.curAckFrame = attackFrame;
+                    int readyFrame = config.readyAtks != null && config.readyAtks.Length > 0
+                        ? Mathf.FloorToInt(config.readyAtks[0] / 3f)
+                        : 0;
+                    if (attackFrame == readyFrame) {
+                        (int xn, int yn) block = Util.getXnYn(bossView.posX, bossView.posY);
+                        UtilFind.forfeachBlocksByAckView(
+                            bossView.camp,
+                            block.xn,
+                            block.yn,
+                            config.findR,
+                            target => {
+                                if (Util.isCanAckByRole(bossView, target)) {
+                                    UtilAck.hurtByRole(bossView, target, config.atk);
+                                }
+                            }
+                        );
                     }
-                    break
+
+                    if (attackFrame >= Mathf.FloorToInt(1000f * config.atkCd / 100f)) {
+                        bossView.curAckFrame = 0;
+                    }
+                    break;
                 }
             }
-            if (l >= i) {
-                Util.resetAtkCd(petSkin, atkCd);
-                let {atkTar: t, moveTar: i, moveBoss: s} = UtilFind.findTar(petSkin);
-                if (t) {
-                    petSkin.subState = SheepRoleSubState.AttackAwait;
-                    petSkin.animType = SheepRoleAnimType.Idle;
-                    return
+        }
+
+        public void update_role_state_in(PetView petSkin) {
+            if (petSkin.conf.skillIn == 0) return;
+
+            SheepSkill skill = SheepSkill.getById(petSkin.conf.skillIn);
+            if (skill.skillType != SheepSkillType.Boom) return;
+
+            SheepSkillSubBoom boom = SheepSkillSubBoom.getById(skill.id);
+            if (petSkin.animFrame != 1) return;
+
+            float fallbackX = petSkin.camp == SheepCamp.Red ? -1200f : 1200f;
+            (int xn, int yn) block = Util.getXnYn(fallbackX, 0f);
+            PetView target = null;
+            UtilFind.findNearBlocksByAckView(petSkin, block.xn, block.yn, 100, candidate => {
+                target = candidate;
+                return true;
+            });
+
+            if (target != null) {
+                petSkin.posBefX = petSkin.posX;
+                petSkin.posBefY = petSkin.posY;
+                petSkin.posX = target.posX;
+                petSkin.posY = target.posY;
+                petSkin.animX = target.posX;
+                petSkin.animY = target.posY;
+            }
+            else {
+                petSkin.posBefX = fallbackX;
+                petSkin.posBefY = 0f;
+                petSkin.posX = fallbackX;
+                petSkin.posY = 0f;
+                petSkin.animX = fallbackX;
+                petSkin.animY = 0f;
+            }
+
+            petSkin.readySkillId = boom.id;
+            petSkin.isLock = true;
+        }
+
+        public void update_role_state_move(PetView petSkin, bool logicTick, float deltaSeconds) {
+            if (petSkin.isLock) return;
+
+            FindTarResult result = UtilFind.findTar(petSkin);
+            if (result.atkTar != null) {
+                petSkin.state = SheepRoleState.Attack;
+                petSkin.subState = SheepRoleSubState.AttackAwait;
+                return;
+            }
+            if (result.moveTar != null) {
+                petSkin.subState = SheepRoleSubState.MoveTar;
+                Util.moveTar(petSkin, result.moveTar, deltaSeconds, logicTick);
+                return;
+            }
+            if (result.moveBoss != null) {
+                petSkin.subState = SheepRoleSubState.MoveBoss;
+                Util.moveTar(petSkin, result.moveBoss, deltaSeconds, logicTick);
+                return;
+            }
+
+            Debug.LogWarning("移动状态没有目标: pet=" + petSkin.index);
+        }
+
+        public void update_role_state_attack(PetView petSkin, bool logicTick, float deltaSeconds) {
+            SheepRoleAtkMoveType attackMoveType = (SheepRoleAtkMoveType)petSkin.conf.atkMoveType;
+            if (petSkin.conf.isLoongStopDistance != 0) {
+                float bossX = petSkin.camp == SheepCamp.Red ? sheepMode.loongX : -sheepMode.loongX;
+                if (Util.dis(petSkin.posX, petSkin.posY, bossX, 0f) <= petSkin.conf.loongStopDistanceR) {
+                    attackMoveType = SheepRoleAtkMoveType.None;
                 }
-                if (i) {
-                    petSkin.state = SheepRoleState.Move;
-                    petSkin.subState = SheepRoleSubState.MoveTar;
-                    petSkin.animType = SheepRoleAnimType.Idle;
-                    return
+            }
+
+            if (petSkin.subState == SheepRoleSubState.AttackAwait) {
+                if (!Util.isAtkCd(petSkin)) {
+                    petSkin.subState = SheepRoleSubState.AttackAnim;
+                    petSkin.animType = SheepRoleAnimType.Attack;
                 }
-                if (s) {
+            }
+            else if (petSkin.subState == SheepRoleSubState.AttackAnim) {
+                SheepRoleTypeInfo config = petSkin.conf;
+                int finishFrame = config.finishAtk;
+                int animationFrame = petSkin.animFrame;
+                int[] readyFrames = config.readyAtks ?? Array.Empty<int>();
+
+                foreach (int readyFrame in readyFrames) {
+                    if (animationFrame != readyFrame) continue;
+
+                    PetView target;
+                    if (config.atkType == SheepRoleAtkType.Throw) {
+                        target = UtilFind.findSortAck(petSkin, config.findR);
+                        if (config.roleType == SheepRoleType.pao_che) {
+                            PetView backBoss = Util.getBackBoss(petSkin.camp);
+                            if (backBoss != null && Util.isCanAckByRole(petSkin, backBoss)) {
+                                target = backBoss;
+                            }
+                        }
+                    }
+                    else {
+                        target = UtilFind.findNearAck(petSkin);
+                    }
+
+                    if (config.bullet != null && config.bullet.Length > 0) {
+                        int bulletConfigIndex = petSkin.camp == SheepCamp.Red ? 0 : 1;
+                        bulletConfigIndex = Math.Min(bulletConfigIndex, config.bullet.Length - 1);
+                        bullte_creates.Add(new BullteCreate {
+                            view_pet = petSkin,
+                            bulletId = config.bullet[bulletConfigIndex],
+                            view_tar_pet = target
+                        });
+                    }
+                    else if (target != null) {
+                        UtilAck.ackTar(petSkin, target);
+                    }
+                    break;
+                }
+
+                if (animationFrame >= finishFrame) {
+                    Util.resetAtkCd(petSkin, config.atkCd);
+                    FindTarResult result = UtilFind.findTar(petSkin);
+                    if (result.atkTar != null) {
+                        petSkin.subState = SheepRoleSubState.AttackAwait;
+                        petSkin.animType = SheepRoleAnimType.Idle;
+                        return;
+                    }
+                    if (result.moveTar != null) {
+                        petSkin.state = SheepRoleState.Move;
+                        petSkin.subState = SheepRoleSubState.MoveTar;
+                        petSkin.animType = SheepRoleAnimType.Idle;
+                        return;
+                    }
+                    if (result.moveBoss != null) {
+                        petSkin.state = SheepRoleState.Move;
+                        petSkin.subState = SheepRoleSubState.MoveBoss;
+                        petSkin.animType = SheepRoleAnimType.Idle;
+                        return;
+                    }
+                }
+            }
+
+            bool canMoveDuringAttack = attackMoveType == SheepRoleAtkMoveType.Move ||
+                                       (attackMoveType == SheepRoleAtkMoveType.CdMove &&
+                                        petSkin.subState == SheepRoleSubState.AttackAwait);
+            if (logicTick && canMoveDuringAttack) {
+                PetView target = UtilFind.findNearAck(petSkin);
+                if (target != null &&
+                    Util.disByRole(petSkin, target) > petSkin.conf.atkMinMoveR + target.conf.collideR) {
+                    Util.moveTar(petSkin, target, deltaSeconds, true);
+                }
+            }
+        }
+
+        public void update_role_state_killer(PetView petSkin) {
+            SheepSkillSubKiller killer = SheepSkillSubKiller.getById(petSkin.readySkillId);
+            int animationFrame = petSkin.animFrame;
+
+            if (animationFrame == killer.findMoveFrame) {
+                bool interruptedByShield = false;
+                if (petSkin.conf.roleType == SheepRoleType.ci_ke) {
+                    UtilFind.foreachFront(
+                        petSkin,
+                        target => {
+                            if (target.conf.roleType == SheepRoleType.dun_bing) {
+                                interruptedByShield = true;
+                            }
+                        },
+                        petSkin.conf.findR,
+                        60f
+                    );
+                }
+
+                if (interruptedByShield) {
                     petSkin.state = SheepRoleState.Move;
                     petSkin.subState = SheepRoleSubState.MoveBoss;
                     petSkin.animType = SheepRoleAnimType.Idle;
-                    return
+                    return;
                 }
-            }
-        }
-        if (t && (o == SheepRoleAtkMoveType.Move || o == SheepRoleAtkMoveType.CdMove && petSkin.subState == SheepRoleSubState.AttackAwait)) {
-            let s = UtilFind.findNearAck(petSkin);
-            s && Util.disByRole(petSkin, s) > petSkin.conf.atkMinMoveR + s.conf.collideR && Util.moveTar(petSkin, s, i, t)
-        }
-    }
 
-    public void update_role_state_killer(PetView petSkin){
-        let t = SheepSkillSubKiller.getById(petSkin.readySkillId);
-        let i = petSkin.animFrame;
-        if (i == t.findMoveFrame) {
-            let i = !1;
-            const s = petSkin.conf;
-            if (petSkin.conf.roleType == SheepRoleType.ci_ke && UtilFind.foreachFront(petSkin, (e => {
-                e.conf.roleType != SheepRoleType.dun_bing || (i = !0)
-            }), s.findR, 60), i) {
-                console.log("刺客被中断，直接回到移动状态"), petSkin.state = SheepRoleState.Move, petSkin.subState = SheepRoleSubState.MoveBoss, petSkin.animType = SheepRoleAnimType.Idle;
-                return
-            }
-            let o = UtilFind.findFarAck(petSkin, t.findR);
-            o ? petSkin.logicMove(o.posX, o.posY) : (petSkin.state = SheepRoleState.Move, petSkin.subState = SheepRoleSubState.MoveBoss, petSkin.animType = SheepRoleAnimType.Idle)
-        }
-        i == t.atkFrame && UtilAck.ackMe(petSkin, t.spiltRadiusBet, t.atkBet, t.atkFindR)
-        if (i >= t.endFrame) {
-            let i = petSkin.subState;
-            if (i == SheepRoleSubState.KillerEnd || i - SheepRoleSubState.KillerStart >= t.cnt) {
-                petSkin.state = SheepRoleState.Move;
-                petSkin.subState = SheepRoleSubState.MoveBoss;
-                petSkin.animType = SheepRoleAnimType.Idle;
-                return;
-            }
-            petSkin.subState = i + 1;
-            petSkin.animType = SheepRoleAnimType.Killer
-        }
-    }
-
-    public void update_role_state_boom(PetView petSkin){
-        let t = SheepSkill.getById(petSkin.readySkillId);
-        let i = SheepSkillSubBoom.getById(t.id);
-        let s = petSkin.animFrame;
-        if (s == i.atkFrame) {
-            let t = [];
-            petSkin.conf.roleType != SheepRoleType.chong_feng_bing && petSkin.conf.roleType != SheepRoleType.qi_lin || t.push(SheepRoleType.qi_lin), UtilAck.ackMe(petSkin, i.spiltRadiusBet, i.atkBet, i.atkFindR, i.hitBackDistance, t)
-        }
-        s >= i.endFrame && (petSkin.isLock = 0, i.endState == SheepRoleState.Move ? (petSkin.state = SheepRoleState.Move, petSkin.subState = SheepRoleSubState.MoveBoss, petSkin.animType = SheepRoleAnimType.Idle) : i.endState == SheepRoleState.Rigidity ? (petSkin.state = SheepRoleState.Rigidity, petSkin.animType = SheepRoleAnimType.Idle, petSkin.readySkillId = i.endSkill) : i.endState == SheepRoleState.Dead ? (petSkin.isDie = !0, petSkin.state = SheepRoleState.Dead) : i.endState == SheepRoleState.Palm ? (petSkin.state = SheepRoleState.Palm, petSkin.subState = SheepRoleSubState.Palm, petSkin.animType = SheepRoleAnimType.Palm, petSkin.readySkillId = i.endSkill) : console.error("endState错误"))
-    }
-
-    public void update_role_state_invincible(PetView petSkin){
-        let t = petSkin.animFrame, i = SheepSkill.getById(petSkin.readySkillId),
-            s = SheepSkillSubInvincible.getById(i.id), o = s.healFrames;
-        for (const i of o) if (t == i) {
-            let t = Math.floor((petSkin.conf.hp - petSkin.curHp) * (s.healHealthPercent / 100));
-            UtilAck.hurtByRole(petSkin, petSkin, -t);
-            break
-        }
-        let l = s.atkFrames;
-        for (const i of l) if (t == i) {
-            UtilAck.ackMe(petSkin, s.spiltRadiusBet, s.atkBet, s.atkFindR);
-            break
-        }
-        t >= s.endFrame && (petSkin.state = SheepRoleState.Move, petSkin.subState = SheepRoleSubState.MoveBoss, petSkin.animType = SheepRoleAnimType.Idle)
-    }
-    public void update_role_state_bladestorm(PetView petSkin, t, i){
-        let s = petSkin.animFrame;
-        let o = SheepSkill.getById(petSkin.readySkillId);
-        let l = SheepSkillSubBladestorm.getById(o.id);
-        if (t) {
-            petSkin.posX;
-            let {atkTar: t, moveTar: s, moveBoss: o} = UtilFind.findTar(petSkin, l.findR), n = t || s || o;
-            Util.dirTar(petSkin, n);
-            let r = l.speed;
-            let x = petSkin.posX + petSkin.dirX * r * i * 3;
-            let y = petSkin.posY + petSkin.dirY * r * i * 3;
-            petSkin.logicMove(x, y);
-        }
-        let n = l.atkFrames;
-        for (const t of n) {
-            if (s == t) {
-                UtilAck.ackMe(petSkin, l.spiltRadiusBet, l.atkBet, l.atkFindR);
-                break
-            }
-        }
-        s >= l.endFrame && (petSkin.state = SheepRoleState.Move, petSkin.subState = SheepRoleSubState.MoveBoss, petSkin.animType = SheepRoleAnimType.Idle)
-    }
-    public void update_role_state_palm(PetView petSkin){
-        let t = petSkin.animFrame, i = SheepSkill.getById(petSkin.readySkillId),
-            s = SheepSkillSubPalm.getById(i.id), o = s.healFrames;
-        for (const i of o) if (t == i) {
-            let t = Math.floor((petSkin.conf.hp - petSkin.curHp) * (s.healHealthPercent / 100));
-            UtilAck.hurtByRole(petSkin, petSkin, -t);
-            break
-        }
-        let l = s.atkFrames;
-        for (const i of l) if (t == i) {
-            UtilAck.ackMe(petSkin, s.spiltRadiusBet, s.atkBet, s.atkFindR);
-            break
-        }
-        let n = s.hitBackFrames;
-        for (let i = 0; i < n.length; i++) {
-            const o = n[i], l = s.hitBackDistances[i];
-            if (t == o) {
-                UtilAck.hitBackMe(petSkin, s.spiltRadiusBet, s.atkFindR, l);
-                break
-            }
-        }
-        t >= s.endFrame && (petSkin.state = SheepRoleState.Move, petSkin.subState = SheepRoleSubState.MoveBoss, petSkin.animType = SheepRoleAnimType.Idle)
-    }
-    public void update_role_state_callbullets(PetView petSkin){
-        let t = petSkin.animFrame;
-        let i = SheepSkill.getById(petSkin.readySkillId);
-        let s = SheepSkillSubCallBullets.getById(i.id);
-        let o = 0;
-        if (s.frameStep) {
-            t % s.frameStep == 0 && (o = s.frameCnt);
-        } else {
-            let e = s.callFrames;
-            for (let i = 0; i < e.length; i++) {
-                if (t == e[i]) {
-                    o = s.callCnts[i];
-                    break
+                PetView target = UtilFind.findFarAck(petSkin, killer.findR);
+                if (target != null) {
+                    petSkin.logicMove(target.posX, target.posY);
                 }
-            }
-        }
-        if (o) {
-            for (let t = 0; t < o; t++) {
-                if (1 == s.type) {
-                    let t = petSkin.posX + s.startOffsetPos[0];
-                    let i = petSkin.posY + s.startOffsetPos[1];
-                    let o = s.startOffsetPos[2];
-                    let l = 360 * Math.random();
-                    let n = petSkin.posX + petSkin.dirX * s.len + s.endRadius * Math.cos(l);
-                    let r = petSkin.posY + petSkin.dirY * s.len + s.endRadius * Math.sin(l);
-                    let a = 0;
-                    this.bullte_creates.push({
-                        view_pet: petSkin,
-                        bulletId: s.bullet,
-                        info: {startX: t, startY: i, startZ: o, endX: n, endY: r, endZ: a}
-                    })
-                } else if (2 == s.type) {
-                    let t = s.startOffsetPos[2];
-                    let i = 360 * Math.random();
-                    let o = petSkin.posX + petSkin.dirX * s.len + s.endRadius * Math.cos(i);
-                    let l = petSkin.posY + petSkin.dirY * s.len + s.endRadius * Math.sin(i);
-                    let n = 0;
-                    this.bullte_creates.push({
-                        view_pet: petSkin,
-                        bulletId: s.bullet,
-                        info: {
-                            startX: o,
-                            startY: l,
-                            startZ: t,
-                            endX: o,
-                            endY: l,
-                            endZ: n,
-                            dirX: 0,
-                            dirY: 0,
-                            dirZ: -1
-                        }
-                    })
-                } else if (3 == s.type) {
-                    this.bullte_creates.push({
-                        view_pet: petSkin,
-                        bulletId: s.bullet,
-                        info: {dirX: 0, dirY: 0, dirZ: -1, angle: 360 / o * t}
-                    });
-                } else if (4 == s.type) {
-                    this.bullte_creates.push({
-                        view_pet: petSkin,
-                        bulletId: s.bullet,
-                        info: {dirX: 1, dirY: 0, dirZ: 0}
-                    });
-                } else {
-                    this.bullte_creates.push({view_pet: petSkin, bulletId: s.bullet});
-                }
-            }
-        }
-        t >= s.endFrame && (petSkin.state = SheepRoleState.Move, petSkin.subState = SheepRoleSubState.MoveBoss, petSkin.animType = SheepRoleAnimType.Idle)
-    }
-    public void update_role_state_buff(PetView petSkin){
-        let t = petSkin.animFrame;
-        let i = SheepSkill.getById(petSkin.readySkillId);
-        if(t >= SheepSkillSubBuff.getById(i.id).endFrame) {
-            petSkin.state = SheepRoleState.Move;
-            petSkin.subState = SheepRoleSubState.MoveBoss;
-            petSkin.animType = SheepRoleAnimType.Idle
-        }
-    }
-    public void update_role_state_rigidity(PetView petSkin){
-        let t = SheepSkill.getById(petSkin.readySkillId), i = SheepSkillSubRigidity.getById(t.id);
-        petSkin.animFrame >= i.endFrame && (petSkin.state = SheepRoleState.SpinAtk, petSkin.animType = SheepRoleAnimType.Attack, petSkin.readySkillId = i.endSkill)
-    }
-    public void update_role_state_spinatk(PetView petSkin, t, i){
-        let s = petSkin.posX;
-        let o = petSkin.posY;
-        let {xn: l, yn: n} = Util.getXnYn(s, o);
-        let r = petSkin.animFrame;
-        let a = SheepSkill.getById(petSkin.readySkillId);
-        let c = SheepSkillSubSpinAtk.getById(a.id);
-        if (1 == r) {
-            let t = UtilFind.findSortAck1(petSkin, petSkin.conf.findR);
-            t && Util.dirTar(petSkin, t)
-        }
-        if (t) {
-            let s = !0;
-            UtilFind.forNearBlocksByAckView(petSkin, l, n, petSkin.conf.findR, (t => !(t.isDie || t.camp == petSkin.camp || 0 == t.roleId || (s && t.conf.roleType == SheepRoleType.dun_bing && Util.isCanAckByRole(petSkin, t) && (s = !1), !Util.isCanAckByRole(petSkin, t)) || (UtilAck.ackTar(petSkin, t), 1)))), s && Util.moveTar(petSkin, null, i, t)
-        }
-        r >= c.endFrame && (petSkin.state = c.endState, petSkin.animType = SheepRoleAnimType.Boom, petSkin.readySkillId = c.endSkill)
-    }
-
-    /**
-     *
-     * @param petSkin {PetView}
-     * @param t
-     * @param i
-     * @returns {Promise<void>}
-     */
-    public void update_role_state(PetView petSkin,bool t,float i = 0.033f) {
-        Util.subAtkCd(petSkin, i);
-        switch (petSkin.state) {
-            case SheepRoleState.Start:
-                if (!t) {
-                    break;
-                }
-                this.update_role_state_start(petSkin, t, i);
-                break;
-            case SheepRoleState.In:
-                // 这一整段都是羊神专属进场逻辑 !!!
-                this.update_role_state_in(petSkin);
-                break;
-            case SheepRoleState.Spurt:
-                if (!t) {
-                    break;
-                }
-                this.update_role_state_spurt(petSkin, t, i);
-                break;
-            case SheepRoleState.Charge:
-                if (!t) {
-                    break;
-                }
-                this.update_role_state_charge(petSkin, t, i);
-                break;
-            case SheepRoleState.ChargePlus:
-                if (!t) {
-                    break;
-                }
-                this.update_role_state_charge_plus(petSkin, t, i);
-                break;
-            case SheepRoleState.SpinSpurt:
-                if (!t) {
-                    break;
-                }
-                this.update_role_state_spinspurt(petSkin, t, i);
-                break;
-            case SheepRoleState.Move:
-                if (!t) {
-                    break;
-                }
-                this.update_role_state_move(petSkin,t,i)
-                break;
-            case SheepRoleState.Attack:
-                this.update_role_state_attack(petSkin,t,i);
-                break;
-            case SheepRoleState.Killer:
-                this.update_role_state_killer(petSkin,t,i);
-                break;
-            case SheepRoleState.Boom:
-                this.update_role_state_boom(petSkin,t,i);
-                break;
-            case SheepRoleState.Invincible:
-                this.update_role_state_invincible(petSkin,t,i);
-                break;
-            case SheepRoleState.Bladestorm:
-                this.update_role_state_bladestorm(petSkin,t,i);
-                break;
-            case SheepRoleState.Palm:
-                this.update_role_state_palm(petSkin,t,i);
-                break;
-            case SheepRoleState.CallBullets:
-                this.update_role_state_callbullets(petSkin,t,i);
-                break;
-            case SheepRoleState.Buff:
-                this.update_role_state_buff(petSkin,t,i);
-                break;
-            case SheepRoleState.Rigidity:
-                this.update_role_state_rigidity(petSkin,t,i);
-                break;
-            case SheepRoleState.SpinAtk:
-                this.update_role_state_spinatk(petSkin,t,i);
-        }
-
-        if (petSkin.impulseX || petSkin.impulseY) {
-            if (!petSkin.isDie && petSkin.curHp > 0) {
-                float t1 = petSkin.impulseX;
-                float i1 = petSkin.impulseY;
-                petSkin.logicMove(petSkin.animX + t1, petSkin.posY + i1);
-            }
-            petSkin.impulseX = 0;
-            petSkin.impulseY = 0;
-        }
-    }
-
-    /**
-     *
-     * @param petSkin {PetView}
-     * @param t
-     * @param s
-     */
-    public void update_role_state_start(PetView petSkin,bool t,float s) {
-        if (this.state == SheepRoomState.Start) {
-            if (t) {
-                let t = petSkin.posX;
-                let i = petSkin.posY;
-                let o = petSkin.tarPosX;
-                let l = petSkin.tarPosY;
-                let n = Util.dis(t, i, o, l);
-                let r = 3 * petSkin.conf.runSpeed;
-                if (n > r * s) {
-                    let [t, i] = Util.dirTarByPos(petSkin, petSkin.tarPosX, petSkin.tarPosY);
-                    let o = {x: petSkin.posX, y: petSkin.posY};
-                        let l = {x: t * r * s, y: i * r * s};
-                        let n = {x: o.x + l.x, y: o.y + l.y};
-                    petSkin.logicMove(n.x, n.y)
-                } else {
-                    petSkin.logicMove(o, l)
-                }
-            }
-        } else if (petSkin.conf.skillSpurt) {
-            let t = SheepSkill.getById(petSkin.conf.skillSpurt);
-            if (t.skillType == SheepSkillType.Charge) {
-                petSkin.state = SheepRoleState.Charge;
-                petSkin.subState = SheepRoleSubState.Spurt;
-                petSkin.animType = SheepRoleAnimType.Spurt;
-            } else if (t.skillType == SheepSkillType.SpinSpurt) {
-                petSkin.state = SheepRoleState.SpinSpurt;
-                petSkin.animType = SheepRoleAnimType.Attack;
-            } else {
-                petSkin.state = SheepRoleState.Spurt;
-                petSkin.subState = SheepRoleSubState.Spurt;
-                if (petSkin.conf.isSpurtAnim) {
-                    petSkin.animType = SheepRoleAnimType.Spurt;
-                } else {
+                else {
+                    petSkin.state = SheepRoleState.Move;
+                    petSkin.subState = SheepRoleSubState.MoveBoss;
                     petSkin.animType = SheepRoleAnimType.Idle;
                 }
             }
-        } else {
-            petSkin.state = SheepRoleState.Spurt;
-            petSkin.subState = SheepRoleSubState.Spurt;
-            if (petSkin.conf.isSpurtAnim) {
-                petSkin.animType = SheepRoleAnimType.Spurt;
-            } else {
+
+            if (animationFrame == killer.atkFrame) {
+                UtilAck.ackMe(petSkin, killer.spiltRadiusBet, killer.atkBet, killer.atkFindR);
+            }
+
+            if (animationFrame >= killer.endFrame) {
+                SheepRoleSubState current = petSkin.subState;
+                if (current == SheepRoleSubState.KillerEnd ||
+                    (int)current - (int)SheepRoleSubState.KillerStart >= killer.cnt) {
+                    petSkin.state = SheepRoleState.Move;
+                    petSkin.subState = SheepRoleSubState.MoveBoss;
+                    petSkin.animType = SheepRoleAnimType.Idle;
+                    return;
+                }
+
+                petSkin.subState = (SheepRoleSubState)((int)current + 1);
+                petSkin.animType = SheepRoleAnimType.Killer;
+            }
+        }
+
+        public void update_role_state_boom(PetView petSkin) {
+            SheepSkill skill = SheepSkill.getById(petSkin.readySkillId);
+            SheepSkillSubBoom boom = SheepSkillSubBoom.getById(skill.id);
+            int animationFrame = petSkin.animFrame;
+
+            if (animationFrame == boom.atkFrame) {
+                List<SheepRoleType> excluded = new List<SheepRoleType>();
+                if (petSkin.conf.roleType == SheepRoleType.chong_feng_bing ||
+                    petSkin.conf.roleType == SheepRoleType.qi_lin) {
+                    excluded.Add(SheepRoleType.qi_lin);
+                }
+                UtilAck.ackMe(
+                    petSkin,
+                    boom.spiltRadiusBet,
+                    boom.atkBet,
+                    boom.atkFindR,
+                    boom.hitBackDistance,
+                    excluded
+                );
+            }
+
+            if (animationFrame < boom.endFrame) return;
+
+            petSkin.isLock = false;
+            SheepRoleState endState = (SheepRoleState)boom.endState;
+            switch (endState) {
+                case SheepRoleState.Move:
+                    petSkin.state = SheepRoleState.Move;
+                    petSkin.subState = SheepRoleSubState.MoveBoss;
+                    petSkin.animType = SheepRoleAnimType.Idle;
+                    break;
+                case SheepRoleState.Rigidity:
+                    petSkin.state = SheepRoleState.Rigidity;
+                    petSkin.animType = SheepRoleAnimType.Idle;
+                    petSkin.readySkillId = boom.endSkill;
+                    break;
+                case SheepRoleState.Dead:
+                    petSkin.isDie = true;
+                    petSkin.state = SheepRoleState.Dead;
+                    break;
+                case SheepRoleState.Palm:
+                    petSkin.state = SheepRoleState.Palm;
+                    petSkin.subState = SheepRoleSubState.Palm;
+                    petSkin.animType = SheepRoleAnimType.Palm;
+                    petSkin.readySkillId = boom.endSkill;
+                    break;
+                default:
+                    Debug.LogError("Boom.endState 错误: " + boom.endState);
+                    break;
+            }
+        }
+
+        public void update_role_state_invincible(PetView petSkin) {
+            int animationFrame = petSkin.animFrame;
+            SheepSkill skill = SheepSkill.getById(petSkin.readySkillId);
+            SheepSkillSubInvincible config = SheepSkillSubInvincible.getById(skill.id);
+
+            foreach (int healFrame in config.healFrames ?? Array.Empty<int>()) {
+                if (animationFrame != healFrame) continue;
+                int heal = Mathf.FloorToInt((petSkin.conf.hp - petSkin.curHp) * (config.healHealthPercent / 100f));
+                UtilAck.hurtByRole(petSkin, petSkin, -heal);
+                break;
+            }
+
+            foreach (int attackFrame in config.atkFrames ?? Array.Empty<int>()) {
+                if (animationFrame != attackFrame) continue;
+                UtilAck.ackMe(petSkin, config.spiltRadiusBet, config.atkBet, config.atkFindR);
+                break;
+            }
+
+            if (animationFrame >= config.endFrame) {
+                petSkin.state = SheepRoleState.Move;
+                petSkin.subState = SheepRoleSubState.MoveBoss;
                 petSkin.animType = SheepRoleAnimType.Idle;
             }
         }
-    }
 
-    /**
-     *
-     * @param e {PetView}
-     * @param t
-     * @param i
-     * @return {*}
-     */
-    public void update_role_state_charge(PetView e, t, i) {
-        let o = e.posX, l = e.posY, {xn: n, yn: r} = Util.getXnYn(o, l);
-        if (e.camp == SheepCamp.Red && e.posX > e.conf.runEndX || e.camp == SheepCamp.Blue && e.posX < -e.conf.runEndX) {
-            let t = !1;
-            if (UtilFind.findNearBlocksByAckView(e, n, r, 5, (i => (i.isDie || i.camp == e.camp || 0 == i.roleId || (t = !0), t))), t) {
-                e.state = SheepRoleState.Boom;
-                e.subState = SheepRoleSubState.Boom;
-                let t = SheepSkillSubCharge.getById(e.conf.skillSpurt);
-                let i = SheepSkillSubBoom.getById(t.endSkill);
-                i.isAnim ? e.animType = SheepRoleAnimType.Boom : e.animType = SheepRoleAnimType.Idle;
-                e.readySkillId = i.id
-            } else {
-                e.state = SheepRoleState.Move;
-                e.subState = SheepRoleSubState.MoveBoss;
-                e.animType = SheepRoleAnimType.Idle
+        public void update_role_state_bladestorm(PetView petSkin, bool logicTick, float deltaSeconds) {
+            int animationFrame = petSkin.animFrame;
+            SheepSkill skill = SheepSkill.getById(petSkin.readySkillId);
+            SheepSkillSubBladestorm config = SheepSkillSubBladestorm.getById(skill.id);
+
+            if (logicTick) {
+                FindTarResult result = UtilFind.findTar(petSkin, config.findR);
+                PetView target = result.atkTar ?? result.moveTar ?? result.moveBoss;
+                if (target != null) Util.dirTar(petSkin, target);
+                petSkin.logicMove(
+                    petSkin.posX + petSkin.dirX * config.speed * deltaSeconds * 3f,
+                    petSkin.posY + petSkin.dirY * config.speed * deltaSeconds * 3f
+                );
             }
-        } else {
-            let s = false;
-            UtilFind.findNearBlocksByAckView(e, n, r, 5, t => {
-                if (!t.isDie && t.camp != e.camp && 0 != t.roleId && Util.isCanAckByRole(e, t)) {
-                    if (t.conf.roleType == SheepRoleType.xiao_bing) {
-                        let i = t;
-                        UtilAck.ackTar(e, i)
-                    } else {
-                        s = true;
+
+            foreach (int attackFrame in config.atkFrames ?? Array.Empty<int>()) {
+                if (animationFrame != attackFrame) continue;
+                UtilAck.ackMe(petSkin, config.spiltRadiusBet, config.atkBet, config.atkFindR);
+                break;
+            }
+
+            if (animationFrame >= config.endFrame) {
+                petSkin.state = SheepRoleState.Move;
+                petSkin.subState = SheepRoleSubState.MoveBoss;
+                petSkin.animType = SheepRoleAnimType.Idle;
+            }
+        }
+
+        public void update_role_state_palm(PetView petSkin) {
+            int animationFrame = petSkin.animFrame;
+            SheepSkill skill = SheepSkill.getById(petSkin.readySkillId);
+            SheepSkillSubPalm config = SheepSkillSubPalm.getById(skill.id);
+
+            foreach (int healFrame in config.healFrames ?? Array.Empty<int>()) {
+                if (animationFrame != healFrame) continue;
+                int heal = Mathf.FloorToInt((petSkin.conf.hp - petSkin.curHp) * (config.healHealthPercent / 100f));
+                UtilAck.hurtByRole(petSkin, petSkin, -heal);
+                break;
+            }
+
+            foreach (int attackFrame in config.atkFrames ?? Array.Empty<int>()) {
+                if (animationFrame != attackFrame) continue;
+                UtilAck.ackMe(petSkin, config.spiltRadiusBet, config.atkBet, config.atkFindR);
+                break;
+            }
+
+            int[] hitBackFrames = config.hitBackFrames ?? Array.Empty<int>();
+            int[] hitBackDistances = config.hitBackDistances ?? Array.Empty<int>();
+            for (int index = 0; index < hitBackFrames.Length; index++) {
+                if (animationFrame != hitBackFrames[index]) continue;
+                float distance = index < hitBackDistances.Length ? hitBackDistances[index] : 0f;
+                UtilAck.hitBackMe(petSkin, config.spiltRadiusBet, config.atkFindR, distance);
+                break;
+            }
+
+            if (animationFrame >= config.endFrame) {
+                petSkin.state = SheepRoleState.Move;
+                petSkin.subState = SheepRoleSubState.MoveBoss;
+                petSkin.animType = SheepRoleAnimType.Idle;
+            }
+        }
+
+        public void update_role_state_callbullets(PetView petSkin) {
+            int animationFrame = petSkin.animFrame;
+            SheepSkill skill = SheepSkill.getById(petSkin.readySkillId);
+            SheepSkillSubCallBullets config = SheepSkillSubCallBullets.getById(skill.id);
+            int callCount = 0;
+
+            if (config.frameStep != 0) {
+                if (animationFrame % config.frameStep == 0) callCount = config.frameCnt;
+            }
+            else {
+                int[] callFrames = config.callFrames ?? Array.Empty<int>();
+                int[] callCounts = config.callCnts ?? Array.Empty<int>();
+                for (int index = 0; index < callFrames.Length; index++) {
+                    if (animationFrame != callFrames[index]) continue;
+                    callCount = index < callCounts.Length ? callCounts[index] : 0;
+                    break;
+                }
+            }
+
+            for (int shotIndex = 0; shotIndex < callCount; shotIndex++) {
+                if (config.type == 1) {
+                    float startX = petSkin.posX + config.startOffsetPos[0];
+                    float startY = petSkin.posY + config.startOffsetPos[1];
+                    float startZ = config.startOffsetPos[2];
+                    float angle = UnityEngine.Random.Range(0f, Mathf.PI * 2f);
+                    float endX = petSkin.posX + petSkin.dirX * config.len + config.endRadius * Mathf.Cos(angle);
+                    float endY = petSkin.posY + petSkin.dirY * config.len + config.endRadius * Mathf.Sin(angle);
+                    bullte_creates.Add(new BullteCreate {
+                        view_pet = petSkin,
+                        bulletId = config.bullet,
+                        info = new Info {
+                            startX = startX,
+                            startY = startY,
+                            startZ = startZ,
+                            endX = endX,
+                            endY = endY,
+                            endZ = 0f,
+                            hasStart = true,
+                            hasEnd = true
+                        }
+                    });
+                }
+                else if (config.type == 2) {
+                    float startZ = config.startOffsetPos[2];
+                    float angle = UnityEngine.Random.Range(0f, Mathf.PI * 2f);
+                    float x = petSkin.posX + petSkin.dirX * config.len + config.endRadius * Mathf.Cos(angle);
+                    float y = petSkin.posY + petSkin.dirY * config.len + config.endRadius * Mathf.Sin(angle);
+                    bullte_creates.Add(new BullteCreate {
+                        view_pet = petSkin,
+                        bulletId = config.bullet,
+                        info = new Info {
+                            startX = x,
+                            startY = y,
+                            startZ = startZ,
+                            endX = x,
+                            endY = y,
+                            endZ = 0f,
+                            dirX = 0f,
+                            dirY = 0f,
+                            dirZ = -1f,
+                            hasStart = true,
+                            hasEnd = true
+                        }
+                    });
+                }
+                else if (config.type == 3) {
+                    bullte_creates.Add(new BullteCreate {
+                        view_pet = petSkin,
+                        bulletId = config.bullet,
+                        info = new Info {
+                            dirX = 0f,
+                            dirY = 0f,
+                            dirZ = -1f,
+                            angle = callCount > 0 ? 360f / callCount * shotIndex : 0f
+                        }
+                    });
+                }
+                else if (config.type == 4) {
+                    bullte_creates.Add(new BullteCreate {
+                        view_pet = petSkin,
+                        bulletId = config.bullet,
+                        info = new Info { dirX = 1f, dirY = 0f, dirZ = 0f }
+                    });
+                }
+                else {
+                    bullte_creates.Add(new BullteCreate {
+                        view_pet = petSkin,
+                        bulletId = config.bullet
+                    });
+                }
+            }
+
+            if (animationFrame >= config.endFrame) {
+                petSkin.state = SheepRoleState.Move;
+                petSkin.subState = SheepRoleSubState.MoveBoss;
+                petSkin.animType = SheepRoleAnimType.Idle;
+            }
+        }
+
+        public void update_role_state_buff(PetView petSkin) {
+            SheepSkill skill = SheepSkill.getById(petSkin.readySkillId);
+            SheepSkillSubBuff config = SheepSkillSubBuff.getById(skill.id);
+            if (petSkin.animFrame >= config.endFrame) {
+                petSkin.state = SheepRoleState.Move;
+                petSkin.subState = SheepRoleSubState.MoveBoss;
+                petSkin.animType = SheepRoleAnimType.Idle;
+            }
+        }
+
+        public void update_role_state_rigidity(PetView petSkin) {
+            SheepSkill skill = SheepSkill.getById(petSkin.readySkillId);
+            SheepSkillSubRigidity config = SheepSkillSubRigidity.getById(skill.id);
+            if (petSkin.animFrame >= config.endFrame) {
+                petSkin.state = SheepRoleState.SpinAtk;
+                petSkin.animType = SheepRoleAnimType.Attack;
+                petSkin.readySkillId = config.endSkill;
+            }
+        }
+
+        public void update_role_state_spinatk(PetView petSkin, bool logicTick, float deltaSeconds) {
+            (int xn, int yn) block = Util.getXnYn(petSkin.posX, petSkin.posY);
+            int animationFrame = petSkin.animFrame;
+            SheepSkill skill = SheepSkill.getById(petSkin.readySkillId);
+            SheepSkillSubSpinAtk config = SheepSkillSubSpinAtk.getById(skill.id);
+
+            if (animationFrame == 1) {
+                PetView target = UtilFind.findSortAck1(petSkin, petSkin.conf.findR);
+                if (target != null) Util.dirTar(petSkin, target);
+            }
+
+            if (logicTick) {
+                bool noShieldTarget = true;
+                UtilFind.forNearBlocksByAckView(
+                    petSkin,
+                    block.xn,
+                    block.yn,
+                    petSkin.conf.findR,
+                    target => {
+                        if (target.isDie || target.camp == petSkin.camp || target.roleId == 0) return false;
+                        bool canAttack = Util.isCanAckByRole(petSkin, target);
+                        if (noShieldTarget &&
+                            target.conf.roleType == SheepRoleType.dun_bing &&
+                            canAttack) {
+                            noShieldTarget = false;
+                        }
+                        if (!canAttack) return false;
+                        UtilAck.ackTar(petSkin, target);
+                        return false;
                     }
-                }
-                return false
-            })
-            if (s) {
-                e.state = SheepRoleState.Boom;
-                e.subState = SheepRoleSubState.Boom;
-                let t = SheepSkillSubCharge.getById(e.conf.skillSpurt);
-                let i = SheepSkillSubBoom.getById(t.endSkill);
-                return i.isAnim ? e.animType = SheepRoleAnimType.Boom : e.animType = SheepRoleAnimType.Idle, void (e.readySkillId = i.id)
+                );
+                if (noShieldTarget) Util.moveTar(petSkin, null, deltaSeconds, true);
             }
-            let o = null;
-            UtilFind.findNearBlocksByAckView(e, n, r, e.conf.findR, t => {
-                // 跳过：死亡的、同阵营的、没有 roleId 的
-                if (t.isDie || t.camp == e.camp || t.roleId === 0) {
+
+            if (animationFrame >= config.endFrame) {
+                petSkin.state = (SheepRoleState)config.endState;
+                petSkin.animType = SheepRoleAnimType.Boom;
+                petSkin.readySkillId = config.endSkill;
+            }
+        }
+
+        public void update_role_state(PetView petSkin, bool logicTick, float deltaSeconds = 0.033f) {
+            Util.subAtkCd(petSkin, deltaSeconds);
+
+            switch (petSkin.state) {
+                case SheepRoleState.Start:
+                    if (logicTick) update_role_state_start(petSkin, true, deltaSeconds);
+                    break;
+                case SheepRoleState.In:
+                    update_role_state_in(petSkin);
+                    break;
+                case SheepRoleState.Spurt:
+                    if (logicTick) update_role_state_spurt(petSkin, true, deltaSeconds);
+                    break;
+                case SheepRoleState.Charge:
+                    if (logicTick) update_role_state_charge(petSkin, true, deltaSeconds);
+                    break;
+                case SheepRoleState.ChargePlus:
+                    if (logicTick) update_role_state_charge_plus(petSkin, true, deltaSeconds);
+                    break;
+                case SheepRoleState.SpinSpurt:
+                    if (logicTick) update_role_state_spinspurt(petSkin, true, deltaSeconds);
+                    break;
+                case SheepRoleState.Move:
+                    if (logicTick) update_role_state_move(petSkin, true, deltaSeconds);
+                    break;
+                case SheepRoleState.Attack:
+                    update_role_state_attack(petSkin, logicTick, deltaSeconds);
+                    break;
+                case SheepRoleState.Killer:
+                    update_role_state_killer(petSkin);
+                    break;
+                case SheepRoleState.Boom:
+                    update_role_state_boom(petSkin);
+                    break;
+                case SheepRoleState.Invincible:
+                    update_role_state_invincible(petSkin);
+                    break;
+                case SheepRoleState.Bladestorm:
+                    update_role_state_bladestorm(petSkin, logicTick, deltaSeconds);
+                    break;
+                case SheepRoleState.Palm:
+                    update_role_state_palm(petSkin);
+                    break;
+                case SheepRoleState.CallBullets:
+                    update_role_state_callbullets(petSkin);
+                    break;
+                case SheepRoleState.Buff:
+                    update_role_state_buff(petSkin);
+                    break;
+                case SheepRoleState.Rigidity:
+                    update_role_state_rigidity(petSkin);
+                    break;
+                case SheepRoleState.SpinAtk:
+                    update_role_state_spinatk(petSkin, logicTick, deltaSeconds);
+                    break;
+            }
+
+            if (Mathf.Abs(petSkin.impulseX) > Mathf.Epsilon ||
+                Mathf.Abs(petSkin.impulseY) > Mathf.Epsilon) {
+                if (!petSkin.isDie && petSkin.curHp > 0f) {
+                    petSkin.logicMove(
+                        petSkin.animX + petSkin.impulseX,
+                        petSkin.posY + petSkin.impulseY
+                    );
+                }
+                petSkin.impulseX = 0f;
+                petSkin.impulseY = 0f;
+            }
+        }
+
+        public void update_role_state_start(PetView petSkin, bool logicTick, float deltaSeconds) {
+            if (state == SheepRoomState.Start) {
+                if (!logicTick) return;
+
+                float distance = Util.dis(
+                    petSkin.posX,
+                    petSkin.posY,
+                    petSkin.tarPosX,
+                    petSkin.tarPosY
+                );
+                float speed = 3f * petSkin.conf.runSpeed;
+                if (distance > speed * deltaSeconds) {
+                    float[] direction = Util.dirTarByPos(petSkin, petSkin.tarPosX, petSkin.tarPosY);
+                    petSkin.logicMove(
+                        petSkin.posX + direction[0] * speed * deltaSeconds,
+                        petSkin.posY + direction[1] * speed * deltaSeconds
+                    );
+                }
+                else {
+                    petSkin.logicMove(petSkin.tarPosX, petSkin.tarPosY);
+                }
+                return;
+            }
+
+            if (petSkin.conf.skillSpurt != 0) {
+                SheepSkill skill = SheepSkill.getById(petSkin.conf.skillSpurt);
+                if (skill.skillType == SheepSkillType.Charge) {
+                    petSkin.state = SheepRoleState.Charge;
+                    petSkin.subState = SheepRoleSubState.Spurt;
+                    petSkin.animType = SheepRoleAnimType.Spurt;
+                }
+                else if (skill.skillType == SheepSkillType.SpinSpurt) {
+                    petSkin.state = SheepRoleState.SpinSpurt;
+                    petSkin.animType = SheepRoleAnimType.Attack;
+                }
+                else {
+                    petSkin.state = SheepRoleState.Spurt;
+                    petSkin.subState = SheepRoleSubState.Spurt;
+                    petSkin.animType = petSkin.conf.isSpurtAnim
+                        ? SheepRoleAnimType.Spurt
+                        : SheepRoleAnimType.Idle;
+                }
+            }
+            else {
+                petSkin.state = SheepRoleState.Spurt;
+                petSkin.subState = SheepRoleSubState.Spurt;
+                petSkin.animType = petSkin.conf.isSpurtAnim
+                    ? SheepRoleAnimType.Spurt
+                    : SheepRoleAnimType.Idle;
+            }
+        }
+
+        public void update_role_state_charge(PetView petSkin, bool logicTick, float deltaSeconds) {
+            (int xn, int yn) block = Util.getXnYn(petSkin.posX, petSkin.posY);
+            bool crossedEnd = petSkin.camp == SheepCamp.Red
+                ? petSkin.posX > petSkin.conf.runEndX
+                : petSkin.posX < -petSkin.conf.runEndX;
+
+            if (crossedEnd) {
+                bool hasBlockingEnemy = false;
+                UtilFind.findNearBlocksByAckView(petSkin, block.xn, block.yn, 5, target => {
+                    if (!target.isDie && target.camp != petSkin.camp && target.roleId != 0) {
+                        hasBlockingEnemy = true;
+                        return true;
+                    }
+                    return false;
+                });
+
+                if (hasBlockingEnemy) {
+                    petSkin.state = SheepRoleState.Boom;
+                    petSkin.subState = SheepRoleSubState.Boom;
+                    SheepSkillSubCharge charge = SheepSkillSubCharge.getById(petSkin.conf.skillSpurt);
+                    SheepSkillSubBoom boom = SheepSkillSubBoom.getById(charge.endSkill);
+                    petSkin.animType = boom.isAnim != 0 ? SheepRoleAnimType.Boom : SheepRoleAnimType.Idle;
+                    petSkin.readySkillId = boom.id;
+                }
+                else {
+                    petSkin.state = SheepRoleState.Move;
+                    petSkin.subState = SheepRoleSubState.MoveBoss;
+                    petSkin.animType = SheepRoleAnimType.Idle;
+                }
+                return;
+            }
+
+            bool hitHeavyTarget = false;
+            UtilFind.findNearBlocksByAckView(petSkin, block.xn, block.yn, 5, target => {
+                if (target.isDie || target.camp == petSkin.camp || target.roleId == 0 ||
+                    !Util.isCanAckByRole(petSkin, target)) {
                     return false;
                 }
 
-                // 只允许 roleType = role3
-                if (t.conf.roleType !== SheepRoleType.gong_jian_shou) {
-                    return false;
+                if (target.conf.roleType == SheepRoleType.xiao_bing) {
+                    UtilAck.ackTar(petSkin, target);
                 }
-
-                // 必须可攻击
-                if (!Util.isCanAckByRole(e, t)) {
-                    return false;
+                else {
+                    hitHeavyTarget = true;
                 }
+                return false;
+            });
 
-                // 如果满足条件，克隆并返回 true
-                o = t;
+            if (hitHeavyTarget) {
+                petSkin.state = SheepRoleState.Boom;
+                petSkin.subState = SheepRoleSubState.Boom;
+                SheepSkillSubCharge charge = SheepSkillSubCharge.getById(petSkin.conf.skillSpurt);
+                SheepSkillSubBoom boom = SheepSkillSubBoom.getById(charge.endSkill);
+                petSkin.animType = boom.isAnim != 0 ? SheepRoleAnimType.Boom : SheepRoleAnimType.Idle;
+                petSkin.readySkillId = boom.id;
+                return;
+            }
+
+            PetView archerTarget = null;
+            UtilFind.findNearBlocksByAckView(petSkin, block.xn, block.yn, petSkin.conf.findR, target => {
+                if (target.isDie || target.camp == petSkin.camp || target.roleId == 0) return false;
+                if (target.conf.roleType != SheepRoleType.gong_jian_shou) return false;
+                if (!Util.isCanAckByRole(petSkin, target)) return false;
+                archerTarget = target;
                 return true;
             });
-            Util.moveTar(e, o, i, t)
+            Util.moveTar(petSkin, archerTarget, deltaSeconds, logicTick);
         }
-    }
 
-    public void update_role_state_charge_plus(PetView e, t, i) {
-        let o = e.posX, l = e.posY, {xn: n, yn: r} = Util.getXnYn(o, l);
-        if (e.camp == SheepCamp.Red && e.posX > e.conf.runEndX || e.camp == SheepCamp.Blue && e.posX < -e.conf.runEndX) {
-            e.state = SheepRoleState.Boom, e.subState = SheepRoleSubState.Boom;
-            let t = SheepSkillSubChargePlus.getById(e.conf.skillSpurt),
-                i = SheepSkillSubBoom.getById(t.endSkill);
-            e.animType = SheepRoleAnimType.Boom, e.readySkillId = i.id
-        } else UtilFind.findNearBlocksByAckView(e, n, r, 5, (t => {
-            if (!t.isDie && t.camp != e.camp && 0 != t.roleId && Util.isCanAckByRole(e, t)) {
-                const i = SheepConfig.beheadLine;
-                if (t.curHp < i) t.isDie = !0, t.state = SheepRoleState.Dead; else {
-                    let t = e.conf;
-                    UtilAck.ackMe(e, t.collideR, 0, t.findR, t.hitBackDistance)
-                }
+        public void update_role_state_charge_plus(PetView petSkin, bool logicTick, float deltaSeconds) {
+            (int xn, int yn) block = Util.getXnYn(petSkin.posX, petSkin.posY);
+            bool crossedEnd = petSkin.camp == SheepCamp.Red
+                ? petSkin.posX > petSkin.conf.runEndX
+                : petSkin.posX < -petSkin.conf.runEndX;
+
+            if (crossedEnd) {
+                petSkin.state = SheepRoleState.Boom;
+                petSkin.subState = SheepRoleSubState.Boom;
+                SheepSkillSubChargePlus charge = SheepSkillSubChargePlus.getById(petSkin.conf.skillSpurt);
+                SheepSkillSubBoom boom = SheepSkillSubBoom.getById(charge.endSkill);
+                petSkin.animType = SheepRoleAnimType.Boom;
+                petSkin.readySkillId = boom.id;
+                return;
             }
-            return !1
-        })), Util.moveTar(e, null, i, t)
-    }
 
-    public void update_role_state_spinspurt(PetView e, t, i) {
-        let o = e.posX, l = e.posY, {xn: n, yn: r} = Util.getXnYn(o, l);
-        if (e.camp == SheepCamp.Red && e.posX > e.conf.runEndX || e.camp == SheepCamp.Blue && e.posX < -e.conf.runEndX) {
-            e.state = SheepRoleState.Boom;
-            e.subState = SheepRoleSubState.Boom;
-            let t = SheepSkillSubSpinSpurt.getById(e.conf.skillSpurt);
-            let i = SheepSkillSubBoom.getById(t.endSkill);
-            i.isAnim ? e.animType = SheepRoleAnimType.Boom : e.animType = SheepRoleAnimType.Idle;
-            e.readySkillId = i.id;
-        } else {
-            Util.moveTar(e, null, i, t);
-            UtilFind.forNearBlocksByAckView(e, n, r, e.conf.findR, (t => !(t.isDie || t.camp == e.camp || 0 == t.roleId || !Util.isCanAckByRole(e, t) || (UtilAck.ackTar(e, t), 1))))
+            UtilFind.findNearBlocksByAckView(petSkin, block.xn, block.yn, 5, target => {
+                if (target.isDie || target.camp == petSkin.camp || target.roleId == 0 ||
+                    !Util.isCanAckByRole(petSkin, target)) {
+                    return false;
+                }
+
+                if (target.curHp < SheepConfig.beheadLine) {
+                    target.isDie = true;
+                    target.state = SheepRoleState.Dead;
+                }
+                else {
+                    SheepRoleTypeInfo config = petSkin.conf;
+                    UtilAck.ackMe(
+                        petSkin,
+                        config.collideR,
+                        0f,
+                        config.findR,
+                        config.hitBackDistance
+                    );
+                }
+                return false;
+            });
+            Util.moveTar(petSkin, null, deltaSeconds, logicTick);
         }
-    }
 
-    public void update_role_state_spurt(PetView e, t, i) {
-        if (e.conf.skillSpurt) {
-            let s = SheepSkill.getById(e.conf.skillSpurt);
-            if (s.skillType == SheepSkillType.Boom) {
-                let o = SheepSkillSubBoom.getById(s.id), {
-                    atkTar: l,
-                    moveTar: n,
-                    moveBoss: r
-                } = UtilFind.findTar(e);
-                if (l || r) return e.state = SheepRoleState.Boom, e.subState = SheepRoleSubState.Boom, o.isAnim ? e.animType = SheepRoleAnimType.Boom : e.animType = SheepRoleAnimType.Idle, void (e.readySkillId = o.id);
-                Util.moveTar(e, null, i, t)
-            } else if (s.skillType == SheepSkillType.Killer) {
-                let o = SheepSkillSubKiller.getById(s.id), {
-                    atkTar: l,
-                    moveTar: n,
-                    moveBoss: r
-                } = UtilFind.findTar(e);
-                if (l) return e.state = SheepRoleState.Killer, e.subState = SheepRoleSubState.KillerStart, e.animType = SheepRoleAnimType.Killer, void (e.readySkillId = o.id);
-                if (r) return e.state = SheepRoleState.Move, e.subState = SheepRoleSubState.MoveBoss, e.animType = SheepRoleAnimType.Idle, void Util.moveTar(e, r, i, t);
-                Util.moveTar(e, null, i, t)
-            } else if (s.skillType == SheepSkillType.Bullet) {
-                let o = SheepSkillSubBullet.getById(s.id), {
-                    atkTar: l,
-                    moveTar: n,
-                    moveBoss: r
-                } = UtilFind.findTar(e);
-                if (l || n || r) {
-                    this.bullte_creates.push({
-                        view_pet: e,
-                        bulletId: o.bullet
-                    })
-                }
-                if (l) {
-                    return e.state = SheepRoleState.Attack, void (e.subState = SheepRoleSubState.AttackAwait);
-                }
-                if (n) {
-                    return e.state = SheepRoleState.Move, e.subState = SheepRoleSubState.MoveTar, void Util.moveTar(e, n, i, t);
-                }
-                if (r) {
-                    return e.state = SheepRoleState.Move, e.subState = SheepRoleSubState.MoveBoss, e.animType = SheepRoleAnimType.Idle, void Util.moveTar(e, r, i, t);
-                }
-                Util.moveTar(e, null, i, t)
-            } else if (s.skillType == SheepSkillType.CallBullets) {
-                let o = SheepSkillSubCallBullets.getById(s.id), {
-                    atkTar: l,
-                    moveTar: n,
-                    moveBoss: r
-                } = UtilFind.findTar(e);
-                if (l || r) return e.state = SheepRoleState.CallBullets, e.subState = SheepRoleSubState.CallBullets, o.isAnim ? e.animType = SheepRoleAnimType.CallBullets : e.animType = SheepRoleAnimType.Idle, void (e.readySkillId = o.id);
-                Util.moveTar(e, null, i, t)
+        public void update_role_state_spinspurt(PetView petSkin, bool logicTick, float deltaSeconds) {
+            (int xn, int yn) block = Util.getXnYn(petSkin.posX, petSkin.posY);
+            bool crossedEnd = petSkin.camp == SheepCamp.Red
+                ? petSkin.posX > petSkin.conf.runEndX
+                : petSkin.posX < -petSkin.conf.runEndX;
+
+            if (crossedEnd) {
+                petSkin.state = SheepRoleState.Boom;
+                petSkin.subState = SheepRoleSubState.Boom;
+                SheepSkillSubSpinSpurt spinSpurt = SheepSkillSubSpinSpurt.getById(petSkin.conf.skillSpurt);
+                SheepSkillSubBoom boom = SheepSkillSubBoom.getById(spinSpurt.endSkill);
+                petSkin.animType = boom.isAnim != 0 ? SheepRoleAnimType.Boom : SheepRoleAnimType.Idle;
+                petSkin.readySkillId = boom.id;
+                return;
             }
-        } else {
-            let {atkTar: s, moveTar: o, moveBoss: l} = UtilFind.findTar(e);
-            if (s) return e.state = SheepRoleState.Attack, void (e.subState = SheepRoleSubState.AttackAwait);
-            if (o) return e.state = SheepRoleState.Move, e.subState = SheepRoleSubState.MoveTar, void Util.moveTar(e, o, i, t);
-            if (l) return e.state = SheepRoleState.Move, e.subState = SheepRoleSubState.MoveBoss, void Util.moveTar(e, l, i, t);
-            Util.moveTar(e, null, i, t)
-        }
-    }
 
-    /**
-     *
-     * @param e {PetView}
-     */
-    public void update_role_anim(PetView e) {
-        e.animFrame = e.animFrame + 1;
-    }
-
-    /**
-     * 向池中 添加 要生产的 单位
-     * @param typeID 角色类型 ID
-     * @param count 数量
-     * @param camp 阵营
-     */
-    public void produce_pets(int typeID,int count,SheepCamp camp) {
-        // 根据阵营 获取 map
-        var callInfos = camp == SheepCamp.Red ? this.redCallInfos : this.blueCallInfos;
-
-        var sheepCallInfo = callInfos[typeID];
-
-        // 没有就创建一个 然后加进去
-        if (sheepCallInfo==null) {
-            sheepCallInfo = new SheepCallInfo();
-            sheepCallInfo.camp = camp;
-            sheepCallInfo.type = typeID;
-            sheepCallInfo.count = 0;
-            sheepCallInfo.frame = 0;
-            sheepCallInfo.count_line = 0;
-
-            sheepCallInfo.items = [];
-            sheepCallInfo.pets = [];
-            callInfos[typeID] = sheepCallInfo;
-        }
-
-        // todo 爆炸是什么意思? 用什么用?
-        sheepCallInfo.count += count;
-        sheepCallInfo.pets.Add(new SheepCallInfoPet() { camp = camp, count = count });
-    }
-
-    /**
-     * 消耗 待 召唤的池 中的 单位
-     * @param sheepCtl {SheepCtl}
-     * @param t
-     */
-    public void consume(object sheepCtl,float t) {
-        let o = this;
-
-        let sheepConfig = SheepConfig;
-
-        this.autoTime += t;
-
-        if (sheepMgr.isAutoCall && this.autoTime > SheepConfig.systemAutomaticTroopsIntervalTime) {
-            this.autoTime = 0;
-            if (sheepMgr.pets[0].size + sheepMgr.pets[1].size < SheepConfig.systemLongerAutomaticallyDispatch) {
-                [SheepCamp.Red, SheepCamp.Blue].forEach(e => {
-                    if (sheepMgr.pets[e].size < SheepConfig.systemAutomaticallyMaxTroops) {
-                        o.produce_pets(SheepConfig.WarmUpID, SheepConfig.systemAutomaticallyTroopsOneNumber, e)
+            Util.moveTar(petSkin, null, deltaSeconds, logicTick);
+            UtilFind.forNearBlocksByAckView(
+                petSkin,
+                block.xn,
+                block.yn,
+                petSkin.conf.findR,
+                target => {
+                    if (target.isDie || target.camp == petSkin.camp || target.roleId == 0 ||
+                        !Util.isCanAckByRole(petSkin, target)) {
+                        return false;
                     }
-                });
-            }
+                    UtilAck.ackTar(petSkin, target);
+                    return false;
+                }
+            );
         }
 
-        [this.redCallInfos, this.blueCallInfos].forEach((function (t) {
-            let n = t == o.redCallInfos ? SheepCamp.Red : SheepCamp.Blue;
+        public void update_role_state_spurt(PetView petSkin, bool logicTick, float deltaSeconds) {
+            if (petSkin.conf.skillSpurt != 0) {
+                SheepSkill skill = SheepSkill.getById(petSkin.conf.skillSpurt);
+                FindTarResult result;
 
-            t.forEach((o, a) => {
-
-                if (o.count <= 0) {
-                    return;
-                }
-
-                let c = SheepRoleTypeInfo.getById(a);
-                var formation = SheepRoleFormation.getById(c.formationId);
-
-                let u = n == SheepCamp.Red ? sheepMgr.perfStat.redNums[c.roleType] : sheepMgr.perfStat.blueNums[c.roleType];
-
-                if (c.roleType == SheepRoleType.xiao_bing) {
-                    if (u > 14500) {
-                        return
+                if (skill.skillType == SheepSkillType.Boom) {
+                    SheepSkillSubBoom boom = SheepSkillSubBoom.getById(skill.id);
+                    result = UtilFind.findTar(petSkin);
+                    if (result.atkTar != null || result.moveBoss != null) {
+                        petSkin.state = SheepRoleState.Boom;
+                        petSkin.subState = SheepRoleSubState.Boom;
+                        petSkin.animType = boom.isAnim != 0 ? SheepRoleAnimType.Boom : SheepRoleAnimType.Idle;
+                        petSkin.readySkillId = boom.id;
+                        return;
                     }
-                } else if (c.roleType == SheepRoleType.ci_ke && u > 9500) {
+                    Util.moveTar(petSkin, null, deltaSeconds, logicTick);
                     return;
                 }
 
-                o.frame += 1
-
-                // 限制每帧生成的单位
-                if (o.frame <= formation.frameItemX) {
+                if (skill.skillType == SheepSkillType.Killer) {
+                    SheepSkillSubKiller killer = SheepSkillSubKiller.getById(skill.id);
+                    result = UtilFind.findTar(petSkin);
+                    if (result.atkTar != null) {
+                        petSkin.state = SheepRoleState.Killer;
+                        petSkin.subState = SheepRoleSubState.KillerStart;
+                        petSkin.animType = SheepRoleAnimType.Killer;
+                        petSkin.readySkillId = killer.id;
+                        return;
+                    }
+                    if (result.moveBoss != null) {
+                        petSkin.state = SheepRoleState.Move;
+                        petSkin.subState = SheepRoleSubState.MoveBoss;
+                        petSkin.animType = SheepRoleAnimType.Idle;
+                        Util.moveTar(petSkin, result.moveBoss, deltaSeconds, logicTick);
+                        return;
+                    }
+                    Util.moveTar(petSkin, null, deltaSeconds, logicTick);
                     return;
                 }
 
-                o.frame = 0
+                if (skill.skillType == SheepSkillType.Bullet) {
+                    SheepSkillSubBullet bullet = SheepSkillSubBullet.getById(skill.id);
+                    result = UtilFind.findTar(petSkin);
+                    if (result.atkTar != null || result.moveTar != null || result.moveBoss != null) {
+                        bullte_creates.Add(new BullteCreate {
+                            view_pet = petSkin,
+                            bulletId = bullet.bullet
+                        });
+                    }
+                    if (result.atkTar != null) {
+                        petSkin.state = SheepRoleState.Attack;
+                        petSkin.subState = SheepRoleSubState.AttackAwait;
+                        return;
+                    }
+                    if (result.moveTar != null) {
+                        petSkin.state = SheepRoleState.Move;
+                        petSkin.subState = SheepRoleSubState.MoveTar;
+                        Util.moveTar(petSkin, result.moveTar, deltaSeconds, logicTick);
+                        return;
+                    }
+                    if (result.moveBoss != null) {
+                        petSkin.state = SheepRoleState.Move;
+                        petSkin.subState = SheepRoleSubState.MoveBoss;
+                        petSkin.animType = SheepRoleAnimType.Idle;
+                        Util.moveTar(petSkin, result.moveBoss, deltaSeconds, logicTick);
+                        return;
+                    }
+                    Util.moveTar(petSkin, null, deltaSeconds, logicTick);
+                    return;
+                }
+
+                if (skill.skillType == SheepSkillType.CallBullets) {
+                    SheepSkillSubCallBullets callBullets = SheepSkillSubCallBullets.getById(skill.id);
+                    result = UtilFind.findTar(petSkin);
+                    if (result.atkTar != null || result.moveBoss != null) {
+                        petSkin.state = SheepRoleState.CallBullets;
+                        petSkin.subState = SheepRoleSubState.CallBullets;
+                        petSkin.animType = callBullets.isAnim != 0
+                            ? SheepRoleAnimType.CallBullets
+                            : SheepRoleAnimType.Idle;
+                        petSkin.readySkillId = callBullets.id;
+                        return;
+                    }
+                    Util.moveTar(petSkin, null, deltaSeconds, logicTick);
+                    return;
+                }
+            }
+
+            FindTarResult normalResult = UtilFind.findTar(petSkin);
+            if (normalResult.atkTar != null) {
+                petSkin.state = SheepRoleState.Attack;
+                petSkin.subState = SheepRoleSubState.AttackAwait;
+                return;
+            }
+            if (normalResult.moveTar != null) {
+                petSkin.state = SheepRoleState.Move;
+                petSkin.subState = SheepRoleSubState.MoveTar;
+                Util.moveTar(petSkin, normalResult.moveTar, deltaSeconds, logicTick);
+                return;
+            }
+            if (normalResult.moveBoss != null) {
+                petSkin.state = SheepRoleState.Move;
+                petSkin.subState = SheepRoleSubState.MoveBoss;
+                Util.moveTar(petSkin, normalResult.moveBoss, deltaSeconds, logicTick);
+                return;
+            }
+            Util.moveTar(petSkin, null, deltaSeconds, logicTick);
+        }
+
+        public void update_role_anim(PetView pet) {
+            pet.animFrame++;
+        }
+
+        public void produce_pets(int typeId, int count, SheepCamp camp) {
+            if (count <= 0) return;
+            Dictionary<int, SheepCallInfo> callInfos = camp == SheepCamp.Red ? redCallInfos : blueCallInfos;
+
+            if (!callInfos.TryGetValue(typeId, out SheepCallInfo callInfo)) {
+                callInfo = new SheepCallInfo {
+                    camp = camp,
+                    type = typeId,
+                    count = 0,
+                    frame = 0,
+                    count_line = 0,
+                    items = Array.Empty<int>(),
+                    pets = new List<SheepCallInfoPet>()
+                };
+                callInfos.Add(typeId, callInfo);
+            }
+
+            callInfo.count += count;
+            callInfo.pets.Add(new SheepCallInfoPet {
+                camp = camp,
+                count = count
+            });
+        }
+
+        public void consume(dynamic sheepCtl, float deltaMs) {
+            autoTime += deltaMs / 1000f;
+            if (isAutoCall && autoTime > SheepConfig.systemAutomaticTroopsIntervalTime) {
+                autoTime = 0f;
+                if (pets[0].Count + pets[1].Count < SheepConfig.systemLongerAutomaticallyDispatch) {
+                    for (int campIndex = 0; campIndex < 2; campIndex++) {
+                        if (pets[campIndex].Count < SheepConfig.systemAutomaticallyMaxTroops) {
+                            produce_pets(
+                                SheepConfig.WarmUpID,
+                                SheepConfig.systemAutomaticallyTroopsOneNumber,
+                                (SheepCamp)campIndex
+                            );
+                        }
+                    }
+                }
+            }
+
+            ConsumeCallMap(redCallInfos, SheepCamp.Red, sheepCtl);
+            ConsumeCallMap(blueCallInfos, SheepCamp.Blue, sheepCtl);
+        }
+
+        private void ConsumeCallMap(
+            Dictionary<int, SheepCallInfo> callInfos,
+            SheepCamp camp,
+            dynamic sheepCtl
+        ) {
+            List<int> removeKeys = new List<int>();
+            List<KeyValuePair<int, SheepCallInfo>> snapshot =
+                new List<KeyValuePair<int, SheepCallInfo>>(callInfos);
+
+            foreach (KeyValuePair<int, SheepCallInfo> pair in snapshot) {
+                int roleId = pair.Key;
+                SheepCallInfo callInfo = pair.Value;
+                if (callInfo == null || callInfo.count <= 0) {
+                    removeKeys.Add(roleId);
+                    continue;
+                }
+
+                SheepRoleTypeInfo roleConfig = SheepRoleTypeInfo.getById(roleId);
+                SheepRoleFormation formation = SheepRoleFormation.getById(roleConfig.formationId);
+                int roleTypeIndex = RoleTypeIndex(roleConfig.roleType);
+                EnsurePerfCapacity(roleTypeIndex);
+                int existingCount = camp == SheepCamp.Red
+                    ? perfStat.redNums[roleTypeIndex]
+                    : perfStat.blueNums[roleTypeIndex];
+
+                if (roleConfig.roleType == SheepRoleType.xiao_bing && existingCount > 14500) continue;
+                if (roleConfig.roleType == SheepRoleType.ci_ke && existingCount > 9500) continue;
+
+                callInfo.frame++;
+                if (callInfo.frame <= formation.frameItemX) continue;
+                callInfo.frame = 0;
 
                 if (formation.formationType == SheepRoleFormationType.RectangleTidy) {
-                    var h = formation.itemNumY;
-                    var m = formation.itemY;
-                    var d = formation.itemYGapNum;
-                    var g = formation.itemYGap;
-
-                    var y = formation.startX + sheepMode.startAddX;
-                    var S = n == SheepCamp.Red ? -y : y;
-
-                    var pets = o.pets;
-                    var I = 0;
-
-                    for (; pets.length > 0 && I < h;) {
-
-                        let T = Math.floor(I / 2);
-                        let M = 0;
-
-                        if (h % 2 == 0) {
-                            if (I % 2 == 0) {
-                                M = m * T + m / 2 + Math.floor(T / d + 1) * g;
-                            } else {
-                                M = -m * T - m / 2 - Math.floor(T / d + 1) * g;
-                            }
-                        } else {
-                            if (I % 2 == 0) {
-                                M = m * Math.floor(T) + Math.floor(T / d) * g;
-                            } else {
-                                M = -m * Math.floor(T + 1) - Math.floor(T / d) * g;
-                            }
-                        }
-                        let C = pets[0];
-                        C.count -= 1;
-                        o.count -= 1;
-                        I += 1;
-
-                        let R = new Vec3(S, M);
-                        if (C.booms) {
-                            createPetView(sheepCtl, C.camp, a, h, 1, !0, R, C.booms.pop());
-                        } else {
-                            createPetView(sheepCtl, C.camp, a, h, 1, !0, R);
-                        }
-                        C.count <= 0 && pets.shift()
-                    }
-                    o.count_line += 1;
-                    if (o.count_line >= formation.itemNumX) {
-                        o.frame -= formation.itemYGapFrame;
-                        o.count_line = 0;
-                    }
-                    o.count <= 0 && t.delete(a)
-                } else if (formation.formationType == SheepRoleFormationType.AngleTidy) {
-
-                    let k = 2 * formation.maxAngle - formation.minAngle;
-                    let G = Math.floor(k / formation.startStepAngle);
-                    let A = Math.floor(1 * G);
-
-                    let pets = o.pets;
-                    let b = 0;
-
-                    for (; pets.length > 0 && b < A;) {
-
-                        let P = pets[0];
-                        let w = P.count;
-
-                        for (var D = 0; D < w && b < A; D++) {
-                            P.count -= 1;
-                            o.count -= 1;
-                            b += 1;
-
-                            let _ = Math.floor(b / G);
-                            let N = formation.startR + sheepMode.startAddR + formation.startStepR * _;
-
-                            let E = (b % 2 == 0 ? 1 : -1) * (Math.floor(b % G / 2) * formation.startStepAngle + formation.minAngle);
-
-                            let x = Math.cos(E * Math.PI / 180) * N;
-                            let F = Math.sin(E * Math.PI / 180) * N;
-                            let X = null;
-                            let L = sheepMode.loongX;
-                            X = n == SheepCamp.Red ? new Vec3(L - x, F, 0) : new Vec3(x - L, F, 0);
-                            if (P.booms) {
-                                createPetView(sheepCtl, P.player, a, G, 1, !0, X, P.booms.pop())
-                            } else {
-                                createPetView(sheepCtl, P.camp, a, G, 1, !0, X)
-                            }
-                        }
-
-                        P.count <= 0 && pets.shift()
+                    ConsumeRectangleTidy(callInfo, roleId, camp, formation, sheepCtl);
+                }
+                else if (formation.formationType == SheepRoleFormationType.AngleTidy) {
+                    ConsumeAngleTidy(callInfo, roleId, camp, formation, sheepCtl);
+                }
+                else {
+                    // Random 编队的位置由 createPetView 计算。每个生成帧按 frameMaxCount 释放。
+                    int count = Math.Max(1, formation.frameMaxCount);
+                    for (int index = 0; index < count && callInfo.pets.Count > 0; index++) {
+                        SheepCallInfoPet source = callInfo.pets[0];
+                        source.count--;
+                        callInfo.count--;
+                        createPetView(
+                            sheepCtl,
+                            source.player ?? source.camp,
+                            roleId,
+                            Math.Max(1, callInfo.count + 1),
+                            1,
+                            true,
+                            null,
+                            source.booms != null && source.booms.Count > 0 && source.booms.Pop()
+                        );
+                        if (source.count <= 0) callInfo.pets.RemoveAt(0);
                     }
                 }
-            })
-        }))
-    }
 
-    /**
-     * 貌似只负责开场 布阵阶段的 小兵位置 计算
-     * @param petId
-     * @param camp
-     * @returns {*}
-     */
-    public Vector3 getPetStartEndPos(int petId,SheepCamp camp) {
-        var petStartCount = this.petStartCounts[(int)camp];
-        var a = petStartCount.get(petId) || 0;
-        petStartCount.set(petId, a + 1);
-        var sheepRoleTypeInfo = SheepRoleTypeInfo.getById(petId);
-        if (sheepRoleTypeInfo==null) {
-            Debug.Log("SheepMgr.getPetStartEndPos roleId=" + petId + " not found");
-        }
-        var sheepRoleFormation = SheepRoleFormation.getById(sheepRoleTypeInfo.formationId);
-        if (sheepRoleFormation==null) {
-            Debug.Log("SheepMgr.getPetStartEndPos formationId=" + sheepRoleTypeInfo.formationId + " not found");
-        }
-        int c = sheepRoleFormation.preItemNumY;
-        int l = sheepRoleFormation.preItemX;
-        int u = sheepRoleFormation.preItemY;
-        int h = sheepRoleFormation.preStartX + Math.Floor(a / c) * l;
-        int m = Math.Floor(a % c);
-        int d = 0;
-        if (c % 2 == 0) {
-            if (m % 2 == 0) {
-                d = u * Math.Floor(m / 2) + u / 2
-            } else {
-                d = -u * Math.Floor(m / 2) - u / 2
+                if (callInfo.count <= 0 || callInfo.pets.Count == 0) {
+                    removeKeys.Add(roleId);
+                }
             }
-        } else {
-            if (m % 2 == 0) {
-                d = u * Math.Floor(m / 2)
-            } else {
-                d = -u * Math.Floor(m / 2 + 1)
+
+            foreach (int key in removeKeys) callInfos.Remove(key);
+        }
+
+        private void ConsumeRectangleTidy(
+            SheepCallInfo callInfo,
+            int roleId,
+            SheepCamp camp,
+            SheepRoleFormation formation,
+            dynamic sheepCtl
+        ) {
+            int itemNumY = Math.Max(1, formation.itemNumY);
+            float itemY = formation.itemY;
+            int gapEvery = Math.Max(1, formation.itemYGapNum);
+            float gap = formation.itemYGap;
+            float startX = formation.startX + sheepMode.startAddX;
+            float x = camp == SheepCamp.Red ? -startX : startX;
+            int lineIndex = 0;
+
+            while (callInfo.pets.Count > 0 && lineIndex < itemNumY) {
+                int halfIndex = Mathf.FloorToInt(lineIndex / 2f);
+                float y;
+                if (itemNumY % 2 == 0) {
+                    y = lineIndex % 2 == 0
+                        ? itemY * halfIndex + itemY / 2f + Mathf.FloorToInt(halfIndex / (float)gapEvery + 1f) * gap
+                        : -itemY * halfIndex - itemY / 2f - Mathf.FloorToInt(halfIndex / (float)gapEvery + 1f) * gap;
+                }
+                else {
+                    y = lineIndex % 2 == 0
+                        ? itemY * halfIndex + Mathf.FloorToInt(halfIndex / (float)gapEvery) * gap
+                        : -itemY * (halfIndex + 1) - Mathf.FloorToInt(halfIndex / (float)gapEvery) * gap;
+                }
+
+                SheepCallInfoPet source = callInfo.pets[0];
+                source.count--;
+                callInfo.count--;
+                lineIndex++;
+
+                bool isBoom = source.booms != null && source.booms.Count > 0 && source.booms.Pop();
+                createPetView(
+                    sheepCtl,
+                    source.player ?? source.camp,
+                    roleId,
+                    itemNumY,
+                    1,
+                    true,
+                    new Vector3(x, y, 0f),
+                    isBoom
+                );
+
+                if (source.count <= 0) callInfo.pets.RemoveAt(0);
             }
-        }
 
-        camp == SheepCamp.Red && (h *= -1);
-        return new Vector3(h, d + Utils.random.range(-1, 1), 0);
-    }
-
-    public void clearCallPets() {
-        this.redCallInfos.clear();
-        this.blueCallInfos.clear()
-    }
-
-
-
-    public void clearBlocks() {
-        this.attackViews[SheepCamp.Red].fill(null);
-        this.attackViews[SheepCamp.Blue].fill(null);
-        this.attackView1s[SheepCamp.Red].fill(null);
-        this.attackView1s[SheepCamp.Blue].fill(null);
-
-        for (var e = 0; e < SheepConfig.MaxGroupCount; e++) {
-            this.collisionViews[SheepCamp.Red][e].fill(null);
-            this.collisionViews[SheepCamp.Blue][e].fill(null);
-            this.collisionView1s[SheepCamp.Red][e].fill(null);
-            this.collisionView1s[SheepCamp.Blue][e].fill(null);
-        }
-
-        this.pre_blocks.Clear();
-    }
-
-    public IndexLen getBlockByIndex(IndexLen[] e,int blockIndex){
-        if (!e[blockIndex]){
-            e[blockIndex]={
-                Len:0,
-                Index:0,
-            };
-        }
-        return e[blockIndex];
-    }
-
-    public void mainClearBlocks() {
-        null == this.isChangeAckFlags && (this.isChangeAckFlags = [!0, !0])
-        if (null == this.isChangeCollsionFlags) {
-            this.isChangeCollsionFlags = [[], []];
-            for (let e = 0; e < SheepConfig.MaxGroupCount; e++) {
-                this.isChangeCollsionFlags[SheepCamp.Red].push(true);
-                this.isChangeCollsionFlags[SheepCamp.Blue].push(true)
+            callInfo.count_line++;
+            if (callInfo.count_line >= Math.Max(1, formation.itemNumX)) {
+                callInfo.frame -= formation.itemYGapFrame;
+                callInfo.count_line = 0;
             }
         }
-        Date.now();
-        this.isChangeAckFlags[SheepCamp.Red] && this.attackViews[SheepCamp.Red].fill(null);
-        this.isChangeAckFlags[SheepCamp.Red] = !1;
-        this.isChangeAckFlags[SheepCamp.Blue] && this.attackViews[SheepCamp.Blue].fill(null);
-        this.isChangeAckFlags[SheepCamp.Blue] = !1;
-        for (let e = 0; e < SheepConfig.MaxGroupCount; e++) {
-            this.isChangeCollsionFlags[SheepCamp.Red][e] && this.collisionViews[SheepCamp.Red][e].fill(null);
-            this.isChangeCollsionFlags[SheepCamp.Red][e] = false;
-            this.isChangeCollsionFlags[SheepCamp.Blue][e] && this.collisionViews[SheepCamp.Blue][e].fill(null);
-            this.isChangeCollsionFlags[SheepCamp.Blue][e] = false;
-        }
-        Date.now();
-        this.pre_blocks.clear();
-        Date.now();
-    }
 
-    public void mainPreAddBlock(int blockIndex,int buffIndex,SheepCamp camp,int collideId) {
-        var o = this.pre_blocks.get(blockIndex);
-        if (!o) {
-            o = [];
-            this.pre_blocks.set(blockIndex, o);
+        private void ConsumeAngleTidy(
+            SheepCallInfo callInfo,
+            int roleId,
+            SheepCamp camp,
+            SheepRoleFormation formation,
+            dynamic sheepCtl
+        ) {
+            int angleSpan = 2 * formation.maxAngle - formation.minAngle;
+            int groupCount = Math.Max(1, Mathf.FloorToInt(angleSpan / (float)Math.Max(1, formation.startStepAngle)));
+            int maxPerFrame = groupCount;
+            int spawned = 0;
+
+            while (callInfo.pets.Count > 0 && spawned < maxPerFrame) {
+                SheepCallInfoPet source = callInfo.pets[0];
+                int sourceCount = source.count;
+
+                for (int index = 0; index < sourceCount && spawned < maxPerFrame; index++) {
+                    source.count--;
+                    callInfo.count--;
+                    spawned++;
+
+                    int ring = Mathf.FloorToInt(spawned / (float)groupCount);
+                    float radius = formation.startR + sheepMode.startAddR + formation.startStepR * ring;
+                    float angleDegrees = (spawned % 2 == 0 ? 1f : -1f) *
+                                         (Mathf.FloorToInt((spawned % groupCount) / 2f) * formation.startStepAngle +
+                                          formation.minAngle);
+                    float angleRadians = angleDegrees * Mathf.Deg2Rad;
+                    float offsetX = Mathf.Cos(angleRadians) * radius;
+                    float offsetY = Mathf.Sin(angleRadians) * radius;
+                    float bossX = sheepMode.loongX;
+                    Vector3 position = camp == SheepCamp.Red
+                        ? new Vector3(bossX - offsetX, offsetY, 0f)
+                        : new Vector3(offsetX - bossX, offsetY, 0f);
+
+                    bool isBoom = source.booms != null && source.booms.Count > 0 && source.booms.Pop();
+                    createPetView(
+                        sheepCtl,
+                        source.player ?? source.camp,
+                        roleId,
+                        groupCount,
+                        1,
+                        true,
+                        position,
+                        isBoom
+                    );
+                }
+
+                if (source.count <= 0) callInfo.pets.RemoveAt(0);
+            }
         }
 
-        var l = o[camp];
-        if (!l) {
-            l = [];
-            o[camp] = l;
-        }
-        var n = l[collideId];
-        if (!n) {
-            n = new Array;
-            l[collideId] = n;
-        }
-        n.push(buffIndex);
-        if (this.isChangeAckFlags && 0 == this.isChangeAckFlags[camp]) {
-            this.isChangeAckFlags[camp] = true;
-        }
-        if (this.isChangeCollsionFlags && 0 == this.isChangeCollsionFlags[camp][collideId]) {
-            this.isChangeCollsionFlags[camp][collideId] = true
-        }
-    }
+        public Vector3 getPetStartEndPos(int roleId, SheepCamp camp) {
+            Dictionary<int, int> counts = petStartCounts[CampIndex(camp)];
+            counts.TryGetValue(roleId, out int count);
+            counts[roleId] = count + 1;
 
-    public void mainSyncBlocksToWokers() {
-        var e =new int[]{0, 0};
-        var t =new List<int>[] {
-          new List<int>(),  
-          new List<int>(),
-        } ;
-        for (var i = 0; i < SheepConfig.MaxGroupCount; i++) {
-            t[(int)SheepCamp.Red].Add(0);
-            t[(int)SheepCamp.Blue].Add(0);
+            SheepRoleTypeInfo roleConfig = SheepRoleTypeInfo.getById(roleId);
+            SheepRoleFormation formation = SheepRoleFormation.getById(roleConfig.formationId);
+            int itemNumY = Math.Max(1, formation.preItemNumY);
+            float x = formation.preStartX + Mathf.FloorToInt(count / (float)itemNumY) * formation.preItemX;
+            int itemIndex = count % itemNumY;
+            float y;
+
+            if (itemNumY % 2 == 0) {
+                y = itemIndex % 2 == 0
+                    ? formation.preItemY * Mathf.FloorToInt(itemIndex / 2f) + formation.preItemY / 2f
+                    : -formation.preItemY * Mathf.FloorToInt(itemIndex / 2f) - formation.preItemY / 2f;
+            }
+            else {
+                y = itemIndex % 2 == 0
+                    ? formation.preItemY * Mathf.FloorToInt(itemIndex / 2f)
+                    : -formation.preItemY * Mathf.FloorToInt(itemIndex / 2f + 1f);
+            }
+
+            if (camp == SheepCamp.Red) x *= -1f;
+            return new Vector3(x, y + UnityEngine.Random.Range(-1f, 1f), 0f);
         }
-        this.pre_blocks.forEach((i, s) => {
-            if (i && i.length) {
-                i.forEach((i, o) => {
-                    if (i && i.length) {
-                        let l = 0;
-                        let n = t[o];
-                        i.forEach((e, t) => {
-                            if (e && e.length) {
-                                let i = this.collisionViews[o][t];
-                                let a = this.collisionView1s[o][t];
-                                let c = n[t];
-                                let f = e.length;
-                                l += f;
-                                let blockByIndex = this.getBlockByIndex(i,s);
-                                blockByIndex.Index=  c;
-                                blockByIndex.Len=  f;
-                                e.forEach(e => {
-                                    a[c] = e;
-                                    c++
-                                });
-                                n[t] = c
-                            }
-                        });
-                        if (0 == l) {
-                            return;
-                        }
-                        let a = this.attackViews[o];
-                        let c = this.attackView1s[o];
-                        let f = e[o];
-                        let blockByIndex = this.getBlockByIndex(a,s);
-                        blockByIndex.Index=  f;
-                        blockByIndex.Len=  l;
-                        i.forEach((e, t) => {
-                            if(e && e.length) {
-                                e.forEach(e => {
-                                    c[f] = e;
-                                    f++
-                                })
-                            }
-                        });
-                        e[o] = f
+
+        public void clearCallPets() {
+            redCallInfos.Clear();
+            blueCallInfos.Clear();
+        }
+
+        public void clearBlocks() {
+            Array.Clear(attackViews[0], 0, attackViews[0].Length);
+            Array.Clear(attackViews[1], 0, attackViews[1].Length);
+            Array.Clear(attackView1s[0], 0, attackView1s[0].Length);
+            Array.Clear(attackView1s[1], 0, attackView1s[1].Length);
+
+            for (int group = 0; group < SheepConfig.MaxGroupCount; group++) {
+                Array.Clear(collisionViews[0][group], 0, collisionViews[0][group].Length);
+                Array.Clear(collisionViews[1][group], 0, collisionViews[1][group].Length);
+                Array.Clear(collisionView1s[0][group], 0, collisionView1s[0][group].Length);
+                Array.Clear(collisionView1s[1][group], 0, collisionView1s[1][group].Length);
+            }
+            pre_blocks.Clear();
+        }
+
+        public IndexLen getBlockByIndex(IndexLen[] blocks, int blockIndex) {
+            if (blocks == null) throw new ArgumentNullException(nameof(blocks));
+            if (blockIndex < 0 || blockIndex >= blocks.Length) {
+                throw new ArgumentOutOfRangeException(nameof(blockIndex), blockIndex, "blockIndex 越界");
+            }
+            if (blocks[blockIndex] == null) blocks[blockIndex] = new IndexLen();
+            return blocks[blockIndex];
+        }
+
+        public void mainClearBlocks() {
+            if (isChangeAckFlags == null) isChangeAckFlags = new[] { true, true };
+            if (isChangeCollsionFlags == null) {
+                isChangeCollsionFlags = new bool[2][];
+                isChangeCollsionFlags[0] = new bool[SheepConfig.MaxGroupCount];
+                isChangeCollsionFlags[1] = new bool[SheepConfig.MaxGroupCount];
+                for (int group = 0; group < SheepConfig.MaxGroupCount; group++) {
+                    isChangeCollsionFlags[0][group] = true;
+                    isChangeCollsionFlags[1][group] = true;
+                }
+            }
+
+            for (int camp = 0; camp < 2; camp++) {
+                if (isChangeAckFlags[camp]) Array.Clear(attackViews[camp], 0, attackViews[camp].Length);
+                isChangeAckFlags[camp] = false;
+                for (int group = 0; group < SheepConfig.MaxGroupCount; group++) {
+                    if (isChangeCollsionFlags[camp][group]) {
+                        Array.Clear(collisionViews[camp][group], 0, collisionViews[camp][group].Length);
                     }
-                })
+                    isChangeCollsionFlags[camp][group] = false;
+                }
             }
-        })
-    }
+            pre_blocks.Clear();
+        }
 
-    public void forEachBlock(IndexLen[] ee,int[] t,int blockIndex,Action<int> callback) {
-        var blockByIndex = this.getBlockByIndex(ee, blockIndex);
-        var o = blockByIndex.Index;
-        var l = blockByIndex.Len;
-        if (l!=0) {
-            for (var e = 0; e < l; e++) {
-                callback(t[o + e]);
+        public void mainPreAddBlock(int blockIndex, int buffIndex, SheepCamp camp, int collideId) {
+            if (blockIndex < 0 || blockIndex >= MaxCount) return;
+            int campIndex = CampIndex(camp);
+            int safeCollideId = Mathf.Clamp(collideId, 0, SheepConfig.MaxGroupCount - 1);
+
+            if (!pre_blocks.TryGetValue(blockIndex, out Dictionary<int, Dictionary<int, List<int>>> camps)) {
+                camps = new Dictionary<int, Dictionary<int, List<int>>>();
+                pre_blocks.Add(blockIndex, camps);
+            }
+            if (!camps.TryGetValue(campIndex, out Dictionary<int, List<int>> groups)) {
+                groups = new Dictionary<int, List<int>>();
+                camps.Add(campIndex, groups);
+            }
+            if (!groups.TryGetValue(safeCollideId, out List<int> petIndices)) {
+                petIndices = new List<int>();
+                groups.Add(safeCollideId, petIndices);
+            }
+            petIndices.Add(buffIndex);
+
+            if (isChangeAckFlags != null && !isChangeAckFlags[campIndex]) {
+                isChangeAckFlags[campIndex] = true;
+            }
+            if (isChangeCollsionFlags != null && !isChangeCollsionFlags[campIndex][safeCollideId]) {
+                isChangeCollsionFlags[campIndex][safeCollideId] = true;
             }
         }
-    }
 
-    public bool findBlock(IndexLen[] e,int[] t,int blockIndex,Func<int, bool> callback) {
-        var blockByIndex = this.getBlockByIndex(e, blockIndex);
-        var Index = blockByIndex.Index;
-        var Len = blockByIndex.Len;
-        if (Len==0) {
+        public void mainSyncBlocksToWokers() {
+            int[] attackOffsets = new int[2];
+            int[][] collisionOffsets = {
+                new int[SheepConfig.MaxGroupCount],
+                new int[SheepConfig.MaxGroupCount]
+            };
+
+            foreach (KeyValuePair<int, Dictionary<int, Dictionary<int, List<int>>>> blockPair in pre_blocks) {
+                int blockIndex = blockPair.Key;
+                foreach (KeyValuePair<int, Dictionary<int, List<int>>> campPair in blockPair.Value) {
+                    int camp = campPair.Key;
+                    int totalInBlock = 0;
+
+                    foreach (KeyValuePair<int, List<int>> groupPair in campPair.Value) {
+                        int group = groupPair.Key;
+                        List<int> indices = groupPair.Value;
+                        if (indices == null || indices.Count == 0) continue;
+
+                        int offset = collisionOffsets[camp][group];
+                        int writable = Math.Min(indices.Count, collisionView1s[camp][group].Length - offset);
+                        if (writable <= 0) continue;
+
+                        IndexLen collisionBlock = getBlockByIndex(collisionViews[camp][group], blockIndex);
+                        collisionBlock.Index = offset;
+                        collisionBlock.Len = writable;
+                        for (int index = 0; index < writable; index++) {
+                            collisionView1s[camp][group][offset + index] = indices[index];
+                        }
+                        collisionOffsets[camp][group] += writable;
+                        totalInBlock += writable;
+                    }
+
+                    if (totalInBlock == 0) continue;
+                    int attackOffset = attackOffsets[camp];
+                    int maxWritable = attackView1s[camp].Length - attackOffset;
+                    int written = 0;
+                    foreach (KeyValuePair<int, List<int>> groupPair in campPair.Value) {
+                        List<int> indices = groupPair.Value;
+                        if (indices == null) continue;
+                        foreach (int petIndex in indices) {
+                            if (written >= maxWritable) break;
+                            attackView1s[camp][attackOffset + written] = petIndex;
+                            written++;
+                        }
+                        if (written >= maxWritable) break;
+                    }
+
+                    IndexLen attackBlock = getBlockByIndex(attackViews[camp], blockIndex);
+                    attackBlock.Index = attackOffset;
+                    attackBlock.Len = written;
+                    attackOffsets[camp] += written;
+                }
+            }
+        }
+
+        public void forEachBlock(IndexLen[] blocks, int[] indices, int blockIndex, Action<int> callback) {
+            IndexLen block = getBlockByIndex(blocks, blockIndex);
+            for (int index = 0; index < block.Len; index++) {
+                callback(indices[block.Index + index]);
+            }
+        }
+
+        public bool findBlock(IndexLen[] blocks, int[] indices, int blockIndex, Func<int, bool> callback) {
+            IndexLen block = getBlockByIndex(blocks, blockIndex);
+            if (block.Len == 0) return false;
+
+            for (int index = 0; index < block.Len; index++) {
+                int secondLevelIndex = block.Index + index;
+                if (secondLevelIndex < 0 || secondLevelIndex >= indices.Length) {
+                    throw new IndexOutOfRangeException("二级空间索引越界");
+                }
+                if (callback(indices[secondLevelIndex])) return true;
+            }
             return false;
         }
-        for (var j = 0; j < Len; j++) {
-            var petIndex = t[Index + j];
-            if (null == petIndex) {
-                throw new Exception("二级内存取出空???");
+
+        public static PetView createPetView(
+            dynamic sheepCtl,
+            SheepCamp camp,
+            int roleType,
+            int formationCount = 1,
+            int unused = 0,
+            bool addToWorld = true,
+            Vector3? position = null,
+            bool isBoom = false
+        ) {
+            SheepMgr manager = sheepMgr;
+            if (manager == null ||
+                (manager.state != SheepRoomState.Run && manager.state != SheepRoomState.Start)) {
+                return null;
             }
-            if (callback(petIndex)) {
-                return true;
+
+            SheepRoleTypeInfo roleConfig = SheepRoleTypeInfo.getById(roleType);
+            PetView petSource = new PetView(-1) {
+                uids = new List<int>(),
+                conf = roleConfig,
+                camp = camp,
+                petId = roleType,
+                isDie = false,
+                scale = roleConfig.scale,
+                isBoom = isBoom,
+                buff_index = -1,
+                view_pet = null,
+                attacher = new BuffTimeAttacher(),
+                skinId = roleConfig.animId
+            };
+
+            SheepRoleFormation formation = SheepRoleFormation.getById(roleConfig.formationId);
+            Vector3 spawnPosition;
+            if (formation.formationType == SheepRoleFormationType.AngleRandom) {
+                float density = Math.Max(1, formation.angleDensity);
+                float maxAngle = Mathf.Min(
+                    (formationCount / density + formation.baseTimes) * formation.startAngle,
+                    formation.maxAngle
+                );
+                float angle = UnityEngine.Random.Range(-maxAngle, maxAngle);
+                angle += angle > 0f ? formation.minAngle : -formation.minAngle;
+                float radius = formation.startR + sheepMode.startAddR;
+                float offsetX = Mathf.Cos(angle * Mathf.Deg2Rad) * radius;
+                float offsetY = Mathf.Sin(angle * Mathf.Deg2Rad) * radius;
+                spawnPosition = camp == SheepCamp.Red
+                    ? new Vector3(sheepMode.loongX - offsetX, offsetY, 0f)
+                    : new Vector3(offsetX - sheepMode.loongX, offsetY, 0f);
             }
+            else if (formation.formationType == SheepRoleFormationType.RectangleRandom) {
+                float density = Math.Max(1, formation.density);
+                float maxScope = Mathf.Min(
+                    (formationCount / density + formation.baseTimes) * formation.startScope,
+                    formation.maxScope
+                );
+                float y = UnityEngine.Random.Range(-maxScope, maxScope);
+                if (formation.minScope != 0) y += y > 0f ? formation.minScope : -formation.minScope;
+                float x = formation.startX + sheepMode.startAddX;
+                x = camp == SheepCamp.Red ? -Mathf.Abs(x) : Mathf.Abs(x);
+                spawnPosition = new Vector3(x, y, 0f);
+            }
+            else {
+                spawnPosition = position ?? new Vector3(
+                    camp == SheepCamp.Red ? -(formation.startX + sheepMode.startAddX) : formation.startX + sheepMode.startAddX,
+                    0f,
+                    0f
+                );
+            }
+
+            petSource.position = spawnPosition;
+            petSource.pos = spawnPosition;
+            if (addToWorld) manager.addPet(petSource, camp);
+            manager.pre_add_pet(petSource);
+            return petSource;
         }
-
-        return false;
-    }
-    
-    
-/**
- *
- * @param sheepCtl {SheepCtl}
- * @param camp {Number}
- * @param roleType
- * @param a
- * @param i
- * @param r
- * @param f
- * @param s
- * @returns {*}
- */
-public static PetView createPetView(object sheepCtl,SheepCamp camp,int roleType, a = 1, i, r = true, f = null, s = false) {
-
-    if (sheepMgr.state != SheepRoomState.Run && sheepMgr.state != SheepRoomState.Start) {
-        return;
-    }
-
-    var sheepRoleTypeInfo = SheepRoleTypeInfo.getById(roleType);
-
-    var petSkin = new PetView();
-    petSkin.uids = [];
-    petSkin.conf = sheepRoleTypeInfo;
-    petSkin.camp = camp;
-    petSkin.petId = roleType;
-    petSkin.isDie = false;
-    petSkin.scale = petSkin.conf.scale;
-    petSkin.isBoom = false;// todo 这里不能写死
-    petSkin.buff_index = -1;
-    petSkin.view_pet = null;
-    petSkin.attacher = new BuffTimeAttacher;
-
-    petSkin.skinId = petSkin.conf.animId;
-
-    let formation = SheepRoleFormation.getById(sheepRoleTypeInfo.formationId);
-
-    if (formation.formationType == SheepRoleFormationType.AngleRandom) {
-        let T = Math.min((a / formation.angleDensity + formation.baseTimes) * formation.startAngle, formation.maxAngle);
-        T = Utils.random.range(-T, T);
-        T += T > 0 ? formation.minAngle : -formation.minAngle;
-
-        let A = formation.startR + sheepMode.startAddR;
-        let H = Math.cos(T * Math.PI / 180) * A;
-        let P = Math.sin(T * Math.PI / 180) * A;
-        let M = sheepMode.loongX;
-
-        if (petSkin.camp == SheepCamp.Red) {
-            let x = v3(M - H, P, 0);
-            petSkin.position = x;
-        } else {
-            let D = v3(H - M, P, 0);
-            petSkin.position = D;
-        }
-
-    } else if (formation.formationType == SheepRoleFormationType.RectangleRandom) {
-        let F = Math.min((a / formation.density + formation.baseTimes) * formation.startScope, formation.maxScope);
-        let N = Utils.random.range(-F, F);
-        formation.minScope && (N += N > 0 ? formation.minScope : -formation.minScope);
-        let W = 0;
-        let E = formation.startX + sheepMode.startAddX;
-        W = camp == SheepCamp.Red ? -Math.abs(E) : Math.abs(E);
-        let O = v3(W, N, 0);
-        petSkin.position = O;
-    } else {
-        petSkin.position = f;
-    }
-
-    sheepMgr.addPet(petSkin, camp)
-
-    petSkin.pos = petSkin.position;
-    sheepMgr.pre_add_pet(petSkin);
-    return petSkin;
-
-}
-
-
-        public static SheepMgr sheepMgr = new SheepMgr();
     }
 }
