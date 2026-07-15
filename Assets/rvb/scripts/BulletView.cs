@@ -1,4 +1,4 @@
-﻿using rvb.scripts;
+using rvb.scripts;
 
 public class BulletView {
     public int id = 0;
@@ -28,37 +28,36 @@ public class BulletView {
 
     public int bulletId {
         get { return _bulletId; }
-
         set {
             _bulletId = value;
-            conf = SheepBullet.getById(_bulletId);
+            conf = value == 0 ? null : SheepBullet.getById(value);
         }
     }
 
-    public void init(int id, BulletView preBulletView) {
-        this.id = id;
+    public void init(int newId, BulletView preview) {
+        if (preview == null) return;
+        this.id = newId;
+        this.roleUid = preview.roleUid;
         this.isDie = false;
-        this.roleUid = preBulletView.roleUid;
-        this.isDie = preBulletView.isDie;
-        this.bulletId = preBulletView.bulletId;
-        this.camp = preBulletView.camp;
-        this.x = preBulletView.x;
-        this.y = preBulletView.y;
-        this.z = preBulletView.z;
-        this.startX = preBulletView.startX;
-        this.startY = preBulletView.startY;
-        this.startZ = preBulletView.startZ;
-        this.dirX = preBulletView.dirX;
-        this.dirY = preBulletView.dirY;
-        this.dirZ = preBulletView.dirZ;
-        this.endX = preBulletView.endX;
-        this.endY = preBulletView.endY;
-        this.endZ = preBulletView.endZ;
-        this.tarRoleIndex = preBulletView.tarRoleIndex;
-        this.atkVue = preBulletView.atkVue;
-        this.frame = preBulletView.frame;
-        this.angle = preBulletView.angle;
-        this.roleIndex = preBulletView.roleIndex;
+        this.bulletId = preview.bulletId;
+        this.camp = preview.camp;
+        this.x = preview.x;
+        this.y = preview.y;
+        this.z = preview.z;
+        this.startX = preview.startX;
+        this.startY = preview.startY;
+        this.startZ = preview.startZ;
+        this.dirX = preview.dirX;
+        this.dirY = preview.dirY;
+        this.dirZ = preview.dirZ;
+        this.endX = preview.endX;
+        this.endY = preview.endY;
+        this.endZ = preview.endZ;
+        this.tarRoleIndex = preview.tarRoleIndex;
+        this.atkVue = preview.atkVue;
+        this.frame = preview.frame;
+        this.angle = preview.angle;
+        this.roleIndex = preview.roleIndex;
     }
 
     public void clear() {
@@ -66,24 +65,16 @@ public class BulletView {
         this.roleUid = 0;
         this.isDie = false;
         this._bulletId = 0;
+        this.conf = null;
         this.camp = 0;
-        this.x = 0;
-        this.y = 0;
-        this.z = 0;
-        this.startX = 0;
-        this.startY = 0;
-        this.startZ = 0;
-        this.dirX = 0;
-        this.dirY = 0;
-        this.dirZ = 0;
-        this.endX = 0;
-        this.endY = 0;
-        this.endZ = 0;
+        this.x = y = z = 0f;
+        this.startX = startY = startZ = 0f;
+        this.dirX = dirY = dirZ = 0f;
+        this.endX = endY = endZ = 0f;
         this.tarRoleIndex = 0;
-        this.atkVue = 0;
+        this.atkVue = 0f;
         this.frame = 0;
-        this.angle = 0;
+        this.angle = 0f;
         this.roleIndex = 0;
-        this.conf = SheepBullet.getById(this._bulletId);
     }
 }
