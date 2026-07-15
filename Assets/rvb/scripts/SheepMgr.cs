@@ -258,18 +258,19 @@ namespace rvb.scripts {
             this.petStartCounts.forEach((function(e, t) {
                 e.clear();
             }));
-            this.preBuffs =new int[][] {
-              new int[]{},  
-              new int[]{},  
+            this.preBuffs = new int[][] {
+                new int[] { },
+                new int[] { },
             };
             this.buffs = new Buff[][] {
-                new Buff[]{},  
-                new Buff[]{},  
-            };;
-            this.countNewBuffs = new int[]{0, 0};
-            this.countBuffs = new int[]{0, 0};
-            this.countShowBuffs = new int[]{0, 0};
-            this.flagLongBuffs = new bool[]{false, false};
+                new Buff[] { },
+                new Buff[] { },
+            };
+            ;
+            this.countNewBuffs = new int[] { 0, 0 };
+            this.countBuffs = new int[] { 0, 0 };
+            this.countShowBuffs = new int[] { 0, 0 };
+            this.flagLongBuffs = new bool[] { false, false };
             // todo 待处理
             // var e = SheepCtl.instance;
             // e.comMatch.updateWinloops();
@@ -283,76 +284,78 @@ namespace rvb.scripts {
         }
 
         public void onGameEnd() {
-            this.god_view_pets = new PetView[]{};
+            this.god_view_pets = new PetView[] { };
         }
-        
+
         public void setState(SheepRoomState e) {
             this.state = e;
-            Debug.Log("房间状态改变"+ e);
+            Debug.Log("房间状态改变" + e);
             // todo 待处理
             // eventBus.emit(EventType.RoomState, {state: e})
         }
-        
-        public void addPet(PetView e,SheepCamp camp) {
+
+        public void addPet(PetView e, SheepCamp camp) {
             this.pets[(int)camp].Add(e);
             if (camp == SheepCamp.Red) {
                 this.perfStat.redNums[(int)e.conf.roleType]++;
-            } else {
+            }
+            else {
                 this.perfStat.blueNums[(int)e.conf.roleType]++;
             }
         }
-        
+
         public void delPet(PetView e) {
             this.pets[(int)SheepCamp.Red].Remove(e);
             this.pets[(int)SheepCamp.Blue].Remove(e);
             if (e.camp == SheepCamp.Red) {
                 this.perfStat.redNums[(int)e.conf.roleType]--;
-            } else {
+            }
+            else {
                 this.perfStat.blueNums[(int)e.conf.roleType]--;
             }
         }
-        
+
         public void clearPets() {
             this.pets[(int)SheepCamp.Red].Clear();
             this.pets[(int)SheepCamp.Blue].Clear();
-            this.perfStat.redNums=new int[]{0,0,0,0,0,0,0,0};
-            this.perfStat.blueNums=new int[]{0,0,0,0,0,0,0,0};
+            this.perfStat.redNums = new int[] { 0, 0, 0, 0, 0, 0, 0, 0 };
+            this.perfStat.blueNums = new int[] { 0, 0, 0, 0, 0, 0, 0, 0 };
         }
-        
+
         public int getBlockIndex(Vector3 e) {
             var t = Math.Floor(e.x / SheepConfig.d + SheepConfig.w / SheepConfig.d / 2);
             var o = Math.Floor(e.y / SheepConfig.d + SheepConfig.h / SheepConfig.d / 2);
             return (int)(t * SheepConfig.line_w + o);
         }
-        
+
         public int getNextPetId() {
             return ++this.petId;
         }
-        
+
         public int rob_role(int t) {
             var old = this.cur_rob_role_index;
             this.cur_rob_role_index += t;
             return old;
         }
-        
+
         public int rob_bullet(int t) {
             var old = this.cur_rob_bullet_index;
             this.cur_rob_bullet_index += t;
             return old;
         }
-        
+
         public int rob_pre_bullet(int t) {
             var old = this.preBulletIndex;
             this.preBulletIndex += t;
             return old;
         }
-        
+
         public void clearPetViews() {
             foreach (var element in this.view_pets) {
                 element.clear();
             }
         }
-        
+
         /**
     *
     * @param petIndex
@@ -362,8 +365,9 @@ namespace rvb.scripts {
             if (petIndex < 0 || petIndex >= SheepConfig.MaxPetCount) {
                 return null;
             }
+
             var pet = this.view_pets[petIndex];
-            if (pet==null) {
+            if (pet == null) {
                 pet = new PetView(petIndex);
                 this.view_pets[petIndex] = pet;
             }
@@ -375,11 +379,12 @@ namespace rvb.scripts {
             foreach (var viewElement in this.view_bullets) {
                 viewElement.clear();
             }
+
             foreach (var viewElement in this.pre_view_bullets) {
                 viewElement.clear();
             }
         }
-        
+
         /**
      *
      * @param e
@@ -389,15 +394,16 @@ namespace rvb.scripts {
             if (e < 0 || e >= SheepConfig.MaxBulletCount) {
                 return null;
             }
+
             var bullet = this.view_bullets[e];
-            if (bullet==null) {
+            if (bullet == null) {
                 bullet = new BulletView();
                 this.view_bullets[e] = bullet;
             }
 
             return bullet;
         }
-        
+
         /**
      *
      * @param e
@@ -407,15 +413,16 @@ namespace rvb.scripts {
             if (e < 0 || e >= SheepConfig.MaxBulletCount) {
                 return null;
             }
+
             var bullet = this.pre_view_bullets[e];
-            if (bullet==null) {
+            if (bullet == null) {
                 bullet = new BulletView();
                 this.pre_view_bullets[e] = bullet;
             }
 
             return bullet;
         }
-        
+
         /**
      *
      * @param e
@@ -424,88 +431,115 @@ namespace rvb.scripts {
      * @param view_tar_pet {PetView}
      * @param l
      */
-    public void copyBulletPreView(int e,int bulletId,PetView view_pet,PetView view_tar_pet,Info l = null) {
-        var n = SheepBullet.getById(bulletId);
-        var r = view_pet!=null ? view_pet.camp == SheepCamp.Red ? n.startOffsetX : -n.startOffsetX : 0;
-        var preBullet = this.getBulletPreView(e);
-        preBullet.bulletId = bulletId;
-        preBullet.roleUid = view_pet!=null ? view_pet.id : 0;
-        preBullet.roleIndex = view_pet!=null ? view_pet.index : 0;
+        public void copyBulletPreView(int e, int bulletId, PetView view_pet, PetView view_tar_pet, Info l = null) {
+            var n = SheepBullet.getById(bulletId);
+            var r = view_pet != null ? view_pet.camp == SheepCamp.Red ? n.startOffsetX : -n.startOffsetX : 0;
+            var preBullet = this.getBulletPreView(e);
+            preBullet.bulletId = bulletId;
+            preBullet.roleUid = view_pet != null ? view_pet.id : 0;
+            preBullet.roleIndex = view_pet != null ? view_pet.index : 0;
 
 
-        preBullet.camp = view_pet!=null ? view_pet.camp : l.camp;
-        if (view_tar_pet!=null && 0 == view_tar_pet.roleId) {
-            preBullet.tarRoleIndex = view_tar_pet.index;
-        } else {
-            preBullet.tarRoleIndex = -1;
-        }
-        if (n.moveType == SheepBulletMoveType.Fixed) {
-            var t = l && l.startX || view_pet && view_pet.posX || 0;
-            preBullet.x = t;
-            var s = l && l.startY || view_pet && view_pet.posY || 0;
-            preBullet.y = s;
+            preBullet.camp = view_pet != null ? view_pet.camp : l.camp;
+            if (view_tar_pet != null && 0 == view_tar_pet.roleId) {
+                preBullet.tarRoleIndex = view_tar_pet.index;
+            }
+            else {
+                preBullet.tarRoleIndex = -1;
+            }
 
-            preBullet.startY = n.startOffsetY;
-            preBullet.z = 0 + n.startOffsetZ;
-            preBullet.dirX = 0;
-            preBullet.dirY = 0;
-            preBullet.dirZ = 1;
-        } else if (n.moveType == SheepBulletMoveType.LineDir) {
-            preBullet.x = view_pet.posX + r;
-            preBullet.y = view_pet.posY + n.startOffsetY;
-            preBullet.z = 0 + n.startOffsetZ;
-            preBullet.dirX = view_pet.dirX;
-            preBullet.dirY = view_pet.dirY;
-        } else if (n.moveType == SheepBulletMoveType.CurvePosFrame) {
-            var t = view_pet!=null ? view_pet.posX : l.startX;
-            var s = view_pet!=null ? view_pet.posY : l.startY;
-            var c = view_tar_pet!=null ? view_tar_pet.posX : view_pet.tarPosX;
-            var f = view_tar_pet !=null ? view_tar_pet.posY : view_pet.tarPosY;
-            preBullet.x = t + r;
-            preBullet.y = s + n.startOffsetY;
-            preBullet.z = 0 + n.startOffsetZ;
-            preBullet.startX = t + r;
-            preBullet.startY = s + n.startOffsetY;
-            preBullet.startZ = 0 + n.startOffsetZ;
-            preBullet.endX = c;
-            preBullet.endY = f;
-            preBullet.endZ = 0 + n.endOffsetZ;
-            preBullet.dirX = 0;
-            preBullet.dirY = 0;
-            preBullet.z = 1;
-        } else if (n.moveType == SheepBulletMoveType.DirAngle) {
-            preBullet.x = view_pet.posX + r;
-            preBullet.y = view_pet.posY + n.startOffsetY;
-            preBullet.z = 0 + n.startOffsetZ;
-            preBullet.dirX = l.dirX;
-            preBullet.dirY = l.dirY;
-            preBullet.dirZ = l.dirZ;
-        } else if (n.moveType == SheepBulletMoveType.RadiusAngle) {
-            preBullet.x = view_pet.posX + r;
-            preBullet.y = view_pet.posY + n.startOffsetY;
-            preBullet.z = 0 + n.startOffsetZ;
-            preBullet.startX = view_pet.posX + r;
-            preBullet.startY = view_pet.posY + n.startOffsetY;
-            preBullet.startZ = 0 + n.startOffsetZ;
-            preBullet.dirX = l.dirX;
-            preBullet.dirY = l.dirY;
-            preBullet.dirZ = l.dirZ;
-            preBullet.angle = l.angle;
-        } else if (n.moveType == SheepBulletMoveType.LineDirEndPos) {
-            preBullet.x = l.startX;
-            preBullet.y = l.startY;
-            preBullet.z = l.startZ;
-            preBullet.startX = l.startX;
-            preBullet.startY = l.startY;
-            preBullet.startZ = l.startZ;
-            preBullet.endX = l.endX;
-            preBullet.endY = l.endY;
-            preBullet.endZ = l.endZ;
-            if (l.dirX || l.dirY || l.dirZ) {
+            if (n.moveType == SheepBulletMoveType.Fixed) {
+                var t = l && l.startX || view_pet && view_pet.posX || 0;
+                preBullet.x = t;
+                var s = l && l.startY || view_pet && view_pet.posY || 0;
+                preBullet.y = s;
+
+                preBullet.startY = n.startOffsetY;
+                preBullet.z = 0 + n.startOffsetZ;
+                preBullet.dirX = 0;
+                preBullet.dirY = 0;
+                preBullet.dirZ = 1;
+            }
+            else if (n.moveType == SheepBulletMoveType.LineDir) {
+                preBullet.x = view_pet.posX + r;
+                preBullet.y = view_pet.posY + n.startOffsetY;
+                preBullet.z = 0 + n.startOffsetZ;
+                preBullet.dirX = view_pet.dirX;
+                preBullet.dirY = view_pet.dirY;
+            }
+            else if (n.moveType == SheepBulletMoveType.CurvePosFrame) {
+                var t = view_pet != null ? view_pet.posX : l.startX;
+                var s = view_pet != null ? view_pet.posY : l.startY;
+                var c = view_tar_pet != null ? view_tar_pet.posX : view_pet.tarPosX;
+                var f = view_tar_pet != null ? view_tar_pet.posY : view_pet.tarPosY;
+                preBullet.x = t + r;
+                preBullet.y = s + n.startOffsetY;
+                preBullet.z = 0 + n.startOffsetZ;
+                preBullet.startX = t + r;
+                preBullet.startY = s + n.startOffsetY;
+                preBullet.startZ = 0 + n.startOffsetZ;
+                preBullet.endX = c;
+                preBullet.endY = f;
+                preBullet.endZ = 0 + n.endOffsetZ;
+                preBullet.dirX = 0;
+                preBullet.dirY = 0;
+                preBullet.z = 1;
+            }
+            else if (n.moveType == SheepBulletMoveType.DirAngle) {
+                preBullet.x = view_pet.posX + r;
+                preBullet.y = view_pet.posY + n.startOffsetY;
+                preBullet.z = 0 + n.startOffsetZ;
                 preBullet.dirX = l.dirX;
                 preBullet.dirY = l.dirY;
                 preBullet.dirZ = l.dirZ;
-            } else {
+            }
+            else if (n.moveType == SheepBulletMoveType.RadiusAngle) {
+                preBullet.x = view_pet.posX + r;
+                preBullet.y = view_pet.posY + n.startOffsetY;
+                preBullet.z = 0 + n.startOffsetZ;
+                preBullet.startX = view_pet.posX + r;
+                preBullet.startY = view_pet.posY + n.startOffsetY;
+                preBullet.startZ = 0 + n.startOffsetZ;
+                preBullet.dirX = l.dirX;
+                preBullet.dirY = l.dirY;
+                preBullet.dirZ = l.dirZ;
+                preBullet.angle = l.angle;
+            }
+            else if (n.moveType == SheepBulletMoveType.LineDirEndPos) {
+                preBullet.x = l.startX;
+                preBullet.y = l.startY;
+                preBullet.z = l.startZ;
+                preBullet.startX = l.startX;
+                preBullet.startY = l.startY;
+                preBullet.startZ = l.startZ;
+                preBullet.endX = l.endX;
+                preBullet.endY = l.endY;
+                preBullet.endZ = l.endZ;
+                if (l.dirX || l.dirY || l.dirZ) {
+                    preBullet.dirX = l.dirX;
+                    preBullet.dirY = l.dirY;
+                    preBullet.dirZ = l.dirZ;
+                }
+                else {
+                    var t = l.endX - l.startX;
+                    var i = l.endY - l.startY;
+                    var s = l.endZ - l.startZ;
+                    var o = Math.Sqrt(t * t + i * i);
+                    preBullet.dirX = (float)(t / o);
+                    preBullet.dirY = (float)(i / o);
+                    preBullet.dirZ = (float)(s / o);
+                }
+            }
+            else if (n.moveType == SheepBulletMoveType.LinePosFrame) {
+                preBullet.x = l.startX;
+                preBullet.y = l.startY;
+                preBullet.z = l.startZ;
+                preBullet.startX = l.startX;
+                preBullet.startY = l.startY;
+                preBullet.startZ = l.startZ;
+                preBullet.endX = l.endX;
+                preBullet.endY = l.endY;
+                preBullet.endZ = l.endZ;
                 var t = l.endX - l.startX;
                 var i = l.endY - l.startY;
                 var s = l.endZ - l.startZ;
@@ -514,35 +548,19 @@ namespace rvb.scripts {
                 preBullet.dirY = (float)(i / o);
                 preBullet.dirZ = (float)(s / o);
             }
-        } else if (n.moveType == SheepBulletMoveType.LinePosFrame) {
-            preBullet.x = l.startX;
-            preBullet.y = l.startY;
-            preBullet.z = l.startZ;
-            preBullet.startX = l.startX;
-            preBullet.startY = l.startY;
-            preBullet.startZ = l.startZ;
-            preBullet.endX = l.endX;
-            preBullet.endY = l.endY;
-            preBullet.endZ = l.endZ;
-            var t = l.endX - l.startX;
-            var i = l.endY - l.startY;
-            var s = l.endZ - l.startZ;
-            var o = Math.Sqrt(t * t + i * i);
-            preBullet.dirX = (float)(t / o);
-            preBullet.dirY = (float)(i / o);
-            preBullet.dirZ = (float)(s / o);
-        } else {
-            preBullet.x = view_pet.posX + r;
-            preBullet.y = view_pet.posY + n.startOffsetY;
-            preBullet.z = 0 + n.startOffsetZ;
-            preBullet.dirX = 0;
-            preBullet.dirY = 0;
-            preBullet.dirZ = 1;
+            else {
+                preBullet.x = view_pet.posX + r;
+                preBullet.y = view_pet.posY + n.startOffsetY;
+                preBullet.z = 0 + n.startOffsetZ;
+                preBullet.dirX = 0;
+                preBullet.dirY = 0;
+                preBullet.dirZ = 1;
+            }
+
+            preBullet.atkVue = view_pet != null ? view_pet.conf.atk : l.atk;
+            preBullet.frame = 0;
         }
-        preBullet.atkVue = view_pet!=null ? view_pet.conf.atk : l.atk;
-        preBullet.frame = 0;
-    }
-        
+
         public static SheepMgr sheepMgr = new SheepMgr();
     }
 }
