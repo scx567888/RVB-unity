@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.Diagnostics;
+using static rvb.scripts.SheepModes;
 
 namespace rvb.scripts {
     public class SheepMgr {
@@ -1345,10 +1346,10 @@ namespace rvb.scripts {
         console.error("移动状态没有目标??")
     }
 
-    public void update_role_state_attack(petSkin, t, i){
+    public void update_role_state_attack(PetView petSkin,bool t,float i){
         let o = petSkin.conf.atkMoveType;
         if (petSkin.conf.isLoongStopDistance) {
-            const t = sheepMode;
+            var t = sheepMode;
             let i = petSkin.conf.loongStopDistanceR;
             Util.dis(petSkin.posX, petSkin.posY, petSkin.camp === SheepCamp.Red ? t.loongX : -t.loongX, 0) <= i && (o = SheepRoleAtkMoveType.None)
         }
@@ -1978,7 +1979,7 @@ namespace rvb.scripts {
      * @param sheepCtl {SheepCtl}
      * @param t
      */
-    public void consume(object sheepCtl, t) {
+    public void consume(object sheepCtl,float t) {
         let o = this;
 
         let sheepConfig = SheepConfig;
@@ -2006,7 +2007,7 @@ namespace rvb.scripts {
                 }
 
                 let c = SheepRoleTypeInfo.getById(a);
-                let formation = SheepRoleFormation.getById(c.formationId);
+                var formation = SheepRoleFormation.getById(c.formationId);
 
                 let u = n == SheepCamp.Red ? sheepMgr.perfStat.redNums[c.roleType] : sheepMgr.perfStat.blueNums[c.roleType];
 
@@ -2028,16 +2029,16 @@ namespace rvb.scripts {
                 o.frame = 0
 
                 if (formation.formationType == SheepRoleFormationType.RectangleTidy) {
-                    let h = formation.itemNumY;
-                    let m = formation.itemY;
-                    let d = formation.itemYGapNum;
-                    let g = formation.itemYGap;
+                    var h = formation.itemNumY;
+                    var m = formation.itemY;
+                    var d = formation.itemYGapNum;
+                    var g = formation.itemYGap;
 
-                    let y = formation.startX + sheepMode.startAddX;
-                    let S = n == SheepCamp.Red ? -y : y;
+                    var y = formation.startX + sheepMode.startAddX;
+                    var S = n == SheepCamp.Red ? -y : y;
 
-                    let pets = o.pets;
-                    let I = 0;
+                    var pets = o.pets;
+                    var I = 0;
 
                     for (; pets.length > 0 && I < h;) {
 
