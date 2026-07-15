@@ -848,6 +848,124 @@ namespace rvb.scripts {
         this.bulletMaxIndex = this.bulletCount
 
     }
+        
+        public void updateBoss(sheepMgr, sheepCtl, dt,  c) {
+        let sheepConfig = SheepConfig;
+        let isEnd = false;
+        sheepMgr.boss.forEach((t, index, n) => {
+
+            let viewPet = this.getPetView(index);
+            let camp = viewPet.camp;
+            let state = viewPet.state;
+
+            if (state == SheepBossState.Ready) {
+
+                viewPet.curHp = t.curHp;
+                t.comProgress.setVue(t.curHp);
+                viewPet.state = SheepBossState.NomalRun;
+
+            } else if (state == SheepBossState.AwakeAnim || state == SheepBossState.UnAwakeAnim) {
+
+                t.comProgress.setVue(t.comProgress._vue)
+
+            } else if (state == SheepBossState.Dead) {
+
+            } else {
+                let curHp = viewPet.curHp;
+                if (curHp <= 0) {
+                    curHp = 0;
+                }
+
+                let d = t.comProgress._vue;
+                let _ = d - curHp;
+
+                if (_ && curHp) {
+
+                    let S = sheepMgr.countBuffs[1 - camp];
+                    if (S > 0) {
+                        let b = 1 + sheepConfig.buffDragonDamageIncreseRate * S;
+                        b += 0;
+                        _ = Math.floor(_ * b)
+                        curHp = d - _;
+                        viewPet.curHp = curHp
+                    }
+
+                    let I = sheepMgr.countBuffs[camp];
+                    if (I > 0) {
+                        let B = Math.pow(1 - sheepConfig.buffDragonReduceRate, I);
+                        B -= 0;
+                        if (B < 1 - sheepConfig.buffDragonMaxReduceRate) {
+                            B = 1 - sheepConfig.buffDragonMaxReduceRate;
+                        }
+                        _ = Math.floor(_ * B)
+                        curHp = d - _;
+                        viewPet.curHp = curHp
+                    }
+
+                }
+
+                if (t.subShield() && _ > 1) {
+                    curHp = d - 1
+                    if (curHp < 0) {
+                        curHp = 0;
+                    }
+                    _ = 1;
+                    viewPet.curHp = curHp;
+                }
+
+                if (curHp != d) {
+                    t.comProgress.setVue(curHp);
+                    t.curHp = curHp;
+                    SheepAnims.showBossBlood(sheepCtl, t, _);
+                    t.hitAnim();
+                }
+
+                let R = sheepMgr.countShowBuffs[camp];
+                let M = sheepMgr.countBuffs[camp];
+
+                if (!sheepMgr.flagLongBuffs[camp] && curHp < sheepMgr.loongHp * sheepConfig.counterHpRatio) {
+                    sheepMgr.flagLongBuffs[camp] = true;
+                    t.backStateTime = c;
+                    sheepMgr.preBuffs[camp].push(0);
+                    sheepCtl.comMatch.showDoubleAnim(camp);
+                    sheepCtl.comUIAnim.backAnim(camp);
+                    sheepCtl.cameraCtl.onShake(SheepConfig.shockBeginNumber)
+                } else if (t.backStateTime && c - t.backStateTime > 12e4 && M - R == 0) {
+                    t.backStateTime = 0;
+                    sheepCtl.comMatch.hideDoubleAnim(camp);
+                    sheepCtl.comUIAnim.backSuccessAnim(camp);
+                    sheepCtl.cameraCtl.onShake(SheepConfig.shockEndNumber)
+                }
+
+                if (curHp <= 0) {
+                    viewPet.state = SheepBossState.Dead;
+                    viewPet.isDie = !0;
+                    t.curHp = 0;
+                    eventBus.emit(EventType.RoomStateEnd)
+                    isEnd = true
+                    return;
+                }
+
+                viewPet.curAckFrame;
+
+                let T = 0;
+                let D = sheepMgr.plotRatio;
+
+                for (let A = 0; A < sheepConfig.loongStateSwitching.length; A++) {
+                    if (D <= sheepConfig.loongStateSwitching[A]) {
+                        T = A;
+                        break
+                    }
+                }
+
+                sheepMgr.plotRatioIndex = T;
+                t.updateState(sheepCtl, sheepMgr, T + 1);
+                t.updateStateJJL(sheepCtl, sheepMgr, T + 1)
+
+            }
+        })
+        return isEnd;
+    }
 
         public static SheepMgr sheepMgr = new SheepMgr();
     }
