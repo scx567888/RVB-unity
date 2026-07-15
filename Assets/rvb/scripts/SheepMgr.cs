@@ -645,6 +645,209 @@ namespace rvb.scripts {
                 throw err;
             }
         }
+        
+        /**
+     *
+     * @param sheepMgr {SheepMgr}
+     * @param sheepCtl {SheepCtl}
+     * @param dt
+     */
+    public void update_merge_workers(SheepMgr sheepMgr,object sheepCtl,float dt) {
+
+        let sheepConfig = SheepConfig;
+        let isEnd = false;
+
+        const now = Date.now();
+
+        this.mainClearBlocks()
+        sheepCtl.comImages.mesh_block.onFrameUpdateStart();
+
+
+        if (sheepMgr.endTime && sheepMgr.endTime < Date.now()) {
+            eventBus.emit(EventType.RoomStateEnd);
+            isEnd = true
+            sheepMgr.endTime = 0
+            return;
+        }
+
+
+        sheepMgr.countNewBuffs = [0, 0];
+        sheepMgr.countBuffs = [0, 0];
+        sheepMgr.countShowBuffs = [0, 0];
+
+        // console.log(sheepMgr.buffs)
+        sheepMgr.buffs.forEach((r, s) => {
+
+            if (r.length && r[0].time < sheepMgr.gameStartTimerForBuff) {
+                r.shift();
+                sheepMgr.buffs[s] = r;
+            }
+
+            for (const o of r) {
+                sheepMgr.countBuffs[s] += o.count || SheepConfig.counterBuffNumber;
+                sheepMgr.countShowBuffs[s] += o.count
+            }
+
+        });
+
+        sheepMgr.preBuffs.forEach((r, s) => {
+            if (!r.length) {
+                return;
+            }
+
+            let sum = 0;
+            let hasZero = false;
+
+            for (const f of r) {
+                if (0 == f) {
+                    hasZero = true;
+                }
+                sum += f
+            }
+
+            if (hasZero) {
+
+                sheepMgr.buffs[s].push({
+                    time: sheepMgr.gameStartTimerForBuff + 1000 * sheepConfig.counterTime,
+                    count: 0
+                });
+
+                if (r.length > 1) {
+                    sheepMgr.buffs[s].push({
+                        time: sheepMgr.gameStartTimerForBuff + 1000 * sheepConfig.buffLastTime,
+                        count: sum
+                    });
+                }
+
+            } else {
+                sheepMgr.buffs[s].push({
+                    time: sheepMgr.gameStartTimerForBuff + 1000 * sheepConfig.buffLastTime,
+                    count: sum
+                });
+            }
+
+            sheepMgr.preBuffs[s] = [];
+            sheepMgr.countNewBuffs[s] += sum
+
+        });
+
+        isEnd = this.updateBoss(sheepMgr, sheepCtl, dt,  now)
+
+        if (isEnd) {
+            return;
+        }
+
+        let h = [];
+        sheepMgr.pets.forEach(e => e.forEach(e => h.push(e)));
+        let _ = false;
+        if (!sheepMgr.cameraEulerAngles.equals(sheepCtl.cameraCtl.camera.node.eulerAngles)) {
+            _ = true;
+            sheepMgr.cameraEulerAngles = sheepCtl.cameraCtl.camera.node.eulerAngles.clone();
+        }
+
+        let b = 0;
+        let I = 0;
+
+        let x = h;
+
+        for (let B = 0; B < x.length; B++) {
+            let y = x[B];
+            if (y.buff_index == -1) {
+                continue;
+            }
+
+            y.updateSkin(sheepCtl, this, sheepMgr, dt);
+
+            let M;
+            let D = y.view_pet;
+            let A = D.state;
+            let P = D.animType;
+            let W = D.animFrame;
+
+            const fgs = sheepCtl.comImages.roles_framess[y.camp];
+
+            const ghg = fgs[y.skinId];
+
+            M = ghg[P];
+
+            if (null == M) {
+                console.warn("找不到动画", SheepCamp[y.camp], y.skinId, SheepRoleAnimType[P]);
+            }
+
+            if (A == SheepRoleState.In && W >= M.length - 1) {
+                let E = SheepSkill.getById(D.readySkillId);
+                if (E) {
+                    if (E.skillType == SheepSkillType.Boom) {
+                        let F = SheepSkillSubBoom.getById(E.id);
+                        D.state = SheepRoleState.Boom;
+                        if (F.isAnim) {
+                            D.animType = SheepRoleAnimType.Boom
+                        } else {
+                            D.animType = SheepRoleAnimType.Idle
+                        }
+                    }
+                } else {
+                    D.state = SheepRoleState.Move;
+                    D.animType = SheepRoleAnimType.Idle
+                }
+            } else if (A == SheepRoleState.Dead && W >= M.length - 1) {
+                D.state = SheepRoleState.Res;
+                D.animType = SheepRoleAnimType.None;
+                y.onRes(sheepCtl, sheepMgr)
+            } else if (A == SheepRoleState.Up && W >= M.length - 1) {
+                D.state = SheepRoleState.In;
+                D.animType = SheepRoleAnimType.In;
+            } else if (A == SheepRoleState.Buff) {
+                let V = SheepSkillSubBuff.getById(D.readySkillId);
+                let U = D.animFrame;
+                if (U > V.buffStratFrame && U < V.buffEndFrame) {
+                    if (y.camp == SheepCamp.Blue) {
+                        I += 1
+                    } else {
+                        b += 1
+                    }
+                }
+            }
+
+        }
+
+        let j = 0;
+        for (let G = 0; G < this.bulletCount; ++G) {
+            let X = this.getBulletView(G);
+            if (X.isDie) {
+                continue;
+            }
+
+            if (X.frame >= X.conf.endFrame) {
+                X.isDie = !0;
+                this.buff_del_bullet(G);
+            } else {
+
+                let z = this.getPetView(X.roleIndex).conf.splitN;
+
+                for (let O = -z; O <= z; ++O) {
+                    for (let Q = -z; Q <= z; ++Q) {
+                        let Z = Util.getIndexByXY(X.x + O, X.y + Q);
+                        sheepCtl.comImages.mesh_block.addFrameBlockCamp(Z, X.camp)
+                    }
+                }
+                ++j
+            }
+        }
+
+        this.mainSyncBlocksToWokers();
+        sheepCtl.comImages.mesh_block.onFrameUpdateEnd(sheepMgr);
+        this.redBuffCount = b;
+        this.blueBuffCount = I;
+
+        if (isEnd) {
+            return;
+        }
+
+        this.roleMaxIndex = this.petCount;
+        this.bulletMaxIndex = this.bulletCount
+
+    }
 
         public static SheepMgr sheepMgr = new SheepMgr();
     }
