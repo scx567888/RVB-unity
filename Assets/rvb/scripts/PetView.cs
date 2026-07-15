@@ -393,7 +393,7 @@ namespace rvb.scripts {
             skinId = 0;
             state = (SheepRoleState)0;
             subState = (SheepRoleSubState)0;
-            isLock = 0;
+            isLock = false;
             frame = 0;
             posBefX = 0;
             posBefY = 0;
