@@ -47,7 +47,7 @@ namespace rvb.scripts {
         public bool[] flagLongBuffs;
 
         public object[] petStartCounts;
-        public PetView[] god_view_pets;
+        public List<PetView> god_view_pets;
         public PerfStat perfStat;
 
         public PetView[] view_pets;
@@ -1002,7 +1002,7 @@ namespace rvb.scripts {
         }
     }
 
-    public void buff_del_pet(e) {
+    public void buff_del_pet(int e) {
         let pet = this.getPetView(e);
         pet.isDie = true;
         pet.id = 0;
@@ -2120,8 +2120,8 @@ namespace rvb.scripts {
      * @param camp
      * @returns {*}
      */
-    public void getPetStartEndPos(petId, camp) {
-        let petStartCount = this.petStartCounts[camp];
+    public Vector3 getPetStartEndPos(int petId,SheepCamp camp) {
+        let petStartCount = this.petStartCounts[(int)camp];
         let a = petStartCount.get(petId) || 0;
         petStartCount.set(petId, a + 1);
         let sheepRoleTypeInfo = SheepRoleTypeInfo.getById(petId);
@@ -2178,7 +2178,7 @@ namespace rvb.scripts {
         this.pre_blocks.clear()
     }
 
-    public void getBlockByIndex(e, blockIndex){
+    public IndexLen getBlockByIndex(IndexLen[] e,int blockIndex){
         if (!e[blockIndex]){
             e[blockIndex]={
                 Len:0,
@@ -2213,7 +2213,7 @@ namespace rvb.scripts {
         Date.now()
     }
 
-    public void mainPreAddBlock(blockIndex, buffIndex, camp, collideId) {
+    public void mainPreAddBlock(int blockIndex,int buffIndex,SheepCamp camp,int collideId) {
         let o = this.pre_blocks.get(blockIndex);
         if (!o) {
             o = [];
@@ -2293,10 +2293,10 @@ namespace rvb.scripts {
         })
     }
 
-    public void forEachBlock(e, t, blockIndex, callback) {
-        let blockByIndex = this.getBlockByIndex(e, blockIndex);
-        let o = blockByIndex.Index;
-        let l = blockByIndex.Len;
+    public void forEachBlock(IndexLen[] e,int[] t,int blockIndex,Action<int> callback) {
+        var blockByIndex = this.getBlockByIndex(e, blockIndex);
+        var o = blockByIndex.Index;
+        var l = blockByIndex.Len;
         if (l) {
             for (let e = 0; e < l; e++) {
                 callback(t[o + e])
@@ -2304,7 +2304,7 @@ namespace rvb.scripts {
         }
     }
 
-    public void findBlock(e, t, blockIndex, callback) {
+    public void findBlock(IndexLen[] e,int[] t,int blockIndex,Func<int, bool> callback) {
         let blockByIndex = this.getBlockByIndex(e, blockIndex);
         let Index = blockByIndex.Index;
         let Len = blockByIndex.Len;
