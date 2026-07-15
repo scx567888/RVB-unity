@@ -318,6 +318,28 @@ namespace rvb.scripts {
             this.perfStat.redNums=new int[]{0,0,0,0,0,0,0,0};
             this.perfStat.blueNums=new int[]{0,0,0,0,0,0,0,0};
         }
+        
+        public int getBlockIndex(Vector3 e) {
+            var t = Math.Floor(e.x / SheepConfig.d + SheepConfig.w / SheepConfig.d / 2);
+            var o = Math.Floor(e.y / SheepConfig.d + SheepConfig.h / SheepConfig.d / 2);
+            return (int)(t * SheepConfig.line_w + o);
+        }
+        
+        public int getNextPetId() {
+            return ++this.petId;
+        }
+        
+        public int rob_role(int t) {
+            var old = this.cur_rob_role_index;
+            this.cur_rob_role_index += t;
+            return old;
+        }
+        
+        public int rob_bullet(int t) {
+            var old = this.cur_rob_bullet_index;
+            this.cur_rob_bullet_index += t;
+            return old;
+        }
 
         public static SheepMgr sheepMgr = new SheepMgr();
     }
