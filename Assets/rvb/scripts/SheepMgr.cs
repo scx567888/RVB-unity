@@ -38,7 +38,7 @@ namespace rvb.scripts {
         public Vector3 cameraEulerAngles = new Vector3();
         public int endTime = 0;
         public int[][] preBuffs;
-        public Buff[] buffs;
+        public Buff[][] buffs;
         public int[] countNewBuffs;
         public int[] countBuffs;
         public int[] countShowBuffs;
@@ -255,17 +255,33 @@ namespace rvb.scripts {
             this.gameStartTimerForBuff = 0;
             this.clearPets();
             this.clearCallPets();
-            this.petStartCounts.forEach((function (e, t) {
-                e.clear()
+            this.petStartCounts.forEach((function(e, t) {
+                e.clear();
             }));
-            this.preBuffs = [[], []];
-            this.buffs = [[], []];
-            this.countNewBuffs = [0, 0];
-            this.countBuffs = [0, 0];
-            this.countShowBuffs = [0, 0];
-            this.flagLongBuffs = [false, false];
-            var e = SheepCtl.instance;
-            e.comMatch.updateWinloops();
+            this.preBuffs =new int[][] {
+              new int[]{},  
+              new int[]{},  
+            };
+            this.buffs = new Buff[][] {
+                new Buff[]{},  
+                new Buff[]{},  
+            };;
+            this.countNewBuffs = new int[]{0, 0};
+            this.countBuffs = new int[]{0, 0};
+            this.countShowBuffs = new int[]{0, 0};
+            this.flagLongBuffs = new bool[]{false, false};
+            
+        }
+
+        public void onGameRun() {
+            this.god_view_pets.forEach((function(e) {
+                e.state = SheepRoleState.Palm, e.subState = SheepRoleSubState.Palm, e.animType =
+                    SheepRoleAnimType.Palm, e.readySkillId = 70002
+            }));
+        }
+
+        public void onGameEnd() {
+            this.god_view_pets = new PetView[]{};
         }
 
         public static SheepMgr sheepMgr = new SheepMgr();
