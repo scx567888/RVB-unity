@@ -62,6 +62,7 @@ namespace rvb.scripts {
         /// 自定义 Boss/组件也可以通过 dynamic 接入。
         /// </summary>
         public List<dynamic> petsAdd;
+
         public Stack<int> petsDel;
         public int petCount;
 
@@ -89,6 +90,7 @@ namespace rvb.scripts {
 
         /// <summary>可选原渲染桥接对象（ComSheepImages 或你自己的实现）。</summary>
         public dynamic comImages;
+
         public int cur_rob_role_index;
         public int cur_rob_bullet_index;
         public int cur_rob_role_mesh_index;
@@ -104,6 +106,7 @@ namespace rvb.scripts {
 
         /// <summary>逻辑侧 Boss 当前已结算生命。</summary>
         public float[] bossHp;
+
         public long[] bossBackStateTime;
 
         /// <summary>若 SheepCtl 已自行推进 Buff 时钟，可设为 false。</summary>
@@ -124,7 +127,8 @@ namespace rvb.scripts {
         public Func<PetView, int> AnimationFrameCountResolver;
         public Func<SheepCamp, bool> BossShieldConsumer;
 
-        public SheepMgr() : this(true) { }
+        public SheepMgr() : this(true) {
+        }
 
         private SheepMgr(bool registerSingleton) {
             if (registerSingleton || sheepMgr == null) {
@@ -231,6 +235,7 @@ namespace rvb.scripts {
             if (roleIndex >= perfStat.redNums.Length) {
                 Array.Resize(ref perfStat.redNums, roleIndex + 4);
             }
+
             if (roleIndex >= perfStat.blueNums.Length) {
                 Array.Resize(ref perfStat.blueNums, roleIndex + 4);
             }
@@ -248,6 +253,7 @@ namespace rvb.scripts {
             foreach (Dictionary<int, int> counts in petStartCounts) {
                 counts.Clear();
             }
+
             foreach (List<int> list in preBuffs) list.Clear();
             foreach (List<Buff> list in buffs) list.Clear();
             Array.Clear(countNewBuffs, 0, countNewBuffs.Length);
@@ -349,6 +355,7 @@ namespace rvb.scripts {
                 pet = new PetView(petIndex);
                 view_pets[petIndex] = pet;
             }
+
             return pet;
         }
 
@@ -364,6 +371,7 @@ namespace rvb.scripts {
                 bullet = new BulletView();
                 view_bullets[index] = bullet;
             }
+
             return bullet;
         }
 
@@ -374,6 +382,7 @@ namespace rvb.scripts {
                 bullet = new BulletView();
                 pre_view_bullets[index] = bullet;
             }
+
             return bullet;
         }
 
@@ -429,6 +438,7 @@ namespace rvb.scripts {
                     if (viewPet == null && info == null) {
                         throw new InvalidOperationException("CurvePosFrame 子弹需要 viewPet 或 info");
                     }
+
                     float startX = viewPet != null ? viewPet.posX : info.startX;
                     float startY = viewPet != null ? viewPet.posY : info.startY;
                     float endX = targetPet != null
@@ -460,6 +470,7 @@ namespace rvb.scripts {
                     if (viewPet == null || info == null) {
                         throw new InvalidOperationException("DirAngle 子弹需要 viewPet 和 info");
                     }
+
                     preBullet.x = viewPet.posX + startOffsetX;
                     preBullet.y = viewPet.posY + config.startOffsetY;
                     preBullet.z = config.startOffsetZ;
@@ -475,6 +486,7 @@ namespace rvb.scripts {
                     if (viewPet == null || info == null) {
                         throw new InvalidOperationException("RadiusAngle 子弹需要 viewPet 和 info");
                     }
+
                     preBullet.x = viewPet.posX + startOffsetX;
                     preBullet.y = viewPet.posY + config.startOffsetY;
                     preBullet.z = config.startOffsetZ;
@@ -492,6 +504,7 @@ namespace rvb.scripts {
                     if (info == null) {
                         throw new InvalidOperationException(moveType + " 子弹需要 info");
                     }
+
                     preBullet.x = info.startX;
                     preBullet.y = info.startY;
                     preBullet.z = info.startZ;
@@ -521,6 +534,7 @@ namespace rvb.scripts {
                             preBullet.dirZ = dz / length;
                         }
                     }
+
                     break;
                 }
                 default: {
@@ -588,7 +602,7 @@ namespace rvb.scripts {
             }
         }
 
-        public void game_update(SheepMgr manager, dynamic sheepCtl, float deltaMs) {
+        public void game_update(SheepMgr manager, SheepCtl sheepCtl, float deltaMs) {
             if (manager == null) manager = this;
             try {
                 if (advanceGameClockInGameUpdate && manager.state == SheepRoomState.Run) {
@@ -929,7 +943,9 @@ namespace rvb.scripts {
                 }
 
                 int stateIndex = 0;
-                for (int thresholdIndex = 0; thresholdIndex < SheepConfig.loongStateSwitching.Length; thresholdIndex++) {
+                for (int thresholdIndex = 0;
+                     thresholdIndex < SheepConfig.loongStateSwitching.Length;
+                     thresholdIndex++) {
                     if (manager.plotRatio <= SheepConfig.loongStateSwitching[thresholdIndex]) {
                         stateIndex = thresholdIndex;
                         break;
@@ -960,6 +976,7 @@ namespace rvb.scripts {
                         Debug.LogWarning($"预加入怪物超过最大数量: {petCount}/{SheepConfig.MaxPetCount}");
                         break;
                     }
+
                     index = petCount++;
                 }
 
@@ -998,6 +1015,7 @@ namespace rvb.scripts {
                         Debug.LogWarning($"预加入子弹超过最大数量: {bulletCount}/{SheepConfig.MaxBulletCount}");
                         break;
                     }
+
                     index = bulletCount++;
                 }
 
@@ -1007,6 +1025,7 @@ namespace rvb.scripts {
                     getBulletView(index).init(++bulletId, preview);
                 }
             }
+
             preBulletIndex = 0;
         }
 
@@ -1059,13 +1078,16 @@ namespace rvb.scripts {
                         request.info
                     );
                 }
+
                 bullte_creates.Clear();
             }
 
             stopwatch.Stop();
             if (stopwatch.ElapsedMilliseconds > 33) {
-                Debug.Log($"count_role:{roleCount} count_bullet:{activeBulletCount} 耗时:{stopwatch.ElapsedMilliseconds}ms");
+                Debug.Log(
+                    $"count_role:{roleCount} count_bullet:{activeBulletCount} 耗时:{stopwatch.ElapsedMilliseconds}ms");
             }
+
             return (stopwatch.ElapsedMilliseconds, true);
         }
 
@@ -1110,6 +1132,7 @@ namespace rvb.scripts {
                 OnRoleRender?.Invoke(viewPet);
                 if (comImages != null) IgnoreExternal(() => comImages.addRole(viewPet));
             }
+
             return safeEnd - start;
         }
 
@@ -1153,6 +1176,7 @@ namespace rvb.scripts {
                                 }
                             );
                         }
+
                         break;
                     }
                 }
@@ -1227,6 +1251,7 @@ namespace rvb.scripts {
                         else {
                             bullet.isDie = true;
                         }
+
                         break;
                     }
 
@@ -1255,6 +1280,7 @@ namespace rvb.scripts {
                     });
                 }
             }
+
             return safeEnd - start;
         }
 
@@ -1273,6 +1299,7 @@ namespace rvb.scripts {
             if (!viewPet.isDie && logicTick) {
                 viewPet.logicMove(viewPet.posX, viewPet.posY);
             }
+
             return logicTick;
         }
 
@@ -1297,6 +1324,7 @@ namespace rvb.scripts {
                                     hasTarget = true;
                                     return true;
                                 }
+
                                 return false;
                             }
                         );
@@ -1326,6 +1354,7 @@ namespace rvb.scripts {
                     if (attackFrame >= Mathf.FloorToInt(1000f * config.atkCd / 100f)) {
                         bossView.curAckFrame = 0;
                     }
+
                     break;
                 }
             }
@@ -1378,11 +1407,13 @@ namespace rvb.scripts {
                 petSkin.subState = SheepRoleSubState.AttackAwait;
                 return;
             }
+
             if (result.moveTar != null) {
                 petSkin.subState = SheepRoleSubState.MoveTar;
                 Util.moveTar(petSkin, result.moveTar, deltaSeconds, logicTick);
                 return;
             }
+
             if (result.moveBoss != null) {
                 petSkin.subState = SheepRoleSubState.MoveBoss;
                 Util.moveTar(petSkin, result.moveBoss, deltaSeconds, logicTick);
@@ -1442,6 +1473,7 @@ namespace rvb.scripts {
                     else if (target != null) {
                         UtilAck.ackTar(petSkin, target);
                     }
+
                     break;
                 }
 
@@ -1453,12 +1485,14 @@ namespace rvb.scripts {
                         petSkin.animType = SheepRoleAnimType.Idle;
                         return;
                     }
+
                     if (result.moveTar != null) {
                         petSkin.state = SheepRoleState.Move;
                         petSkin.subState = SheepRoleSubState.MoveTar;
                         petSkin.animType = SheepRoleAnimType.Idle;
                         return;
                     }
+
                     if (result.moveBoss != null) {
                         petSkin.state = SheepRoleState.Move;
                         petSkin.subState = SheepRoleSubState.MoveBoss;
@@ -1547,6 +1581,7 @@ namespace rvb.scripts {
                     petSkin.conf.roleType == SheepRoleType.qi_lin) {
                     excluded.Add(SheepRoleType.qi_lin);
                 }
+
                 UtilAck.ackMe(
                     petSkin,
                     boom.spiltRadiusBet,
@@ -1820,6 +1855,7 @@ namespace rvb.scripts {
                             canAttack) {
                             noShieldTarget = false;
                         }
+
                         if (!canAttack) return false;
                         UtilAck.ackTar(petSkin, target);
                         return false;
@@ -1900,6 +1936,7 @@ namespace rvb.scripts {
                         petSkin.posY + petSkin.impulseY
                     );
                 }
+
                 petSkin.impulseX = 0f;
                 petSkin.impulseY = 0f;
             }
@@ -1926,6 +1963,7 @@ namespace rvb.scripts {
                 else {
                     petSkin.logicMove(petSkin.tarPosX, petSkin.tarPosY);
                 }
+
                 return;
             }
 
@@ -1970,6 +2008,7 @@ namespace rvb.scripts {
                         hasBlockingEnemy = true;
                         return true;
                     }
+
                     return false;
                 });
 
@@ -1986,6 +2025,7 @@ namespace rvb.scripts {
                     petSkin.subState = SheepRoleSubState.MoveBoss;
                     petSkin.animType = SheepRoleAnimType.Idle;
                 }
+
                 return;
             }
 
@@ -2002,6 +2042,7 @@ namespace rvb.scripts {
                 else {
                     hitHeavyTarget = true;
                 }
+
                 return false;
             });
 
@@ -2062,6 +2103,7 @@ namespace rvb.scripts {
                         config.hitBackDistance
                     );
                 }
+
                 return false;
             });
             Util.moveTar(petSkin, null, deltaSeconds, logicTick);
@@ -2094,6 +2136,7 @@ namespace rvb.scripts {
                         !Util.isCanAckByRole(petSkin, target)) {
                         return false;
                     }
+
                     UtilAck.ackTar(petSkin, target);
                     return false;
                 }
@@ -2115,6 +2158,7 @@ namespace rvb.scripts {
                         petSkin.readySkillId = boom.id;
                         return;
                     }
+
                     Util.moveTar(petSkin, null, deltaSeconds, logicTick);
                     return;
                 }
@@ -2129,6 +2173,7 @@ namespace rvb.scripts {
                         petSkin.readySkillId = killer.id;
                         return;
                     }
+
                     if (result.moveBoss != null) {
                         petSkin.state = SheepRoleState.Move;
                         petSkin.subState = SheepRoleSubState.MoveBoss;
@@ -2136,6 +2181,7 @@ namespace rvb.scripts {
                         Util.moveTar(petSkin, result.moveBoss, deltaSeconds, logicTick);
                         return;
                     }
+
                     Util.moveTar(petSkin, null, deltaSeconds, logicTick);
                     return;
                 }
@@ -2149,17 +2195,20 @@ namespace rvb.scripts {
                             bulletId = bullet.bullet
                         });
                     }
+
                     if (result.atkTar != null) {
                         petSkin.state = SheepRoleState.Attack;
                         petSkin.subState = SheepRoleSubState.AttackAwait;
                         return;
                     }
+
                     if (result.moveTar != null) {
                         petSkin.state = SheepRoleState.Move;
                         petSkin.subState = SheepRoleSubState.MoveTar;
                         Util.moveTar(petSkin, result.moveTar, deltaSeconds, logicTick);
                         return;
                     }
+
                     if (result.moveBoss != null) {
                         petSkin.state = SheepRoleState.Move;
                         petSkin.subState = SheepRoleSubState.MoveBoss;
@@ -2167,6 +2216,7 @@ namespace rvb.scripts {
                         Util.moveTar(petSkin, result.moveBoss, deltaSeconds, logicTick);
                         return;
                     }
+
                     Util.moveTar(petSkin, null, deltaSeconds, logicTick);
                     return;
                 }
@@ -2183,6 +2233,7 @@ namespace rvb.scripts {
                         petSkin.readySkillId = callBullets.id;
                         return;
                     }
+
                     Util.moveTar(petSkin, null, deltaSeconds, logicTick);
                     return;
                 }
@@ -2194,18 +2245,21 @@ namespace rvb.scripts {
                 petSkin.subState = SheepRoleSubState.AttackAwait;
                 return;
             }
+
             if (normalResult.moveTar != null) {
                 petSkin.state = SheepRoleState.Move;
                 petSkin.subState = SheepRoleSubState.MoveTar;
                 Util.moveTar(petSkin, normalResult.moveTar, deltaSeconds, logicTick);
                 return;
             }
+
             if (normalResult.moveBoss != null) {
                 petSkin.state = SheepRoleState.Move;
                 petSkin.subState = SheepRoleSubState.MoveBoss;
                 Util.moveTar(petSkin, normalResult.moveBoss, deltaSeconds, logicTick);
                 return;
             }
+
             Util.moveTar(petSkin, null, deltaSeconds, logicTick);
         }
 
@@ -2476,6 +2530,7 @@ namespace rvb.scripts {
                 Array.Clear(collisionView1s[0][group], 0, collisionView1s[0][group].Length);
                 Array.Clear(collisionView1s[1][group], 0, collisionView1s[1][group].Length);
             }
+
             pre_blocks.Clear();
         }
 
@@ -2484,6 +2539,7 @@ namespace rvb.scripts {
             if (blockIndex < 0 || blockIndex >= blocks.Length) {
                 throw new ArgumentOutOfRangeException(nameof(blockIndex), blockIndex, "blockIndex 越界");
             }
+
             if (blocks[blockIndex] == null) blocks[blockIndex] = new IndexLen();
             return blocks[blockIndex];
         }
@@ -2507,9 +2563,11 @@ namespace rvb.scripts {
                     if (isChangeCollsionFlags[camp][group]) {
                         Array.Clear(collisionViews[camp][group], 0, collisionViews[camp][group].Length);
                     }
+
                     isChangeCollsionFlags[camp][group] = false;
                 }
             }
+
             pre_blocks.Clear();
         }
 
@@ -2522,19 +2580,23 @@ namespace rvb.scripts {
                 camps = new Dictionary<int, Dictionary<int, List<int>>>();
                 pre_blocks.Add(blockIndex, camps);
             }
+
             if (!camps.TryGetValue(campIndex, out Dictionary<int, List<int>> groups)) {
                 groups = new Dictionary<int, List<int>>();
                 camps.Add(campIndex, groups);
             }
+
             if (!groups.TryGetValue(safeCollideId, out List<int> petIndices)) {
                 petIndices = new List<int>();
                 groups.Add(safeCollideId, petIndices);
             }
+
             petIndices.Add(buffIndex);
 
             if (isChangeAckFlags != null && !isChangeAckFlags[campIndex]) {
                 isChangeAckFlags[campIndex] = true;
             }
+
             if (isChangeCollsionFlags != null && !isChangeCollsionFlags[campIndex][safeCollideId]) {
                 isChangeCollsionFlags[campIndex][safeCollideId] = true;
             }
@@ -2568,6 +2630,7 @@ namespace rvb.scripts {
                         for (int index = 0; index < writable; index++) {
                             collisionView1s[camp][group][offset + index] = indices[index];
                         }
+
                         collisionOffsets[camp][group] += writable;
                         totalInBlock += writable;
                     }
@@ -2584,6 +2647,7 @@ namespace rvb.scripts {
                             attackView1s[camp][attackOffset + written] = petIndex;
                             written++;
                         }
+
                         if (written >= maxWritable) break;
                     }
 
@@ -2611,8 +2675,10 @@ namespace rvb.scripts {
                 if (secondLevelIndex < 0 || secondLevelIndex >= indices.Length) {
                     throw new IndexOutOfRangeException("二级空间索引越界");
                 }
+
                 if (callback(indices[secondLevelIndex])) return true;
             }
+
             return false;
         }
 
@@ -2678,7 +2744,9 @@ namespace rvb.scripts {
             }
             else {
                 spawnPosition = position ?? new Vector3(
-                    camp == SheepCamp.Red ? -(formation.startX + sheepMode.startAddX) : formation.startX + sheepMode.startAddX,
+                    camp == SheepCamp.Red
+                        ? -(formation.startX + sheepMode.startAddX)
+                        : formation.startX + sheepMode.startAddX,
                     0f,
                     0f
                 );
