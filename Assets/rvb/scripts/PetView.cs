@@ -22,7 +22,7 @@ namespace rvb.scripts {
         public int? skinId = 0;
         public SheepRoleState state = (SheepRoleState)0;
         public SheepRoleSubState subState = (SheepRoleSubState)0;
-        public int isLock = 0;
+        public bool isLock = false;
         public int frame = 0;
         public float posBefX = 0;
         public float posBefY = 0;

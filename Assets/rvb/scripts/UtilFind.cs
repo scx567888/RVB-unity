@@ -6,7 +6,7 @@ namespace rvb.scripts {
     public static class UtilFind {
         public static SheepMgr system;
 
-        public static Dictionary<string, PetView> findTar(PetView petSkin, int findR = 0) {
+        public static FindTarResult findTar(PetView petSkin, int findR = 0) {
             float i = petSkin.posX;
             float o = petSkin.posY;
             (int xn, int yn) block = Util.getXnYn(i, o);
@@ -52,14 +52,14 @@ namespace rvb.scripts {
             if (r != null) {
                 petSkin.tarPosX = r.posX;
                 petSkin.tarPosY = r.posY;
-                return new Dictionary<string, PetView> { { "atkTar", r } };
+                return new FindTarResult() {  atkTar= r  };
             }
 
             PetView backBoss = Util.getBackBoss(petSkin.camp);
             if (Util.isCanAckByRole(petSkin, backBoss)) {
                 petSkin.tarPosX = backBoss.posX;
                 petSkin.tarPosY = backBoss.posY;
-                return new Dictionary<string, PetView> { { "atkTar", backBoss } };
+                return new FindTarResult() { atkTar= backBoss } ;
             }
 
             if (a != null) {
