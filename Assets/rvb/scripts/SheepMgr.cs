@@ -615,7 +615,7 @@ namespace rvb.scripts {
      * @param i 时间
      * @returns {Promise<void>}
      */
-        public void game_update(SheepMgr sheepMgr, sheepCtl,float i) {
+        public void game_update(SheepMgr sheepMgr,object sheepCtl,float i) {
             try {
                 // 处理召唤兵
                 this.consume(sheepCtl, i);
@@ -1779,7 +1779,7 @@ namespace rvb.scripts {
      * @param i
      * @return {*}
      */
-    public void update_role_state_charge(e, t, i) {
+    public void update_role_state_charge(PetView e, t, i) {
         let o = e.posX, l = e.posY, {xn: n, yn: r} = Util.getXnYn(o, l);
         if (e.camp == SheepCamp.Red && e.posX > e.conf.runEndX || e.camp == SheepCamp.Blue && e.posX < -e.conf.runEndX) {
             let t = !1;
@@ -1840,7 +1840,7 @@ namespace rvb.scripts {
         }
     }
 
-    public void update_role_state_charge_plus(e, t, i) {
+    public void update_role_state_charge_plus(PetView e, t, i) {
         let o = e.posX, l = e.posY, {xn: n, yn: r} = Util.getXnYn(o, l);
         if (e.camp == SheepCamp.Red && e.posX > e.conf.runEndX || e.camp == SheepCamp.Blue && e.posX < -e.conf.runEndX) {
             e.state = SheepRoleState.Boom, e.subState = SheepRoleSubState.Boom;
@@ -1859,7 +1859,7 @@ namespace rvb.scripts {
         })), Util.moveTar(e, null, i, t)
     }
 
-    public void update_role_state_spinspurt(e, t, i) {
+    public void update_role_state_spinspurt(PetView e, t, i) {
         let o = e.posX, l = e.posY, {xn: n, yn: r} = Util.getXnYn(o, l);
         if (e.camp == SheepCamp.Red && e.posX > e.conf.runEndX || e.camp == SheepCamp.Blue && e.posX < -e.conf.runEndX) {
             e.state = SheepRoleState.Boom;
@@ -1874,7 +1874,7 @@ namespace rvb.scripts {
         }
     }
 
-    public void update_role_state_spurt(e, t, i) {
+    public void update_role_state_spurt(PetView e, t, i) {
         if (e.conf.skillSpurt) {
             let s = SheepSkill.getById(e.conf.skillSpurt);
             if (s.skillType == SheepSkillType.Boom) {
@@ -1985,12 +1985,12 @@ namespace rvb.scripts {
 
         this.autoTime += t;
 
-        if (sheepMgr.isAutoCall && this.autoTime > sheepConfig.systemAutomaticTroopsIntervalTime) {
+        if (sheepMgr.isAutoCall && this.autoTime > SheepConfig.systemAutomaticTroopsIntervalTime) {
             this.autoTime = 0;
-            if (sheepMgr.pets[0].size + sheepMgr.pets[1].size < sheepConfig.systemLongerAutomaticallyDispatch) {
+            if (sheepMgr.pets[0].size + sheepMgr.pets[1].size < SheepConfig.systemLongerAutomaticallyDispatch) {
                 [SheepCamp.Red, SheepCamp.Blue].forEach(e => {
-                    if (sheepMgr.pets[e].size < sheepConfig.systemAutomaticallyMaxTroops) {
-                        o.produce_pets(sheepConfig.WarmUpID, sheepConfig.systemAutomaticallyTroopsOneNumber, e)
+                    if (sheepMgr.pets[e].size < SheepConfig.systemAutomaticallyMaxTroops) {
+                        o.produce_pets(SheepConfig.WarmUpID, SheepConfig.systemAutomaticallyTroopsOneNumber, e)
                     }
                 });
             }
