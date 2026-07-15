@@ -424,32 +424,32 @@ namespace rvb.scripts {
      * @param view_tar_pet {PetView}
      * @param l
      */
-    public void copyBulletPreView(int e,int bulletId,PetView view_pet,PetView view_tar_pet,BullteCreate l = null) {
+    public void copyBulletPreView(int e,int bulletId,PetView view_pet,PetView view_tar_pet,Info l = null) {
         var n = SheepBullet.getById(bulletId);
-        var r = view_pet ? view_pet.camp == SheepCamp.Red ? n.startOffsetX : -n.startOffsetX : 0;
+        var r = view_pet!=null ? view_pet.camp == SheepCamp.Red ? n.startOffsetX : -n.startOffsetX : 0;
         var preBullet = this.getBulletPreView(e);
         preBullet.bulletId = bulletId;
-        preBullet.roleUid = view_pet ? view_pet.id : 0;
-        preBullet.roleIndex = view_pet ? view_pet.index : 0;
+        preBullet.roleUid = view_pet!=null ? view_pet.id : 0;
+        preBullet.roleIndex = view_pet!=null ? view_pet.index : 0;
 
 
-        preBullet.camp = view_pet ? view_pet.camp : l.camp;
-        if (view_tar_pet && 0 == view_tar_pet.roleId) {
+        preBullet.camp = view_pet!=null ? view_pet.camp : l.camp;
+        if (view_tar_pet!=null && 0 == view_tar_pet.roleId) {
             preBullet.tarRoleIndex = view_tar_pet.index;
         } else {
             preBullet.tarRoleIndex = -1;
         }
         if (n.moveType == SheepBulletMoveType.Fixed) {
-            let t = l && l.startX || view_pet && view_pet.posX || 0;
+            var t = l && l.startX || view_pet && view_pet.posX || 0;
             preBullet.x = t;
-            let s = l && l.startY || view_pet && view_pet.posY || 0;
+            var s = l && l.startY || view_pet && view_pet.posY || 0;
             preBullet.y = s;
 
             preBullet.startY = n.startOffsetY;
             preBullet.z = 0 + n.startOffsetZ;
             preBullet.dirX = 0;
             preBullet.dirY = 0;
-            preBullet.dirZ = 1
+            preBullet.dirZ = 1;
         } else if (n.moveType == SheepBulletMoveType.LineDir) {
             preBullet.x = view_pet.posX + r;
             preBullet.y = view_pet.posY + n.startOffsetY;
@@ -457,10 +457,10 @@ namespace rvb.scripts {
             preBullet.dirX = view_pet.dirX;
             preBullet.dirY = view_pet.dirY;
         } else if (n.moveType == SheepBulletMoveType.CurvePosFrame) {
-            let t = view_pet ? view_pet.posX : l.startX;
-            let s = view_pet ? view_pet.posY : l.startY;
-            let c = view_tar_pet ? view_tar_pet.posX : view_pet.tarPosX;
-            let f = view_tar_pet ? view_tar_pet.posY : view_pet.tarPosY;
+            var t = view_pet!=null ? view_pet.posX : l.startX;
+            var s = view_pet!=null ? view_pet.posY : l.startY;
+            var c = view_tar_pet!=null ? view_tar_pet.posX : view_pet.tarPosX;
+            var f = view_tar_pet !=null ? view_tar_pet.posY : view_pet.tarPosY;
             preBullet.x = t + r;
             preBullet.y = s + n.startOffsetY;
             preBullet.z = 0 + n.startOffsetZ;
@@ -472,7 +472,7 @@ namespace rvb.scripts {
             preBullet.endZ = 0 + n.endOffsetZ;
             preBullet.dirX = 0;
             preBullet.dirY = 0;
-            preBullet.z = 1
+            preBullet.z = 1;
         } else if (n.moveType == SheepBulletMoveType.DirAngle) {
             preBullet.x = view_pet.posX + r;
             preBullet.y = view_pet.posY + n.startOffsetY;
@@ -506,13 +506,13 @@ namespace rvb.scripts {
                 preBullet.dirY = l.dirY;
                 preBullet.dirZ = l.dirZ;
             } else {
-                let t = l.endX - l.startX;
-                let i = l.endY - l.startY;
-                let s = l.endZ - l.startZ;
-                let o = Math.sqrt(t * t + i * i);
-                preBullet.dirX = t / o;
-                preBullet.dirY = i / o;
-                preBullet.dirZ = s / o
+                var t = l.endX - l.startX;
+                var i = l.endY - l.startY;
+                var s = l.endZ - l.startZ;
+                var o = Math.Sqrt(t * t + i * i);
+                preBullet.dirX = (float)(t / o);
+                preBullet.dirY = (float)(i / o);
+                preBullet.dirZ = (float)(s / o);
             }
         } else if (n.moveType == SheepBulletMoveType.LinePosFrame) {
             preBullet.x = l.startX;
@@ -524,13 +524,13 @@ namespace rvb.scripts {
             preBullet.endX = l.endX;
             preBullet.endY = l.endY;
             preBullet.endZ = l.endZ;
-            let t = l.endX - l.startX;
-            let i = l.endY - l.startY;
-            let s = l.endZ - l.startZ;
-            let o = Math.sqrt(t * t + i * i);
-            preBullet.dirX = t / o;
-            preBullet.dirY = i / o;
-            preBullet.dirZ = s / o;
+            var t = l.endX - l.startX;
+            var i = l.endY - l.startY;
+            var s = l.endZ - l.startZ;
+            var o = Math.Sqrt(t * t + i * i);
+            preBullet.dirX = (float)(t / o);
+            preBullet.dirY = (float)(i / o);
+            preBullet.dirZ = (float)(s / o);
         } else {
             preBullet.x = view_pet.posX + r;
             preBullet.y = view_pet.posY + n.startOffsetY;
@@ -539,7 +539,7 @@ namespace rvb.scripts {
             preBullet.dirY = 0;
             preBullet.dirZ = 1;
         }
-        preBullet.atkVue = view_pet ? view_pet.conf.atk : l.atk;
+        preBullet.atkVue = view_pet!=null ? view_pet.conf.atk : l.atk;
         preBullet.frame = 0;
     }
         

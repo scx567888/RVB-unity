@@ -10,5 +10,14 @@
         public int startX;
         public int startY;
         public int startZ;
+        public int endX;
+        public int endY;
+        public int endZ;
+        public int dirX;
+        public int dirY;
+        public int dirZ;
+        public int angle;
+        public SheepCamp camp;
+        public float atk;
     }
 }
