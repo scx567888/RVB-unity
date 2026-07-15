@@ -31,7 +31,7 @@ namespace rvb.scripts {
         public SheepRoomState state = SheepRoomState.Ready;
 
         // 尝试角色 (todo 但是是哪一种? 当前在场上的? )
-        public object pets;
+        public List<PetView>[] pets;
 
         public int gameIndex = 0;
         public int gameStartTimerForBuff = 0;
@@ -48,7 +48,7 @@ namespace rvb.scripts {
 
         public object[] petStartCounts;
         public PetView[] god_view_pets;
-        public object perfStat;
+        public PerfStat perfStat;
 
         public object view_pets;
         public object view_bullets;
@@ -270,7 +270,9 @@ namespace rvb.scripts {
             this.countBuffs = new int[]{0, 0};
             this.countShowBuffs = new int[]{0, 0};
             this.flagLongBuffs = new bool[]{false, false};
-            
+            // todo 待处理
+            // var e = SheepCtl.instance;
+            // e.comMatch.updateWinloops();
         }
 
         public void onGameRun() {
@@ -282,6 +284,22 @@ namespace rvb.scripts {
 
         public void onGameEnd() {
             this.god_view_pets = new PetView[]{};
+        }
+        
+        public void setState(SheepRoomState e) {
+            this.state = e;
+            Debug.Log("房间状态改变"+ e);
+            // todo 待处理
+            // eventBus.emit(EventType.RoomState, {state: e})
+        }
+        
+        public void addPet(PetView e,SheepCamp camp) {
+            this.pets[(int)camp].Add(e);
+            if (camp == SheepCamp.Red) {
+                this.perfStat.redNums[(int)e.conf.roleType]++;
+            } else {
+                this.perfStat.blueNums[(int)e.conf.roleType]++;
+            }
         }
 
         public static SheepMgr sheepMgr = new SheepMgr();
