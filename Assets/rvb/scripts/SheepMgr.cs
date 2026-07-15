@@ -849,14 +849,14 @@ namespace rvb.scripts {
 
     }
         
-        public void updateBoss(sheepMgr, sheepCtl, dt,  c) {
-        let sheepConfig = SheepConfig;
-        let isEnd = false;
+        public void updateBoss(SheepMgr sheepMgr,object sheepCtl,float dt,  c) {
+        var sheepConfig = SheepConfig;
+        var isEnd = false;
         sheepMgr.boss.forEach((t, index, n) => {
 
-            let viewPet = this.getPetView(index);
-            let camp = viewPet.camp;
-            let state = viewPet.state;
+            var viewPet = this.getPetView(index);
+            var camp = viewPet.camp;
+            var state = viewPet.state;
 
             if (state == SheepBossState.Ready) {
 
@@ -864,13 +864,16 @@ namespace rvb.scripts {
                 t.comProgress.setVue(t.curHp);
                 viewPet.state = SheepBossState.NomalRun;
 
-            } else if (state == SheepBossState.AwakeAnim || state == SheepBossState.UnAwakeAnim) {
+            }
+            else if (state == SheepBossState.AwakeAnim || state == SheepBossState.UnAwakeAnim) {
 
                 t.comProgress.setVue(t.comProgress._vue)
 
-            } else if (state == SheepBossState.Dead) {
+            }
+            else if (state == SheepBossState.Dead) {
 
-            } else {
+            }
+            else {
                 let curHp = viewPet.curHp;
                 if (curHp <= 0) {
                     curHp = 0;
@@ -897,6 +900,7 @@ namespace rvb.scripts {
                         if (B < 1 - sheepConfig.buffDragonMaxReduceRate) {
                             B = 1 - sheepConfig.buffDragonMaxReduceRate;
                         }
+
                         _ = Math.floor(_ * B)
                         curHp = d - _;
                         viewPet.curHp = curHp
@@ -909,6 +913,7 @@ namespace rvb.scripts {
                     if (curHp < 0) {
                         curHp = 0;
                     }
+
                     _ = 1;
                     viewPet.curHp = curHp;
                 }
@@ -930,7 +935,8 @@ namespace rvb.scripts {
                     sheepCtl.comMatch.showDoubleAnim(camp);
                     sheepCtl.comUIAnim.backAnim(camp);
                     sheepCtl.cameraCtl.onShake(SheepConfig.shockBeginNumber)
-                } else if (t.backStateTime && c - t.backStateTime > 12e4 && M - R == 0) {
+                }
+                else if (t.backStateTime && c - t.backStateTime > 12e4 && M - R == 0) {
                     t.backStateTime = 0;
                     sheepCtl.comMatch.hideDoubleAnim(camp);
                     sheepCtl.comUIAnim.backSuccessAnim(camp);
@@ -963,7 +969,7 @@ namespace rvb.scripts {
                 t.updateStateJJL(sheepCtl, sheepMgr, T + 1)
 
             }
-        })
+        });
         return isEnd;
     }
 
