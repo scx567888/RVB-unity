@@ -26,7 +26,7 @@ namespace rvb.scripts {
         public int loongHp = 10000;
 
         /// <summary>可选的外部 Boss 显示/控制组件；核心逻辑不依赖它。</summary>
-        public dynamic[] boss = new dynamic[2];
+        public Boss[] boss = new Boss[2];
 
         public float plotRatio = 0.5f;
         public int plotRatioIndex;
@@ -61,7 +61,7 @@ namespace rvb.scripts {
         /// 待加入对象需要提供 init(int, PetView)。普通单位 PetView 已满足；
         /// 自定义 Boss/组件也可以通过 dynamic 接入。
         /// </summary>
-        public List<dynamic> petsAdd;
+        public List<PetView> petsAdd;
 
         public Stack<int> petsDel;
         public int petCount;
@@ -89,7 +89,7 @@ namespace rvb.scripts {
         public Dictionary<int, SheepCallInfo> blueCallInfos;
 
         /// <summary>可选原渲染桥接对象（ComSheepImages 或你自己的实现）。</summary>
-        public dynamic comImages;
+        public ComImages comImages;
 
         public int cur_rob_role_index;
         public int cur_rob_bullet_index;
@@ -99,7 +99,7 @@ namespace rvb.scripts {
         public int roleMaxIndex;
         public int bulletMaxIndex;
         public int preBulletIndex;
-        public dynamic curIndexImages;
+        public CurIndexImages curIndexImages;
         public int redBuffCount;
         public int blueBuffCount;
         public int petId;
@@ -167,7 +167,7 @@ namespace rvb.scripts {
             view_bullets = new BulletView[SheepConfig.MaxBulletCount];
             pre_view_bullets = new BulletView[SheepConfig.MaxBulletCount];
 
-            petsAdd = new List<dynamic>();
+            petsAdd = new List<PetView>();
             petsDel = new Stack<int>();
             bulletsDel = new Stack<int>();
             logic_counts = new[] { 1, 1 };
@@ -559,7 +559,7 @@ namespace rvb.scripts {
             preBullet.isDie = false;
         }
 
-        public async Task game_run(dynamic sheepCtl, CancellationToken cancellationToken = default) {
+        public async Task game_run(SheepCtl sheepCtl, CancellationToken cancellationToken = default) {
             game_clear();
             mainClearBlocks();
 
@@ -623,7 +623,7 @@ namespace rvb.scripts {
                 cur_rob_bullet_index = 0;
 
                 if (comImages != null) {
-                    curIndexImages = ReadExternal<dynamic>(() => comImages.startAdd(), null);
+                    curIndexImages = ReadExternal<CurIndexImages>(() => comImages.startAdd(), null);
                 }
 
                 role_logic();
@@ -640,7 +640,7 @@ namespace rvb.scripts {
             }
         }
 
-        private int ResolveAnimationFrameCount(PetView source, dynamic sheepCtl) {
+        private int ResolveAnimationFrameCount(PetView source, SheepCtl sheepCtl) {
             if (source?.view_pet == null) return 1;
             if (AnimationFrameCountResolver != null) {
                 int count = AnimationFrameCountResolver(source.view_pet);
@@ -651,12 +651,12 @@ namespace rvb.scripts {
                 int camp = CampIndex(source.camp);
                 int skin = source.skinId ?? 0;
                 int anim = (int)source.view_pet.animType;
-                dynamic frames = sheepCtl.comImages.roles_framess[camp][skin][anim];
-                return Math.Max(1, Convert.ToInt32(frames.length));
+                var frames = sheepCtl.comImages.roles_framess[camp][skin][anim];
+                return Math.Max(1, Convert.ToInt32(frames.Length));
             }, 1);
         }
 
-        public void update_merge_workers(SheepMgr manager, dynamic sheepCtl, float deltaMs) {
+        public void update_merge_workers(SheepMgr manager, SheepCtl sheepCtl, float deltaMs) {
             if (manager == null) manager = this;
             long now = NowMs();
 
@@ -844,7 +844,7 @@ namespace rvb.scripts {
             return ReadExternal(() => (bool)boss[index].subShield(), false);
         }
 
-        public bool updateBoss(SheepMgr manager, dynamic sheepCtl, float deltaMs, long now) {
+        public bool updateBoss(SheepMgr manager, SheepCtl sheepCtl, float deltaMs, long now) {
             bool ended = false;
 
             for (int index = 0; index < 2; index++) {
@@ -961,7 +961,7 @@ namespace rvb.scripts {
             return ended;
         }
 
-        public void pre_add_pet(dynamic source) {
+        public void pre_add_pet(PetView source) {
             if (source != null) petsAdd.Add(source);
         }
 
@@ -980,7 +980,7 @@ namespace rvb.scripts {
                     index = petCount++;
                 }
 
-                dynamic source = petsAdd[0];
+                PetView source = petsAdd[0];
                 petsAdd.RemoveAt(0);
                 PetView view = getPetView(index);
                 source.init(index, view);
@@ -1091,7 +1091,7 @@ namespace rvb.scripts {
             return (stopwatch.ElapsedMilliseconds, true);
         }
 
-        public int rob_role_task(int count, dynamic currentImages) {
+        public int rob_role_task(int count, CurIndexImages currentImages) {
             int start = rob_role(count);
             int end = start + count;
             int updated = update_role(start, end);
@@ -1099,7 +1099,7 @@ namespace rvb.scripts {
             return updated;
         }
 
-        public int rob_bullet_task(int count, dynamic currentImages) {
+        public int rob_bullet_task(int count, CurIndexImages currentImages) {
             int start = rob_bullet(count);
             int end = start + count;
             int updated = update_bullet(start, end);
@@ -2291,7 +2291,7 @@ namespace rvb.scripts {
             });
         }
 
-        public void consume(dynamic sheepCtl, float deltaMs) {
+        public void consume(SheepCtl sheepCtl, float deltaMs) {
             autoTime += deltaMs / 1000f;
             if (isAutoCall && autoTime > SheepConfig.systemAutomaticTroopsIntervalTime) {
                 autoTime = 0f;
@@ -2315,7 +2315,7 @@ namespace rvb.scripts {
         private void ConsumeCallMap(
             Dictionary<int, SheepCallInfo> callInfos,
             SheepCamp camp,
-            dynamic sheepCtl
+            SheepCtl sheepCtl
         ) {
             List<int> removeKeys = new List<int>();
             List<KeyValuePair<int, SheepCallInfo>> snapshot =
@@ -2384,7 +2384,7 @@ namespace rvb.scripts {
             int roleId,
             SheepCamp camp,
             SheepRoleFormation formation,
-            dynamic sheepCtl
+            SheepCtl sheepCtl
         ) {
             int itemNumY = Math.Max(1, formation.itemNumY);
             float itemY = formation.itemY;
@@ -2440,7 +2440,7 @@ namespace rvb.scripts {
             int roleId,
             SheepCamp camp,
             SheepRoleFormation formation,
-            dynamic sheepCtl
+            SheepCtl sheepCtl
         ) {
             int angleSpan = 2 * formation.maxAngle - formation.minAngle;
             int groupCount = Math.Max(1, Mathf.FloorToInt(angleSpan / (float)Math.Max(1, formation.startStepAngle)));
@@ -2683,7 +2683,7 @@ namespace rvb.scripts {
         }
 
         public static PetView createPetView(
-            dynamic sheepCtl,
+            SheepCtl sheepCtl,
             SheepCamp camp,
             int roleType,
             int formationCount = 1,
