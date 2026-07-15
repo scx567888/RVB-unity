@@ -57,7 +57,7 @@ namespace rvb.scripts {
         public object petsAdd;
         public object petsDel;
         public object petCount;
-        public object bulletsDel;
+        public List<int> bulletsDel;
         public object bulletCount;
         public object bulletId;
 
@@ -123,6 +123,7 @@ namespace rvb.scripts {
         // 角色 id 分配器
         public int petId;
 
+        public int plotRatioIndex;
 
         public SheepMgr() {
             // 是否自动出兵
@@ -1018,9 +1019,9 @@ namespace rvb.scripts {
     }
 
     public void buff_add_bullets() {
-        let e = this.preBulletIndex;
-        if (e) {
-            for (; e;) {
+        var e = this.preBulletIndex;
+        if (e!=0) {
+            for (; e!=0;) {
                 let t = this.bulletsDel.pop();
                 if (null == t) {
                     if (this.bulletCount >= SheepConfig.MaxBulletCount - 1) {
@@ -1047,7 +1048,7 @@ namespace rvb.scripts {
         this.cur_rob_bullet_index = 0;
         this.bulletMaxIndex = 0;
         this.bulletCount = 0;
-        this.bulletsDel.length = 0
+        this.bulletsDel.length = 0;
     }
 
     public void game_clear() {
@@ -1062,30 +1063,31 @@ namespace rvb.scripts {
     }
 
     public void role_logic() {
-        let t = Date.now();
+        var t = Date.now();
         this.logic_counts[SheepCamp.Red] = this.redBuffCount > 0 ? 2 : 1;
         this.logic_counts[SheepCamp.Blue] = this.blueBuffCount > 0 ? 2 : 1;
         let curIndexImages = this.curIndexImages;
         let o = 0;
-        if (this.roleMaxIndex) {
+        if (this.roleMaxIndex!=0) {
             o = this.rob_role_task(this.roleMaxIndex, curIndexImages);
         }
-        let l = 0;
-        if (this.bulletMaxIndex) {
+        int l = 0;
+        if (this.bulletMaxIndex!=0) {
             l = this.rob_bullet_task(this.bulletMaxIndex, curIndexImages);
         }
-        if (this.bullte_creates.length) {
-            let e = this.rob_pre_bullet(this.bullte_creates.length);
-            for (const t of this.bullte_creates) {
+        if (this.bullte_creates.Length!=0) {
+            var e = this.rob_pre_bullet(this.bullte_creates.Length);
+            foreach (var t in this.bullte_creates) {
                 let i = e++;
                 if (i > SheepConfig.MaxBulletCount) {
                     break;
                 }
                 this.copyBulletPreView(i, t.bulletId, t.view_pet, t.view_tar_pet, t.info)
             }
-            this.bullte_creates = []
+
+            this.bullte_creates = [];
         }
-        let n = true;
+        bool n = true;
 
         n = true;
 
@@ -1107,11 +1109,11 @@ namespace rvb.scripts {
         return i;
     }
 
-    public void rob_bullet_task(count, curIndexImages) {
-        let start = this.rob_bullet(count);
+    public int rob_bullet_task(int count, curIndexImages) {
+        var start = this.rob_bullet(count);
         const end = start + count;
-        const i = this.update_bullet(start, end);
-        this.comImages.update_bullet(curIndexImages)
+        var i = this.update_bullet(start, end);
+        this.comImages.update_bullet(curIndexImages);
         return i;
     }
 
@@ -1146,7 +1148,7 @@ namespace rvb.scripts {
         return end - start
     }
 
-    public void update_bullet(start, end) {
+    public int update_bullet(int start,int end) {
         for (let i = start; i < end; i++) {
             if (i >= SheepConfig.MaxBulletCount) {
                 return i - start;
@@ -1226,7 +1228,8 @@ namespace rvb.scripts {
             }
             t = null
         }
-        return end - start
+
+        return end - start;
     }
 
     /**
