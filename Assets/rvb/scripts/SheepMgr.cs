@@ -1933,8 +1933,8 @@ namespace rvb.scripts {
      *
      * @param e {PetView}
      */
-    public void update_role_anim(e) {
-        e.animFrame = e.animFrame + 1
+    public void update_role_anim(PetView e) {
+        e.animFrame = e.animFrame + 1;
     }
 
     /**
@@ -1943,14 +1943,14 @@ namespace rvb.scripts {
      * @param count 数量
      * @param camp 阵营
      */
-    public void produce_pets(typeID, count, camp) {
+    public void produce_pets(int typeID,int count,SheepCamp camp) {
         // 根据阵营 获取 map
-        let callInfos = camp == SheepCamp.Red ? this.redCallInfos : this.blueCallInfos;
+        var callInfos = camp == SheepCamp.Red ? this.redCallInfos : this.blueCallInfos;
 
-        let sheepCallInfo = callInfos.get(typeID);
+        var sheepCallInfo = callInfos[typeID];
 
         // 没有就创建一个 然后加进去
-        if (!sheepCallInfo) {
+        if (sheepCallInfo==null) {
             sheepCallInfo = new SheepCallInfo();
             sheepCallInfo.camp = camp;
             sheepCallInfo.type = typeID;
@@ -1960,12 +1960,12 @@ namespace rvb.scripts {
 
             sheepCallInfo.items = [];
             sheepCallInfo.pets = [];
-            callInfos.set(typeID, sheepCallInfo)
+            callInfos[typeID] = sheepCallInfo;
         }
 
         // todo 爆炸是什么意思? 用什么用?
         sheepCallInfo.count += count;
-        sheepCallInfo.pets.push({camp: camp, count: count})
+        sheepCallInfo.pets.Add(new SheepCallInfoPet() { camp = camp, count = count });
     }
 
     /**
