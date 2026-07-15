@@ -46,7 +46,7 @@ namespace rvb.scripts {
         // 反击时刻标识符 (防止多次触发反击时刻)
         public bool[] flagLongBuffs;
 
-        public object[] petStartCounts;
+        public int[] petStartCounts;
         public List<PetView> god_view_pets;
         public PerfStat perfStat;
 
@@ -2121,38 +2121,39 @@ namespace rvb.scripts {
      * @returns {*}
      */
     public Vector3 getPetStartEndPos(int petId,SheepCamp camp) {
-        let petStartCount = this.petStartCounts[(int)camp];
-        let a = petStartCount.get(petId) || 0;
+        var petStartCount = this.petStartCounts[(int)camp];
+        var a = petStartCount.get(petId) || 0;
         petStartCount.set(petId, a + 1);
-        let sheepRoleTypeInfo = SheepRoleTypeInfo.getById(petId);
-        if (!sheepRoleTypeInfo) {
-            console.error("SheepMgr.getPetStartEndPos roleId=" + petId + " not found");
+        var sheepRoleTypeInfo = SheepRoleTypeInfo.getById(petId);
+        if (sheepRoleTypeInfo==null) {
+            Debug.Log("SheepMgr.getPetStartEndPos roleId=" + petId + " not found");
         }
-        let sheepRoleFormation = SheepRoleFormation.getById(sheepRoleTypeInfo.formationId);
-        if (!sheepRoleFormation) {
-            console.error("SheepMgr.getPetStartEndPos formationId=" + sheepRoleTypeInfo.formationId + " not found");
+        var sheepRoleFormation = SheepRoleFormation.getById(sheepRoleTypeInfo.formationId);
+        if (sheepRoleFormation==null) {
+            Debug.Log("SheepMgr.getPetStartEndPos formationId=" + sheepRoleTypeInfo.formationId + " not found");
         }
-        let c = sheepRoleFormation.preItemNumY;
-        let l = sheepRoleFormation.preItemX;
-        let u = sheepRoleFormation.preItemY;
-        let h = sheepRoleFormation.preStartX + Math.floor(a / c) * l;
-        let m = Math.floor(a % c);
-        let d = 0;
+        int c = sheepRoleFormation.preItemNumY;
+        int l = sheepRoleFormation.preItemX;
+        int u = sheepRoleFormation.preItemY;
+        int h = sheepRoleFormation.preStartX + Math.Floor(a / c) * l;
+        int m = Math.Floor(a % c);
+        int d = 0;
         if (c % 2 == 0) {
             if (m % 2 == 0) {
-                d = u * Math.floor(m / 2) + u / 2
+                d = u * Math.Floor(m / 2) + u / 2
             } else {
-                d = -u * Math.floor(m / 2) - u / 2
+                d = -u * Math.Floor(m / 2) - u / 2
             }
         } else {
             if (m % 2 == 0) {
-                d = u * Math.floor(m / 2)
+                d = u * Math.Floor(m / 2)
             } else {
-                d = -u * Math.floor(m / 2 + 1)
+                d = -u * Math.Floor(m / 2 + 1)
             }
         }
-        camp == SheepCamp.Red && (h *= -1)
-        return v3(h, d + Utils.random.range(-1, 1), 0)
+
+        camp == SheepCamp.Red && (h *= -1);
+        return new Vector3(h, d + Utils.random.range(-1, 1), 0);
     }
 
     public void clearCallPets() {
