@@ -50,7 +50,7 @@ namespace rvb.scripts {
         public PetView[] god_view_pets;
         public PerfStat perfStat;
 
-        public object view_pets;
+        public PetView[] view_pets;
         public object view_bullets;
         public object pre_view_bullets;
         public object updateTime;
@@ -339,6 +339,18 @@ namespace rvb.scripts {
             var old = this.cur_rob_bullet_index;
             this.cur_rob_bullet_index += t;
             return old;
+        }
+        
+        public int rob_pre_bullet(int t) {
+            var old = this.preBulletIndex;
+            this.preBulletIndex += t;
+            return old;
+        }
+        
+        public void clearPetViews() {
+            foreach (var element in this.view_pets) {
+                element.clear();
+            }
         }
 
         public static SheepMgr sheepMgr = new SheepMgr();
