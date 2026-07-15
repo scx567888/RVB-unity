@@ -63,7 +63,7 @@ namespace rvb.scripts {
             }
 
             if (a != null) {
-                return new Dictionary<string, PetView> { { "moveTar", a } };
+                return new FindTarResult() {  moveTar= a };
             }
 
             if (petSkin.state == SheepRoleState.Spurt && petSkin.conf.skillSpurt == 0) {
@@ -84,7 +84,7 @@ namespace rvb.scripts {
                 });
 
                 if (t != null) {
-                    return new Dictionary<string, PetView> { { "moveTar", t } };
+                    return new FindTarResult() { moveTar= t };
                 }
             }
 
@@ -93,10 +93,10 @@ namespace rvb.scripts {
                 petSkin.camp == SheepCamp.Red && petSkin.posX > petSkin.conf.runEndX ||
                 petSkin.camp == SheepCamp.Blue && petSkin.posX < petSkin.conf.runEndX
             ) {
-                return new Dictionary<string, PetView> { { "moveBoss", backBoss } };
+                return new FindTarResult() { moveBoss= backBoss } ;
             }
 
-            return new Dictionary<string, PetView>();
+            return new FindTarResult();
         }
 
         public static PetView findNearAck(PetView petSkin) {
