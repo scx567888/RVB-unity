@@ -605,6 +605,46 @@ namespace rvb.scripts {
                 }
             }
         }
+        
+        /**
+     *
+     * @param sheepMgr {SheepMgr}
+     * @param sheepCtl {SheepCtl}
+     * @param i 时间
+     * @returns {Promise<void>}
+     */
+        public void game_update(sheepMgr, sheepCtl, i) {
+            try {
+                // 处理召唤兵
+                this.consume(sheepCtl, i);
+
+                this.buff_add_pets();
+
+                this.buff_add_bullets();
+
+                // 要处理的总数量
+                let n = sheepMgr.pets[SheepCamp.Red].size + sheepMgr.pets[SheepCamp.Blue].size
+                if (n <= 0) {
+                    return
+                }
+
+                this.cur_rob_role_index = 0;
+                this.cur_rob_bullet_index = 0;
+
+                this.curIndexImages = this.comImages.startAdd();
+
+                // 执行主逻辑
+                this.role_logic();
+
+                this.comImages.endAdd();
+
+                this.update_merge_workers(sheepMgr, sheepCtl, i);
+
+            } catch (err) {
+                console.error("update逻辑错误", err);
+                throw err;
+            }
+        }
 
         public static SheepMgr sheepMgr = new SheepMgr();
     }
