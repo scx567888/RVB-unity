@@ -1322,9 +1322,9 @@ namespace rvb.scripts {
         }
     }
 
-    public void update_role_state_move(petSkin, t, i){
+    public void update_role_state_move(PetView petSkin,bool t,int i){
         if (petSkin.isLock) {
-            return
+            return;
         }
         let {atkTar: s, moveTar: o, moveBoss: l} = UtilFind.findTar(petSkin);
         if (s) {
@@ -1633,8 +1633,8 @@ namespace rvb.scripts {
      * @param i
      * @returns {Promise<void>}
      */
-    public void update_role_state(PetView petSkin, t, i = .033) {
-        Util.subAtkCd(petSkin, i)
+    public void update_role_state(PetView petSkin,bool t,float i = 0.033f) {
+        Util.subAtkCd(petSkin, i);
         switch (petSkin.state) {
             case SheepRoleState.Start:
                 if (!t) {
@@ -1709,9 +1709,9 @@ namespace rvb.scripts {
 
         if (petSkin.impulseX || petSkin.impulseY) {
             if (!petSkin.isDie && petSkin.curHp > 0) {
-                let t = petSkin.impulseX;
-                let i = petSkin.impulseY;
-                petSkin.logicMove(petSkin.animX + t, petSkin.posY + i);
+                float t1 = petSkin.impulseX;
+                float i1 = petSkin.impulseY;
+                petSkin.logicMove(petSkin.animX + t1, petSkin.posY + i1);
             }
             petSkin.impulseX = 0;
             petSkin.impulseY = 0;
