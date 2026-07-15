@@ -63,7 +63,7 @@ namespace rvb.scripts {
 
         public int[] logic_counts;
 
-        public int[] bullte_creates;
+        public BullteCreate[] bullte_creates;
 
         public object pre_blocks;
         public object isChangeCollsionFlags = null;
@@ -424,10 +424,10 @@ namespace rvb.scripts {
      * @param view_tar_pet {PetView}
      * @param l
      */
-    copyBulletPreView(e, bulletId, view_pet, view_tar_pet, l = null) {
-        let n = SheepBullet.getById(bulletId);
-        let r = view_pet ? view_pet.camp == SheepCamp.Red ? n.startOffsetX : -n.startOffsetX : 0;
-        let preBullet = this.getBulletPreView(e);
+    public void copyBulletPreView(int e,int bulletId,PetView view_pet,PetView view_tar_pet,BullteCreate l = null) {
+        var n = SheepBullet.getById(bulletId);
+        var r = view_pet ? view_pet.camp == SheepCamp.Red ? n.startOffsetX : -n.startOffsetX : 0;
+        var preBullet = this.getBulletPreView(e);
         preBullet.bulletId = bulletId;
         preBullet.roleUid = view_pet ? view_pet.id : 0;
         preBullet.roleIndex = view_pet ? view_pet.index : 0;
@@ -435,9 +435,9 @@ namespace rvb.scripts {
 
         preBullet.camp = view_pet ? view_pet.camp : l.camp;
         if (view_tar_pet && 0 == view_tar_pet.roleId) {
-            preBullet.tarRoleIndex = view_tar_pet.index
+            preBullet.tarRoleIndex = view_tar_pet.index;
         } else {
-            preBullet.tarRoleIndex = -1
+            preBullet.tarRoleIndex = -1;
         }
         if (n.moveType == SheepBulletMoveType.Fixed) {
             let t = l && l.startX || view_pet && view_pet.posX || 0;
@@ -530,7 +530,7 @@ namespace rvb.scripts {
             let o = Math.sqrt(t * t + i * i);
             preBullet.dirX = t / o;
             preBullet.dirY = i / o;
-            preBullet.dirZ = s / o
+            preBullet.dirZ = s / o;
         } else {
             preBullet.x = view_pet.posX + r;
             preBullet.y = view_pet.posY + n.startOffsetY;
@@ -540,7 +540,7 @@ namespace rvb.scripts {
             preBullet.dirZ = 1;
         }
         preBullet.atkVue = view_pet ? view_pet.conf.atk : l.atk;
-        preBullet.frame = 0
+        preBullet.frame = 0;
     }
         
         public static SheepMgr sheepMgr = new SheepMgr();
