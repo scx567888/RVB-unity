@@ -54,9 +54,9 @@ namespace rvb.scripts {
         public BulletView[] view_bullets;
         public BulletView[] pre_view_bullets;
         public object updateTime;
-        public object petsAdd;
+        public List<PetView> petsAdd;
         public object petsDel;
-        public object petCount;
+        public int petCount;
         public List<int> bulletsDel;
         public object bulletCount;
         public object bulletId;
@@ -614,7 +614,7 @@ namespace rvb.scripts {
      * @param i 时间
      * @returns {Promise<void>}
      */
-        public void game_update(sheepMgr, sheepCtl, i) {
+        public void game_update(SheepMgr sheepMgr, sheepCtl,float i) {
             try {
                 // 处理召唤兵
                 this.consume(sheepCtl, i);
@@ -654,9 +654,8 @@ namespace rvb.scripts {
      * @param dt
      */
     public void update_merge_workers(SheepMgr sheepMgr,object sheepCtl,float dt) {
-
-        let sheepConfig = SheepConfig;
-        let isEnd = false;
+            
+        var isEnd = false;
 
         const now = Date.now();
 
@@ -709,20 +708,20 @@ namespace rvb.scripts {
             if (hasZero) {
 
                 sheepMgr.buffs[s].push({
-                    time: sheepMgr.gameStartTimerForBuff + 1000 * sheepConfig.counterTime,
+                    time: sheepMgr.gameStartTimerForBuff + 1000 * SheepConfig.counterTime,
                     count: 0
                 });
 
                 if (r.length > 1) {
                     sheepMgr.buffs[s].push({
-                        time: sheepMgr.gameStartTimerForBuff + 1000 * sheepConfig.buffLastTime,
+                        time: sheepMgr.gameStartTimerForBuff + 1000 * SheepConfig.buffLastTime,
                         count: sum
                     });
                 }
 
             } else {
                 sheepMgr.buffs[s].push({
-                    time: sheepMgr.gameStartTimerForBuff + 1000 * sheepConfig.buffLastTime,
+                    time: sheepMgr.gameStartTimerForBuff + 1000 * SheepConfig.buffLastTime,
                     count: sum
                 });
             }
@@ -979,27 +978,28 @@ namespace rvb.scripts {
      *
      * @param e {PetView}
      */
-    public void pre_add_pet(e) {
-        this.petsAdd.push(e)
+    public void pre_add_pet(PetView e) {
+        this.petsAdd.Add(e);
     }
 
     public void buff_add_pets() {
-        if (this.petsAdd.length <= 0) {
+        if (this.petsAdd.Count <= 0) {
             return;
         }
 
-        for (; this.petsAdd.length;) {
-            let e = this.petsDel.pop();
+        for (; this.petsAdd.Count!=0;) {
+            var e = this.petsDel.pop();
             if (null == e) {
                 if (this.petCount >= SheepConfig.MaxPetCount - 1) {
                     console.warn("预加入怪物加入buff超过最大数量", this.petCount, SheepConfig.MaxPetCount);
-                    break
+                    break;
                 }
-                e = this.petCount++
+
+                e = this.petCount++;
             }
             let t = this.petsAdd.shift();
             let r = this.getPetView(e);
-            t.init(e, r)
+            t.init(e, r);
         }
     }
 
@@ -1117,20 +1117,21 @@ namespace rvb.scripts {
         return i;
     }
 
-    public void update_role(start, end) {
-        for (let i = start; i < end; i++) {
+    public void update_role(int start,int end) {
+        for (int i = start; i < end; i++) {
             let viewPet = this.getPetView(i);
             if (!viewPet.isActive) {
                 viewPet = null;
-                continue
+                continue;
             }
             let t = viewPet.isDie;
             if (0 == viewPet.roleId) {
-                let i = this.update_frame(viewPet);
-                if (!t && i) {
+                var f = this.update_frame(viewPet);
+                if (!t && f) {
                     this.update_boss_state(viewPet);
                 }
-                this.update_role_anim(viewPet)
+
+                this.update_role_anim(viewPet);
             } else {
                 let i = viewPet.camp, s = this.logic_counts[i];
                 for (let i = 0; i < s; i++) {
@@ -1149,7 +1150,7 @@ namespace rvb.scripts {
     }
 
     public int update_bullet(int start,int end) {
-        for (let i = start; i < end; i++) {
+        for (int i = start; i < end; i++) {
             if (i >= SheepConfig.MaxBulletCount) {
                 return i - start;
             }
@@ -1977,7 +1978,7 @@ namespace rvb.scripts {
      * @param sheepCtl {SheepCtl}
      * @param t
      */
-    public void consume(sheepCtl, t) {
+    public void consume(object sheepCtl, t) {
         let o = this;
 
         let sheepConfig = SheepConfig;
@@ -2331,6 +2332,82 @@ namespace rvb.scripts {
 
         return false;
     }
+    
+    
+/**
+ *
+ * @param sheepCtl {SheepCtl}
+ * @param camp {Number}
+ * @param roleType
+ * @param a
+ * @param i
+ * @param r
+ * @param f
+ * @param s
+ * @returns {*}
+ */
+public static PetView createPetView(object sheepCtl,SheepCamp camp,int roleType, a = 1, i, r = true, f = null, s = false) {
+
+    if (sheepMgr.state != SheepRoomState.Run && sheepMgr.state != SheepRoomState.Start) {
+        return;
+    }
+
+    var sheepRoleTypeInfo = SheepRoleTypeInfo.getById(roleType);
+
+    var petSkin = new PetView();
+    petSkin.uids = [];
+    petSkin.conf = sheepRoleTypeInfo;
+    petSkin.camp = camp;
+    petSkin.petId = roleType;
+    petSkin.isDie = false;
+    petSkin.scale = petSkin.conf.scale;
+    petSkin.isBoom = false;// todo 这里不能写死
+    petSkin.buff_index = -1;
+    petSkin.view_pet = null;
+    petSkin.attacher = new BuffTimeAttacher;
+
+    petSkin.skinId = petSkin.conf.animId;
+
+    let formation = SheepRoleFormation.getById(sheepRoleTypeInfo.formationId);
+
+    if (formation.formationType == SheepRoleFormationType.AngleRandom) {
+        let T = Math.min((a / formation.angleDensity + formation.baseTimes) * formation.startAngle, formation.maxAngle);
+        T = Utils.random.range(-T, T);
+        T += T > 0 ? formation.minAngle : -formation.minAngle;
+
+        let A = formation.startR + sheepMode.startAddR;
+        let H = Math.cos(T * Math.PI / 180) * A;
+        let P = Math.sin(T * Math.PI / 180) * A;
+        let M = sheepMode.loongX;
+
+        if (petSkin.camp == SheepCamp.Red) {
+            let x = v3(M - H, P, 0);
+            petSkin.position = x;
+        } else {
+            let D = v3(H - M, P, 0);
+            petSkin.position = D;
+        }
+
+    } else if (formation.formationType == SheepRoleFormationType.RectangleRandom) {
+        let F = Math.min((a / formation.density + formation.baseTimes) * formation.startScope, formation.maxScope);
+        let N = Utils.random.range(-F, F);
+        formation.minScope && (N += N > 0 ? formation.minScope : -formation.minScope);
+        let W = 0;
+        let E = formation.startX + sheepMode.startAddX;
+        W = camp == SheepCamp.Red ? -Math.abs(E) : Math.abs(E);
+        let O = v3(W, N, 0);
+        petSkin.position = O;
+    } else {
+        petSkin.position = f;
+    }
+
+    sheepMgr.addPet(petSkin, camp)
+
+    petSkin.pos = petSkin.position;
+    sheepMgr.pre_add_pet(petSkin);
+    return petSkin;
+
+}
 
 
         public static SheepMgr sheepMgr = new SheepMgr();
