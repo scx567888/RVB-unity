@@ -65,7 +65,7 @@ namespace rvb.scripts {
 
         public BullteCreate[] bullte_creates;
 
-        public object pre_blocks;
+        public Dictionary<int,object[]> pre_blocks;
         public object isChangeCollsionFlags = null;
         public object isChangeAckFlags = null;
 
@@ -2168,14 +2168,14 @@ namespace rvb.scripts {
         this.attackView1s[SheepCamp.Red].fill(null);
         this.attackView1s[SheepCamp.Blue].fill(null);
 
-        for (let e = 0; e < SheepConfig.MaxGroupCount; e++) {
+        for (var e = 0; e < SheepConfig.MaxGroupCount; e++) {
             this.collisionViews[SheepCamp.Red][e].fill(null);
             this.collisionViews[SheepCamp.Blue][e].fill(null);
             this.collisionView1s[SheepCamp.Red][e].fill(null);
             this.collisionView1s[SheepCamp.Blue][e].fill(null);
         }
 
-        this.pre_blocks.clear()
+        this.pre_blocks.Clear();
     }
 
     public IndexLen getBlockByIndex(IndexLen[] e,int blockIndex){
@@ -2214,18 +2214,18 @@ namespace rvb.scripts {
     }
 
     public void mainPreAddBlock(int blockIndex,int buffIndex,SheepCamp camp,int collideId) {
-        let o = this.pre_blocks.get(blockIndex);
+        var o = this.pre_blocks.get(blockIndex);
         if (!o) {
             o = [];
             this.pre_blocks.set(blockIndex, o);
         }
 
-        let l = o[camp];
+        var l = o[camp];
         if (!l) {
             l = [];
             o[camp] = l;
         }
-        let n = l[collideId];
+        var n = l[collideId];
         if (!n) {
             n = new Array;
             l[collideId] = n;
@@ -2240,11 +2240,14 @@ namespace rvb.scripts {
     }
 
     public void mainSyncBlocksToWokers() {
-        let e = [0, 0];
-        let t = [[], []];
-        for (let e = 0; e < SheepConfig.MaxGroupCount; e++) {
-            t[SheepCamp.Red].push(0);
-            t[SheepCamp.Blue].push(0);
+        var e =new int[]{0, 0};
+        var t =new List<int>[] {
+          new List<int>(),  
+          new List<int>(),
+        } ;
+        for (var i = 0; i < SheepConfig.MaxGroupCount; i++) {
+            t[(int)SheepCamp.Red].Add(0);
+            t[(int)SheepCamp.Blue].Add(0);
         }
         this.pre_blocks.forEach((i, s) => {
             if (i && i.length) {
