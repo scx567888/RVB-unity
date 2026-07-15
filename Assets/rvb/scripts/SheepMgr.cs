@@ -812,7 +812,7 @@ namespace rvb.scripts {
 
         }
 
-        let j = 0;
+        var j = 0;
         for (let G = 0; G < this.bulletCount; ++G) {
             let X = this.getBulletView(G);
             if (X.isDie) {
@@ -851,7 +851,6 @@ namespace rvb.scripts {
     }
         
         public void updateBoss(SheepMgr sheepMgr,object sheepCtl,float dt,  c) {
-        var sheepConfig = SheepConfig;
         var isEnd = false;
         sheepMgr.boss.forEach((t, index, n) => {
 
@@ -887,7 +886,7 @@ namespace rvb.scripts {
 
                     let S = sheepMgr.countBuffs[1 - camp];
                     if (S > 0) {
-                        let b = 1 + sheepConfig.buffDragonDamageIncreseRate * S;
+                        let b = 1 + SheepConfig.buffDragonDamageIncreseRate * S;
                         b += 0;
                         _ = Math.floor(_ * b)
                         curHp = d - _;
@@ -896,10 +895,10 @@ namespace rvb.scripts {
 
                     let I = sheepMgr.countBuffs[camp];
                     if (I > 0) {
-                        let B = Math.pow(1 - sheepConfig.buffDragonReduceRate, I);
+                        let B = Math.pow(1 - SheepConfig.buffDragonReduceRate, I);
                         B -= 0;
-                        if (B < 1 - sheepConfig.buffDragonMaxReduceRate) {
-                            B = 1 - sheepConfig.buffDragonMaxReduceRate;
+                        if (B < 1 - SheepConfig.buffDragonMaxReduceRate) {
+                            B = 1 - SheepConfig.buffDragonMaxReduceRate;
                         }
 
                         _ = Math.floor(_ * B)
@@ -929,7 +928,7 @@ namespace rvb.scripts {
                 let R = sheepMgr.countShowBuffs[camp];
                 let M = sheepMgr.countBuffs[camp];
 
-                if (!sheepMgr.flagLongBuffs[camp] && curHp < sheepMgr.loongHp * sheepConfig.counterHpRatio) {
+                if (!sheepMgr.flagLongBuffs[camp] && curHp < sheepMgr.loongHp * SheepConfig.counterHpRatio) {
                     sheepMgr.flagLongBuffs[camp] = true;
                     t.backStateTime = c;
                     sheepMgr.preBuffs[camp].push(0);
@@ -958,8 +957,8 @@ namespace rvb.scripts {
                 let T = 0;
                 let D = sheepMgr.plotRatio;
 
-                for (let A = 0; A < sheepConfig.loongStateSwitching.length; A++) {
-                    if (D <= sheepConfig.loongStateSwitching[A]) {
+                for (let A = 0; A < SheepConfig.loongStateSwitching.length; A++) {
+                    if (D <= SheepConfig.loongStateSwitching[A]) {
                         T = A;
                         break
                     }
