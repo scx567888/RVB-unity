@@ -1049,7 +1049,7 @@ namespace rvb.scripts {
         this.cur_rob_bullet_index = 0;
         this.bulletMaxIndex = 0;
         this.bulletCount = 0;
-        this.bulletsDel.length = 0;
+        this.bulletsDel.Clear();
     }
 
     public void game_clear() {
@@ -1425,7 +1425,7 @@ namespace rvb.scripts {
         }
     }
 
-    public void update_role_state_killer(petSkin){
+    public void update_role_state_killer(PetView petSkin){
         let t = SheepSkillSubKiller.getById(petSkin.readySkillId);
         let i = petSkin.animFrame;
         if (i == t.findMoveFrame) {
@@ -1454,7 +1454,7 @@ namespace rvb.scripts {
         }
     }
 
-    public void update_role_state_boom(petSkin){
+    public void update_role_state_boom(PetView petSkin){
         let t = SheepSkill.getById(petSkin.readySkillId);
         let i = SheepSkillSubBoom.getById(t.id);
         let s = petSkin.animFrame;
@@ -1465,7 +1465,7 @@ namespace rvb.scripts {
         s >= i.endFrame && (petSkin.isLock = 0, i.endState == SheepRoleState.Move ? (petSkin.state = SheepRoleState.Move, petSkin.subState = SheepRoleSubState.MoveBoss, petSkin.animType = SheepRoleAnimType.Idle) : i.endState == SheepRoleState.Rigidity ? (petSkin.state = SheepRoleState.Rigidity, petSkin.animType = SheepRoleAnimType.Idle, petSkin.readySkillId = i.endSkill) : i.endState == SheepRoleState.Dead ? (petSkin.isDie = !0, petSkin.state = SheepRoleState.Dead) : i.endState == SheepRoleState.Palm ? (petSkin.state = SheepRoleState.Palm, petSkin.subState = SheepRoleSubState.Palm, petSkin.animType = SheepRoleAnimType.Palm, petSkin.readySkillId = i.endSkill) : console.error("endState错误"))
     }
 
-    public void update_role_state_invincible(petSkin){
+    public void update_role_state_invincible(PetView petSkin){
         let t = petSkin.animFrame, i = SheepSkill.getById(petSkin.readySkillId),
             s = SheepSkillSubInvincible.getById(i.id), o = s.healFrames;
         for (const i of o) if (t == i) {
@@ -1480,7 +1480,7 @@ namespace rvb.scripts {
         }
         t >= s.endFrame && (petSkin.state = SheepRoleState.Move, petSkin.subState = SheepRoleSubState.MoveBoss, petSkin.animType = SheepRoleAnimType.Idle)
     }
-    public void update_role_state_bladestorm(petSkin, t, i){
+    public void update_role_state_bladestorm(PetView petSkin, t, i){
         let s = petSkin.animFrame;
         let o = SheepSkill.getById(petSkin.readySkillId);
         let l = SheepSkillSubBladestorm.getById(o.id);
@@ -1502,7 +1502,7 @@ namespace rvb.scripts {
         }
         s >= l.endFrame && (petSkin.state = SheepRoleState.Move, petSkin.subState = SheepRoleSubState.MoveBoss, petSkin.animType = SheepRoleAnimType.Idle)
     }
-    public void update_role_state_palm(petSkin){
+    public void update_role_state_palm(PetView petSkin){
         let t = petSkin.animFrame, i = SheepSkill.getById(petSkin.readySkillId),
             s = SheepSkillSubPalm.getById(i.id), o = s.healFrames;
         for (const i of o) if (t == i) {
@@ -1525,7 +1525,7 @@ namespace rvb.scripts {
         }
         t >= s.endFrame && (petSkin.state = SheepRoleState.Move, petSkin.subState = SheepRoleSubState.MoveBoss, petSkin.animType = SheepRoleAnimType.Idle)
     }
-    public void update_role_state_callbullets(petSkin){
+    public void update_role_state_callbullets(PetView petSkin){
         let t = petSkin.animFrame;
         let i = SheepSkill.getById(petSkin.readySkillId);
         let s = SheepSkillSubCallBullets.getById(i.id);
@@ -1596,7 +1596,7 @@ namespace rvb.scripts {
         }
         t >= s.endFrame && (petSkin.state = SheepRoleState.Move, petSkin.subState = SheepRoleSubState.MoveBoss, petSkin.animType = SheepRoleAnimType.Idle)
     }
-    public void update_role_state_buff(petSkin){
+    public void update_role_state_buff(PetView petSkin){
         let t = petSkin.animFrame;
         let i = SheepSkill.getById(petSkin.readySkillId);
         if(t >= SheepSkillSubBuff.getById(i.id).endFrame) {
@@ -1605,11 +1605,11 @@ namespace rvb.scripts {
             petSkin.animType = SheepRoleAnimType.Idle
         }
     }
-    public void update_role_state_rigidity(petSkin){
+    public void update_role_state_rigidity(PetView petSkin){
         let t = SheepSkill.getById(petSkin.readySkillId), i = SheepSkillSubRigidity.getById(t.id);
         petSkin.animFrame >= i.endFrame && (petSkin.state = SheepRoleState.SpinAtk, petSkin.animType = SheepRoleAnimType.Attack, petSkin.readySkillId = i.endSkill)
     }
-    public void update_role_state_spinatk(petSkin, t, i){
+    public void update_role_state_spinatk(PetView petSkin, t, i){
         let s = petSkin.posX;
         let o = petSkin.posY;
         let {xn: l, yn: n} = Util.getXnYn(s, o);
@@ -1749,26 +1749,26 @@ namespace rvb.scripts {
             if (t.skillType == SheepSkillType.Charge) {
                 petSkin.state = SheepRoleState.Charge;
                 petSkin.subState = SheepRoleSubState.Spurt;
-                petSkin.animType = SheepRoleAnimType.Spurt
+                petSkin.animType = SheepRoleAnimType.Spurt;
             } else if (t.skillType == SheepSkillType.SpinSpurt) {
                 petSkin.state = SheepRoleState.SpinSpurt;
-                petSkin.animType = SheepRoleAnimType.Attack
+                petSkin.animType = SheepRoleAnimType.Attack;
             } else {
                 petSkin.state = SheepRoleState.Spurt;
                 petSkin.subState = SheepRoleSubState.Spurt;
                 if (petSkin.conf.isSpurtAnim) {
-                    petSkin.animType = SheepRoleAnimType.Spurt
+                    petSkin.animType = SheepRoleAnimType.Spurt;
                 } else {
-                    petSkin.animType = SheepRoleAnimType.Idle
+                    petSkin.animType = SheepRoleAnimType.Idle;
                 }
             }
         } else {
             petSkin.state = SheepRoleState.Spurt;
             petSkin.subState = SheepRoleSubState.Spurt;
             if (petSkin.conf.isSpurtAnim) {
-                petSkin.animType = SheepRoleAnimType.Spurt
+                petSkin.animType = SheepRoleAnimType.Spurt;
             } else {
-                petSkin.animType = SheepRoleAnimType.Idle
+                petSkin.animType = SheepRoleAnimType.Idle;
             }
         }
     }
@@ -2217,7 +2217,7 @@ namespace rvb.scripts {
         }
         Date.now();
         this.pre_blocks.clear();
-        Date.now()
+        Date.now();
     }
 
     public void mainPreAddBlock(int blockIndex,int buffIndex,SheepCamp camp,int collideId) {
