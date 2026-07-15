@@ -560,6 +560,51 @@ namespace rvb.scripts {
             preBullet.atkVue = view_pet != null ? view_pet.conf.atk : l.atk;
             preBullet.frame = 0;
         }
+        
+        /**
+  *
+  * @param sheepCtl {SheepCtl}
+  * @returns {Promise<void>}
+  */
+        public void game_run(object sheepCtl) {
+
+            // 清理游戏数据
+            this.game_clear();
+
+            this.mainClearBlocks();
+
+            let i = sheepMgr.gameIndex;
+
+            this.updateTime = Date.now();
+
+            //只有 游戏处于运行中 或者 局数未改变
+            while (i === sheepMgr.gameIndex && (sheepMgr.state == SheepRoomState.Run || sheepMgr.state == SheepRoomState.Start)) {
+
+                try {
+                    let lastUpdateTime = this.updateTime
+                    this.updateTime = Date.now();
+
+                    let diff = this.updateTime - lastUpdateTime;
+
+                    if (diff >= 100) {
+                        console.warn("主线程更新逻辑耗时过长: " + diff + "ms");
+                    }
+
+                    if (diff < 33) {
+                        await new Promise(e => setTimeout(e, 33 - diff));
+                    }
+
+                    if (this.comImages.isHasFreeImage()) {
+                        let o = Date.now() - lastUpdateTime;
+                        await this.game_update(sheepMgr, sheepCtl, o);
+                    }
+
+                } catch (e) {
+                    console.error("主线程更新逻辑错误:", e);
+                    return;
+                }
+            }
+        }
 
         public static SheepMgr sheepMgr = new SheepMgr();
     }
