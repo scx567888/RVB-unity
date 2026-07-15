@@ -51,8 +51,8 @@ namespace rvb.scripts {
         public PerfStat perfStat;
 
         public PetView[] view_pets;
-        public object view_bullets;
-        public object pre_view_bullets;
+        public BulletView[] view_bullets;
+        public BulletView[] pre_view_bullets;
         public object updateTime;
         public object petsAdd;
         public object petsDel;
@@ -352,7 +352,52 @@ namespace rvb.scripts {
                 element.clear();
             }
         }
+        
+        /**
+    *
+    * @param petIndex
+    * @returns {PetView}
+    */
+        public PetView getPetView(int petIndex) {
+            if (petIndex < 0 || petIndex >= SheepConfig.MaxPetCount) {
+                return null;
+            }
+            var pet = this.view_pets[petIndex];
+            if (pet==null) {
+                pet = new PetView(petIndex);
+                this.view_pets[petIndex] = pet;
+            }
 
+            return pet;
+        }
+
+        public void clearViewBullets() {
+            foreach (var viewElement in this.view_bullets) {
+                viewElement.clear();
+            }
+            foreach (var viewElement in this.pre_view_bullets) {
+                viewElement.clear();
+            }
+        }
+        
+        /**
+     *
+     * @param e
+     * @returns {BulletView}
+     */
+        public BulletView getBulletView(int e) {
+            if (e < 0 || e >= SheepConfig.MaxBulletCount) {
+                return null;
+            }
+            var bullet = this.view_bullets[e];
+            if (bullet==null) {
+                bullet = new BulletView();
+                this.view_bullets[e] = bullet;
+            }
+
+            return bullet;
+        }
+        
         public static SheepMgr sheepMgr = new SheepMgr();
     }
 }
