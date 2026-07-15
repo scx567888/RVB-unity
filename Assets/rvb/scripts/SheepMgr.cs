@@ -2304,23 +2304,24 @@ namespace rvb.scripts {
         }
     }
 
-    public void findBlock(IndexLen[] e,int[] t,int blockIndex,Func<int, bool> callback) {
-        let blockByIndex = this.getBlockByIndex(e, blockIndex);
-        let Index = blockByIndex.Index;
-        let Len = blockByIndex.Len;
-        if (!Len) {
+    public bool findBlock(IndexLen[] e,int[] t,int blockIndex,Func<int, bool> callback) {
+        var blockByIndex = this.getBlockByIndex(e, blockIndex);
+        var Index = blockByIndex.Index;
+        var Len = blockByIndex.Len;
+        if (Len==0) {
             return false;
         }
-        for (let j = 0; j < Len; j++) {
-            const petIndex = t[Index + j];
+        for (var j = 0; j < Len; j++) {
+            var petIndex = t[Index + j];
             if (null == petIndex) {
-                throw new Error("二级内存取出空???");
+                throw new Exception("二级内存取出空???");
             }
             if (callback(petIndex)) {
-                return true
+                return true;
             }
         }
-        return false
+
+        return false;
     }
 
 
