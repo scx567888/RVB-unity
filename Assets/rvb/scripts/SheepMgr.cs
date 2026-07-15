@@ -301,6 +301,23 @@ namespace rvb.scripts {
                 this.perfStat.blueNums[(int)e.conf.roleType]++;
             }
         }
+        
+        public void delPet(PetView e) {
+            this.pets[(int)SheepCamp.Red].Remove(e);
+            this.pets[(int)SheepCamp.Blue].Remove(e);
+            if (e.camp == SheepCamp.Red) {
+                this.perfStat.redNums[(int)e.conf.roleType]--;
+            } else {
+                this.perfStat.blueNums[(int)e.conf.roleType]--;
+            }
+        }
+        
+        public void clearPets() {
+            this.pets[(int)SheepCamp.Red].Clear();
+            this.pets[(int)SheepCamp.Blue].Clear();
+            this.perfStat.redNums=new int[]{0,0,0,0,0,0,0,0};
+            this.perfStat.blueNums=new int[]{0,0,0,0,0,0,0,0};
+        }
 
         public static SheepMgr sheepMgr = new SheepMgr();
     }
