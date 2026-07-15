@@ -1234,14 +1234,14 @@ namespace rvb.scripts {
      * @param viewPet {PetView}
      * @returns {boolean}
      */
-    public void update_frame(viewPet) {
-        let frame = viewPet.frame;
-        let loopFrame = SheepConfig.loopFrame;
-        let i = frame % loopFrame == loopFrame - 1;
-        let posBefX = viewPet.posBefX;
-        let posBefY = viewPet.posBefY;
-        let posX = viewPet.posX;
-        let posY = viewPet.posY;
+    public bool update_frame(PetView viewPet) {
+        var frame = viewPet.frame;
+        var loopFrame = SheepConfig.loopFrame;
+        var i = frame % loopFrame == loopFrame - 1;
+        var posBefX = viewPet.posBefX;
+        var posBefY = viewPet.posBefY;
+        var posX = viewPet.posX;
+        var posY = viewPet.posY;
         if (!viewPet.isDie) {
             viewPet.animX = posBefX + (posX - posBefX) * (frame % loopFrame) / loopFrame;
             viewPet.animY = posBefY + (posY - posBefY) * (frame % loopFrame) / loopFrame;
@@ -1251,7 +1251,8 @@ namespace rvb.scripts {
         if (!viewPet.isDie && i) {
             viewPet.logicMove(posX, posY);
         }
-        return i
+
+        return i;
     }
 
     public void update_boss_state(e) {
@@ -1628,7 +1629,7 @@ namespace rvb.scripts {
      * @param i
      * @returns {Promise<void>}
      */
-    public void update_role_state(petSkin, t, i = .033) {
+    public void update_role_state(PetView petSkin, t, i = .033) {
         Util.subAtkCd(petSkin, i)
         switch (petSkin.state) {
             case SheepRoleState.Start:
