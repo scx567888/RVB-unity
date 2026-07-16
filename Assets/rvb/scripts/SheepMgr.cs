@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using static rvb.scripts.BullteCreate;
 using static rvb.scripts.SheepModes;
+using static rvb.scripts.EventBus;
 
 namespace rvb.scripts {
     /// <summary>
@@ -326,22 +327,22 @@ namespace rvb.scripts {
         }
 
         public void onGameEnd() {
-            god_view_pets.Clear();
+            this.god_view_pets = new List<PetView>();
         }
 
-        public void setState(SheepRoomState newState) {
-            state = newState;
-            Debug.Log("房间状态改变: " + newState);
-            OnRoomStateChanged?.Invoke(newState);
+        public void setState(SheepRoomState e) {
+            this.state = e;
+            Debug.Log("房间状态改变: " + e);
+            eventBus.emit(EventType.RoomState, (state = e));
         }
 
-        public void addPet(PetView pet, SheepCamp camp) {
-            if (pet == null) return;
-            pets[CampIndex(camp)].Add(pet);
-            int roleIndex = RoleTypeIndex(pet.conf.roleType);
-            EnsurePerfCapacity(roleIndex);
-            if (camp == SheepCamp.Red) perfStat.redNums[roleIndex]++;
-            else perfStat.blueNums[roleIndex]++;
+        public void addPet(PetView e, SheepCamp camp) {
+            this.pets[(int)camp].Add(e);
+            if (camp == SheepCamp.Red) {
+                this.perfStat.redNums[(int)e.conf.roleType]++;
+            } else {
+                this.perfStat.blueNums[(int)e.conf.roleType]++;
+            }
         }
 
         public void delPet(PetView pet) {
