@@ -10,7 +10,7 @@ namespace rvb.scripts {
         }
 
         public void addRole(PetView viewPet) {
-            Debug.Log("addRole");
+            // Debug.Log("addRole");
         }
 
         public void update_bullet(CurIndexImages currentImages) {
@@ -22,7 +22,7 @@ namespace rvb.scripts {
         }
 
         public void update_role(CurIndexImages currentImages) {
-            Debug.Log("update_role");
+            // Debug.Log("update_role");
         }
 
         public bool isHasFreeImage() {
