@@ -106,7 +106,7 @@ namespace rvb.scripts {
 
         public Dictionary<int, SheepCallInfo> blueCallInfos = new Dictionary<int, SheepCallInfo>();
 
-        public ComImages comImages = null;
+        public ComImages comImages = new ComImages();
 
         public int cur_rob_role_index;
         public int cur_rob_bullet_index;
@@ -125,9 +125,9 @@ namespace rvb.scripts {
         //********************************** 以下字段 待处理 **********************************************
 
         /// <summary>逻辑侧 Boss 当前已结算生命。</summary>
-        public float[] bossHp;
+        public float[] bossHp={0,0};
 
-        public long[] bossBackStateTime;
+        public long[] bossBackStateTime={0,0};
 
         /// <summary>若 SheepCtl 已自行推进 Buff 时钟，可设为 false。</summary>
         public bool advanceGameClockInGameUpdate = true;
@@ -274,7 +274,7 @@ namespace rvb.scripts {
             /**
              * @type ComSheepImages
              */
-            this.comImages = null;
+            this.comImages = new ComImages();
 
             this.cur_rob_role_index = 0;
             this.cur_rob_bullet_index = 0;
