@@ -228,17 +228,24 @@ namespace rvb.scripts {
                 new int[SheepConfig.MaxPetCount]
             };
 
-            this.collisionViews = new IndexLen[2][][];
+            this.collisionViews = new IndexLen[][][] {
+                new IndexLen[SheepConfig.MaxGroupCount][],
+                new IndexLen[SheepConfig.MaxGroupCount][]
+            };
+
             for (var e = 0; e < SheepConfig.MaxGroupCount; e++) {
-                this.collisionViews[(int)SheepCamp.Red];
-                this.collisionViews[(int)SheepCamp.Red].push(new Array(this.MaxCount));
-                this.collisionViews[(int)SheepCamp.Blue].push(new Array(this.MaxCount));
+                this.collisionViews[(int)SheepCamp.Red][e] = new IndexLen[this.MaxCount];
+                this.collisionViews[(int)SheepCamp.Blue][e] = new IndexLen[this.MaxCount];
             }
 
-            this.collisionView1s = [[], []];
-            for (let e = 0; e < SheepConfig.MaxGroupCount; e++) {
-                this.collisionView1s[SheepCamp.Red].push(new Array(SheepConfig.MaxPetCount));
-                this.collisionView1s[SheepCamp.Blue].push(new Array(SheepConfig.MaxPetCount));
+            this.collisionView1s = new int[][][] {
+                new int[SheepConfig.MaxGroupCount][],
+                new int[SheepConfig.MaxGroupCount][]
+            };
+
+            for (var e = 0; e < SheepConfig.MaxGroupCount; e++) {
+                this.collisionView1s[(int)SheepCamp.Red][e] = new int[SheepConfig.MaxPetCount];
+                this.collisionView1s[(int)SheepCamp.Blue][e] = new int[SheepConfig.MaxPetCount];
             }
 
             /**
@@ -290,64 +297,23 @@ namespace rvb.scripts {
             UtilAck.system = this;
         }
 
-        private static long NowMs() => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-
-        private static void IgnoreExternal(Action action) {
-            try {
-                action?.Invoke();
-            }
-            catch {
-                // 外部显示桥接是可选的，缺少成员时不应中断核心逻辑。
-            }
-        }
-
-        private static T ReadExternal<T>(Func<T> getter, T fallback = default) {
-            try {
-                return getter != null ? getter() : fallback;
-            }
-            catch {
-                return fallback;
-            }
-        }
-
-        private static int CampIndex(SheepCamp camp) => (int)camp;
-
-        private static int RoleTypeIndex(SheepRoleType roleType) => (int)roleType;
-
-        private void EnsurePerfCapacity(int roleIndex) {
-            if (roleIndex < 0) return;
-            if (roleIndex >= perfStat.redNums.Length) {
-                Array.Resize(ref perfStat.redNums, roleIndex + 4);
-            }
-
-            if (roleIndex >= perfStat.blueNums.Length) {
-                Array.Resize(ref perfStat.blueNums, roleIndex + 4);
-            }
-        }
-
-        private void RaiseRoomEnd() {
-            OnRoomStateEnd?.Invoke();
-        }
-
         public void onGameStart() {
-            gameStartTimerForBuff = 0f;
-            autoTime = 0f;
-            clearPets();
-            clearCallPets();
-            foreach (Dictionary<int, int> counts in petStartCounts) {
-                counts.Clear();
+            this.gameStartTimerForBuff = 0;
+            this.clearPets();
+            this.clearCallPets();
+            
+            foreach (var e1 in this.petStartCounts) {
+                e1.Clear();
             }
 
-            foreach (List<int> list in preBuffs) list.Clear();
-            foreach (List<Buff> list in buffs) list.Clear();
-            Array.Clear(countNewBuffs, 0, countNewBuffs.Length);
-            Array.Clear(countBuffs, 0, countBuffs.Length);
-            Array.Clear(countShowBuffs, 0, countShowBuffs.Length);
-            Array.Clear(flagLongBuffs, 0, flagLongBuffs.Length);
-            Array.Clear(bossBackStateTime, 0, bossBackStateTime.Length);
-            bossHp[0] = loongHp;
-            bossHp[1] = loongHp;
-            OnGameStartHook?.Invoke();
+            this.preBuffs = new[] { new List<int>(), new List<int>() };
+            this.buffs = new[] { new List<Buff>(), new List<Buff>() };
+            this.countNewBuffs = new[] { 0, 0 };
+            this.countBuffs = new[] { 0, 0 };
+            this.countShowBuffs = new[] { 0, 0 };
+            this.flagLongBuffs = new[] { false, false };
+            var e2 = SheepCtl.instance;
+            e2.comMatch.updateWinloops();
         }
 
         public void onGameRun() {
@@ -2807,6 +2773,46 @@ namespace rvb.scripts {
             if (addToWorld) manager.addPet(petSource, camp);
             manager.pre_add_pet(petSource);
             return petSource;
+        }
+
+
+        public static long NowMs() => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+        public static void IgnoreExternal(Action action) {
+            try {
+                action?.Invoke();
+            }
+            catch {
+                // 外部显示桥接是可选的，缺少成员时不应中断核心逻辑。
+            }
+        }
+
+        public static T ReadExternal<T>(Func<T> getter, T fallback = default) {
+            try {
+                return getter != null ? getter() : fallback;
+            }
+            catch {
+                return fallback;
+            }
+        }
+
+        public static int CampIndex(SheepCamp camp) => (int)camp;
+
+        public static int RoleTypeIndex(SheepRoleType roleType) => (int)roleType;
+
+        public void EnsurePerfCapacity(int roleIndex) {
+            if (roleIndex < 0) return;
+            if (roleIndex >= perfStat.redNums.Length) {
+                Array.Resize(ref perfStat.redNums, roleIndex + 4);
+            }
+
+            if (roleIndex >= perfStat.blueNums.Length) {
+                Array.Resize(ref perfStat.blueNums, roleIndex + 4);
+            }
+        }
+
+        public void RaiseRoomEnd() {
+            OnRoomStateEnd?.Invoke();
         }
     }
 }
