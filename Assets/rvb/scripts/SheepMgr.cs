@@ -301,7 +301,7 @@ namespace rvb.scripts {
             this.gameStartTimerForBuff = 0;
             this.clearPets();
             this.clearCallPets();
-            
+
             foreach (var e1 in this.petStartCounts) {
                 e1.Clear();
             }
@@ -317,12 +317,11 @@ namespace rvb.scripts {
         }
 
         public void onGameRun() {
-            foreach (PetView pet in god_view_pets) {
-                if (pet == null || pet.isDie) continue;
-                pet.state = SheepRoleState.Palm;
-                pet.subState = SheepRoleSubState.Palm;
-                pet.animType = SheepRoleAnimType.Palm;
-                pet.readySkillId = 70002;
+            foreach (var e in this.god_view_pets) {
+                e.state = SheepRoleState.Palm;
+                e.subState = SheepRoleSubState.Palm;
+                e.animType = SheepRoleAnimType.Palm;
+                e.readySkillId = 70002;
             }
         }
 
