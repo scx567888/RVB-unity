@@ -198,9 +198,9 @@ namespace rvb.scripts {
                 blueNums = new[] { 0, 0, 0, 0, 0, 0, 0, 0 }
             };
 
-            this.view_pets = new PetView[] { };
-            this.view_bullets = new BulletView[] { };
-            this.pre_view_bullets = new BulletView[] { };
+            this.view_pets = new PetView[SheepConfig.MaxPetCount];
+            this.view_bullets = new BulletView[SheepConfig.MaxBulletCount];
+            this.pre_view_bullets = new BulletView[SheepConfig.MaxBulletCount];
             this.updateTime = 0;
             this.petsAdd = new List<PetView>();
             this.petsDel = new Stack<int>();
@@ -361,39 +361,39 @@ namespace rvb.scripts {
             Array.Fill(this.perfStat.redNums,0);
             Array.Fill(this.perfStat.blueNums,0);
         }
-
+// todo
         public int getBlockIndex(Vector3 position) {
             int xn = Mathf.FloorToInt(position.x / SheepConfig.d + SheepConfig.w / (float)SheepConfig.d / 2f);
             int yn = Mathf.FloorToInt(position.y / SheepConfig.d + SheepConfig.h / (float)SheepConfig.d / 2f);
             return Util.getIndexByXnYn(xn, yn);
         }
-
+// todo
         public int getNextPetId() => ++petId;
-
+// todo
         public int rob_role(int count) {
             int old = cur_rob_role_index;
             cur_rob_role_index += count;
             return old;
         }
-
+// todo
         public int rob_bullet(int count) {
             int old = cur_rob_bullet_index;
             cur_rob_bullet_index += count;
             return old;
         }
-
+// todo
         public int rob_pre_bullet(int count) {
             int old = preBulletIndex;
             preBulletIndex += count;
             return old;
         }
-
+// todo
         public void clearPetViews() {
             for (int i = 0; i < view_pets.Length; i++) {
                 view_pets[i]?.clear();
             }
         }
-
+// todo
         public PetView getPetView(int petIndex) {
             if (petIndex < 0 || petIndex >= SheepConfig.MaxPetCount) return null;
             PetView pet = view_pets[petIndex];
@@ -404,12 +404,12 @@ namespace rvb.scripts {
 
             return pet;
         }
-
+// todo
         public void clearViewBullets() {
             for (int i = 0; i < view_bullets.Length; i++) view_bullets[i]?.clear();
             for (int i = 0; i < pre_view_bullets.Length; i++) pre_view_bullets[i]?.clear();
         }
-
+// todo
         public BulletView getBulletView(int index) {
             if (index < 0 || index >= SheepConfig.MaxBulletCount) return null;
             BulletView bullet = view_bullets[index];
@@ -420,7 +420,7 @@ namespace rvb.scripts {
 
             return bullet;
         }
-
+// todo
         public BulletView getBulletPreView(int index) {
             if (index < 0 || index >= SheepConfig.MaxBulletCount) return null;
             BulletView bullet = pre_view_bullets[index];
@@ -431,7 +431,7 @@ namespace rvb.scripts {
 
             return bullet;
         }
-
+// todo
         public void copyBulletPreView(int e, int bulletId, PetView view_pet, PetView view_tar_pet, Info l = null) {
             var n = SheepBullet.getById(bulletId);
             var r = view_pet != null ? view_pet.camp == SheepCamp.Red ? n.startOffsetX : -n.startOffsetX : 0;
@@ -569,7 +569,7 @@ namespace rvb.scripts {
             preBullet.atkVue = view_pet != null ? view_pet.conf.atk : l.atk;
             preBullet.frame = 0;
         }
-
+// todo
         public async Task game_run(SheepCtl sheepCtl, CancellationToken cancellationToken = default) {
             game_clear();
             mainClearBlocks();
@@ -612,7 +612,7 @@ namespace rvb.scripts {
                 }
             }
         }
-
+// todo
         public void game_update(SheepMgr manager, SheepCtl sheepCtl, float deltaMs) {
             if (manager == null) manager = this;
             try {
@@ -650,7 +650,7 @@ namespace rvb.scripts {
                 throw;
             }
         }
-
+// todo
         private int ResolveAnimationFrameCount(PetView source, SheepCtl sheepCtl) {
             if (source?.view_pet == null) return 1;
             if (AnimationFrameCountResolver != null) {
@@ -666,7 +666,7 @@ namespace rvb.scripts {
                 return Math.Max(1, Convert.ToInt32(frames.Length));
             }, 1);
         }
-
+// todo
         public void update_merge_workers(SheepMgr manager, SheepCtl sheepCtl, float deltaMs) {
             if (manager == null) manager = this;
             long now = NowMs();
@@ -813,7 +813,7 @@ namespace rvb.scripts {
             roleMaxIndex = petCount;
             bulletMaxIndex = bulletCount;
         }
-
+// todo
         private void InitializeBossView(SheepCamp camp) {
             int index = CampIndex(camp);
             PetView view = getPetView(index);
@@ -842,19 +842,19 @@ namespace rvb.scripts {
             bossHp[index] = ReadExternal(() => Convert.ToSingle(boss[index].curHp), (float)loongHp);
             view.curHp = bossHp[index];
         }
-
+// todo
         private void SetBossProgress(int camp, float value) {
             bossHp[camp] = value;
             IgnoreExternal(() => boss[camp].comProgress.setVue(value));
             IgnoreExternal(() => boss[camp].curHp = value);
         }
-
+// todo
         private bool ConsumeBossShield(SheepCamp camp) {
             if (BossShieldConsumer != null) return BossShieldConsumer(camp);
             int index = CampIndex(camp);
             return ReadExternal(() => (bool)boss[index].subShield(), false);
         }
-
+// todo
         public bool updateBoss(SheepMgr manager, SheepCtl sheepCtl, float deltaMs, long now) {
             bool ended = false;
 
@@ -971,11 +971,11 @@ namespace rvb.scripts {
 
             return ended;
         }
-
+// todo
         public void pre_add_pet(PetView source) {
             if (source != null) petsAdd.Add(source);
         }
-
+// todo
         public void buff_add_pets() {
             while (petsAdd.Count > 0) {
                 int index;
@@ -997,7 +997,7 @@ namespace rvb.scripts {
                 source.init(index, view);
             }
         }
-
+// todo
         public void buff_del_pet(int index) {
             PetView pet = getPetView(index);
             if (pet == null) return;
@@ -1005,7 +1005,7 @@ namespace rvb.scripts {
             pet.id = 0;
             petsDel.Push(index);
         }
-
+// todo
         public void clear_pets() {
             cur_rob_role_index = 0;
             roleMaxIndex = 0;
@@ -1013,7 +1013,7 @@ namespace rvb.scripts {
             petsAdd.Clear();
             petsDel.Clear();
         }
-
+// todo
         public void buff_add_bullets() {
             int pendingCount = preBulletIndex;
             while (pendingCount > 0) {
@@ -1039,7 +1039,7 @@ namespace rvb.scripts {
 
             preBulletIndex = 0;
         }
-
+// todo
         public void buff_del_bullet(int index) {
             BulletView bullet = getBulletView(index);
             if (bullet == null || bullet.id == 0) return;
@@ -1047,14 +1047,14 @@ namespace rvb.scripts {
             bullet.isDie = true;
             bulletsDel.Push(index);
         }
-
+// todo
         public void clear_bullets() {
             cur_rob_bullet_index = 0;
             bulletMaxIndex = 0;
             bulletCount = 0;
             bulletsDel.Clear();
         }
-
+// todo
         public void game_clear() {
             clearBlocks();
             clearPetViews();
@@ -1068,7 +1068,7 @@ namespace rvb.scripts {
             petCount = 2;
             roleMaxIndex = 2;
         }
-
+// todo
         public (long time, bool isEndWorker) role_logic() {
             Stopwatch stopwatch = Stopwatch.StartNew();
             logic_counts[CampIndex(SheepCamp.Red)] = redBuffCount > 0 ? 2 : 1;
@@ -1101,7 +1101,7 @@ namespace rvb.scripts {
 
             return (stopwatch.ElapsedMilliseconds, true);
         }
-
+// todo
         public int rob_role_task(int count, CurIndexImages currentImages) {
             int start = rob_role(count);
             int end = start + count;
@@ -1109,7 +1109,7 @@ namespace rvb.scripts {
             if (comImages != null) IgnoreExternal(() => comImages.update_role(currentImages));
             return updated;
         }
-
+// todo
         public int rob_bullet_task(int count, CurIndexImages currentImages) {
             int start = rob_bullet(count);
             int end = start + count;
@@ -1117,7 +1117,7 @@ namespace rvb.scripts {
             if (comImages != null) IgnoreExternal(() => comImages.update_bullet(currentImages));
             return updated;
         }
-
+// todo
         public int update_role(int start, int end) {
             for (var i = start; i < end; i++) {
                 var viewPet = this.getPetView(i);
@@ -1156,7 +1156,7 @@ namespace rvb.scripts {
 
             return end - start;
         }
-
+// todo
         public int update_bullet(int start, int end) {
             for (var i = start; i < end; i++) {
                 if (i >= SheepConfig.MaxBulletCount) {
@@ -1292,7 +1292,7 @@ namespace rvb.scripts {
 
             return end - start;
         }
-
+// todo
         public bool update_frame(PetView viewPet) {
             var frame = viewPet.frame;
             var loopFrame = SheepConfig.loopFrame;
@@ -1314,7 +1314,7 @@ namespace rvb.scripts {
 
             return i;
         }
-
+// todo
         public void update_boss_state(PetView bossView) {
             SheepBossState bossState = (SheepBossState)(int)bossView.state;
             switch (bossState) {
@@ -1371,7 +1371,7 @@ namespace rvb.scripts {
                 }
             }
         }
-
+// todo
         public void update_role_state_in(PetView petSkin) {
             if (petSkin.conf.skillIn == 0) return;
 
@@ -1409,7 +1409,7 @@ namespace rvb.scripts {
             petSkin.readySkillId = boom.id;
             petSkin.isLock = true;
         }
-
+// todo
         public void update_role_state_move(PetView petSkin, bool logicTick, float deltaSeconds) {
             if (petSkin.isLock) return;
 
@@ -1434,7 +1434,7 @@ namespace rvb.scripts {
 
             Debug.LogWarning("移动状态没有目标: pet=" + petSkin.index);
         }
-
+// todo
         public void update_role_state_attack(PetView petSkin, bool logicTick, float deltaSeconds) {
             SheepRoleAtkMoveType attackMoveType = (SheepRoleAtkMoveType)petSkin.conf.atkMoveType;
             if (petSkin.conf.isLoongStopDistance != 0) {
@@ -1525,7 +1525,7 @@ namespace rvb.scripts {
                 }
             }
         }
-
+// todo
         public void update_role_state_killer(PetView petSkin) {
             SheepSkillSubKiller killer = SheepSkillSubKiller.getById(petSkin.readySkillId);
             int animationFrame = petSkin.animFrame;
@@ -1581,7 +1581,7 @@ namespace rvb.scripts {
                 petSkin.animType = SheepRoleAnimType.Killer;
             }
         }
-
+// todo
         public void update_role_state_boom(PetView petSkin) {
             SheepSkill skill = SheepSkill.getById(petSkin.readySkillId);
             SheepSkillSubBoom boom = SheepSkillSubBoom.getById(skill.id);
@@ -1634,7 +1634,7 @@ namespace rvb.scripts {
                     break;
             }
         }
-
+// todo
         public void update_role_state_invincible(PetView petSkin) {
             int animationFrame = petSkin.animFrame;
             SheepSkill skill = SheepSkill.getById(petSkin.readySkillId);
@@ -1659,7 +1659,7 @@ namespace rvb.scripts {
                 petSkin.animType = SheepRoleAnimType.Idle;
             }
         }
-
+// todo
         public void update_role_state_bladestorm(PetView petSkin, bool logicTick, float deltaSeconds) {
             int animationFrame = petSkin.animFrame;
             SheepSkill skill = SheepSkill.getById(petSkin.readySkillId);
@@ -1687,7 +1687,7 @@ namespace rvb.scripts {
                 petSkin.animType = SheepRoleAnimType.Idle;
             }
         }
-
+// todo
         public void update_role_state_palm(PetView petSkin) {
             int animationFrame = petSkin.animFrame;
             SheepSkill skill = SheepSkill.getById(petSkin.readySkillId);
@@ -1721,7 +1721,7 @@ namespace rvb.scripts {
                 petSkin.animType = SheepRoleAnimType.Idle;
             }
         }
-
+// todo
         public void update_role_state_callbullets(PetView petSkin) {
             int animationFrame = petSkin.animFrame;
             SheepSkill skill = SheepSkill.getById(petSkin.readySkillId);
@@ -1820,7 +1820,7 @@ namespace rvb.scripts {
                 petSkin.animType = SheepRoleAnimType.Idle;
             }
         }
-
+// todo
         public void update_role_state_buff(PetView petSkin) {
             SheepSkill skill = SheepSkill.getById(petSkin.readySkillId);
             SheepSkillSubBuff config = SheepSkillSubBuff.getById(skill.id);
@@ -1830,7 +1830,7 @@ namespace rvb.scripts {
                 petSkin.animType = SheepRoleAnimType.Idle;
             }
         }
-
+// todo
         public void update_role_state_rigidity(PetView petSkin) {
             SheepSkill skill = SheepSkill.getById(petSkin.readySkillId);
             SheepSkillSubRigidity config = SheepSkillSubRigidity.getById(skill.id);
@@ -1840,7 +1840,7 @@ namespace rvb.scripts {
                 petSkin.readySkillId = config.endSkill;
             }
         }
-
+// todo
         public void update_role_state_spinatk(PetView petSkin, bool logicTick, float deltaSeconds) {
             (int xn, int yn) block = Util.getXnYn(petSkin.posX, petSkin.posY);
             int animationFrame = petSkin.animFrame;
@@ -1882,7 +1882,7 @@ namespace rvb.scripts {
                 petSkin.readySkillId = config.endSkill;
             }
         }
-
+// todo
         public void update_role_state(PetView petSkin, bool logicTick, float deltaSeconds = 0.033f) {
             Util.subAtkCd(petSkin, deltaSeconds);
 
@@ -1953,7 +1953,7 @@ namespace rvb.scripts {
                 petSkin.impulseY = 0f;
             }
         }
-
+// todo
         public void update_role_state_start(PetView petSkin, bool logicTick, float deltaSeconds) {
             if (state == SheepRoomState.Start) {
                 if (!logicTick) return;
@@ -2006,7 +2006,7 @@ namespace rvb.scripts {
                     : SheepRoleAnimType.Idle;
             }
         }
-
+// todo
         public void update_role_state_charge(PetView petSkin, bool logicTick, float deltaSeconds) {
             (int xn, int yn) block = Util.getXnYn(petSkin.posX, petSkin.posY);
             bool crossedEnd = petSkin.camp == SheepCamp.Red
@@ -2078,7 +2078,7 @@ namespace rvb.scripts {
             });
             Util.moveTar(petSkin, archerTarget, deltaSeconds, logicTick);
         }
-
+// todo
         public void update_role_state_charge_plus(PetView petSkin, bool logicTick, float deltaSeconds) {
             (int xn, int yn) block = Util.getXnYn(petSkin.posX, petSkin.posY);
             bool crossedEnd = petSkin.camp == SheepCamp.Red
@@ -2120,7 +2120,7 @@ namespace rvb.scripts {
             });
             Util.moveTar(petSkin, null, deltaSeconds, logicTick);
         }
-
+// todo
         public void update_role_state_spinspurt(PetView petSkin, bool logicTick, float deltaSeconds) {
             (int xn, int yn) block = Util.getXnYn(petSkin.posX, petSkin.posY);
             bool crossedEnd = petSkin.camp == SheepCamp.Red
@@ -2154,7 +2154,7 @@ namespace rvb.scripts {
                 }
             );
         }
-
+// todo
         public void update_role_state_spurt(PetView petSkin, bool logicTick, float deltaSeconds) {
             if (petSkin.conf.skillSpurt != 0) {
                 SheepSkill skill = SheepSkill.getById(petSkin.conf.skillSpurt);
@@ -2274,11 +2274,11 @@ namespace rvb.scripts {
 
             Util.moveTar(petSkin, null, deltaSeconds, logicTick);
         }
-
+// todo
         public void update_role_anim(PetView pet) {
             pet.animFrame++;
         }
-
+// todo
         public void produce_pets(int typeId, int count, SheepCamp camp) {
             if (count <= 0) return;
             Dictionary<int, SheepCallInfo> callInfos = camp == SheepCamp.Red ? redCallInfos : blueCallInfos;
@@ -2302,7 +2302,7 @@ namespace rvb.scripts {
                 count = count
             });
         }
-
+// todo
         public void consume(SheepCtl sheepCtl, float deltaMs) {
             autoTime += deltaMs / 1000f;
             if (isAutoCall && autoTime > SheepConfig.systemAutomaticTroopsIntervalTime) {
@@ -2323,7 +2323,7 @@ namespace rvb.scripts {
             ConsumeCallMap(redCallInfos, SheepCamp.Red, sheepCtl);
             ConsumeCallMap(blueCallInfos, SheepCamp.Blue, sheepCtl);
         }
-
+// todo
         private void ConsumeCallMap(
             Dictionary<int, SheepCallInfo> callInfos,
             SheepCamp camp,
@@ -2390,7 +2390,7 @@ namespace rvb.scripts {
 
             foreach (int key in removeKeys) callInfos.Remove(key);
         }
-
+// todo
         private void ConsumeRectangleTidy(
             SheepCallInfo callInfo,
             int roleId,
@@ -2446,7 +2446,7 @@ namespace rvb.scripts {
                 callInfo.count_line = 0;
             }
         }
-
+// todo
         private void ConsumeAngleTidy(
             SheepCallInfo callInfo,
             int roleId,
@@ -2497,7 +2497,7 @@ namespace rvb.scripts {
                 if (source.count <= 0) callInfo.pets.RemoveAt(0);
             }
         }
-
+// todo
         public Vector3 getPetStartEndPos(int roleId, SheepCamp camp) {
             Dictionary<int, int> counts = petStartCounts[CampIndex(camp)];
             counts.TryGetValue(roleId, out int count);
@@ -2524,12 +2524,12 @@ namespace rvb.scripts {
             if (camp == SheepCamp.Red) x *= -1f;
             return new Vector3(x, y + UnityEngine.Random.Range(-1f, 1f), 0f);
         }
-
+// todo
         public void clearCallPets() {
             redCallInfos.Clear();
             blueCallInfos.Clear();
         }
-
+// todo
         public void clearBlocks() {
             Array.Clear(attackViews[0], 0, attackViews[0].Length);
             Array.Clear(attackViews[1], 0, attackViews[1].Length);
@@ -2545,7 +2545,7 @@ namespace rvb.scripts {
 
             pre_blocks.Clear();
         }
-
+// todo
         public IndexLen getBlockByIndex(IndexLen[] blocks, int blockIndex) {
             if (blocks == null) throw new ArgumentNullException(nameof(blocks));
             if (blockIndex < 0 || blockIndex >= blocks.Length) {
@@ -2555,7 +2555,7 @@ namespace rvb.scripts {
             if (blocks[blockIndex] == null) blocks[blockIndex] = new IndexLen();
             return blocks[blockIndex];
         }
-
+// todo
         public void mainClearBlocks() {
             if (isChangeAckFlags == null) isChangeAckFlags = new[] { true, true };
             if (isChangeCollsionFlags == null) {
@@ -2582,7 +2582,7 @@ namespace rvb.scripts {
 
             pre_blocks.Clear();
         }
-
+// todo
         public void mainPreAddBlock(int blockIndex, int buffIndex, SheepCamp camp, int collideId) {
             if (blockIndex < 0 || blockIndex >= MaxCount) return;
             int campIndex = CampIndex(camp);
@@ -2613,7 +2613,7 @@ namespace rvb.scripts {
                 isChangeCollsionFlags[campIndex][safeCollideId] = true;
             }
         }
-
+// todo
         public void mainSyncBlocksToWokers() {
             int[] attackOffsets = new int[2];
             int[][] collisionOffsets = {
@@ -2670,14 +2670,14 @@ namespace rvb.scripts {
                 }
             }
         }
-
+// todo
         public void forEachBlock(IndexLen[] blocks, int[] indices, int blockIndex, Action<int> callback) {
             IndexLen block = getBlockByIndex(blocks, blockIndex);
             for (int index = 0; index < block.Len; index++) {
                 callback(indices[block.Index + index]);
             }
         }
-
+// todo
         public bool findBlock(IndexLen[] blocks, int[] indices, int blockIndex, Func<int, bool> callback) {
             IndexLen block = getBlockByIndex(blocks, blockIndex);
             if (block.Len == 0) return false;
@@ -2693,7 +2693,7 @@ namespace rvb.scripts {
 
             return false;
         }
-
+// todo
         public static PetView createPetView(
             SheepCtl sheepCtl,
             SheepCamp camp,
@@ -2771,9 +2771,9 @@ namespace rvb.scripts {
             return petSource;
         }
 
-
+// todo
         public static long NowMs() => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-
+// todo
         public static void IgnoreExternal(Action action) {
             try {
                 action?.Invoke();
@@ -2782,7 +2782,7 @@ namespace rvb.scripts {
                 // 外部显示桥接是可选的，缺少成员时不应中断核心逻辑。
             }
         }
-
+// todo
         public static T ReadExternal<T>(Func<T> getter, T fallback = default) {
             try {
                 return getter != null ? getter() : fallback;
@@ -2791,11 +2791,11 @@ namespace rvb.scripts {
                 return fallback;
             }
         }
-
+// todo
         public static int CampIndex(SheepCamp camp) => (int)camp;
-
+// todo
         public static int RoleTypeIndex(SheepRoleType roleType) => (int)roleType;
-
+// todo
         public void EnsurePerfCapacity(int roleIndex) {
             if (roleIndex < 0) return;
             if (roleIndex >= perfStat.redNums.Length) {
@@ -2807,6 +2807,7 @@ namespace rvb.scripts {
             }
         }
 
+        // todo
         public void RaiseRoomEnd() {
             OnRoomStateEnd?.Invoke();
         }
