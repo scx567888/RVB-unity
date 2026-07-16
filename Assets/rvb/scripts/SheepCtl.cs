@@ -4,6 +4,7 @@
         public ComUIAnim comUIAnim;
         public CameraCtl cameraCtl;
         public ComImages comImages;
+        public static SheepCtl instance;
     }
 
     public class ComMatch {
@@ -11,6 +12,11 @@
         }
 
         public void hideDoubleAnim(SheepCamp camp) {
+            
+        }
+
+        public void updateWinloops() {
+            
             
         }
     }
