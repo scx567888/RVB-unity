@@ -1235,22 +1235,24 @@ namespace rvb.scripts {
         }
 
         public bool update_frame(PetView viewPet) {
-            int frame = viewPet.frame;
-            int loopFrame = Math.Max(1, SheepConfig.loopFrame);
-            bool logicTick = frame % loopFrame == loopFrame - 1;
-
+            var frame = viewPet.frame;
+            var loopFrame = SheepConfig.loopFrame;
+            var i = frame % loopFrame == loopFrame - 1;
+            var posBefX = viewPet.posBefX;
+            var posBefY = viewPet.posBefY;
+            var posX = viewPet.posX;
+            var posY = viewPet.posY;
             if (!viewPet.isDie) {
-                float progress = (frame % loopFrame) / (float)loopFrame;
-                viewPet.animX = Mathf.LerpUnclamped(viewPet.posBefX, viewPet.posX, progress);
-                viewPet.animY = Mathf.LerpUnclamped(viewPet.posBefY, viewPet.posY, progress);
+                viewPet.animX = posBefX + (posX - posBefX) * (frame % loopFrame) / loopFrame;
+                viewPet.animY = posBefY + (posY - posBefY) * (frame % loopFrame) / loopFrame;
+            }
+            frame += 1;
+            viewPet.frame = frame;
+            if (!viewPet.isDie && i) {
+                viewPet.logicMove(posX, posY);
             }
 
-            viewPet.frame = frame + 1;
-            if (!viewPet.isDie && logicTick) {
-                viewPet.logicMove(viewPet.posX, viewPet.posY);
-            }
-
-            return logicTick;
+            return i;
         }
 
         public void update_boss_state(PetView bossView) {
