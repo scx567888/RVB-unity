@@ -345,25 +345,21 @@ namespace rvb.scripts {
             }
         }
 
-        public void delPet(PetView pet) {
-            if (pet == null) return;
-            bool removed = pets[0].Remove(pet) | pets[1].Remove(pet);
-            if (!removed || pet.conf == null) return;
-            int roleIndex = RoleTypeIndex(pet.conf.roleType);
-            EnsurePerfCapacity(roleIndex);
-            if (pet.camp == SheepCamp.Red) {
-                perfStat.redNums[roleIndex] = Math.Max(0, perfStat.redNums[roleIndex] - 1);
-            }
-            else {
-                perfStat.blueNums[roleIndex] = Math.Max(0, perfStat.blueNums[roleIndex] - 1);
+        public void delPet(PetView e) {
+            this.pets[(int)SheepCamp.Red].Remove(e);
+            this.pets[(int)SheepCamp.Blue].Remove(e);
+            if (e.camp == SheepCamp.Red) {
+                this.perfStat.redNums[(int)e.conf.roleType]--;
+            } else {
+                this.perfStat.blueNums[(int)e.conf.roleType]--;
             }
         }
 
         public void clearPets() {
-            pets[0].Clear();
-            pets[1].Clear();
-            perfStat.redNums = new int[Math.Max(16, perfStat.redNums?.Length ?? 0)];
-            perfStat.blueNums = new int[Math.Max(16, perfStat.blueNums?.Length ?? 0)];
+            this.pets[(int)SheepCamp.Red].Clear();
+            this.pets[(int)SheepCamp.Blue].Clear();
+            Array.Fill(this.perfStat.redNums,0);
+            Array.Fill(this.perfStat.blueNums,0);
         }
 
         public int getBlockIndex(Vector3 position) {
