@@ -386,92 +386,123 @@ namespace rvb.scripts {
             return bullet;
         }
 
-        public void copyBulletPreView(int e,int bulletId,PetView view_pet,PetView view_tar_pet,Info l = null) {
-           var n = SheepBullet.getById(bulletId);
-        var r = view_pet!=null ? view_pet.camp == SheepCamp.Red ? n.startOffsetX : -n.startOffsetX : 0;
-        var preBullet = this.getBulletPreView(e);
-        preBullet.bulletId = bulletId;
-        preBullet.roleUid = view_pet!=null ? view_pet.id : 0;
-        preBullet.roleIndex = view_pet!=null ? view_pet.index : 0;
+        public void copyBulletPreView(int e, int bulletId, PetView view_pet, PetView view_tar_pet, Info l = null) {
+            var n = SheepBullet.getById(bulletId);
+            var r = view_pet != null ? view_pet.camp == SheepCamp.Red ? n.startOffsetX : -n.startOffsetX : 0;
+            var preBullet = this.getBulletPreView(e);
+            preBullet.bulletId = bulletId;
+            preBullet.roleUid = view_pet != null ? view_pet.id : 0;
+            preBullet.roleIndex = view_pet != null ? view_pet.index : 0;
 
 
-        preBullet.camp = view_pet!=null ? view_pet.camp : l.camp;
-        if (view_tar_pet!=null && 0 == view_tar_pet.roleId) {
-            preBullet.tarRoleIndex = view_tar_pet.index;
-        } else {
-            preBullet.tarRoleIndex = -1;
-        }
-        if (n.moveType == (int)SheepBulletMoveType.Fixed) {
-            float t = l!=null && l.startX!=0 
-                ? l.startX
-                :   view_pet!=null && view_pet.posX!=0  ? view_pet.posX : 0;
-            preBullet.x = t;
-            float s = l!=null && l.startY!=0 
-                ? l.startY
-                :  view_pet!=null && view_pet.posY!=0 ? view_pet.posY : 0;
-            preBullet.y = s;
+            preBullet.camp = view_pet != null ? view_pet.camp : l.camp;
+            if (view_tar_pet != null && 0 == view_tar_pet.roleId) {
+                preBullet.tarRoleIndex = view_tar_pet.index;
+            }
+            else {
+                preBullet.tarRoleIndex = -1;
+            }
 
-            preBullet.startY = n.startOffsetY;
-            preBullet.z = 0 + n.startOffsetZ;
-            preBullet.dirX = 0;
-            preBullet.dirY = 0;
-            preBullet.dirZ = 1;
-        } else if (n.moveType == (int)SheepBulletMoveType.LineDir) {
-            preBullet.x = view_pet.posX + r;
-            preBullet.y = view_pet.posY + n.startOffsetY;
-            preBullet.z = 0 + n.startOffsetZ;
-            preBullet.dirX = view_pet.dirX;
-            preBullet.dirY = view_pet.dirY;
-        } else if (n.moveType == (int)SheepBulletMoveType.CurvePosFrame) {
-            float t = view_pet!=null ? view_pet.posX : l.startX;
-            float s = view_pet!=null ? view_pet.posY : l.startY;
-            float c = view_tar_pet!=null ? view_tar_pet.posX : view_pet.tarPosX;
-            float f = view_tar_pet!=null ? view_tar_pet.posY : view_pet.tarPosY;
-            preBullet.x = t + r;
-            preBullet.y = s + n.startOffsetY;
-            preBullet.z = 0 + n.startOffsetZ;
-            preBullet.startX = t + r;
-            preBullet.startY = s + n.startOffsetY;
-            preBullet.startZ = 0 + n.startOffsetZ;
-            preBullet.endX = c;
-            preBullet.endY = f;
-            preBullet.endZ = 0 + n.endOffsetZ;
-            preBullet.dirX = 0;
-            preBullet.dirY = 0;
-            preBullet.z = 1;
-        } else if (n.moveType == (int)SheepBulletMoveType.DirAngle) {
-            preBullet.x = view_pet.posX + r;
-            preBullet.y = view_pet.posY + n.startOffsetY;
-            preBullet.z = 0 + n.startOffsetZ;
-            preBullet.dirX = l.dirX;
-            preBullet.dirY = l.dirY;
-            preBullet.dirZ = l.dirZ;
-        } else if (n.moveType == (int)SheepBulletMoveType.RadiusAngle) {
-            preBullet.x = view_pet.posX + r;
-            preBullet.y = view_pet.posY + n.startOffsetY;
-            preBullet.z = 0 + n.startOffsetZ;
-            preBullet.startX = view_pet.posX + r;
-            preBullet.startY = view_pet.posY + n.startOffsetY;
-            preBullet.startZ = 0 + n.startOffsetZ;
-            preBullet.dirX = l.dirX;
-            preBullet.dirY = l.dirY;
-            preBullet.dirZ = l.dirZ;
-            preBullet.angle = l.angle;
-        } else if (n.moveType == (int)SheepBulletMoveType.LineDirEndPos) {
-            preBullet.x = l.startX;
-            preBullet.y = l.startY;
-            preBullet.z = l.startZ;
-            preBullet.startX = l.startX;
-            preBullet.startY = l.startY;
-            preBullet.startZ = l.startZ;
-            preBullet.endX = l.endX;
-            preBullet.endY = l.endY;
-            preBullet.endZ = l.endZ;
-            if (l.dirX!=0 || l.dirY!=0 || l.dirZ!=0) {
+            if (n.moveType == (int)SheepBulletMoveType.Fixed) {
+                float t = l != null && l.startX != 0
+                    ? l.startX
+                    : view_pet != null && view_pet.posX != 0
+                        ? view_pet.posX
+                        : 0;
+                preBullet.x = t;
+                float s = l != null && l.startY != 0
+                    ? l.startY
+                    : view_pet != null && view_pet.posY != 0
+                        ? view_pet.posY
+                        : 0;
+                preBullet.y = s;
+
+                preBullet.startY = n.startOffsetY;
+                preBullet.z = 0 + n.startOffsetZ;
+                preBullet.dirX = 0;
+                preBullet.dirY = 0;
+                preBullet.dirZ = 1;
+            }
+            else if (n.moveType == (int)SheepBulletMoveType.LineDir) {
+                preBullet.x = view_pet.posX + r;
+                preBullet.y = view_pet.posY + n.startOffsetY;
+                preBullet.z = 0 + n.startOffsetZ;
+                preBullet.dirX = view_pet.dirX;
+                preBullet.dirY = view_pet.dirY;
+            }
+            else if (n.moveType == (int)SheepBulletMoveType.CurvePosFrame) {
+                float t = view_pet != null ? view_pet.posX : l.startX;
+                float s = view_pet != null ? view_pet.posY : l.startY;
+                float c = view_tar_pet != null ? view_tar_pet.posX : view_pet.tarPosX;
+                float f = view_tar_pet != null ? view_tar_pet.posY : view_pet.tarPosY;
+                preBullet.x = t + r;
+                preBullet.y = s + n.startOffsetY;
+                preBullet.z = 0 + n.startOffsetZ;
+                preBullet.startX = t + r;
+                preBullet.startY = s + n.startOffsetY;
+                preBullet.startZ = 0 + n.startOffsetZ;
+                preBullet.endX = c;
+                preBullet.endY = f;
+                preBullet.endZ = 0 + n.endOffsetZ;
+                preBullet.dirX = 0;
+                preBullet.dirY = 0;
+                preBullet.z = 1;
+            }
+            else if (n.moveType == (int)SheepBulletMoveType.DirAngle) {
+                preBullet.x = view_pet.posX + r;
+                preBullet.y = view_pet.posY + n.startOffsetY;
+                preBullet.z = 0 + n.startOffsetZ;
                 preBullet.dirX = l.dirX;
                 preBullet.dirY = l.dirY;
                 preBullet.dirZ = l.dirZ;
-            } else {
+            }
+            else if (n.moveType == (int)SheepBulletMoveType.RadiusAngle) {
+                preBullet.x = view_pet.posX + r;
+                preBullet.y = view_pet.posY + n.startOffsetY;
+                preBullet.z = 0 + n.startOffsetZ;
+                preBullet.startX = view_pet.posX + r;
+                preBullet.startY = view_pet.posY + n.startOffsetY;
+                preBullet.startZ = 0 + n.startOffsetZ;
+                preBullet.dirX = l.dirX;
+                preBullet.dirY = l.dirY;
+                preBullet.dirZ = l.dirZ;
+                preBullet.angle = l.angle;
+            }
+            else if (n.moveType == (int)SheepBulletMoveType.LineDirEndPos) {
+                preBullet.x = l.startX;
+                preBullet.y = l.startY;
+                preBullet.z = l.startZ;
+                preBullet.startX = l.startX;
+                preBullet.startY = l.startY;
+                preBullet.startZ = l.startZ;
+                preBullet.endX = l.endX;
+                preBullet.endY = l.endY;
+                preBullet.endZ = l.endZ;
+                if (l.dirX != 0 || l.dirY != 0 || l.dirZ != 0) {
+                    preBullet.dirX = l.dirX;
+                    preBullet.dirY = l.dirY;
+                    preBullet.dirZ = l.dirZ;
+                }
+                else {
+                    float t = l.endX - l.startX;
+                    float i = l.endY - l.startY;
+                    float s = l.endZ - l.startZ;
+                    float o = (float)Math.Sqrt(t * t + i * i);
+                    preBullet.dirX = t / o;
+                    preBullet.dirY = i / o;
+                    preBullet.dirZ = s / o;
+                }
+            }
+            else if (n.moveType == (int)SheepBulletMoveType.LinePosFrame) {
+                preBullet.x = l.startX;
+                preBullet.y = l.startY;
+                preBullet.z = l.startZ;
+                preBullet.startX = l.startX;
+                preBullet.startY = l.startY;
+                preBullet.startZ = l.startZ;
+                preBullet.endX = l.endX;
+                preBullet.endY = l.endY;
+                preBullet.endZ = l.endZ;
                 float t = l.endX - l.startX;
                 float i = l.endY - l.startY;
                 float s = l.endZ - l.startZ;
@@ -480,33 +511,17 @@ namespace rvb.scripts {
                 preBullet.dirY = i / o;
                 preBullet.dirZ = s / o;
             }
-        } else if (n.moveType == (int)SheepBulletMoveType.LinePosFrame) {
-            preBullet.x = l.startX;
-            preBullet.y = l.startY;
-            preBullet.z = l.startZ;
-            preBullet.startX = l.startX;
-            preBullet.startY = l.startY;
-            preBullet.startZ = l.startZ;
-            preBullet.endX = l.endX;
-            preBullet.endY = l.endY;
-            preBullet.endZ = l.endZ;
-            float t = l.endX - l.startX;
-            float i = l.endY - l.startY;
-            float s = l.endZ - l.startZ;
-            float o = (float)Math.Sqrt(t * t + i * i);
-            preBullet.dirX = t / o;
-            preBullet.dirY = i / o;
-            preBullet.dirZ = s / o;
-        } else {
-            preBullet.x = view_pet.posX + r;
-            preBullet.y = view_pet.posY + n.startOffsetY;
-            preBullet.z = 0 + n.startOffsetZ;
-            preBullet.dirX = 0;
-            preBullet.dirY = 0;
-            preBullet.dirZ = 1;
-        }
-        preBullet.atkVue = view_pet!=null ? view_pet.conf.atk : l.atk;
-        preBullet.frame = 0;
+            else {
+                preBullet.x = view_pet.posX + r;
+                preBullet.y = view_pet.posY + n.startOffsetY;
+                preBullet.z = 0 + n.startOffsetZ;
+                preBullet.dirX = 0;
+                preBullet.dirY = 0;
+                preBullet.dirZ = 1;
+            }
+
+            preBullet.atkVue = view_pet != null ? view_pet.conf.atk : l.atk;
+            preBullet.frame = 0;
         }
 
         public async Task game_run(SheepCtl sheepCtl, CancellationToken cancellationToken = default) {
@@ -1087,123 +1102,136 @@ namespace rvb.scripts {
         }
 
         public int update_bullet(int start, int end) {
-             for (var i = start; i < end; i++) {
-            if (i >= SheepConfig.MaxBulletCount) {
-                return i - start;
-            }
-            var t = this.getBulletView(i);
-            if (t.isDie) {
-                continue;
-            }
-            if (t.id!=0 && t.conf.animId!=0) {
-                var e = t;
-                this.comImages.addBullet(e);
-            }
-            var xnyn = Util.getXnYn(t.x, t.y);
-            var s = xnyn.xn;
-            var o=xnyn.yn;
-            var l = t.frame;
-            var n = t.conf;
-            {
-                var e = t.conf.atkFrames;
-                if (e!=null) {
-                    for (var i = 0; i < e.Length; i++) {
-                        var n = e[i];
-                        if (-1 == n || n == l) {
-                            if (0 == t.tarRoleIndex || 1 == t.tarRoleIndex) {
-                                var o = this.getPetView(t.tarRoleIndex);
-                                if (UtilAck.isCanAckByBullet(t, o, i)) {
-                                    UtilAck.hurtByBullet(t, o, t.atkVue);
-                                }
-                            } else UtilFind.forfeachBlocksByAckView(t.camp, s, o, t.conf.findR, (e => {
-                                UtilAck.isCanAckByBullet(t, e, i) && UtilAck.hurtByBullet(t, e, t.atkVue)
-                            }));
+            for (var i = start; i < end; i++) {
+                if (i >= SheepConfig.MaxBulletCount) {
+                    return i - start;
+                }
 
-                            break;
+                var t = this.getBulletView(i);
+                if (t.isDie) {
+                    continue;
+                }
+
+                if (t.id != 0 && t.conf.animId != 0) {
+                    var e = t;
+                    this.comImages.addBullet(e);
+                }
+
+                var xnyn = Util.getXnYn(t.x, t.y);
+                var s = xnyn.xn;
+                var o = xnyn.yn;
+                var l = t.frame;
+                var n = t.conf;
+                {
+                    var e = t.conf.atkFrames;
+                    if (e != null) {
+                        for (var i = 0; i < e.Length; i++) {
+                            var n = e[i];
+                            if (-1 == n || n == l) {
+                                if (0 == t.tarRoleIndex || 1 == t.tarRoleIndex) {
+                                    var o = this.getPetView(t.tarRoleIndex);
+                                    if (UtilAck.isCanAckByBullet(t, o, i)) {
+                                        UtilAck.hurtByBullet(t, o, t.atkVue);
+                                    }
+                                }
+                                else
+                                    UtilFind.forfeachBlocksByAckView(t.camp, s, o, t.conf.findR,
+                                        (e => {
+                                            UtilAck.isCanAckByBullet(t, e, i) && UtilAck.hurtByBullet(t, e, t.atkVue)
+                                        }));
+
+                                break;
+                            }
                         }
                     }
-                }
 
-                switch (t.conf.moveType) {
-                    case (int)SheepBulletMoveType.Fixed:
-                        break;
-                    case (int)SheepBulletMoveType.LineDir:
-                        t.x = (float)(t.x + t.dirX * n.speed * .033);
-                        t.y = (float)(t.y + t.dirY * n.speed * .033);
-                        break;
-                    case (int)SheepBulletMoveType.LinePosFrame:
-                        t.x = t.startX + (t.endX - t.startX) * l / n.moveTimeFrame;
-                        t.y = t.startY + (t.endY - t.startY) * l / n.moveTimeFrame;
-                        t.z = t.startZ + (t.endZ - t.startZ) * l / n.moveTimeFrame;
-                        break;
-                    case (int)SheepBulletMoveType.LineTarFrame:
-                        break;
-                    case (int)SheepBulletMoveType.CurvePosFrame:
-                        var e = (t.startX + t.endX) / 2;
-                        var i = (t.startY + t.endY) / 2;
-                        var s = n.curveHigh;
-                        var o = t.startX + (e - t.startX) * l / n.moveTimeFrame;
-                        var r = e + (t.endX - e) * l / n.moveTimeFrame;
-                        var a = t.startY + (i - t.startY) * l / n.moveTimeFrame;
-                        var c = i + (t.endY - i) * l / n.moveTimeFrame;
-                        var f = t.startZ + (s - t.startZ) * l / n.moveTimeFrame;
-                        var    h = s + (t.endZ - s) * l / n.moveTimeFrame;
-                        t.x = o + (r - o) * l / n.moveTimeFrame;
-                        t.y = a + (c - a) * l / n.moveTimeFrame;
-                        t.z = f + (h - f) * l / n.moveTimeFrame;
-                        var p = t.endX - t.startX > 0 ? 1 : -1;
-                        var u = .2 * p;
-                        var d = .8;
-                        var g = p;
-                        var S = 0;
-                        var m = -.2 * p;
-                        var y = -.8;
-                        var k = u + (g - u) * l / n.endFrame;
-                        var B = d + (S - d) * l / n.endFrame;
-                        var w = g + (m - g) * l / n.endFrame;
-                        var R = S + (y - S) * l / n.endFrame;
-                        t.dirX = (float)(k + (w - k) * l / n.endFrame);
-                        t.dirY = 0;
-                        t.dirZ = (float)(B + (R - B) * l / n.endFrame);
-                        break;
-                    case (int)SheepBulletMoveType.CurveTarFrame:
-                        break;
-                    case (int)SheepBulletMoveType.LineDirEndPos:
-                        t.x = (float)(t.x + t.dirX * n.speed * .033);
-                        t.y = (float)(t.y + t.dirY * n.speed * .033);
-                        t.z = (float)(t.z + t.dirZ * n.speed * .033);
-                        break;
-                    case (int)SheepBulletMoveType.RadiusAngle:
-                        t.angle += n.speed;
-                        var x = t.roleUid;
-                        var _ = this.getPetView(t.roleIndex);
-                        x == _.id ? (t.x = (float)(_.animX + n.radius * Math.Cos(t.angle)), t.y = _.animY + n.radius * Math.sin(t.angle)) : t.isDie = true;
-                        break;
-                    case (int)SheepBulletMoveType.DirAngle: {
-                        t.x = (float)(t.x + t.dirX * n.speed * .033);
-                        t.y = (float)(t.y + t.dirY * n.speed * .033);
-                        t.z = (float)(t.z + t.dirZ * n.speed * .033);
+                    switch (t.conf.moveType) {
+                        case (int)SheepBulletMoveType.Fixed:
+                            break;
+                        case (int)SheepBulletMoveType.LineDir:
+                            t.x = (float)(t.x + t.dirX * n.speed * .033);
+                            t.y = (float)(t.y + t.dirY * n.speed * .033);
+                            break;
+                        case (int)SheepBulletMoveType.LinePosFrame:
+                            t.x = t.startX + (t.endX - t.startX) * l / n.moveTimeFrame;
+                            t.y = t.startY + (t.endY - t.startY) * l / n.moveTimeFrame;
+                            t.z = t.startZ + (t.endZ - t.startZ) * l / n.moveTimeFrame;
+                            break;
+                        case (int)SheepBulletMoveType.LineTarFrame:
+                            break;
+                        case (int)SheepBulletMoveType.CurvePosFrame:
+                            var e1 = (t.startX + t.endX) / 2;
+                            var i1 = (t.startY + t.endY) / 2;
+                            var s1 = n.curveHigh;
+                            var o1 = t.startX + (e1 - t.startX) * l / n.moveTimeFrame;
+                            var r1 = e1 + (t.endX - e1) * l / n.moveTimeFrame;
+                            var a = t.startY + (i1 - t.startY) * l / n.moveTimeFrame;
+                            var c = i1 + (t.endY - i1) * l / n.moveTimeFrame;
+                            var f = t.startZ + (s1 - t.startZ) * l / n.moveTimeFrame;
+                            var h = s1 + (t.endZ - s1) * l / n.moveTimeFrame;
+                            t.x = o1 + (r1 - o1) * l / n.moveTimeFrame;
+                            t.y = a + (c - a) * l / n.moveTimeFrame;
+                            t.z = f + (h - f) * l / n.moveTimeFrame;
+                            var p = t.endX - t.startX > 0 ? 1 : -1;
+                            var u = .2 * p;
+                            var d = .8;
+                            var g = p;
+                            var S = 0;
+                            var m = -.2 * p;
+                            var y = -.8;
+                            var k = u + (g - u) * l / n.endFrame;
+                            var B = d + (S - d) * l / n.endFrame;
+                            var w = g + (m - g) * l / n.endFrame;
+                            var R = S + (y - S) * l / n.endFrame;
+                            t.dirX = (float)(k + (w - k) * l / n.endFrame);
+                            t.dirY = 0;
+                            t.dirZ = (float)(B + (R - B) * l / n.endFrame);
+                            break;
+                        case (int)SheepBulletMoveType.CurveTarFrame:
+                            break;
+                        case (int)SheepBulletMoveType.LineDirEndPos:
+                            t.x = (float)(t.x + t.dirX * n.speed * .033);
+                            t.y = (float)(t.y + t.dirY * n.speed * .033);
+                            t.z = (float)(t.z + t.dirZ * n.speed * .033);
+                            break;
+                        case (int)SheepBulletMoveType.RadiusAngle:
+                            t.angle += n.speed;
+                            var x = t.roleUid;
+                            var _ = this.getPetView(t.roleIndex);
+                            if (x == _.id) {
+                                t.x = (float)(_.animX + n.radius * Math.Cos(t.angle));
+                                t.y = (float)(_.animY + n.radius * Math.Sin(t.angle));
+                            }
+                            else {
+                                t.isDie = true;
+                            }
+
+                            break;
+                        case (int)SheepBulletMoveType.DirAngle: {
+                            t.x = (float)(t.x + t.dirX * n.speed * .033);
+                            t.y = (float)(t.y + t.dirY * n.speed * .033);
+                            t.z = (float)(t.z + t.dirZ * n.speed * .033);
+                        }
                     }
+
+                    t.frame = l + 1;
+                }
+                var r = n.createBulletID;
+                if (r != 0 && n.createBulletFrame == l) {
+                    var e = this.getPetView(t.roleIndex);
+                    var i1 = this.getPetView(t.tarRoleIndex);
+                    this.bullte_creates.Add(new BullteCreate() {
+                        view_pet = e,
+                        bulletId = r,
+                        view_tar_pet = i1,
+                        info = new Info() { startX = t.x, startY = t.y, startZ = 100 }
+                    });
                 }
 
-                t.frame = l + 1;
-            }
-            var r = n.createBulletID;
-            if (r!=0 && n.createBulletFrame == l) {
-                var e = this.getPetView(t.roleIndex);
-                var i = this.getPetView(t.tarRoleIndex);
-                this.bullte_creates.Add(new BullteCreate() {
-                    view_pet = e,
-                    bulletId = r,
-                    view_tar_pet = i,
-                    info = new Info() { startX = t.x, startY = t.y, startZ = 100 }
-                });
+                t = null;
             }
 
-            t = null;
-             }
-
-        return end - start;
+            return end - start;
         }
 
         public bool update_frame(PetView viewPet) {
@@ -1218,6 +1246,7 @@ namespace rvb.scripts {
                 viewPet.animX = posBefX + (posX - posBefX) * (frame % loopFrame) / loopFrame;
                 viewPet.animY = posBefY + (posY - posBefY) * (frame % loopFrame) / loopFrame;
             }
+
             frame += 1;
             viewPet.frame = frame;
             if (!viewPet.isDie && i) {
