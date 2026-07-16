@@ -386,177 +386,127 @@ namespace rvb.scripts {
             return bullet;
         }
 
-        public void copyBulletPreView(
-            int index,
-            int newBulletId,
-            PetView viewPet,
-            PetView targetPet,
-            Info info = null
-        ) {
-            SheepBullet config = SheepBullet.getById(newBulletId);
-            float startOffsetX = viewPet != null
-                ? (viewPet.camp == SheepCamp.Red ? config.startOffsetX : -config.startOffsetX)
-                : 0f;
+        public void copyBulletPreView(int e,int bulletId,PetView view_pet,PetView view_tar_pet,Info l = null) {
+           var n = SheepBullet.getById(bulletId);
+        var r = view_pet!=null ? view_pet.camp == SheepCamp.Red ? n.startOffsetX : -n.startOffsetX : 0;
+        var preBullet = this.getBulletPreView(e);
+        preBullet.bulletId = bulletId;
+        preBullet.roleUid = view_pet!=null ? view_pet.id : 0;
+        preBullet.roleIndex = view_pet!=null ? view_pet.index : 0;
 
-            BulletView preBullet = getBulletPreView(index);
-            if (preBullet == null) return;
 
-            preBullet.clear();
-            preBullet.bulletId = newBulletId;
-            preBullet.roleUid = viewPet?.id ?? 0;
-            preBullet.roleIndex = viewPet?.index ?? 0;
-            preBullet.camp = viewPet != null ? viewPet.camp : (info?.camp ?? SheepCamp.Red);
-            preBullet.tarRoleIndex = targetPet != null && targetPet.roleId == 0 ? targetPet.index : -1;
+        preBullet.camp = view_pet!=null ? view_pet.camp : l.camp;
+        if (view_tar_pet!=null && 0 == view_tar_pet.roleId) {
+            preBullet.tarRoleIndex = view_tar_pet.index;
+        } else {
+            preBullet.tarRoleIndex = -1;
+        }
+        if (n.moveType == (int)SheepBulletMoveType.Fixed) {
+            float t = l!=null && l.startX!=0 
+                ? l.startX
+                :   view_pet!=null && view_pet.posX!=0  ? view_pet.posX : 0;
+            preBullet.x = t;
+            float s = l!=null && l.startY!=0 
+                ? l.startY
+                :  view_pet!=null && view_pet.posY!=0 ? view_pet.posY : 0;
+            preBullet.y = s;
 
-            SheepBulletMoveType moveType = (SheepBulletMoveType)config.moveType;
-            switch (moveType) {
-                case SheepBulletMoveType.Fixed: {
-                    preBullet.x = info != null ? info.startX : (viewPet?.posX ?? 0f);
-                    preBullet.y = info != null ? info.startY : (viewPet?.posY ?? 0f);
-                    preBullet.startX = preBullet.x;
-                    preBullet.startY = preBullet.y;
-                    preBullet.startZ = config.startOffsetZ;
-                    preBullet.z = config.startOffsetZ;
-                    preBullet.dirX = 0f;
-                    preBullet.dirY = 0f;
-                    preBullet.dirZ = 1f;
-                    break;
-                }
-                case SheepBulletMoveType.LineDir: {
-                    if (viewPet == null) throw new InvalidOperationException("LineDir 子弹需要 viewPet");
-                    preBullet.x = viewPet.posX + startOffsetX;
-                    preBullet.y = viewPet.posY + config.startOffsetY;
-                    preBullet.z = config.startOffsetZ;
-                    preBullet.startX = preBullet.x;
-                    preBullet.startY = preBullet.y;
-                    preBullet.startZ = preBullet.z;
-                    preBullet.dirX = viewPet.dirX;
-                    preBullet.dirY = viewPet.dirY;
-                    break;
-                }
-                case SheepBulletMoveType.CurvePosFrame: {
-                    if (viewPet == null && info == null) {
-                        throw new InvalidOperationException("CurvePosFrame 子弹需要 viewPet 或 info");
-                    }
-
-                    float startX = viewPet != null ? viewPet.posX : info.startX;
-                    float startY = viewPet != null ? viewPet.posY : info.startY;
-                    float endX = targetPet != null
-                        ? targetPet.posX
-                        : (info != null && info.hasEnd
-                            ? info.endX
-                            : (viewPet != null ? viewPet.tarPosX : startX));
-                    float endY = targetPet != null
-                        ? targetPet.posY
-                        : (info != null && info.hasEnd
-                            ? info.endY
-                            : (viewPet != null ? viewPet.tarPosY : startY));
-
-                    preBullet.x = startX + startOffsetX;
-                    preBullet.y = startY + config.startOffsetY;
-                    preBullet.z = config.startOffsetZ;
-                    preBullet.startX = preBullet.x;
-                    preBullet.startY = preBullet.y;
-                    preBullet.startZ = preBullet.z;
-                    preBullet.endX = endX;
-                    preBullet.endY = endY;
-                    preBullet.endZ = config.endOffsetZ;
-                    preBullet.dirX = 0f;
-                    preBullet.dirY = 0f;
-                    preBullet.dirZ = 1f;
-                    break;
-                }
-                case SheepBulletMoveType.DirAngle: {
-                    if (viewPet == null || info == null) {
-                        throw new InvalidOperationException("DirAngle 子弹需要 viewPet 和 info");
-                    }
-
-                    preBullet.x = viewPet.posX + startOffsetX;
-                    preBullet.y = viewPet.posY + config.startOffsetY;
-                    preBullet.z = config.startOffsetZ;
-                    preBullet.startX = preBullet.x;
-                    preBullet.startY = preBullet.y;
-                    preBullet.startZ = preBullet.z;
-                    preBullet.dirX = info.dirX;
-                    preBullet.dirY = info.dirY;
-                    preBullet.dirZ = info.dirZ;
-                    break;
-                }
-                case SheepBulletMoveType.RadiusAngle: {
-                    if (viewPet == null || info == null) {
-                        throw new InvalidOperationException("RadiusAngle 子弹需要 viewPet 和 info");
-                    }
-
-                    preBullet.x = viewPet.posX + startOffsetX;
-                    preBullet.y = viewPet.posY + config.startOffsetY;
-                    preBullet.z = config.startOffsetZ;
-                    preBullet.startX = preBullet.x;
-                    preBullet.startY = preBullet.y;
-                    preBullet.startZ = preBullet.z;
-                    preBullet.dirX = info.dirX;
-                    preBullet.dirY = info.dirY;
-                    preBullet.dirZ = info.dirZ;
-                    preBullet.angle = info.angle;
-                    break;
-                }
-                case SheepBulletMoveType.LineDirEndPos:
-                case SheepBulletMoveType.LinePosFrame: {
-                    if (info == null) {
-                        throw new InvalidOperationException(moveType + " 子弹需要 info");
-                    }
-
-                    preBullet.x = info.startX;
-                    preBullet.y = info.startY;
-                    preBullet.z = info.startZ;
-                    preBullet.startX = info.startX;
-                    preBullet.startY = info.startY;
-                    preBullet.startZ = info.startZ;
-                    preBullet.endX = info.endX;
-                    preBullet.endY = info.endY;
-                    preBullet.endZ = info.endZ;
-
-                    if (moveType == SheepBulletMoveType.LineDirEndPos &&
-                        (Mathf.Abs(info.dirX) > Mathf.Epsilon ||
-                         Mathf.Abs(info.dirY) > Mathf.Epsilon ||
-                         Mathf.Abs(info.dirZ) > Mathf.Epsilon)) {
-                        preBullet.dirX = info.dirX;
-                        preBullet.dirY = info.dirY;
-                        preBullet.dirZ = info.dirZ;
-                    }
-                    else {
-                        float dx = info.endX - info.startX;
-                        float dy = info.endY - info.startY;
-                        float dz = info.endZ - info.startZ;
-                        float length = Mathf.Sqrt(dx * dx + dy * dy + dz * dz);
-                        if (length > Mathf.Epsilon) {
-                            preBullet.dirX = dx / length;
-                            preBullet.dirY = dy / length;
-                            preBullet.dirZ = dz / length;
-                        }
-                    }
-
-                    break;
-                }
-                default: {
-                    if (viewPet == null) throw new InvalidOperationException("该子弹类型需要 viewPet");
-                    preBullet.x = viewPet.posX + startOffsetX;
-                    preBullet.y = viewPet.posY + config.startOffsetY;
-                    preBullet.z = config.startOffsetZ;
-                    preBullet.startX = preBullet.x;
-                    preBullet.startY = preBullet.y;
-                    preBullet.startZ = preBullet.z;
-                    preBullet.dirX = 0f;
-                    preBullet.dirY = 0f;
-                    preBullet.dirZ = 1f;
-                    break;
-                }
+            preBullet.startY = n.startOffsetY;
+            preBullet.z = 0 + n.startOffsetZ;
+            preBullet.dirX = 0;
+            preBullet.dirY = 0;
+            preBullet.dirZ = 1;
+        } else if (n.moveType == (int)SheepBulletMoveType.LineDir) {
+            preBullet.x = view_pet.posX + r;
+            preBullet.y = view_pet.posY + n.startOffsetY;
+            preBullet.z = 0 + n.startOffsetZ;
+            preBullet.dirX = view_pet.dirX;
+            preBullet.dirY = view_pet.dirY;
+        } else if (n.moveType == (int)SheepBulletMoveType.CurvePosFrame) {
+            float t = view_pet!=null ? view_pet.posX : l.startX;
+            float s = view_pet!=null ? view_pet.posY : l.startY;
+            float c = view_tar_pet!=null ? view_tar_pet.posX : view_pet.tarPosX;
+            float f = view_tar_pet!=null ? view_tar_pet.posY : view_pet.tarPosY;
+            preBullet.x = t + r;
+            preBullet.y = s + n.startOffsetY;
+            preBullet.z = 0 + n.startOffsetZ;
+            preBullet.startX = t + r;
+            preBullet.startY = s + n.startOffsetY;
+            preBullet.startZ = 0 + n.startOffsetZ;
+            preBullet.endX = c;
+            preBullet.endY = f;
+            preBullet.endZ = 0 + n.endOffsetZ;
+            preBullet.dirX = 0;
+            preBullet.dirY = 0;
+            preBullet.z = 1;
+        } else if (n.moveType == (int)SheepBulletMoveType.DirAngle) {
+            preBullet.x = view_pet.posX + r;
+            preBullet.y = view_pet.posY + n.startOffsetY;
+            preBullet.z = 0 + n.startOffsetZ;
+            preBullet.dirX = l.dirX;
+            preBullet.dirY = l.dirY;
+            preBullet.dirZ = l.dirZ;
+        } else if (n.moveType == (int)SheepBulletMoveType.RadiusAngle) {
+            preBullet.x = view_pet.posX + r;
+            preBullet.y = view_pet.posY + n.startOffsetY;
+            preBullet.z = 0 + n.startOffsetZ;
+            preBullet.startX = view_pet.posX + r;
+            preBullet.startY = view_pet.posY + n.startOffsetY;
+            preBullet.startZ = 0 + n.startOffsetZ;
+            preBullet.dirX = l.dirX;
+            preBullet.dirY = l.dirY;
+            preBullet.dirZ = l.dirZ;
+            preBullet.angle = l.angle;
+        } else if (n.moveType == (int)SheepBulletMoveType.LineDirEndPos) {
+            preBullet.x = l.startX;
+            preBullet.y = l.startY;
+            preBullet.z = l.startZ;
+            preBullet.startX = l.startX;
+            preBullet.startY = l.startY;
+            preBullet.startZ = l.startZ;
+            preBullet.endX = l.endX;
+            preBullet.endY = l.endY;
+            preBullet.endZ = l.endZ;
+            if (l.dirX!=0 || l.dirY!=0 || l.dirZ!=0) {
+                preBullet.dirX = l.dirX;
+                preBullet.dirY = l.dirY;
+                preBullet.dirZ = l.dirZ;
+            } else {
+                float t = l.endX - l.startX;
+                float i = l.endY - l.startY;
+                float s = l.endZ - l.startZ;
+                float o = (float)Math.Sqrt(t * t + i * i);
+                preBullet.dirX = t / o;
+                preBullet.dirY = i / o;
+                preBullet.dirZ = s / o;
             }
-
-            preBullet.atkVue = viewPet != null
-                ? viewPet.conf.atk
-                : (info?.atk ?? 0f);
-            preBullet.frame = 0;
-            preBullet.isDie = false;
+        } else if (n.moveType == (int)SheepBulletMoveType.LinePosFrame) {
+            preBullet.x = l.startX;
+            preBullet.y = l.startY;
+            preBullet.z = l.startZ;
+            preBullet.startX = l.startX;
+            preBullet.startY = l.startY;
+            preBullet.startZ = l.startZ;
+            preBullet.endX = l.endX;
+            preBullet.endY = l.endY;
+            preBullet.endZ = l.endZ;
+            float t = l.endX - l.startX;
+            float i = l.endY - l.startY;
+            float s = l.endZ - l.startZ;
+            float o = (float)Math.Sqrt(t * t + i * i);
+            preBullet.dirX = t / o;
+            preBullet.dirY = i / o;
+            preBullet.dirZ = s / o;
+        } else {
+            preBullet.x = view_pet.posX + r;
+            preBullet.y = view_pet.posY + n.startOffsetY;
+            preBullet.z = 0 + n.startOffsetZ;
+            preBullet.dirX = 0;
+            preBullet.dirY = 0;
+            preBullet.dirZ = 1;
+        }
+        preBullet.atkVue = view_pet!=null ? view_pet.conf.atk : l.atk;
+        preBullet.frame = 0;
         }
 
         public async Task game_run(SheepCtl sheepCtl, CancellationToken cancellationToken = default) {
