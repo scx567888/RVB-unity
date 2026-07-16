@@ -16,7 +16,7 @@ namespace rvb.scripts {
     /// 因而可以接入你自己的 SheepCtl/渲染实现。
     /// </summary>
     public class SheepMgr {
-        public static SheepMgr sheepMgr = new SheepMgr(false);
+        public static SheepMgr sheepMgr = new SheepMgr();
         public static SheepMgr inc;
 
         // 是否自动出兵
@@ -86,11 +86,8 @@ namespace rvb.scripts {
         public bool[] isChangeAckFlags=null;
 
         public int MaxCount=SheepConfig.line_w * SheepConfig.line_w;
-        
-        public IndexLen[][] attackViews=new IndexLen[][] {
-            new [MaxCount],
-            new [MaxCount],
-        };
+
+        public IndexLen[][] attackViews;
         
         public int[][] attackView1s=new int[][] {
             new int[SheepConfig.MaxPetCount],
@@ -149,83 +146,148 @@ namespace rvb.scripts {
         
         public int plotRatioIndex;
 
-        public SheepMgr() : this(true) {
+        private SheepMgr() {
+            
+        // 是否自动出兵
+        this.isAutoCall = true;
+
+        // 自动出兵计时器
+        this.autoTime = 0;
+
+        // 游戏模式 (外部会设置)
+        this.gameMode = 0;
+
+        // 时间模式 (外部会设置)
+        this.timeMode = 2;
+
+        // boss 血量 (外部会设置)
+        this.loongHp = 10000;
+
+        // 红蓝 boss
+        this.boss =new Boss[] {null, null};
+
+        // 地块比例
+        this.plotRatio = 0.5f;
+
+        // 核心状态机
+        this.state = SheepRoomState.Ready;
+
+        // 尝试角色 (todo 但是是哪一种? 当前在场上的? )
+        this.pets = new []{new HashSet<PetView>(),new HashSet<PetView>()};
+
+        this.gameIndex = 0;
+        this.gameStartTimerForBuff = 0;
+        this.cameraEulerAngles = new Vector3();
+        this.endTime = 0;
+        this.preBuffs = new []{new List<int>(),new List<int>()};
+        this.buffs = new []{new List<Buff>(),new List<Buff>()};
+        this.countNewBuffs =new [] {0, 0};
+        this.countBuffs =new [] {0, 0};
+        this.countShowBuffs = new []{0, 0};
+
+        // 反击时刻标识符 (防止多次触发反击时刻)
+        this.flagLongBuffs = new []{false, false};
+
+        this.petStartCounts = new []{new  Dictionary<int, int>(),new  Dictionary<int, int>()};
+        this.god_view_pets = new List<PetView>();
+        this.perfStat = new PerfStat() {
+            redNums = new []{0, 0, 0, 0, 0, 0, 0, 0},
+            blueNums=new []{0, 0, 0, 0, 0, 0, 0, 0}
+        };
+
+        this.view_pets = new PetView[]{};
+        this.view_bullets = new BulletView[]{};
+        this.pre_view_bullets = new BulletView[]{};
+        this.updateTime = 0;
+        this.petsAdd = new List<PetView>();
+        this.petsDel = new Stack<int>();
+        this.petCount = 0;
+        this.bulletsDel = new Stack<int>();
+        this.bulletCount = 0;
+        this.bulletId = 0;
+
+        this.logic_counts = new []{1, 1};
+
+        this.bullte_creates = new List<BullteCreate>();
+
+        this.pre_blocks = new Dictionary<int, Dictionary<int, Dictionary<int, List<int>>>>();
+        this.isChangeCollsionFlags = null;
+        this.isChangeAckFlags = null;
+
+        this.MaxCount = SheepConfig.line_w * SheepConfig.line_w;
+
+        this.attackViews = new IndexLen[][] {
+            new IndexLen[MaxCount],
+            new IndexLen[MaxCount],
+        };
+
+        this.attackView1s = new int[][] {
+            new int[SheepConfig.MaxPetCount],
+            new int[SheepConfig.MaxPetCount]
+        };
+
+        this.collisionViews = new IndexLen[2][][];
+        for (var e = 0; e < SheepConfig.MaxGroupCount; e++) {
+            this.collisionViews[(int)SheepCamp.Red];
+            this.collisionViews[(int)SheepCamp.Red].push(new Array( this.MaxCount));
+            this.collisionViews[(int)SheepCamp.Blue].push(new Array(this.MaxCount));
         }
 
-        private SheepMgr(bool registerSingleton) {
-            if (registerSingleton || sheepMgr == null) {
-                sheepMgr = this;
-            }
+        this.collisionView1s = [[], []];
+        for (let e = 0; e < SheepConfig.MaxGroupCount; e++) {
+            this.collisionView1s[SheepCamp.Red].push(new Array(SheepConfig.MaxPetCount));
+            this.collisionView1s[SheepCamp.Blue].push(new Array(SheepConfig.MaxPetCount));
+        }
 
-            pets = new[] {
-                new HashSet<PetView>(),
-                new HashSet<PetView>()
-            };
+        /**
+         * 红方召唤池
+         * key 是 类型 id
+         * @type {Map<Number,SheepCallInfo>}
+         */
+        this.redCallInfos = new Dictionary<int, SheepCallInfo>();
 
-            preBuffs = new[] {
-                new List<int>(),
-                new List<int>()
-            };
-            buffs = new[] {
-                new List<Buff>(),
-                new List<Buff>()
-            };
-            countNewBuffs = new int[2];
-            countBuffs = new int[2];
-            countShowBuffs = new int[2];
-            flagLongBuffs = new bool[2];
+        /**
+         * 蓝方召唤池
+         * key 是 类型 id
+         * @type {Map<Number,SheepCallInfo>}
+         */
+        this.blueCallInfos = new Dictionary<int, SheepCallInfo>();
 
-            petStartCounts = new[] {
-                new Dictionary<int, int>(),
-                new Dictionary<int, int>()
-            };
-            god_view_pets = new List<PetView>();
-            perfStat = new PerfStat {
-                redNums = new int[16],
-                blueNums = new int[16]
-            };
+        /**
+         * 是否自动出兵
+         * @type {boolean}
+         */
 
-            view_pets = new PetView[SheepConfig.MaxPetCount];
-            view_bullets = new BulletView[SheepConfig.MaxBulletCount];
-            pre_view_bullets = new BulletView[SheepConfig.MaxBulletCount];
 
-            petsAdd = new List<PetView>();
-            petsDel = new Stack<int>();
-            bulletsDel = new Stack<int>();
-            logic_counts = new[] { 1, 1 };
-            bullte_creates = new List<BullteCreate>();
-            pre_blocks = new Dictionary<int, Dictionary<int, Dictionary<int, List<int>>>>();
+        // ************************ 以下待整理 **************************
 
-            MaxCount = SheepConfig.line_w * SheepConfig.line_h;
-            attackViews = new[] {
-                new IndexLen[MaxCount],
-                new IndexLen[MaxCount]
-            };
-            attackView1s = new[] {
-                new int[SheepConfig.MaxPetCount],
-                new int[SheepConfig.MaxPetCount]
-            };
+        /**
+         * @type ComSheepImages
+         */
+        this.comImages=null;
 
-            collisionViews = new IndexLen[2][][];
-            collisionView1s = new int[2][][];
-            for (int camp = 0; camp < 2; camp++) {
-                collisionViews[camp] = new IndexLen[SheepConfig.MaxGroupCount][];
-                collisionView1s[camp] = new int[SheepConfig.MaxGroupCount][];
-                for (int group = 0; group < SheepConfig.MaxGroupCount; group++) {
-                    collisionViews[camp][group] = new IndexLen[MaxCount];
-                    collisionView1s[camp][group] = new int[SheepConfig.MaxPetCount];
-                }
-            }
+        this.cur_rob_role_index=0;
+        this.cur_rob_bullet_index=0;
+        this.cur_rob_role_mesh_index=0;
+        this.cur_rob_bullet_mesh_index=0;
+        this.cur_rob_star_mesh_index=0;
+        this.roleMaxIndex=0;
+        this.bulletMaxIndex=0;
+        this.preBulletIndex=0;
+        this.curIndexImages=null;
+        this.redBuffCount=0;
+        this.blueBuffCount=0;
 
-            redCallInfos = new Dictionary<int, SheepCallInfo>();
-            blueCallInfos = new Dictionary<int, SheepCallInfo>();
-            bossHp = new[] { (float)loongHp, (float)loongHp };
-            bossBackStateTime = new long[2];
+        // 角色 id 分配器
+        this.petId = 0;
 
-            Util.system = this;
-            UtilFind.system = this;
-            UtilAck.system = this;
-            inc = this;
+
+        // 绑定 system
+        Util.system = this;
+        UtilFind.system = this;
+        UtilAck.system = this;
+
+
         }
 
         private static long NowMs() => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
