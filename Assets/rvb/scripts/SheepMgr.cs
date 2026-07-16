@@ -1073,32 +1073,42 @@ namespace rvb.scripts {
         }
 
         public int update_role(int start, int end) {
-            int safeEnd = Math.Min(end, SheepConfig.MaxPetCount);
-            for (int index = start; index < safeEnd; index++) {
-                PetView viewPet = getPetView(index);
-                if (viewPet == null || !viewPet.isActive) continue;
-
-                bool wasDead = viewPet.isDie;
-                if (viewPet.roleId == 0) {
-                    bool logicTick = update_frame(viewPet);
-                    if (!wasDead && logicTick) update_boss_state(viewPet);
-                    update_role_anim(viewPet);
+            for (var i = start; i < end; i++) {
+                var viewPet = this.getPetView(i);
+                if (!viewPet.isActive) {
+                    viewPet = null;
                     continue;
                 }
 
-                int camp = CampIndex(viewPet.camp);
-                int loops = Math.Max(1, logic_counts[camp]);
-                for (int loop = 0; loop < loops; loop++) {
-                    bool logicTick = update_frame(viewPet);
-                    if (!wasDead) update_role_state(viewPet, logicTick);
-                    update_role_anim(viewPet);
+                var t = viewPet.isDie;
+                if (0 == viewPet.roleId) {
+                    var i1 = this.update_frame(viewPet);
+                    if (!t && i1) {
+                        this.update_boss_state(viewPet);
+                    }
+
+                    this.update_role_anim(viewPet);
+                }
+                else {
+                    var i1 = (int)viewPet.camp;
+                    var s = this.logic_counts[i1];
+                    for (var i2 = 0; i2 < s; i2++) {
+                        var i3 = this.update_frame(viewPet);
+                        if (!t) {
+                            this.update_role_state(viewPet, i3);
+                        }
+
+                        this.update_role_anim(viewPet);
+                    }
+
+                    var o = viewPet;
+                    this.comImages.addRole(o);
                 }
 
-                OnRoleRender?.Invoke(viewPet);
-                if (comImages != null) IgnoreExternal(() => comImages.addRole(viewPet));
+                viewPet = null;
             }
 
-            return safeEnd - start;
+            return end - start;
         }
 
         public int update_bullet(int start, int end) {
