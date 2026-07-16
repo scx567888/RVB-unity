@@ -19,77 +19,93 @@ namespace rvb.scripts {
         public static SheepMgr sheepMgr = new SheepMgr(false);
         public static SheepMgr inc;
 
+        // 是否自动出兵
         public bool isAutoCall = true;
+        
+        // 自动出兵计时器
         public float autoTime = 0f;
+        
+        // 游戏模式 (外部会设置)
         public int gameMode = 0;
+        
+        // 时间模式 (外部会设置)
         public int timeMode = 2;
+        
+        // boss 血量 (外部会设置)
         public int loongHp = 10000;
 
-        /// <summary>可选的外部 Boss 显示/控制组件；核心逻辑不依赖它。</summary>
-        public Boss[] boss = new Boss[2];
+        // 红蓝 boss
+        public Boss[] boss = {null,null};
 
+        // 地块比例
         public float plotRatio = 0.5f;
-        public int plotRatioIndex;
+        
+        // 核心状态机
         public SheepRoomState state = SheepRoomState.Ready;
 
-        /// <summary>普通单位源对象。Boss 固定占用 view_pets 的 0、1 下标，不放入此集合。</summary>
-        public HashSet<PetView>[] pets;
+        // 尝试角色 (todo 但是是哪一种? 当前在场上的? )
+        public HashSet<PetView>[] pets=new []{new HashSet<PetView>(),new HashSet<PetView>()};
 
-        public int gameIndex;
-        public float gameStartTimerForBuff;
+        public int gameIndex=0;
+        public float gameStartTimerForBuff=0;
         public Vector3 cameraEulerAngles = Vector3.zero;
-        public long endTime;
+        public long endTime=0;
+        public List<int>[] preBuffs=new []{new List<int>(),new List<int>()};
+        public List<Buff>[] buffs=new []{new List<Buff>(),new List<Buff>()};
+        public int[] countNewBuffs=new []{0,0};
+        public int[] countBuffs=new []{0,0};
+        public int[] countShowBuffs=new []{0,0};
+        
+        // 反击时刻标识符 (防止多次触发反击时刻)
+        public bool[] flagLongBuffs=new []{false,false};
 
-        public List<int>[] preBuffs;
-        public List<Buff>[] buffs;
-        public int[] countNewBuffs;
-        public int[] countBuffs;
-        public int[] countShowBuffs;
-        public bool[] flagLongBuffs;
+        public Dictionary<int, int>[] petStartCounts={new  Dictionary<int, int>(),new  Dictionary<int, int>()};
+        public List<PetView> god_view_pets=new List<PetView>();
+        public PerfStat perfStat=new PerfStat() {
+            redNums = new []{0, 0, 0, 0, 0, 0, 0, 0},
+            blueNums=new []{0, 0, 0, 0, 0, 0, 0, 0}
+        };
 
-        public Dictionary<int, int>[] petStartCounts;
-        public List<PetView> god_view_pets;
-        public PerfStat perfStat;
+        public PetView[] view_pets=new PetView[]{};
+        public BulletView[] view_bullets=new BulletView[]{};
+        public BulletView[] pre_view_bullets=new BulletView[]{};
+        public long updateTime=0;
+        public List<PetView> petsAdd=new List<PetView>();
+        public Stack<int> petsDel=new Stack<int>();
+        public int petCount=0;
+        public Stack<int> bulletsDel=new Stack<int>();
+        public int bulletCount=0;
+        public int bulletId=0;
 
-        public PetView[] view_pets;
-        public BulletView[] view_bullets;
-        public BulletView[] pre_view_bullets;
+        public int[] logic_counts={1,1};
+        
+        public List<BullteCreate> bullte_creates=new List<BullteCreate>();
+        
+        public Dictionary<int, Dictionary<int, Dictionary<int, List<int>>>> pre_blocks=new Dictionary<int, Dictionary<int, Dictionary<int, List<int>>>>();
+        public bool[][] isChangeCollsionFlags=null;
+        public bool[] isChangeAckFlags=null;
 
-        public long updateTime;
+        public int MaxCount=SheepConfig.line_w * SheepConfig.line_w;
+        
+        public IndexLen[][] attackViews=new IndexLen[][] {
+            new [MaxCount],
+            new [MaxCount],
+        };
+        
+        public int[][] attackView1s=new int[][] {
+            new int[SheepConfig.MaxPetCount],
+            new int[SheepConfig.MaxPetCount]
+        };
+        
+        public IndexLen[][][] collisionViews=new IndexLen[][][]{};
+        
+        public int[][][] collisionView1s=new int[][][]{};
 
-        /// <summary>
-        /// 待加入对象需要提供 init(int, PetView)。普通单位 PetView 已满足；
-        /// 自定义 Boss/组件也可以通过 dynamic 接入。
-        /// </summary>
-        public List<PetView> petsAdd;
-
-        public Stack<int> petsDel;
-        public int petCount;
-
-        public Stack<int> bulletsDel;
-        public int bulletCount;
-        public int bulletId;
-
-        public int[] logic_counts;
-        public List<BullteCreate> bullte_creates;
-
-        /// <summary>blockIndex -> camp -> collideId -> petIndex 列表。</summary>
-        public Dictionary<int, Dictionary<int, Dictionary<int, List<int>>>> pre_blocks;
-
-        public bool[][] isChangeCollsionFlags;
-        public bool[] isChangeAckFlags;
-
-        public int MaxCount;
-        public IndexLen[][] attackViews;
-        public int[][] attackView1s;
-        public IndexLen[][][] collisionViews;
-        public int[][][] collisionView1s;
-
-        public Dictionary<int, SheepCallInfo> redCallInfos;
-        public Dictionary<int, SheepCallInfo> blueCallInfos;
-
-        /// <summary>可选原渲染桥接对象（ComSheepImages 或你自己的实现）。</summary>
-        public ComImages comImages;
+        public Dictionary<int, SheepCallInfo> redCallInfos=new Dictionary<int, SheepCallInfo>();
+        
+        public Dictionary<int, SheepCallInfo> blueCallInfos=new Dictionary<int, SheepCallInfo>();
+        
+        public ComImages comImages=null;
 
         public int cur_rob_role_index;
         public int cur_rob_bullet_index;
@@ -102,7 +118,10 @@ namespace rvb.scripts {
         public CurIndexImages curIndexImages;
         public int redBuffCount;
         public int blueBuffCount;
-        public int petId;
+        
+        public int petId=0;
+        
+        //********************************** 以下字段 待处理 **********************************************
 
         /// <summary>逻辑侧 Boss 当前已结算生命。</summary>
         public float[] bossHp;
@@ -126,6 +145,9 @@ namespace rvb.scripts {
         public Action<int> OnCameraShake;
         public Func<PetView, int> AnimationFrameCountResolver;
         public Func<SheepCamp, bool> BossShieldConsumer;
+        
+        
+        public int plotRatioIndex;
 
         public SheepMgr() : this(true) {
         }
