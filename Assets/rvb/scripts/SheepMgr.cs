@@ -2277,6 +2277,7 @@ namespace rvb.scripts {
 // todo
         public void update_role_anim(PetView pet) {
             pet.animFrame++;
+            OnRoleRender(pet);
         }
 // todo
         public void produce_pets(int typeId, int count, SheepCamp camp) {
