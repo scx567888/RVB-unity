@@ -1125,19 +1125,21 @@ namespace rvb.scripts {
                 {
                     var e = t.conf.atkFrames;
                     if (e != null) {
-                        for (var i = 0; i < e.Length; i++) {
-                            var n = e[i];
-                            if (-1 == n || n == l) {
+                        for (var i1 = 0; i1 < e.Length; i1++) {
+                            var n1 = e[i1];
+                            if (-1 == n1 || n1 == l) {
                                 if (0 == t.tarRoleIndex || 1 == t.tarRoleIndex) {
-                                    var o = this.getPetView(t.tarRoleIndex);
-                                    if (UtilAck.isCanAckByBullet(t, o, i)) {
-                                        UtilAck.hurtByBullet(t, o, t.atkVue);
+                                    var o1 = this.getPetView(t.tarRoleIndex);
+                                    if (UtilAck.isCanAckByBullet(t, o1, i1)) {
+                                        UtilAck.hurtByBullet(t, o1, t.atkVue);
                                     }
                                 }
                                 else
                                     UtilFind.forfeachBlocksByAckView(t.camp, s, o, t.conf.findR,
                                         (e => {
-                                            UtilAck.isCanAckByBullet(t, e, i) && UtilAck.hurtByBullet(t, e, t.atkVue)
+                                            if (UtilAck.isCanAckByBullet(t, e, i1)) {
+                                                UtilAck.hurtByBullet(t, e, t.atkVue);
+                                            }
                                         }));
 
                                 break;
@@ -1211,6 +1213,7 @@ namespace rvb.scripts {
                             t.x = (float)(t.x + t.dirX * n.speed * .033);
                             t.y = (float)(t.y + t.dirY * n.speed * .033);
                             t.z = (float)(t.z + t.dirZ * n.speed * .033);
+                            break;
                         }
                     }
 
