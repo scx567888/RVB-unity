@@ -1087,151 +1087,123 @@ namespace rvb.scripts {
         }
 
         public int update_bullet(int start, int end) {
-            int safeEnd = Math.Min(end, SheepConfig.MaxBulletCount);
-            for (int index = start; index < safeEnd; index++) {
-                BulletView bullet = getBulletView(index);
-                if (bullet == null || bullet.isDie || bullet.conf == null) continue;
-
-                if (bullet.id != 0 && bullet.conf.animId != 0) {
-                    OnBulletRender?.Invoke(bullet);
-                    if (comImages != null) IgnoreExternal(() => comImages.addBullet(bullet));
-                }
-
-                (int xn, int yn) block = Util.getXnYn(bullet.x, bullet.y);
-                int frame = bullet.frame;
-                SheepBullet config = bullet.conf;
-
-                int[] attackFrames = config.atkFrames;
-                if (attackFrames != null) {
-                    for (int attackIndex = 0; attackIndex < attackFrames.Length; attackIndex++) {
-                        int attackFrame = attackFrames[attackIndex];
-                        if (attackFrame != -1 && attackFrame != frame) continue;
-
-                        if (bullet.tarRoleIndex == 0 || bullet.tarRoleIndex == 1) {
-                            PetView target = getPetView(bullet.tarRoleIndex);
-                            if (target != null && UtilAck.isCanAckByBullet(bullet, target, attackIndex)) {
-                                UtilAck.hurtByBullet(bullet, target, bullet.atkVue);
-                            }
-                        }
-                        else {
-                            UtilFind.forfeachBlocksByAckView(
-                                bullet.camp,
-                                block.xn,
-                                block.yn,
-                                config.findR,
-                                target => {
-                                    if (UtilAck.isCanAckByBullet(bullet, target, attackIndex)) {
-                                        UtilAck.hurtByBullet(bullet, target, bullet.atkVue);
-                                    }
+             for (var i = start; i < end; i++) {
+            if (i >= SheepConfig.MaxBulletCount) {
+                return i - start;
+            }
+            var t = this.getBulletView(i);
+            if (t.isDie) {
+                continue;
+            }
+            if (t.id!=0 && t.conf.animId!=0) {
+                var e = t;
+                this.comImages.addBullet(e);
+            }
+            var xnyn = Util.getXnYn(t.x, t.y);
+            var s = xnyn.xn;
+            var o=xnyn.yn;
+            var l = t.frame;
+            var n = t.conf;
+            {
+                var e = t.conf.atkFrames;
+                if (e!=null) {
+                    for (var i = 0; i < e.Length; i++) {
+                        var n = e[i];
+                        if (-1 == n || n == l) {
+                            if (0 == t.tarRoleIndex || 1 == t.tarRoleIndex) {
+                                var o = this.getPetView(t.tarRoleIndex);
+                                if (UtilAck.isCanAckByBullet(t, o, i)) {
+                                    UtilAck.hurtByBullet(t, o, t.atkVue);
                                 }
-                            );
-                        }
+                            } else UtilFind.forfeachBlocksByAckView(t.camp, s, o, t.conf.findR, (e => {
+                                UtilAck.isCanAckByBullet(t, e, i) && UtilAck.hurtByBullet(t, e, t.atkVue)
+                            }));
 
-                        break;
+                            break;
+                        }
                     }
                 }
 
-                switch ((SheepBulletMoveType)config.moveType) {
-                    case SheepBulletMoveType.Fixed:
+                switch (t.conf.moveType) {
+                    case (int)SheepBulletMoveType.Fixed:
                         break;
-
-                    case SheepBulletMoveType.LineDir:
-                        bullet.x += bullet.dirX * config.speed * 0.033f;
-                        bullet.y += bullet.dirY * config.speed * 0.033f;
+                    case (int)SheepBulletMoveType.LineDir:
+                        t.x = (float)(t.x + t.dirX * n.speed * .033);
+                        t.y = (float)(t.y + t.dirY * n.speed * .033);
                         break;
-
-                    case SheepBulletMoveType.LinePosFrame: {
-                        float denominator = Math.Max(1, config.moveTimeFrame);
-                        float progress = frame / denominator;
-                        bullet.x = Mathf.LerpUnclamped(bullet.startX, bullet.endX, progress);
-                        bullet.y = Mathf.LerpUnclamped(bullet.startY, bullet.endY, progress);
-                        bullet.z = Mathf.LerpUnclamped(bullet.startZ, bullet.endZ, progress);
+                    case (int)SheepBulletMoveType.LinePosFrame:
+                        t.x = t.startX + (t.endX - t.startX) * l / n.moveTimeFrame;
+                        t.y = t.startY + (t.endY - t.startY) * l / n.moveTimeFrame;
+                        t.z = t.startZ + (t.endZ - t.startZ) * l / n.moveTimeFrame;
                         break;
+                    case (int)SheepBulletMoveType.LineTarFrame:
+                        break;
+                    case (int)SheepBulletMoveType.CurvePosFrame:
+                        var e = (t.startX + t.endX) / 2;
+                        var i = (t.startY + t.endY) / 2;
+                        var s = n.curveHigh;
+                        var o = t.startX + (e - t.startX) * l / n.moveTimeFrame;
+                        var r = e + (t.endX - e) * l / n.moveTimeFrame;
+                        var a = t.startY + (i - t.startY) * l / n.moveTimeFrame;
+                        var c = i + (t.endY - i) * l / n.moveTimeFrame;
+                        var f = t.startZ + (s - t.startZ) * l / n.moveTimeFrame;
+                        var    h = s + (t.endZ - s) * l / n.moveTimeFrame;
+                        t.x = o + (r - o) * l / n.moveTimeFrame;
+                        t.y = a + (c - a) * l / n.moveTimeFrame;
+                        t.z = f + (h - f) * l / n.moveTimeFrame;
+                        var p = t.endX - t.startX > 0 ? 1 : -1;
+                        var u = .2 * p;
+                        var d = .8;
+                        var g = p;
+                        var S = 0;
+                        var m = -.2 * p;
+                        var y = -.8;
+                        var k = u + (g - u) * l / n.endFrame;
+                        var B = d + (S - d) * l / n.endFrame;
+                        var w = g + (m - g) * l / n.endFrame;
+                        var R = S + (y - S) * l / n.endFrame;
+                        t.dirX = (float)(k + (w - k) * l / n.endFrame);
+                        t.dirY = 0;
+                        t.dirZ = (float)(B + (R - B) * l / n.endFrame);
+                        break;
+                    case (int)SheepBulletMoveType.CurveTarFrame:
+                        break;
+                    case (int)SheepBulletMoveType.LineDirEndPos:
+                        t.x = (float)(t.x + t.dirX * n.speed * .033);
+                        t.y = (float)(t.y + t.dirY * n.speed * .033);
+                        t.z = (float)(t.z + t.dirZ * n.speed * .033);
+                        break;
+                    case (int)SheepBulletMoveType.RadiusAngle:
+                        t.angle += n.speed;
+                        var x = t.roleUid;
+                        var _ = this.getPetView(t.roleIndex);
+                        x == _.id ? (t.x = (float)(_.animX + n.radius * Math.Cos(t.angle)), t.y = _.animY + n.radius * Math.sin(t.angle)) : t.isDie = true;
+                        break;
+                    case (int)SheepBulletMoveType.DirAngle: {
+                        t.x = (float)(t.x + t.dirX * n.speed * .033);
+                        t.y = (float)(t.y + t.dirY * n.speed * .033);
+                        t.z = (float)(t.z + t.dirZ * n.speed * .033);
                     }
-
-                    case SheepBulletMoveType.LineTarFrame:
-                        break;
-
-                    case SheepBulletMoveType.CurvePosFrame: {
-                        float denominator = Math.Max(1, config.moveTimeFrame);
-                        float progress = frame / denominator;
-                        float middleX = (bullet.startX + bullet.endX) * 0.5f;
-                        float middleY = (bullet.startY + bullet.endY) * 0.5f;
-                        float high = config.curveHigh;
-
-                        float leftX = Mathf.LerpUnclamped(bullet.startX, middleX, progress);
-                        float rightX = Mathf.LerpUnclamped(middleX, bullet.endX, progress);
-                        float leftY = Mathf.LerpUnclamped(bullet.startY, middleY, progress);
-                        float rightY = Mathf.LerpUnclamped(middleY, bullet.endY, progress);
-                        float leftZ = Mathf.LerpUnclamped(bullet.startZ, high, progress);
-                        float rightZ = Mathf.LerpUnclamped(high, bullet.endZ, progress);
-
-                        bullet.x = Mathf.LerpUnclamped(leftX, rightX, progress);
-                        bullet.y = Mathf.LerpUnclamped(leftY, rightY, progress);
-                        bullet.z = Mathf.LerpUnclamped(leftZ, rightZ, progress);
-
-                        float directionSign = bullet.endX - bullet.startX > 0f ? 1f : -1f;
-                        float endProgress = frame / (float)Math.Max(1, config.endFrame);
-                        float firstX = Mathf.LerpUnclamped(0.2f * directionSign, directionSign, endProgress);
-                        float firstZ = Mathf.LerpUnclamped(0.8f, 0f, endProgress);
-                        float secondX = Mathf.LerpUnclamped(directionSign, -0.2f * directionSign, endProgress);
-                        float secondZ = Mathf.LerpUnclamped(0f, -0.8f, endProgress);
-                        bullet.dirX = Mathf.LerpUnclamped(firstX, secondX, endProgress);
-                        bullet.dirY = 0f;
-                        bullet.dirZ = Mathf.LerpUnclamped(firstZ, secondZ, endProgress);
-                        break;
-                    }
-
-                    case SheepBulletMoveType.CurveTarFrame:
-                        break;
-
-                    case SheepBulletMoveType.LineDirEndPos:
-                        bullet.x += bullet.dirX * config.speed * 0.033f;
-                        bullet.y += bullet.dirY * config.speed * 0.033f;
-                        bullet.z += bullet.dirZ * config.speed * 0.033f;
-                        break;
-
-                    case SheepBulletMoveType.RadiusAngle: {
-                        bullet.angle += config.speed;
-                        PetView owner = getPetView(bullet.roleIndex);
-                        if (owner != null && bullet.roleUid == owner.id) {
-                            bullet.x = owner.animX + config.radius * Mathf.Cos(bullet.angle);
-                            bullet.y = owner.animY + config.radius * Mathf.Sin(bullet.angle);
-                        }
-                        else {
-                            bullet.isDie = true;
-                        }
-
-                        break;
-                    }
-
-                    case SheepBulletMoveType.DirAngle:
-                        bullet.x += bullet.dirX * config.speed * 0.033f;
-                        bullet.y += bullet.dirY * config.speed * 0.033f;
-                        bullet.z += bullet.dirZ * config.speed * 0.033f;
-                        break;
                 }
 
-                bullet.frame = frame + 1;
-
-                if (config.createBulletID != 0 && config.createBulletFrame == frame) {
-                    PetView owner = getPetView(bullet.roleIndex);
-                    PetView target = getPetView(bullet.tarRoleIndex);
-                    bullte_creates.Add(new BullteCreate {
-                        view_pet = owner,
-                        bulletId = config.createBulletID,
-                        view_tar_pet = target,
-                        info = new Info {
-                            startX = bullet.x,
-                            startY = bullet.y,
-                            startZ = 100f,
-                            hasStart = true
-                        }
-                    });
-                }
+                t.frame = l + 1;
+            }
+            var r = n.createBulletID;
+            if (r!=0 && n.createBulletFrame == l) {
+                var e = this.getPetView(t.roleIndex);
+                var i = this.getPetView(t.tarRoleIndex);
+                this.bullte_creates.Add(new BullteCreate() {
+                    view_pet = e,
+                    bulletId = r,
+                    view_tar_pet = i,
+                    info = new Info() { startX = t.x, startY = t.y, startZ = 100 }
+                });
             }
 
-            return safeEnd - start;
+            t = null;
+             }
+
+        return end - start;
         }
 
         public bool update_frame(PetView viewPet) {
