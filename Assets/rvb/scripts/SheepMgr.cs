@@ -1373,43 +1373,42 @@ namespace rvb.scripts {
                 }
             }
         }
-// todo
+
         public void update_role_state_in(PetView petSkin) {
-            if (petSkin.conf.skillIn == 0) return;
-
-            SheepSkill skill = SheepSkill.getById(petSkin.conf.skillIn);
-            if (skill.skillType != SheepSkillType.Boom) return;
-
-            SheepSkillSubBoom boom = SheepSkillSubBoom.getById(skill.id);
-            if (petSkin.animFrame != 1) return;
-
-            float fallbackX = petSkin.camp == SheepCamp.Red ? -1200f : 1200f;
-            (int xn, int yn) block = Util.getXnYn(fallbackX, 0f);
-            PetView target = null;
-            UtilFind.findNearBlocksByAckView(petSkin, block.xn, block.yn, 100, candidate => {
-                target = candidate;
-                return true;
-            });
-
-            if (target != null) {
-                petSkin.posBefX = petSkin.posX;
-                petSkin.posBefY = petSkin.posY;
-                petSkin.posX = target.posX;
-                petSkin.posY = target.posY;
-                petSkin.animX = target.posX;
-                petSkin.animY = target.posY;
+            if (petSkin.conf.skillIn!=0) {
+                var t = SheepSkill.getById(petSkin.conf.skillIn);
+                if (t.skillType == SheepSkillType.Boom) {
+                    var i = SheepSkillSubBoom.getById(t.id);
+                    if (1 == petSkin.animFrame) {
+                        var t1 = petSkin.camp == SheepCamp.Red ? -1200 : 1200;
+                        var xnyn = Util.getXnYn(t1, 0);
+                        var o= xnyn.xn;
+                        var l = xnyn.yn;
+                        PetView n = null;
+                        UtilFind.findNearBlocksByAckView(petSkin, o, l, 100, e => {
+                            n = e;
+                            return true;
+                        });
+                        if (n!=null) {
+                            petSkin.posBefX = petSkin.posX;
+                            petSkin.posBefY = petSkin.posY;
+                            petSkin.posX = n.posX;
+                            petSkin.posY = n.posY;
+                            petSkin.animX = petSkin.posX;
+                            petSkin.animY = petSkin.posY;
+                        } else {
+                            petSkin.posBefX = t1;
+                            petSkin.posBefY = 0;
+                            petSkin.posX = t1;
+                            petSkin.posY = 0;
+                            petSkin.animX = t1;
+                            petSkin.animY = 0;
+                        }
+                        petSkin.readySkillId = i.id;
+                        petSkin.isLock = true;
+                    }
+                }
             }
-            else {
-                petSkin.posBefX = fallbackX;
-                petSkin.posBefY = 0f;
-                petSkin.posX = fallbackX;
-                petSkin.posY = 0f;
-                petSkin.animX = fallbackX;
-                petSkin.animY = 0f;
-            }
-
-            petSkin.readySkillId = boom.id;
-            petSkin.isLock = true;
         }
 // todo
         public void update_role_state_move(PetView petSkin, bool logicTick, float deltaSeconds) {
