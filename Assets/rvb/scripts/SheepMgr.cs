@@ -397,13 +397,15 @@ namespace rvb.scripts {
                 element.clear();
             }
         }
-// todo
+
         public PetView getPetView(int petIndex) {
-            if (petIndex < 0 || petIndex >= SheepConfig.MaxPetCount) return null;
-            PetView pet = view_pets[petIndex];
-            if (pet == null) {
+            if (petIndex < 0 || petIndex >= SheepConfig.MaxPetCount) {
+                return null;
+            }
+            var pet = this.view_pets[petIndex];
+            if (pet==null) {
                 pet = new PetView(petIndex);
-                view_pets[petIndex] = pet;
+                this.view_pets[petIndex] = pet;
             }
 
             return pet;
