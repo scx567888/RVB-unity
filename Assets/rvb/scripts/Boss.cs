@@ -1,8 +1,12 @@
 ﻿namespace rvb.scripts {
-    public class Boss {
+    public class Boss : PetView{
         public long backStateTime;
-        public double curHp;
-        public ComProgress comProgress;
+        public float curHp;
+        public ComProgress comProgress=new ComProgress();
+
+        public Boss(int t) : base(t) {
+            
+        }
 
         public bool subShield() {
             return true;
@@ -25,8 +29,10 @@
     }
 
     public class ComProgress {
+        public float _vue;
+
         public void setVue(float f) {
-            
+            _vue = f;
         }
     }
 }

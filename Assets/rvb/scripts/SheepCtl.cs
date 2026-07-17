@@ -6,6 +6,10 @@ namespace rvb.scripts {
         public ComUIAnim comUIAnim=new ();
         public CameraCtl cameraCtl=new ();
         public ComImages comImages=new ();
+        public Boss[] boss=new [] {
+            new Boss(0),
+            new Boss(0),
+        };
         public static SheepCtl instance=new SheepCtl();
     }
 

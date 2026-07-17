@@ -916,7 +916,7 @@ namespace rvb.scripts {
             int index = CampIndex(camp);
             return ReadExternal(() => (bool)boss[index].subShield(), false);
         }
-// todo
+
         public bool updateBoss(SheepMgr sheepMgr, SheepCtl sheepCtl, float dt, long c) {
 
             var isEnd = false;
