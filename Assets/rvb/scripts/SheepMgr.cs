@@ -2556,32 +2556,33 @@ namespace rvb.scripts {
             if (blocks[blockIndex] == null) blocks[blockIndex] = new IndexLen();
             return blocks[blockIndex];
         }
-// todo
+
         public void mainClearBlocks() {
-            if (isChangeAckFlags == null) isChangeAckFlags = new[] { true, true };
-            if (isChangeCollsionFlags == null) {
+            if (null == this.isChangeAckFlags) {this.isChangeAckFlags =new[] {true, true};}
+                
+            if (null == this.isChangeCollsionFlags) {
                 isChangeCollsionFlags = new bool[2][];
                 isChangeCollsionFlags[0] = new bool[SheepConfig.MaxGroupCount];
                 isChangeCollsionFlags[1] = new bool[SheepConfig.MaxGroupCount];
-                for (int group = 0; group < SheepConfig.MaxGroupCount; group++) {
-                    isChangeCollsionFlags[0][group] = true;
-                    isChangeCollsionFlags[1][group] = true;
+                for (var e = 0; e < SheepConfig.MaxGroupCount; e++) {
+                    this.isChangeCollsionFlags[(int)SheepCamp.Red][e]=true;
+                    this.isChangeCollsionFlags[(int)SheepCamp.Blue][e] = true;
                 }
             }
-
-            for (int camp = 0; camp < 2; camp++) {
-                if (isChangeAckFlags[camp]) Array.Clear(attackViews[camp], 0, attackViews[camp].Length);
-                isChangeAckFlags[camp] = false;
-                for (int group = 0; group < SheepConfig.MaxGroupCount; group++) {
-                    if (isChangeCollsionFlags[camp][group]) {
-                        Array.Clear(collisionViews[camp][group], 0, collisionViews[camp][group].Length);
-                    }
-
-                    isChangeCollsionFlags[camp][group] = false;
-                }
+            
+            if(this.isChangeAckFlags[(int)SheepCamp.Red])  {Array.Fill(this.attackViews[(int)SheepCamp.Red],null);}
+            this.isChangeAckFlags[(int)SheepCamp.Red] = false;
+            if(this.isChangeAckFlags[(int)SheepCamp.Blue]) {Array.Fill(this.attackViews[(int)SheepCamp.Blue],null);}
+            this.isChangeAckFlags[(int)SheepCamp.Blue] = false;
+            for (var e = 0; e < SheepConfig.MaxGroupCount; e++) {
+                if (this.isChangeCollsionFlags[(int)SheepCamp.Red][e]) {Array.Fill(this.collisionViews[(int)SheepCamp.Red][e],null);}
+                this.isChangeCollsionFlags[(int)SheepCamp.Red][e] = false;
+                if(this.isChangeCollsionFlags[(int)SheepCamp.Blue][e]){ Array.Fill(this.collisionViews[(int)SheepCamp.Blue][e],null);}
+                this.isChangeCollsionFlags[(int)SheepCamp.Blue][e] = false;
             }
-
-            pre_blocks.Clear();
+            
+            this.pre_blocks.Clear();
+            
         }
 
         public void mainPreAddBlock(int blockIndex, int buffIndex, SheepCamp camp, int collideId) {
