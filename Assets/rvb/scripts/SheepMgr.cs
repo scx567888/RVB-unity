@@ -369,9 +369,12 @@ namespace rvb.scripts {
             var o = Math.Floor(e.y / SheepConfig.d + SheepConfig.h / SheepConfig.d / 2);
             return (int)(t * SheepConfig.line_w + o);
         }
-// todo
-        public int getNextPetId() => ++petId;
-// todo
+
+        public int getNextPetId() {
+            return ++petId;
+        }
+
+        // todo
         public int rob_role(int count) {
             int old = cur_rob_role_index;
             cur_rob_role_index += count;
