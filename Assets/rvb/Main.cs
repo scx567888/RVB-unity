@@ -62,9 +62,9 @@ namespace rvb {
         private SheepMgr sheepMgr;
 
         // SheepMgr 的 PetView.index 是稳定的对象池槽位，适合绑定渲染单元。
-        private readonly Dictionary<int, ScxSpriteRenderUnit> roleRenderers = new Dictionary<int, ScxSpriteRenderUnit>();
-        private readonly HashSet<int> seenRoleSlots = new HashSet<int>();
-        private readonly List<int> staleRoleSlots = new List<int>();
+        private readonly Dictionary<string, ScxSpriteRenderUnit> roleRenderers = new Dictionary<string, ScxSpriteRenderUnit>();
+        private readonly HashSet<string> seenRoleSlots = new HashSet<string>();
+        private readonly List<string> staleRoleSlots = new List<string>();
 
         // BulletView 没有公开池下标，测试阶段使用唯一 bullet.id。
         private readonly Dictionary<int, Pet> bulletRenderers = new Dictionary<int, Pet>();
@@ -221,9 +221,9 @@ namespace rvb {
 
         private void SyncRoleView(PetView view) {
             int slot = view.index;
-            seenRoleSlots.Add(slot);
+            seenRoleSlots.Add(((int)view.camp)+"_"+slot);
 
-            if (!roleRenderers.TryGetValue(slot, out ScxSpriteRenderUnit renderPet)) {
+            if (!roleRenderers.TryGetValue(((int)view.camp)+"_"+slot, out ScxSpriteRenderUnit renderPet)) {
                 ScxSpriteRenderUnit unit = null;
                 if (view.camp==SheepCamp.Red) {
                     unit = scxSpriteRenderer.createUnit();
@@ -239,7 +239,7 @@ namespace rvb {
                 unit.setFrame(initialFrame);
 
                 renderPet = unit;
-                roleRenderers.Add(slot, renderPet);
+                roleRenderers.Add(((int)view.camp)+"_"+slot, renderPet);
             }
 
             float worldX = view.animX * logicToWorldScale;
@@ -318,13 +318,13 @@ namespace rvb {
         private void RecycleMissingRoleRenderers() {
             staleRoleSlots.Clear();
 
-            foreach (KeyValuePair<int, ScxSpriteRenderUnit> pair in roleRenderers) {
+            foreach (KeyValuePair<string, ScxSpriteRenderUnit> pair in roleRenderers) {
                 if (!seenRoleSlots.Contains(pair.Key)) {
                     staleRoleSlots.Add(pair.Key);
                 }
             }
 
-            foreach (int slot in staleRoleSlots) {
+            foreach (var slot in staleRoleSlots) {
                 var renderPet = roleRenderers[slot];
                 roleRenderers.Remove(slot);
                 renderPet.destroy();
