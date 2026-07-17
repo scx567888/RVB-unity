@@ -2305,199 +2305,151 @@ namespace rvb.scripts {
             });
         }
 // todo
-        public void consume(SheepCtl sheepCtl, float deltaMs) {
-            autoTime += deltaMs / 1000f;
-            if (isAutoCall && autoTime > SheepConfig.systemAutomaticTroopsIntervalTime) {
-                autoTime = 0f;
-                if (pets[0].Count + pets[1].Count < SheepConfig.systemLongerAutomaticallyDispatch) {
-                    for (int campIndex = 0; campIndex < 2; campIndex++) {
-                        if (pets[campIndex].Count < SheepConfig.systemAutomaticallyMaxTroops) {
-                            produce_pets(
-                                SheepConfig.WarmUpID,
-                                SheepConfig.systemAutomaticallyTroopsOneNumber,
-                                (SheepCamp)campIndex
-                            );
-                        }
+        public void consume(SheepCtl sheepCtl, float t) {
+           var o = this;
+
+        this.autoTime += t;
+
+        if (sheepMgr.isAutoCall && this.autoTime > SheepConfig.systemAutomaticTroopsIntervalTime) {
+            this.autoTime = 0;
+            if (sheepMgr.pets[0].Count + sheepMgr.pets[1].Count < SheepConfig.systemLongerAutomaticallyDispatch) {
+                foreach (var e in new SheepCamp[]{SheepCamp.Red, SheepCamp.Blue}) {
+                    if (sheepMgr.pets[(int)e].Count < SheepConfig.systemAutomaticallyMaxTroops) {
+                        o.produce_pets(SheepConfig.WarmUpID, SheepConfig.systemAutomaticallyTroopsOneNumber, e);
                     }
                 }
             }
-
-            ConsumeCallMap(redCallInfos, SheepCamp.Red, sheepCtl);
-            ConsumeCallMap(blueCallInfos, SheepCamp.Blue, sheepCtl);
         }
-// todo
-        private void ConsumeCallMap(
-            Dictionary<int, SheepCallInfo> callInfos,
-            SheepCamp camp,
-            SheepCtl sheepCtl
-        ) {
-            List<int> removeKeys = new List<int>();
-            List<KeyValuePair<int, SheepCallInfo>> snapshot =
-                new List<KeyValuePair<int, SheepCallInfo>>(callInfos);
 
-            foreach (KeyValuePair<int, SheepCallInfo> pair in snapshot) {
-                int roleId = pair.Key;
-                SheepCallInfo callInfo = pair.Value;
-                if (callInfo == null || callInfo.count <= 0) {
-                    removeKeys.Add(roleId);
-                    continue;
+        foreach (var t1 in new []{this.redCallInfos, this.blueCallInfos}) {
+            var n = t1 == o.redCallInfos ? SheepCamp.Red : SheepCamp.Blue;
+            
+            foreach (var ee in t1) {
+                var o1 = ee.Value;
+                var a = ee.Key;
+                
+                if (o1.count <= 0) {
+                    return;
                 }
 
-                SheepRoleTypeInfo roleConfig = SheepRoleTypeInfo.getById(roleId);
-                SheepRoleFormation formation = SheepRoleFormation.getById(roleConfig.formationId);
-                int roleTypeIndex = RoleTypeIndex(roleConfig.roleType);
-                EnsurePerfCapacity(roleTypeIndex);
-                int existingCount = camp == SheepCamp.Red
-                    ? perfStat.redNums[roleTypeIndex]
-                    : perfStat.blueNums[roleTypeIndex];
+                var c = SheepRoleTypeInfo.getById(a);
+                var formation = SheepRoleFormation.getById(c.formationId);
 
-                if (roleConfig.roleType == SheepRoleType.xiao_bing && existingCount > 14500) continue;
-                if (roleConfig.roleType == SheepRoleType.ci_ke && existingCount > 9500) continue;
+                var u = n == SheepCamp.Red ? sheepMgr.perfStat.redNums[(int)c.roleType] : sheepMgr.perfStat.blueNums[(int)c.roleType];
 
-                callInfo.frame++;
-                if (callInfo.frame <= formation.frameItemX) continue;
-                callInfo.frame = 0;
+                if (c.roleType == SheepRoleType.xiao_bing) {
+                    if (u > 14500) {
+                        return;
+                    }
+                } else if (c.roleType == SheepRoleType.ci_ke && u > 9500) {
+                    return;
+                }
+
+                o1.frame += 1;
+
+                // 限制每帧生成的单位
+                if (o1.frame <= formation.frameItemX) {
+                    return;
+                }
+
+                o1.frame = 0;
 
                 if (formation.formationType == SheepRoleFormationType.RectangleTidy) {
-                    ConsumeRectangleTidy(callInfo, roleId, camp, formation, sheepCtl);
-                }
-                else if (formation.formationType == SheepRoleFormationType.AngleTidy) {
-                    ConsumeAngleTidy(callInfo, roleId, camp, formation, sheepCtl);
-                }
-                else {
-                    // Random 编队的位置由 createPetView 计算。每个生成帧按 frameMaxCount 释放。
-                    int count = Math.Max(1, formation.frameMaxCount);
-                    for (int index = 0; index < count && callInfo.pets.Count > 0; index++) {
-                        SheepCallInfoPet source = callInfo.pets[0];
-                        source.count--;
-                        callInfo.count--;
-                        createPetView(
-                            sheepCtl,
-                            source.player ?? source.camp,
-                            roleId,
-                            Math.Max(1, callInfo.count + 1),
-                            1,
-                            true,
-                            null,
-                            source.booms != null && source.booms.Count > 0 && source.booms.Pop()
-                        );
-                        if (source.count <= 0) callInfo.pets.RemoveAt(0);
+                    var h = formation.itemNumY;
+                    var m = formation.itemY;
+                    var d = formation.itemYGapNum;
+                    var g = formation.itemYGap;
+
+                    var y = formation.startX + sheepMode.startAddX;
+                    var S = n == SheepCamp.Red ? -y : y;
+
+                    var pets = o1.pets;
+                    var I = 0;
+
+                    for (; pets.Count > 0 && I < h;) {
+
+                        var T = Math.Floor((double)(I / 2));
+                        float M = 0;
+
+                        if (h % 2 == 0) {
+                            if (I % 2 == 0) {
+                                M = (float)(m * T + m / 2 + Math.Floor(T / d + 1) * g);
+                            } else {
+                                M = (float)(-m * T - m / 2 - Math.Floor(T / d + 1) * g);
+                            }
+                        } else {
+                            if (I % 2 == 0) {
+                                M = (float)(m * Math.Floor(T) + Math.Floor(T / d) * g);
+                            } else {
+                                M = (float)(-m * Math.Floor(T + 1) - Math.Floor(T / d) * g);
+                            }
+                        }
+                        var C = pets[0];
+                        C.count -= 1;
+                        o1.count -= 1;
+                        I += 1;
+
+                        var R = new Vector3(S, M);
+                        if (C.booms!=null) {
+                            createPetView(sheepCtl, C.camp, a, h, 1, true, R, C.booms.Pop());
+                        } else {
+                            createPetView(sheepCtl, C.camp, a, h, 1, true, R);
+                        }
+
+                        if (C.count <= 0) {
+                            pets.RemoveAt(0);
+                        }
+                    }
+                    o1.count_line += 1;
+                    if (o1.count_line >= formation.itemNumX) {
+                        o1.frame -= formation.itemYGapFrame;
+                        o1.count_line = 0;
+                    }
+
+                    if(o1.count <= 0) { t1.Remove(a);}
+                } else if (formation.formationType == SheepRoleFormationType.AngleTidy) {
+
+                    var k = 2 * formation.maxAngle - formation.minAngle;
+                    var G = Math.Floor((double)(k / formation.startStepAngle));
+                    var A = Math.Floor(1 * G);
+
+                    var pets = o1.pets;
+                    var b = 0;
+
+                    for (; pets.Count > 0 && b < A;) {
+
+                        var P = pets[0];
+                        var w = P.count;
+
+                        for (var D = 0; D < w && b < A; D++) {
+                            P.count -= 1;
+                            o1.count -= 1;
+                            b += 1;
+
+                            var _ = Math.Floor(b / G);
+                            var N = formation.startR + sheepMode.startAddR + formation.startStepR * _;
+
+                            var E = (b % 2 == 0 ? 1 : -1) * (Math.Floor(b % G / 2) * formation.startStepAngle + formation.minAngle);
+
+                            var x = Math.Cos(E * Math.PI / 180) * N;
+                            float F = (float)(Math.Sin(E * Math.PI / 180) * N);
+                            var X = new Vector3();
+                            var L = sheepMode.loongX;
+                            X = n == SheepCamp.Red ? new Vector3((float)(L - x), F, 0) : new Vector3((float)(x - L), F, 0);
+                            if (P.booms!=null) {
+                                createPetView(sheepCtl, P.player, a, (int)G, 1, true, X, P.booms.Pop());
+                            } else {
+                                createPetView(sheepCtl, P.camp, a, (int)G, 1, true, X);
+                            }
+                        }
+
+                        if(P.count <= 0) { pets.RemoveAt(0);}
                     }
                 }
-
-                if (callInfo.count <= 0 || callInfo.pets.Count == 0) {
-                    removeKeys.Add(roleId);
-                }
             }
-
-            foreach (int key in removeKeys) callInfos.Remove(key);
+        
         }
-// todo
-        private void ConsumeRectangleTidy(
-            SheepCallInfo callInfo,
-            int roleId,
-            SheepCamp camp,
-            SheepRoleFormation formation,
-            SheepCtl sheepCtl
-        ) {
-            int itemNumY = Math.Max(1, formation.itemNumY);
-            float itemY = formation.itemY;
-            int gapEvery = Math.Max(1, formation.itemYGapNum);
-            float gap = formation.itemYGap;
-            float startX = formation.startX + sheepMode.startAddX;
-            float x = camp == SheepCamp.Red ? -startX : startX;
-            int lineIndex = 0;
-
-            while (callInfo.pets.Count > 0 && lineIndex < itemNumY) {
-                int halfIndex = Mathf.FloorToInt(lineIndex / 2f);
-                float y;
-                if (itemNumY % 2 == 0) {
-                    y = lineIndex % 2 == 0
-                        ? itemY * halfIndex + itemY / 2f + Mathf.FloorToInt(halfIndex / (float)gapEvery + 1f) * gap
-                        : -itemY * halfIndex - itemY / 2f - Mathf.FloorToInt(halfIndex / (float)gapEvery + 1f) * gap;
-                }
-                else {
-                    y = lineIndex % 2 == 0
-                        ? itemY * halfIndex + Mathf.FloorToInt(halfIndex / (float)gapEvery) * gap
-                        : -itemY * (halfIndex + 1) - Mathf.FloorToInt(halfIndex / (float)gapEvery) * gap;
-                }
-
-                SheepCallInfoPet source = callInfo.pets[0];
-                source.count--;
-                callInfo.count--;
-                lineIndex++;
-
-                bool isBoom = source.booms != null && source.booms.Count > 0 && source.booms.Pop();
-                createPetView(
-                    sheepCtl,
-                    source.player ?? source.camp,
-                    roleId,
-                    itemNumY,
-                    1,
-                    true,
-                    new Vector3(x, y, 0f),
-                    isBoom
-                );
-
-                if (source.count <= 0) callInfo.pets.RemoveAt(0);
-            }
-
-            callInfo.count_line++;
-            if (callInfo.count_line >= Math.Max(1, formation.itemNumX)) {
-                callInfo.frame -= formation.itemYGapFrame;
-                callInfo.count_line = 0;
-            }
-        }
-// todo
-        private void ConsumeAngleTidy(
-            SheepCallInfo callInfo,
-            int roleId,
-            SheepCamp camp,
-            SheepRoleFormation formation,
-            SheepCtl sheepCtl
-        ) {
-            int angleSpan = 2 * formation.maxAngle - formation.minAngle;
-            int groupCount = Math.Max(1, Mathf.FloorToInt(angleSpan / (float)Math.Max(1, formation.startStepAngle)));
-            int maxPerFrame = groupCount;
-            int spawned = 0;
-
-            while (callInfo.pets.Count > 0 && spawned < maxPerFrame) {
-                SheepCallInfoPet source = callInfo.pets[0];
-                int sourceCount = source.count;
-
-                for (int index = 0; index < sourceCount && spawned < maxPerFrame; index++) {
-                    source.count--;
-                    callInfo.count--;
-                    spawned++;
-
-                    int ring = Mathf.FloorToInt(spawned / (float)groupCount);
-                    float radius = formation.startR + sheepMode.startAddR + formation.startStepR * ring;
-                    float angleDegrees = (spawned % 2 == 0 ? 1f : -1f) *
-                                         (Mathf.FloorToInt((spawned % groupCount) / 2f) * formation.startStepAngle +
-                                          formation.minAngle);
-                    float angleRadians = angleDegrees * Mathf.Deg2Rad;
-                    float offsetX = Mathf.Cos(angleRadians) * radius;
-                    float offsetY = Mathf.Sin(angleRadians) * radius;
-                    float bossX = sheepMode.loongX;
-                    Vector3 position = camp == SheepCamp.Red
-                        ? new Vector3(bossX - offsetX, offsetY, 0f)
-                        : new Vector3(offsetX - bossX, offsetY, 0f);
-
-                    bool isBoom = source.booms != null && source.booms.Count > 0 && source.booms.Pop();
-                    createPetView(
-                        sheepCtl,
-                        source.player ?? source.camp,
-                        roleId,
-                        groupCount,
-                        1,
-                        true,
-                        position,
-                        isBoom
-                    );
-                }
-
-                if (source.count <= 0) callInfo.pets.RemoveAt(0);
-            }
+      
         }
 
         public Vector3 getPetStartEndPos(int petId, SheepCamp camp) {

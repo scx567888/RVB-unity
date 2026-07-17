@@ -18,6 +18,6 @@ namespace rvb.scripts {
 
         // 逆向源码中存在这两个可选字段，普通 produce_pets 不会设置。
         public Stack<bool> booms;
-        public SheepCamp? player;
+        public SheepCamp player;
     }
 }
