@@ -2274,10 +2274,10 @@ namespace rvb.scripts {
 
             Util.moveTar(petSkin, null, deltaSeconds, logicTick);
         }
-// todo
-        public void update_role_anim(PetView pet) {
-            pet.animFrame++;
-            OnRoleRender(pet);
+
+        public void update_role_anim(PetView e) {
+            e.animFrame = e.animFrame + 1;
+            OnRoleRender(e);
         }
 // todo
         public void produce_pets(int typeId, int count, SheepCamp camp) {
