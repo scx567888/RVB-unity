@@ -1116,12 +1116,12 @@ namespace rvb.scripts {
             bullet.isDie = true;
             bulletsDel.Push(index);
         }
-// todo
+
         public void clear_bullets() {
-            cur_rob_bullet_index = 0;
-            bulletMaxIndex = 0;
-            bulletCount = 0;
-            bulletsDel.Clear();
+            this.cur_rob_bullet_index = 0;
+            this.bulletMaxIndex = 0;
+            this.bulletCount = 0;
+            this.bulletsDel.Clear();
         }
 // todo
         public void game_clear() {
