@@ -2156,7 +2156,7 @@ namespace rvb.scripts {
                 }
             );
         }
-// todo
+
         public void update_role_state_spurt(PetView e, bool t, float i) {
             if (e.conf.skillSpurt!=0) {
             var s = SheepSkill.getById(e.conf.skillSpurt);
