@@ -169,7 +169,7 @@ namespace rvb.scripts {
             this.loongHp = 10000;
 
             // 红蓝 boss
-            this.boss = new Boss[] { null, null };
+            this.boss = sheepCtl.boss;
 
             // 地块比例
             this.plotRatio = 0.5f;
@@ -917,125 +917,132 @@ namespace rvb.scripts {
             return ReadExternal(() => (bool)boss[index].subShield(), false);
         }
 // todo
-        public bool updateBoss(SheepMgr manager, SheepCtl sheepCtl, float deltaMs, long now) {
-            bool ended = false;
+        public bool updateBoss(SheepMgr sheepMgr, SheepCtl sheepCtl, float dt, long c) {
 
-            for (int index = 0; index < 2; index++) {
-                PetView viewPet = getPetView(index);
-                if (viewPet == null || !viewPet.isActive) continue;
+            var isEnd = false;
+            for (var i = 0; i < sheepMgr.boss.Length; i++) {
+                var t= sheepMgr.boss[i];
+                var index = i;
+                
+                
+            var viewPet = this.getPetView(index);
+            var camp = viewPet.camp;
+            var state = viewPet.state;
 
-                SheepCamp camp = viewPet.camp;
-                SheepBossState bossState = (SheepBossState)(int)viewPet.state;
+            if ((int)state == (int)SheepBossState.Ready) {
 
-                if (bossState == SheepBossState.Ready) {
-                    float initialHp = ReadExternal(() => Convert.ToSingle(boss[index].curHp), (float)loongHp);
-                    viewPet.curHp = initialHp;
-                    SetBossProgress(index, initialHp);
-                    viewPet.state = (SheepRoleState)(int)SheepBossState.NomalRun;
-                    continue;
+                viewPet.curHp = t.curHp;
+                t.comProgress.setVue(t.curHp);
+                viewPet.state = (SheepRoleState)(int)SheepBossState.NomalRun;
+
+            } else if ((int)state == (int)SheepBossState.AwakeAnim || (int)state == (int)SheepBossState.UnAwakeAnim) {
+
+                t.comProgress.setVue(t.comProgress._vue);
+
+            } else if ((int)state == (int)SheepBossState.Dead) {
+
+            } else {
+                var curHp = viewPet.curHp;
+                if (curHp <= 0) {
+                    curHp = 0;
                 }
 
-                if (bossState == SheepBossState.AwakeAnim || bossState == SheepBossState.UnAwakeAnim) {
-                    SetBossProgress(index, bossHp[index]);
-                    continue;
-                }
+                var d = t.comProgress._vue;
+                var _ = d - curHp;
 
-                if (bossState == SheepBossState.Dead) continue;
+                if (_!=0 && curHp!=0) {
 
-                float currentHp = Mathf.Max(0f, viewPet.curHp);
-                float previousHp = bossHp[index];
-                float damage = previousHp - currentHp;
-
-                if (damage > 0f && currentHp > 0f) {
-                    int attackBuffCount = manager.countBuffs[1 - index];
-                    if (attackBuffCount > 0) {
-                        float multiplier = 1f + SheepConfig.buffDragonDamageIncreseRate * attackBuffCount;
-                        damage = Mathf.Floor(damage * multiplier);
-                        currentHp = previousHp - damage;
-                        viewPet.curHp = currentHp;
+                    var S = sheepMgr.countBuffs[1 - (int)camp];
+                    if (S > 0) {
+                        var b = 1 + SheepConfig.buffDragonDamageIncreseRate * S;
+                        b += 0;
+                        _ = (float)Math.Floor(_ * b);
+                        curHp = d - _;
+                        viewPet.curHp = curHp;
                     }
 
-                    int defenceBuffCount = manager.countBuffs[index];
-                    if (defenceBuffCount > 0) {
-                        float multiplier = Mathf.Pow(1f - SheepConfig.buffDragonReduceRate, defenceBuffCount);
-                        multiplier = Mathf.Max(multiplier, 1f - SheepConfig.buffDragonMaxReduceRate);
-                        damage = Mathf.Floor(damage * multiplier);
-                        currentHp = previousHp - damage;
-                        viewPet.curHp = currentHp;
+                    var I = sheepMgr.countBuffs[(int)camp];
+                    if (I > 0) {
+                        var B = Math.Pow(1 - SheepConfig.buffDragonReduceRate, I);
+                        B -= 0;
+                        if (B < 1 - SheepConfig.buffDragonMaxReduceRate) {
+                            B = 1 - SheepConfig.buffDragonMaxReduceRate;
+                        }
+
+                        _ = (float)Math.Floor(_ * B);
+                        curHp = d - _;
+                        viewPet.curHp = curHp;
                     }
+
                 }
 
-                // 原版会先调用 subShield()，再判断本次伤害是否大于 1。
-                bool consumedShield = ConsumeBossShield(camp);
-                if (consumedShield && damage > 1f) {
-                    damage = 1f;
-                    currentHp = Mathf.Max(0f, previousHp - 1f);
-                    viewPet.curHp = currentHp;
+                if (t.subShield() && _ > 1) {
+                    curHp = d - 1;
+                    if (curHp < 0) {
+                        curHp = 0;
+                    }
+                    _ = 1;
+                    viewPet.curHp = curHp;
                 }
 
-                if (!Mathf.Approximately(currentHp, previousHp)) {
-                    SetBossProgress(index, currentHp);
-                    OnBossHpChanged?.Invoke(camp, currentHp, damage);
-                    IgnoreExternal(() => boss[index].hitAnim());
+                if (curHp != d) {
+                    t.comProgress.setVue(curHp);
+                    t.curHp = curHp;
+                    SheepAnims.showBossBlood(sheepCtl, t, _);
+                    t.hitAnim();
                 }
 
-                int visibleBuffCount = manager.countShowBuffs[index];
-                int totalBuffCount = manager.countBuffs[index];
+                var R = sheepMgr.countShowBuffs[(int)camp];
+                var M = sheepMgr.countBuffs[(int)camp];
 
-                if (!manager.flagLongBuffs[index] &&
-                    currentHp < manager.loongHp * SheepConfig.counterHpRatio) {
-                    manager.flagLongBuffs[index] = true;
-                    manager.bossBackStateTime[index] = now;
-                    manager.preBuffs[index].Add(0);
-                    OnCounterStarted?.Invoke(camp);
-                    OnCameraShake?.Invoke(SheepConfig.shockBeginNumber);
-                    IgnoreExternal(() => boss[index].backStateTime = now);
-                    IgnoreExternal(() => sheepCtl.comMatch.showDoubleAnim(camp));
-                    IgnoreExternal(() => sheepCtl.comUIAnim.backAnim(camp));
-                    IgnoreExternal(() => sheepCtl.cameraCtl.onShake(SheepConfig.shockBeginNumber));
-                }
-                else if (manager.bossBackStateTime[index] > 0 &&
-                         now - manager.bossBackStateTime[index] > 120000 &&
-                         totalBuffCount - visibleBuffCount == 0) {
-                    manager.bossBackStateTime[index] = 0;
-                    OnCounterFinished?.Invoke(camp);
-                    OnCameraShake?.Invoke(SheepConfig.shockEndNumber);
-                    IgnoreExternal(() => boss[index].backStateTime = 0);
-                    IgnoreExternal(() => sheepCtl.comMatch.hideDoubleAnim(camp));
-                    IgnoreExternal(() => sheepCtl.comUIAnim.backSuccessAnim(camp));
-                    IgnoreExternal(() => sheepCtl.cameraCtl.onShake(SheepConfig.shockEndNumber));
+                if (!sheepMgr.flagLongBuffs[(int)camp] && curHp < sheepMgr.loongHp * SheepConfig.counterHpRatio) {
+                    sheepMgr.flagLongBuffs[(int)camp] = true;
+                    t.backStateTime = c;
+                    sheepMgr.preBuffs[(int)camp].Add(0);
+                    sheepCtl.comMatch.showDoubleAnim(camp);
+                    sheepCtl.comUIAnim.backAnim(camp);
+                    sheepCtl.cameraCtl.onShake(SheepConfig.shockBeginNumber);
+                } else if (t.backStateTime!=0 && c - t.backStateTime > 12e4 && M - R == 0) {
+                    t.backStateTime = 0;
+                    sheepCtl.comMatch.hideDoubleAnim(camp);
+                    sheepCtl.comUIAnim.backSuccessAnim(camp);
+                    sheepCtl.cameraCtl.onShake(SheepConfig.shockEndNumber);
                 }
 
-                if (currentHp <= 0f) {
+                if (curHp <= 0) {
                     viewPet.state = (SheepRoleState)(int)SheepBossState.Dead;
                     viewPet.isDie = true;
-                    SetBossProgress(index, 0f);
-                    ended = true;
-                    RaiseRoomEnd();
-                    break;
+                    t.curHp = 0;
+                    eventBus.emit(EventType.RoomStateEnd);
+                    isEnd = true;
+                    continue;
                 }
 
-                int stateIndex = 0;
-                for (int thresholdIndex = 0;
-                     thresholdIndex < SheepConfig.loongStateSwitching.Length;
-                     thresholdIndex++) {
-                    if (manager.plotRatio <= SheepConfig.loongStateSwitching[thresholdIndex]) {
-                        stateIndex = thresholdIndex;
+                var unuse=viewPet.curAckFrame;
+
+                var T = 0;
+                var D = sheepMgr.plotRatio;
+
+                for (var A = 0; A < SheepConfig.loongStateSwitching.Length; A++) {
+                    if (D <= SheepConfig.loongStateSwitching[A]) {
+                        T = A;
                         break;
                     }
                 }
 
-                manager.plotRatioIndex = stateIndex;
-                int visualState = stateIndex + 1;
-                IgnoreExternal(() => boss[index].updateState(sheepCtl, manager, visualState));
-                IgnoreExternal(() => boss[index].updateStateJJL(sheepCtl, manager, visualState));
-            }
+                sheepMgr.plotRatioIndex = T;
+                t.updateState(sheepCtl, sheepMgr, T + 1);
+                t.updateStateJJL(sheepCtl, sheepMgr, T + 1);
 
-            return ended;
+            }
+            }
+        
+        
+        return isEnd;
         }
-// todo
-        public void pre_add_pet(PetView source) {
-            if (source != null) petsAdd.Add(source);
+
+        public void pre_add_pet(PetView e) {
+            this.petsAdd.Add(e);
         }
 // todo
         public void buff_add_pets() {
@@ -1118,13 +1125,12 @@ namespace rvb.scripts {
         }
 // todo
         public void game_clear() {
-            clearBlocks();
-            clearPetViews();
-            preBulletIndex = 0;
-            clearViewBullets();
-            clear_pets();
-            clear_bullets();
-
+            this.clearBlocks();
+            this.clearPetViews();
+            this.preBulletIndex = 0;
+            this.clearViewBullets();
+            this.clear_pets();
+            this.clear_bullets();
             InitializeBossView(SheepCamp.Red);
             InitializeBossView(SheepCamp.Blue);
             petCount = 2;
