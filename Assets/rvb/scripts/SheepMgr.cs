@@ -363,11 +363,11 @@ namespace rvb.scripts {
             Array.Fill(this.perfStat.redNums,0);
             Array.Fill(this.perfStat.blueNums,0);
         }
-// todo
-        public int getBlockIndex(Vector3 position) {
-            int xn = Mathf.FloorToInt(position.x / SheepConfig.d + SheepConfig.w / (float)SheepConfig.d / 2f);
-            int yn = Mathf.FloorToInt(position.y / SheepConfig.d + SheepConfig.h / (float)SheepConfig.d / 2f);
-            return Util.getIndexByXnYn(xn, yn);
+
+        public int getBlockIndex(Vector3 e) {
+            var t = Math.Floor(e.x / SheepConfig.d + SheepConfig.w / SheepConfig.d / 2);
+            var o = Math.Floor(e.y / SheepConfig.d + SheepConfig.h / SheepConfig.d / 2);
+            return (int)(t * SheepConfig.line_w + o);
         }
 // todo
         public int getNextPetId() => ++petId;
