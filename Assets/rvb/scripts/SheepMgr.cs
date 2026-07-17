@@ -904,18 +904,6 @@ namespace rvb.scripts {
             bossHp[index] = ReadExternal(() => Convert.ToSingle(boss[index].curHp), (float)loongHp);
             view.curHp = bossHp[index];
         }
-// todo
-        private void SetBossProgress(int camp, float value) {
-            bossHp[camp] = value;
-            IgnoreExternal(() => boss[camp].comProgress.setVue(value));
-            IgnoreExternal(() => boss[camp].curHp = value);
-        }
-// todo
-        private bool ConsumeBossShield(SheepCamp camp) {
-            if (BossShieldConsumer != null) return BossShieldConsumer(camp);
-            int index = CampIndex(camp);
-            return ReadExternal(() => (bool)boss[index].subShield(), false);
-        }
 
         public bool updateBoss(SheepMgr sheepMgr, SheepCtl sheepCtl, float dt, long c) {
 
