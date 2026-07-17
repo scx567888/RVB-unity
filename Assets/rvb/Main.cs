@@ -84,7 +84,7 @@ namespace rvb {
             this.loadRoleResult = SheepSpriteAtlasLoader.loadRole(texture, json.text);
             scxSpriteRenderer = new ScxSpriteRenderer(
                 loadRoleResult.spriteAtlas,
-                30,
+                40,
                 mainMaterial,
                 Mathf.Max(5000, initialCountPerCamp * 4)
             );
@@ -92,7 +92,7 @@ namespace rvb {
             var loadRoleResult1 = SheepSpriteAtlasLoader.loadRole(texture1, json1.text);
             scxSpriteRenderer1 = new ScxSpriteRenderer(
                 loadRoleResult1.spriteAtlas,
-                30,
+                40,
                 mainMaterial,
                 Mathf.Max(5000, initialCountPerCamp * 4)
             );
