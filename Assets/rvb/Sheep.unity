@@ -417,6 +417,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   texture: {fileID: 2800000, guid: 194dfda588cc49649980d799777b8130, type: 3}
   json: {fileID: 4900000, guid: 1e8835a799484c07b43cde1bb2398750, type: 3}
+  texture1: {fileID: 2800000, guid: 66e55d3c90bc483682f314f57044eefa, type: 3}
+  json1: {fileID: 4900000, guid: 8e60092c9ac349dc95dd27f98c58c057, type: 3}
   mainMaterial: {fileID: 2100000, guid: de552a8032c24a2b826d1da4ff7198d9, type: 2}
   highlightMaterial: {fileID: 2100000, guid: 354b83e8760f5654f86b342c00b5e4a2, type: 2}
   logicFPS: 30

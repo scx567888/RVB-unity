@@ -17,6 +17,9 @@ namespace rvb {
         [Header("Atlas")]
         public Texture2D texture;
         public TextAsset json;
+        [Header("Atlas")]
+        public Texture2D texture1;
+        public TextAsset json1;
         public Material mainMaterial;
         public Material highlightMaterial;
 
@@ -54,6 +57,7 @@ namespace rvb {
         [SerializeField] private float rotateSpeed = 1f;
 
         private ScxSpriteRenderer scxSpriteRenderer;
+        private ScxSpriteRenderer scxSpriteRenderer1;
         private string[] spriteNames;
         private SheepMgr sheepMgr;
 
@@ -79,6 +83,14 @@ namespace rvb {
             var atlas = SheepSpriteAtlasLoader.loadRole(texture, json.text);
             scxSpriteRenderer = new ScxSpriteRenderer(
                 atlas,
+                100,
+                mainMaterial,
+                Mathf.Max(5000, initialCountPerCamp * 4)
+            );
+            
+            var atlas1 = SheepSpriteAtlasLoader.loadRole(texture1, json1.text);
+            scxSpriteRenderer1 = new ScxSpriteRenderer(
+                atlas1,
                 100,
                 mainMaterial,
                 Mathf.Max(5000, initialCountPerCamp * 4)
@@ -152,6 +164,7 @@ namespace rvb {
 
             // Unity 每个显示帧提交一次渲染。
             scxSpriteRenderer.update();
+            scxSpriteRenderer1.update();
         }
 
         private void RunLogicFrames() {
@@ -210,8 +223,16 @@ namespace rvb {
             seenRoleSlots.Add(slot);
 
             if (!roleRenderers.TryGetValue(slot, out Pet renderPet)) {
-                var unit = scxSpriteRenderer.createUnit();
-                unit.setVisible(true);
+                ScxSpriteRenderUnit unit = null;
+                if (view.camp==SheepCamp.Red) {
+                    unit = scxSpriteRenderer.createUnit();
+                    unit.setVisible(true);    
+                }
+                else {
+                    unit = scxSpriteRenderer1.createUnit();
+                    unit.setVisible(true);    
+                }
+                unit.setRotationFromEuler(45,0,0);
 
                 int initialFrame = ResolveRoleSpriteFrame(view);
                 unit.setFrame(initialFrame);
