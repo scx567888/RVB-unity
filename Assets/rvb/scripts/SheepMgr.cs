@@ -1117,7 +1117,7 @@ namespace rvb.scripts {
             if (comImages != null) IgnoreExternal(() => comImages.update_bullet(currentImages));
             return updated;
         }
-// todo
+
         public int update_role(int start, int end) {
             for (var i = start; i < end; i++) {
                 var viewPet = this.getPetView(i);
@@ -1156,7 +1156,7 @@ namespace rvb.scripts {
 
             return end - start;
         }
-// todo
+
         public int update_bullet(int start, int end) {
             for (var i = start; i < end; i++) {
                 if (i >= SheepConfig.MaxBulletCount) {
@@ -1292,7 +1292,7 @@ namespace rvb.scripts {
 
             return end - start;
         }
-// todo
+
         public bool update_frame(PetView viewPet) {
             var frame = viewPet.frame;
             var loopFrame = SheepConfig.loopFrame;
