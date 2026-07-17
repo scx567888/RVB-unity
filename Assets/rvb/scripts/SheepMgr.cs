@@ -2614,62 +2614,68 @@ namespace rvb.scripts {
                 isChangeCollsionFlags[campIndex][safeCollideId] = true;
             }
         }
-// todo
-        public void mainSyncBlocksToWokers() {
-            int[] attackOffsets = new int[2];
-            int[][] collisionOffsets = {
-                new int[SheepConfig.MaxGroupCount],
-                new int[SheepConfig.MaxGroupCount]
-            };
 
-            foreach (KeyValuePair<int, Dictionary<int, Dictionary<int, List<int>>>> blockPair in pre_blocks) {
-                int blockIndex = blockPair.Key;
-                foreach (KeyValuePair<int, Dictionary<int, List<int>>> campPair in blockPair.Value) {
-                    int camp = campPair.Key;
-                    int totalInBlock = 0;
-
-                    foreach (KeyValuePair<int, List<int>> groupPair in campPair.Value) {
-                        int group = groupPair.Key;
-                        List<int> indices = groupPair.Value;
-                        if (indices == null || indices.Count == 0) continue;
-
-                        int offset = collisionOffsets[camp][group];
-                        int writable = Math.Min(indices.Count, collisionView1s[camp][group].Length - offset);
-                        if (writable <= 0) continue;
-
-                        IndexLen collisionBlock = getBlockByIndex(collisionViews[camp][group], blockIndex);
-                        collisionBlock.Index = offset;
-                        collisionBlock.Len = writable;
-                        for (int index = 0; index < writable; index++) {
-                            collisionView1s[camp][group][offset + index] = indices[index];
+        public void mainSyncBlocksToWokers() { 
+        var e = new int[]{0, 0};
+        var t = new List<int>[]{new List<int>(),new List<int>()};
+        for (var e1 = 0; e1 < SheepConfig.MaxGroupCount; e1++) {
+            t[(int)SheepCamp.Red].Add(0);
+            t[(int)SheepCamp.Blue].Add(0);
+        }
+        foreach (var e2 in this.pre_blocks) {
+            var s = e2.Key;
+            var i1 = e2.Value;
+            if (i1!=null && i1.Count!=0) {
+                foreach (var e3 in i1) {
+                    var i2 = e3.Value;
+                    var o = e3.Key;
+                    if (i2!=null && i2.Count!=0) {
+                        var l = 0;
+                        var n = t[o];
+                        foreach (var e4 in i2) {
+                            var e5 = e4.Value;
+                            var t6 = e4.Key;
+                            if (e5!=null && e5.Count!=0) {
+                                var i = this.collisionViews[o][t6];
+                                var a3 = this.collisionView1s[o][t6];
+                                var c3 = n[t6];
+                                var f3 = e5.Count;
+                                l += f3;
+                                var blockByIndex = this.getBlockByIndex(i,s);
+                                blockByIndex.Index=  c3;
+                                blockByIndex.Len=  f3;
+                                
+                                foreach (var e7 in e5) {
+                                    a3[c3] = e7;
+                                    c3++;
+                                }
+                                n[t6] = c3;
+                            }
                         }
-
-                        collisionOffsets[camp][group] += writable;
-                        totalInBlock += writable;
-                    }
-
-                    if (totalInBlock == 0) continue;
-                    int attackOffset = attackOffsets[camp];
-                    int maxWritable = attackView1s[camp].Length - attackOffset;
-                    int written = 0;
-                    foreach (KeyValuePair<int, List<int>> groupPair in campPair.Value) {
-                        List<int> indices = groupPair.Value;
-                        if (indices == null) continue;
-                        foreach (int petIndex in indices) {
-                            if (written >= maxWritable) break;
-                            attackView1s[camp][attackOffset + written] = petIndex;
-                            written++;
+                        if (0 == l) {
+                            return;
                         }
-
-                        if (written >= maxWritable) break;
+                        var a = this.attackViews[o];
+                        var c = this.attackView1s[o];
+                        var f = e[o];
+                        var blockByIndex1 = this.getBlockByIndex(a,s);
+                        blockByIndex1.Index=  f;
+                        blockByIndex1.Len=  l;
+                        foreach (var e9 in i2) {
+                            var e10 = e9.Value;
+                            var t8 = e9.Key;
+                            if(e10!=null && e10.Count!=0) {
+                                foreach (var e11 in e10) {
+                                    c[f] = e11;
+                                    f++;
+                                }
+                            }
+                        }
+                        e[o] = f;
                     }
-
-                    IndexLen attackBlock = getBlockByIndex(attackViews[camp], blockIndex);
-                    attackBlock.Index = attackOffset;
-                    attackBlock.Len = written;
-                    attackOffsets[camp] += written;
                 }
             }
+        }
         }
 
         public void forEachBlock(IndexLen[] e, int[] t, int blockIndex, Action<int> callback) {
