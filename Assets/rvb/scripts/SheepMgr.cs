@@ -379,10 +379,10 @@ namespace rvb.scripts {
             this.cur_rob_role_index += t;
             return old;
         }
-// todo
-        public int rob_bullet(int count) {
-            int old = cur_rob_bullet_index;
-            cur_rob_bullet_index += count;
+
+        public int rob_bullet(int t) {
+            var old = this.cur_rob_bullet_index;
+            this.cur_rob_bullet_index += t;
             return old;
         }
 // todo
