@@ -2546,15 +2546,15 @@ namespace rvb.scripts {
 
             pre_blocks.Clear();
         }
-// todo
-        public IndexLen getBlockByIndex(IndexLen[] blocks, int blockIndex) {
-            if (blocks == null) throw new ArgumentNullException(nameof(blocks));
-            if (blockIndex < 0 || blockIndex >= blocks.Length) {
-                throw new ArgumentOutOfRangeException(nameof(blockIndex), blockIndex, "blockIndex 越界");
-            }
 
-            if (blocks[blockIndex] == null) blocks[blockIndex] = new IndexLen();
-            return blocks[blockIndex];
+        public IndexLen getBlockByIndex(IndexLen[] e, int blockIndex) {
+            if (e[blockIndex]==null){
+                e[blockIndex]=new IndexLen(){
+                    Len=0,
+                    Index=0,
+                };
+            }
+            return e[blockIndex];
         }
 
         public void mainClearBlocks() {
