@@ -2583,21 +2583,19 @@ namespace rvb.scripts {
 
             pre_blocks.Clear();
         }
-// todo
+
         public void mainPreAddBlock(int blockIndex, int buffIndex, SheepCamp camp, int collideId) {
-            var o = this.pre_blocks[blockIndex];
-            if (o==null) {
+            if (!this.pre_blocks.TryGetValue(blockIndex,out Dictionary<int, Dictionary<int, List<int>>> o)) {
                 o = new Dictionary<int, Dictionary<int, List<int>>>();
                 this.pre_blocks[blockIndex]= o;
             }
-
-            var l = o[(int)camp];
-            if (l==null) {
+            
+            if (!o.TryGetValue((int)camp,out Dictionary<int, List<int>> l)) {
                 l = new Dictionary<int, List<int>>();
                 o[(int)camp] = l;
             }
-            var n = l[collideId];
-            if (n==null) {
+            
+            if (!l.TryGetValue(collideId, out List<int> n)) {
                 n = new List<int>();
                 l[collideId] = n;
             }
