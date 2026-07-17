@@ -1108,13 +1108,11 @@ namespace rvb.scripts {
 
             preBulletIndex = 0;
         }
-// todo
-        public void buff_del_bullet(int index) {
-            BulletView bullet = getBulletView(index);
-            if (bullet == null || bullet.id == 0) return;
+
+        public void buff_del_bullet(int e) {
+            var bullet = this.getBulletView(e);
             bullet.id = 0;
-            bullet.isDie = true;
-            bulletsDel.Push(index);
+            this.bulletsDel.Push(e);
         }
 
         public void clear_bullets() {
