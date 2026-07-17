@@ -1775,102 +1775,83 @@ namespace rvb.scripts {
         }
 // todo
         public void update_role_state_callbullets(PetView petSkin) {
-            int animationFrame = petSkin.animFrame;
-            SheepSkill skill = SheepSkill.getById(petSkin.readySkillId);
-            SheepSkillSubCallBullets config = SheepSkillSubCallBullets.getById(skill.id);
-            int callCount = 0;
-
-            if (config.frameStep != 0) {
-                if (animationFrame % config.frameStep == 0) callCount = config.frameCnt;
+            var t = petSkin.animFrame;
+        var i = SheepSkill.getById(petSkin.readySkillId);
+        var s = SheepSkillSubCallBullets.getById(i.id);
+        var o = 0;
+        if (s.frameStep!=0) {
+            if (t % s.frameStep == 0) {
+                o = s.frameCnt;
             }
-            else {
-                int[] callFrames = config.callFrames ?? Array.Empty<int>();
-                int[] callCounts = config.callCnts ?? Array.Empty<int>();
-                for (int index = 0; index < callFrames.Length; index++) {
-                    if (animationFrame != callFrames[index]) continue;
-                    callCount = index < callCounts.Length ? callCounts[index] : 0;
+        } else {
+            var e = s.callFrames;
+            for (var i1 = 0; i1 < e.Length; i1++) {
+                if (t == e[i1]) {
+                    o = s.callCnts[i1];
                     break;
                 }
             }
-
-            for (int shotIndex = 0; shotIndex < callCount; shotIndex++) {
-                if (config.type == 1) {
-                    float startX = petSkin.posX + config.startOffsetPos[0];
-                    float startY = petSkin.posY + config.startOffsetPos[1];
-                    float startZ = config.startOffsetPos[2];
-                    float angle = UnityEngine.Random.Range(0f, Mathf.PI * 2f);
-                    float endX = petSkin.posX + petSkin.dirX * config.len + config.endRadius * Mathf.Cos(angle);
-                    float endY = petSkin.posY + petSkin.dirY * config.len + config.endRadius * Mathf.Sin(angle);
-                    bullte_creates.Add(new BullteCreate {
+        }
+        if (o!=0) {
+            for (var t1 = 0; t1 < o; t1++) {
+                if (1 == s.type) {
+                    var t3 = petSkin.posX + s.startOffsetPos[0];
+                    var i3 = petSkin.posY + s.startOffsetPos[1];
+                    var o3 = s.startOffsetPos[2];
+                    var l = 360 * Random.Range(0f,1f);
+                    var n = petSkin.posX + petSkin.dirX * s.len + s.endRadius * Math.Cos(l);
+                    var r = petSkin.posY + petSkin.dirY * s.len + s.endRadius * Math.Sin(l);
+                    var a = 0;
+                    this.bullte_creates.Add(new BullteCreate() {
                         view_pet = petSkin,
-                        bulletId = config.bullet,
-                        info = new Info {
-                            startX = startX,
-                            startY = startY,
-                            startZ = startZ,
-                            endX = endX,
-                            endY = endY,
-                            endZ = 0f,
-                            hasStart = true,
-                            hasEnd = true
+                        bulletId = s.bullet,
+                        info = new Info() { startX = t3, startY = i3, startZ = o3, endX = (float)n, endY = (float)r, endZ = a }
+                    });
+                } else if (2 == s.type) {
+                    var t4 = s.startOffsetPos[2];
+                    var i5 = 360 * Random.Range(0f,1f);
+                    var o5 = petSkin.posX + petSkin.dirX * s.len + s.endRadius * Math.Cos(i5);
+                    var l = petSkin.posY + petSkin.dirY * s.len + s.endRadius * Math.Sin(i5);
+                    var n = 0;
+                    this.bullte_creates.Add(new BullteCreate() {
+                        view_pet = petSkin,
+                        bulletId = s.bullet,
+                        info = new Info() {
+                            startX = (float)o5,
+                            startY = (float)l,
+                            startZ = t4,
+                            endX = (float)o5,
+                            endY = (float)l,
+                            endZ = n,
+                            dirX = 0,
+                            dirY = 0,
+                            dirZ = -1
                         }
                     });
-                }
-                else if (config.type == 2) {
-                    float startZ = config.startOffsetPos[2];
-                    float angle = UnityEngine.Random.Range(0f, Mathf.PI * 2f);
-                    float x = petSkin.posX + petSkin.dirX * config.len + config.endRadius * Mathf.Cos(angle);
-                    float y = petSkin.posY + petSkin.dirY * config.len + config.endRadius * Mathf.Sin(angle);
-                    bullte_creates.Add(new BullteCreate {
-                        view_pet = petSkin,
-                        bulletId = config.bullet,
-                        info = new Info {
-                            startX = x,
-                            startY = y,
-                            startZ = startZ,
-                            endX = x,
-                            endY = y,
-                            endZ = 0f,
-                            dirX = 0f,
-                            dirY = 0f,
-                            dirZ = -1f,
-                            hasStart = true,
-                            hasEnd = true
-                        }
+                } else if (3 == s.type) {
+                    this.bullte_creates.Add(new BullteCreate(){
+                        view_pet= petSkin,
+                        bulletId= s.bullet,
+                        info= new Info(){dirX= 0, dirY= 0, dirZ= -1, angle= 360f / o * t1}
                     });
-                }
-                else if (config.type == 3) {
-                    bullte_creates.Add(new BullteCreate {
-                        view_pet = petSkin,
-                        bulletId = config.bullet,
-                        info = new Info {
-                            dirX = 0f,
-                            dirY = 0f,
-                            dirZ = -1f,
-                            angle = callCount > 0 ? 360f / callCount * shotIndex : 0f
-                        }
+                } else if (4 == s.type) {
+                    this.bullte_creates.Add(new BullteCreate(){
+                        view_pet= petSkin,
+                        bulletId= s.bullet,
+                        info=new Info() {dirX= 1, dirY= 0, dirZ= 0}
                     });
-                }
-                else if (config.type == 4) {
-                    bullte_creates.Add(new BullteCreate {
-                        view_pet = petSkin,
-                        bulletId = config.bullet,
-                        info = new Info { dirX = 1f, dirY = 0f, dirZ = 0f }
-                    });
-                }
-                else {
-                    bullte_creates.Add(new BullteCreate {
-                        view_pet = petSkin,
-                        bulletId = config.bullet
-                    });
+                } else {
+                    this.bullte_creates.Add(new BullteCreate(){view_pet= petSkin, bulletId= s.bullet});
                 }
             }
+        }
 
-            if (animationFrame >= config.endFrame) {
-                petSkin.state = SheepRoleState.Move;
-                petSkin.subState = SheepRoleSubState.MoveBoss;
-                petSkin.animType = SheepRoleAnimType.Idle;
-            }
+        if (t >= s.endFrame) {
+            petSkin.state = SheepRoleState.Move;
+            petSkin.subState = SheepRoleSubState.MoveBoss;
+            petSkin.animType = SheepRoleAnimType.Idle;
+        }
+         
         }
 
         public void update_role_state_buff(PetView petSkin) {
