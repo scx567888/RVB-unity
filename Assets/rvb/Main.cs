@@ -71,7 +71,7 @@ namespace rvb {
             this.loadRoleResult = SheepSpriteAtlasLoader.loadRole(texture, json.text);
             scxSpriteRenderer = new ScxSpriteRenderer(
                 loadRoleResult.spriteAtlas,
-                40,
+                100,
                 mainMaterial,
                 Mathf.Max(5000, initialCountPerCamp * 4)
             );
@@ -79,18 +79,31 @@ namespace rvb {
             var loadRoleResult1 = SheepSpriteAtlasLoader.loadRole(texture1, json1.text);
             scxSpriteRenderer1 = new ScxSpriteRenderer(
                 loadRoleResult1.spriteAtlas,
-                40,
+                100,
                 mainMaterial,
                 Mathf.Max(5000, initialCountPerCamp * 4)
             );
 
             spriteNames = scxSpriteRenderer.getSpriteNames();
             scxSpriteRenderer.setParent(gameObject);
+            scxSpriteRenderer1.setParent(gameObject);
 
          
 
             BindSheepMgr();
-            StartBattle();
+            
+            if (sheepMgr == null) {
+                return;
+            }
+
+            ClearAllRenderUnits();
+            logicAccumulator = 0f;
+
+            sheepMgr.gameIndex++;
+            sheepMgr.setState(SheepRoomState.Start);
+            sheepMgr.onGameStart();
+            sheepMgr.game_clear();
+            
         }
 
         private void BindSheepMgr() {
@@ -107,30 +120,18 @@ namespace rvb {
             // 否则默认值为 1，In/Dead 等状态可能一帧就结束。
             sheepMgr.AnimationFrameCountResolver = ResolveLogicalAnimationFrameCount;
 
-            sheepMgr.advanceGameClockInGameUpdate = true;
+            sheepMgr.advanceGameClockInGameUpdate = false;
             sheepMgr.isAutoCall = enableAutomaticTroops;
             sheepMgr.loongHp = SheepConfig.loongHps[0];
         }
 
         public void StartBattle() {
-            if (sheepMgr == null) {
-                return;
-            }
-
-            ClearAllRenderUnits();
-            logicAccumulator = 0f;
-
-            sheepMgr.gameIndex++;
-            sheepMgr.setState(SheepRoomState.Start);
-            sheepMgr.onGameStart();
-            sheepMgr.game_clear();
+           
 
             // 这里先跳过倒计时，直接进入战斗状态。
             sheepMgr.setState(SheepRoomState.Run);
             sheepMgr.onGameRun();
 
-            SpawnArmy(SheepCamp.Red, redRoleId, initialCountPerCamp);
-            SpawnArmy(SheepCamp.Blue, blueRoleId, initialCountPerCamp);
         }
 
         private void Update() {
@@ -215,6 +216,7 @@ namespace rvb {
                     unit = scxSpriteRenderer1.createUnit();
                     unit.setVisible(true);    
                 }
+                unit.setScale(view.conf.scale,view.conf.scale,1f);
                 unit.setRotationFromEuler(45,0,0);
 
                 var initialFrame = ResolveRoleSpriteFrame(view);
@@ -373,19 +375,6 @@ namespace rvb {
             bulletRenderers.Clear();
             seenBulletIds.Clear();
             staleBulletIds.Clear();
-        }
-
-        [ContextMenu("Print First 100 Sprite Names")]
-        private void PrintFirstSpriteNames() {
-            if (spriteNames == null) {
-                Debug.LogWarning("RVB: spriteNames 尚未初始化，请先运行场景。");
-                return;
-            }
-
-            int count = Mathf.Min(100, spriteNames.Length);
-            for (int i = 0; i < count; i++) {
-                Debug.Log($"Sprite[{i}] = {spriteNames[i]}");
-            }
         }
 
         private void OnDestroy() {
