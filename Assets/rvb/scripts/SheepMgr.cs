@@ -2530,21 +2530,21 @@ namespace rvb.scripts {
             redCallInfos.Clear();
             blueCallInfos.Clear();
         }
-// todo
-        public void clearBlocks() {
-            Array.Clear(attackViews[0], 0, attackViews[0].Length);
-            Array.Clear(attackViews[1], 0, attackViews[1].Length);
-            Array.Clear(attackView1s[0], 0, attackView1s[0].Length);
-            Array.Clear(attackView1s[1], 0, attackView1s[1].Length);
 
-            for (int group = 0; group < SheepConfig.MaxGroupCount; group++) {
-                Array.Clear(collisionViews[0][group], 0, collisionViews[0][group].Length);
-                Array.Clear(collisionViews[1][group], 0, collisionViews[1][group].Length);
-                Array.Clear(collisionView1s[0][group], 0, collisionView1s[0][group].Length);
-                Array.Clear(collisionView1s[1][group], 0, collisionView1s[1][group].Length);
+        public void clearBlocks() {
+            Array.Fill(this.attackViews[(int)SheepCamp.Red],null);
+            Array.Fill(this.attackViews[(int)SheepCamp.Blue],null);
+            Array.Fill(this.attackView1s[(int)SheepCamp.Red],0);
+            Array.Fill(this.attackView1s[(int)SheepCamp.Blue],0);
+
+            for (var e = 0; e < SheepConfig.MaxGroupCount; e++) {
+                Array.Fill(this.collisionViews[(int)SheepCamp.Red][e],null);
+                Array.Fill(this.collisionViews[(int)SheepCamp.Blue][e],null);
+                Array.Fill(this.collisionView1s[(int)SheepCamp.Red][e],0);
+                Array.Fill(this.collisionView1s[(int)SheepCamp.Blue][e],0);
             }
 
-            pre_blocks.Clear();
+            this.pre_blocks.Clear();
         }
 
         public IndexLen getBlockByIndex(IndexLen[] e, int blockIndex) {
