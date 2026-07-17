@@ -410,10 +410,14 @@ namespace rvb.scripts {
 
             return pet;
         }
-// todo
+
         public void clearViewBullets() {
-            for (int i = 0; i < view_bullets.Length; i++) view_bullets[i]?.clear();
-            for (int i = 0; i < pre_view_bullets.Length; i++) pre_view_bullets[i]?.clear();
+            foreach (var viewElement in this.view_bullets) {
+                viewElement.clear();
+            }
+            foreach (var viewElement in this.pre_view_bullets) {
+                viewElement.clear();
+            }
         }
 // todo
         public BulletView getBulletView(int index) {
