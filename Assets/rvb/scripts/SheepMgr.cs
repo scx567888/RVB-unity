@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Stopwatch = System.Diagnostics.Stopwatch;
 using System.Threading;
 using System.Threading.Tasks;
@@ -1110,13 +1111,13 @@ namespace rvb.scripts {
             if (comImages != null) IgnoreExternal(() => comImages.update_role(currentImages));
             return updated;
         }
-// todo
-        public int rob_bullet_task(int count, CurIndexImages currentImages) {
-            int start = rob_bullet(count);
-            int end = start + count;
-            int updated = update_bullet(start, end);
-            if (comImages != null) IgnoreExternal(() => comImages.update_bullet(currentImages));
-            return updated;
+
+        public int rob_bullet_task(int count, CurIndexImages curIndexImages) {
+            var start = this.rob_bullet(count);
+            var end = start + count;
+            var i = this.update_bullet(start, end);
+            this.comImages.update_bullet(curIndexImages);
+            return i;
         }
 
         public int update_role(int start, int end) {
@@ -2323,7 +2324,7 @@ namespace rvb.scripts {
         foreach (var t1 in new []{this.redCallInfos, this.blueCallInfos}) {
             var n = t1 == o.redCallInfos ? SheepCamp.Red : SheepCamp.Blue;
             
-            foreach (var ee in t1) {
+            foreach (var ee in t1.ToArray()) {
                 var o1 = ee.Value;
                 var a = ee.Key;
                 
@@ -2367,14 +2368,14 @@ namespace rvb.scripts {
 
                     for (; pets.Count > 0 && I < h;) {
 
-                        var T = Math.Floor((double)(I / 2));
+                        var T = Math.Floor((double)(I / 2.0));
                         float M = 0;
 
                         if (h % 2 == 0) {
                             if (I % 2 == 0) {
-                                M = (float)(m * T + m / 2 + Math.Floor(T / d + 1) * g);
+                                M = (float)(m * T + m / 2.0 + Math.Floor(T / d + 1) * g);
                             } else {
-                                M = (float)(-m * T - m / 2 - Math.Floor(T / d + 1) * g);
+                                M = (float)(-m * T - m / 2.0 - Math.Floor(T / d + 1) * g);
                             }
                         } else {
                             if (I % 2 == 0) {
@@ -2389,7 +2390,7 @@ namespace rvb.scripts {
                         I += 1;
 
                         var R = new Vector3(S, M);
-                        if (C.booms!=null) {
+                        if (C.booms!=null&&C.booms.Count>0) {
                             createPetView(sheepCtl, C.camp, a, h, 1, true, R, C.booms.Pop());
                         } else {
                             createPetView(sheepCtl, C.camp, a, h, 1, true, R);
@@ -2409,7 +2410,7 @@ namespace rvb.scripts {
                 } else if (formation.formationType == SheepRoleFormationType.AngleTidy) {
 
                     var k = 2 * formation.maxAngle - formation.minAngle;
-                    var G = Math.Floor((double)(k / formation.startStepAngle));
+                    double G = Math.Floor((double)(k / formation.startStepAngle));
                     var A = Math.Floor(1 * G);
 
                     var pets = o1.pets;
@@ -2435,7 +2436,7 @@ namespace rvb.scripts {
                             var X = new Vector3();
                             var L = sheepMode.loongX;
                             X = n == SheepCamp.Red ? new Vector3((float)(L - x), F, 0) : new Vector3((float)(x - L), F, 0);
-                            if (P.booms!=null) {
+                            if (P.booms!=null&&P.booms.Count>0) {
                                 createPetView(sheepCtl, P.player, a, (int)G, 1, true, X, P.booms.Pop());
                             } else {
                                 createPetView(sheepCtl, P.camp, a, (int)G, 1, true, X);

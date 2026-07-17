@@ -426,7 +426,7 @@ MonoBehaviour:
   fallbackLogicalAnimationFrames: 30
   redRoleId: 22
   blueRoleId: 22
-  initialCountPerCamp: 3000
+  initialCountPerCamp: 1000
   hotkeySpawnCount: 10
   enableAutomaticTroops: 1
   redPreviewStartFrame: 0
