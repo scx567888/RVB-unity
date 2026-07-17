@@ -1,4 +1,6 @@
-﻿namespace rvb.scripts {
+﻿using UnityEngine;
+
+namespace rvb.scripts {
     public class SheepCtl {
         public ComMatch comMatch=new ComMatch();
         public ComUIAnim comUIAnim=new ();
@@ -31,9 +33,19 @@
     }
 
     public class CameraCtl {
+        public CameraCtlCamera camera=new CameraCtlCamera();
+
         public void onShake(int shockBeginNumber) {
             
         }
+    }
+
+    public class CameraCtlCamera {
+        public CameraCtlCameraNode node=new CameraCtlCameraNode();
+    }
+
+    public class CameraCtlCameraNode {
+        public Vector3 eulerAngles=new Vector3();
     }
 
 }

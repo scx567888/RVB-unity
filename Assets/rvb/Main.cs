@@ -47,6 +47,7 @@ namespace rvb {
         private ScxSpriteRenderer scxSpriteRenderer1;
         private string[] spriteNames;
         private SheepMgr sheepMgr;
+        private SheepCtl sheepCtl=new SheepCtl();
 
         // SheepMgr 的 PetView.index 是稳定的对象池槽位，适合绑定渲染单元。
         private readonly Dictionary<string, ScxSpriteRenderUnit> roleRenderers = new Dictionary<string, ScxSpriteRenderUnit>();
@@ -165,7 +166,7 @@ namespace rvb {
             int stepCount = 0;
             while (logicAccumulator >= logicStepSeconds &&
                    stepCount < maxLogicStepsPerUnityFrame) {
-                sheepMgr.game_update(sheepMgr, null, logicStepMilliseconds);
+                sheepMgr.game_update(sheepMgr, sheepCtl, logicStepMilliseconds);
 
                 if (renderBossMarkers) {
                     SyncBossMarker(0);

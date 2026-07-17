@@ -656,7 +656,7 @@ namespace rvb.scripts {
 
             } catch (Exception err) {
                 Debug.LogError("update逻辑错误 "+ err);
-                throw err;
+                throw;
             }
         }
 // todo
@@ -676,151 +676,211 @@ namespace rvb.scripts {
             }, 1);
         }
 // todo
-        public void update_merge_workers(SheepMgr manager, SheepCtl sheepCtl, float deltaMs) {
-            if (manager == null) manager = this;
-            long now = NowMs();
+        public void update_merge_workers(SheepMgr sheepMgr, SheepCtl sheepCtl, float dt) {
 
-            mainClearBlocks();
-            OnFrameBlockStart?.Invoke();
-            IgnoreExternal(() => sheepCtl.comImages.mesh_block.onFrameUpdateStart());
+        var isEnd = false;
 
-            if (manager.endTime > 0 && manager.endTime < now) {
-                manager.endTime = 0;
-                RaiseRoomEnd();
-                return;
+        var now = NowMs();
+
+        this.mainClearBlocks();
+        sheepCtl.comImages.mesh_block.onFrameUpdateStart();
+
+
+        if (sheepMgr.endTime!=0 && sheepMgr.endTime < NowMs()) {
+            eventBus.emit(EventType.RoomStateEnd);
+            isEnd = true;
+            sheepMgr.endTime = 0;
+            return;
+        }
+
+
+        sheepMgr.countNewBuffs = new[] { 0, 0 };
+        sheepMgr.countBuffs = new[] { 0, 0 };
+        sheepMgr.countShowBuffs = new[] { 0, 0 };
+
+        // console.log(sheepMgr.buffs)
+        for (var i = 0; i < sheepMgr.buffs.Length; i++) {
+            var r=sheepMgr.buffs[i];
+            var s=i;
+            if (r.Count!=0 && r[0].time < sheepMgr.gameStartTimerForBuff) {
+                r.RemoveAt(0);
+                sheepMgr.buffs[s] = r;
             }
 
-            Array.Clear(manager.countNewBuffs, 0, 2);
-            Array.Clear(manager.countBuffs, 0, 2);
-            Array.Clear(manager.countShowBuffs, 0, 2);
-
-            for (int camp = 0; camp < 2; camp++) {
-                List<Buff> activeBuffs = manager.buffs[camp];
-                while (activeBuffs.Count > 0 && activeBuffs[0].time < manager.gameStartTimerForBuff) {
-                    activeBuffs.RemoveAt(0);
-                }
-
-                foreach (Buff buff in activeBuffs) {
-                    manager.countBuffs[camp] += buff.count != 0
-                        ? buff.count
-                        : SheepConfig.counterBuffNumber;
-                    manager.countShowBuffs[camp] += buff.count;
-                }
+            foreach (var o in r) {
+                sheepMgr.countBuffs[s] += o.count!=0 ?o.count : SheepConfig.counterBuffNumber;
+                sheepMgr.countShowBuffs[s] += o.count;
+            }
+        }
+        
+        for (var i = 0; i < sheepMgr.preBuffs.Length; i++) {
+            var r=sheepMgr.preBuffs[i];
+            var s=i;
+            
+            if (r.Count==0) {
+                continue;
             }
 
-            for (int camp = 0; camp < 2; camp++) {
-                List<int> pending = manager.preBuffs[camp];
-                if (pending.Count == 0) continue;
+            var sum = 0;
+            var hasZero = false;
 
-                int sum = 0;
-                bool hasCounterMarker = false;
-                foreach (int value in pending) {
-                    if (value == 0) hasCounterMarker = true;
-                    sum += value;
+            foreach (var f in r) {
+                if (0 == f) {
+                    hasZero = true;
                 }
 
-                if (hasCounterMarker) {
-                    manager.buffs[camp].Add(new Buff {
-                        time = Mathf.RoundToInt(manager.gameStartTimerForBuff + 1000f * SheepConfig.counterTime),
-                        count = 0
+                sum += f;
+            }
+
+            if (hasZero) {
+
+                sheepMgr.buffs[s].Add(new Buff(){
+                    time= (int)(sheepMgr.gameStartTimerForBuff + 1000 * SheepConfig.counterTime),
+                    count= 0
+                });
+
+                if (r.Count > 1) {
+                    sheepMgr.buffs[s].Add(new Buff(){
+                        time= (int)(sheepMgr.gameStartTimerForBuff + 1000 * SheepConfig.buffLastTime),
+                        count= sum
                     });
-                    if (pending.Count > 1) {
-                        manager.buffs[camp].Add(new Buff {
-                            time = Mathf.RoundToInt(manager.gameStartTimerForBuff + 1000f * SheepConfig.buffLastTime),
-                            count = sum
-                        });
-                    }
-                }
-                else {
-                    manager.buffs[camp].Add(new Buff {
-                        time = Mathf.RoundToInt(manager.gameStartTimerForBuff + 1000f * SheepConfig.buffLastTime),
-                        count = sum
-                    });
                 }
 
-                pending.Clear();
-                manager.countNewBuffs[camp] += sum;
+            } else {
+                sheepMgr.buffs[s].Add(new Buff(){
+                    time= (int)(sheepMgr.gameStartTimerForBuff + 1000 * SheepConfig.buffLastTime),
+                    count= sum
+                });
             }
 
-            if (updateBoss(manager, sheepCtl, deltaMs, now)) return;
+            sheepMgr.preBuffs[s] = new List<int>();
+            sheepMgr.countNewBuffs[s] += sum;
 
-            List<PetView> allPets = new List<PetView>(manager.pets[0].Count + manager.pets[1].Count);
-            allPets.AddRange(manager.pets[0]);
-            allPets.AddRange(manager.pets[1]);
 
-            int redActiveBuffAnimCount = 0;
-            int blueActiveBuffAnimCount = 0;
+        }
 
-            foreach (PetView source in allPets) {
-                if (source == null || source.buff_index == -1 || source.view_pet == null) continue;
+        isEnd = this.updateBoss(sheepMgr, sheepCtl, dt, now);
 
-                source.updateSkin(sheepCtl, this, manager, deltaMs);
-                PetView view = source.view_pet;
-                if (view == null) continue;
+        if (isEnd) {
+            return;
+        }
 
-                SheepRoleState roleState = view.state;
-                int animationFrameCount = ResolveAnimationFrameCount(source, sheepCtl);
-                int lastFrame = Math.Max(0, animationFrameCount - 1);
+        var h = new List<PetView>();
+        foreach (var e in sheepMgr.pets) {
+            foreach (var e1 in e) {
+                h.Add(e1);
+            }
+        }
 
-                if (roleState == SheepRoleState.In && view.animFrame >= lastFrame) {
-                    if (SheepSkill.TryGetById(view.readySkillId, out SheepSkill skill)) {
-                        if (skill.skillType == SheepSkillType.Boom) {
-                            SheepSkillSubBoom boom = SheepSkillSubBoom.getById(skill.id);
-                            view.state = SheepRoleState.Boom;
-                            view.animType = boom.isAnim != 0 ? SheepRoleAnimType.Boom : SheepRoleAnimType.Idle;
+        var _ = false;
+        if (!sheepMgr.cameraEulerAngles.Equals(sheepCtl.cameraCtl.camera.node.eulerAngles)) {
+            _ = true;
+            sheepMgr.cameraEulerAngles = sheepCtl.cameraCtl.camera.node.eulerAngles;
+        }
+
+        var b = 0;
+        var I = 0;
+
+        var x = h;
+
+        for (var B = 0; B < x.Count; B++) {
+            var y = x[B];
+            if (y.buff_index == -1) {
+                continue;
+            }
+
+            y.updateSkin(sheepCtl, this, sheepMgr, dt);
+
+            int[] M;
+            var D = y.view_pet;
+            var A = D.state;
+            var P = D.animType;
+            var W = D.animFrame;
+
+            var fgs = sheepCtl.comImages.roles_framess[(int)y.camp];
+
+            var ghg = fgs[(int)y.skinId];
+
+            M = ghg[(int)P];
+
+            if (null == M) {
+                Debug.LogError("找不到动画 "+ y.camp + " "+ y.skinId+" "+ P);
+            }
+
+            if (A == SheepRoleState.In && W >= M.Length - 1) {
+                var E = SheepSkill.getById(D.readySkillId);
+                if (E!=null) {
+                    if (E.skillType == SheepSkillType.Boom) {
+                        var F = SheepSkillSubBoom.getById(E.id);
+                        D.state = SheepRoleState.Boom;
+                        if (F.isAnim!=0) {
+                            D.animType = SheepRoleAnimType.Boom;
+                        } else {
+                            D.animType = SheepRoleAnimType.Idle;
                         }
                     }
-                    else {
-                        view.state = SheepRoleState.Move;
-                        view.animType = SheepRoleAnimType.Idle;
-                    }
+                } else {
+                    D.state = SheepRoleState.Move;
+                    D.animType = SheepRoleAnimType.Idle;
                 }
-                else if (roleState == SheepRoleState.Dead && view.animFrame >= lastFrame) {
-                    view.state = SheepRoleState.Res;
-                    view.animType = SheepRoleAnimType.None;
-                    source.onRes(sheepCtl, manager);
-                }
-                else if (roleState == SheepRoleState.Up && view.animFrame >= lastFrame) {
-                    view.state = SheepRoleState.In;
-                    view.animType = SheepRoleAnimType.In;
-                }
-                else if (roleState == SheepRoleState.Buff) {
-                    SheepSkillSubBuff buff = SheepSkillSubBuff.getById(view.readySkillId);
-                    if (view.animFrame > buff.buffStratFrame && view.animFrame < buff.buffEndFrame) {
-                        if (source.camp == SheepCamp.Blue) blueActiveBuffAnimCount++;
-                        else redActiveBuffAnimCount++;
-                    }
-                }
-            }
-
-            for (int index = 0; index < bulletCount; index++) {
-                BulletView bullet = getBulletView(index);
-                if (bullet == null || bullet.isDie || bullet.conf == null) continue;
-
-                if (bullet.frame >= bullet.conf.endFrame) {
-                    bullet.isDie = true;
-                    buff_del_bullet(index);
-                    continue;
-                }
-
-                PetView owner = getPetView(bullet.roleIndex);
-                int split = owner?.conf?.splitN ?? 0;
-                for (int x = -split; x <= split; x++) {
-                    for (int y = -split; y <= split; y++) {
-                        int blockIndex = Util.getIndexByXY(bullet.x + x, bullet.y + y);
-                        IgnoreExternal(() => sheepCtl.comImages.mesh_block.addFrameBlockCamp(blockIndex, bullet.camp));
+            } else if (A == SheepRoleState.Dead && W >= M.Length - 1) {
+                D.state = SheepRoleState.Res;
+                D.animType = SheepRoleAnimType.None;
+                y.onRes(sheepCtl, sheepMgr);
+            } else if (A == SheepRoleState.Up && W >= M.Length - 1) {
+                D.state = SheepRoleState.In;
+                D.animType = SheepRoleAnimType.In;
+            } else if (A == SheepRoleState.Buff) {
+                var V = SheepSkillSubBuff.getById(D.readySkillId);
+                var U = D.animFrame;
+                if (U > V.buffStratFrame && U < V.buffEndFrame) {
+                    if (y.camp == SheepCamp.Blue) {
+                        I += 1;
+                    } else {
+                        b += 1;
                     }
                 }
             }
 
-            mainSyncBlocksToWokers();
-            OnFrameBlockEnd?.Invoke(manager);
-            IgnoreExternal(() => sheepCtl.comImages.mesh_block.onFrameUpdateEnd(manager));
+        }
 
-            redBuffCount = redActiveBuffAnimCount;
-            blueBuffCount = blueActiveBuffAnimCount;
-            roleMaxIndex = petCount;
-            bulletMaxIndex = bulletCount;
+        var j = 0;
+        for (var G = 0; G < this.bulletCount; ++G) {
+            var X = this.getBulletView(G);
+            if (X.isDie) {
+                continue;
+            }
+
+            if (X.frame >= X.conf.endFrame) {
+                X.isDie = true;
+                this.buff_del_bullet(G);
+            } else {
+
+                var z = this.getPetView(X.roleIndex).conf.splitN;
+
+                for (var O = -z; O <= z; ++O) {
+                    for (var Q = -z; Q <= z; ++Q) {
+                        var Z = Util.getIndexByXY(X.x + O, X.y + Q);
+                        sheepCtl.comImages.mesh_block.addFrameBlockCamp(Z, X.camp);
+                    }
+                }
+
+                ++j;
+            }
+        }
+
+        this.mainSyncBlocksToWokers();
+        sheepCtl.comImages.mesh_block.onFrameUpdateEnd(sheepMgr);
+        this.redBuffCount = b;
+        this.blueBuffCount = I;
+
+        if (isEnd) {
+            return;
+        }
+
+        this.roleMaxIndex = this.petCount;
+        this.bulletMaxIndex = this.bulletCount;
+
         }
 // todo
         private void InitializeBossView(SheepCamp camp) {

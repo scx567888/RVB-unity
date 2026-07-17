@@ -2,8 +2,8 @@
 
 namespace rvb.scripts {
     public class ComImages {
-        public MeshBlock mesh_block;
-        public int[][][][] roles_framess;
+        public MeshBlock mesh_block=new MeshBlock();
+        public int[][][][] roles_framess=new int[][][][]{};
 
         public void addBullet(BulletView bullet) {
             Debug.Log("addBullet");
