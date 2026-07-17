@@ -668,23 +668,7 @@ namespace rvb.scripts {
                 throw;
             }
         }
-// todo
-        private int ResolveAnimationFrameCount(PetView source, SheepCtl sheepCtl) {
-            if (source?.view_pet == null) return 1;
-            if (AnimationFrameCountResolver != null) {
-                int count = AnimationFrameCountResolver(source.view_pet);
-                if (count > 0) return count;
-            }
 
-            return ReadExternal(() => {
-                int camp = CampIndex(source.camp);
-                int skin = source.skinId ?? 0;
-                int anim = (int)source.view_pet.animType;
-                var frames = sheepCtl.comImages.roles_framess[camp][skin][anim];
-                return Math.Max(1, Convert.ToInt32(frames.Length));
-            }, 1);
-        }
-// todo
         public void update_merge_workers(SheepMgr sheepMgr, SheepCtl sheepCtl, float dt) {
 
         var isEnd = false;
