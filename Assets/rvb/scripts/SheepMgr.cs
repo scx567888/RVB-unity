@@ -1773,7 +1773,7 @@ namespace rvb.scripts {
                 petSkin.animType = SheepRoleAnimType.Idle;
             }
         }
-// todo
+
         public void update_role_state_callbullets(PetView petSkin) {
             var t = petSkin.animFrame;
         var i = SheepSkill.getById(petSkin.readySkillId);
