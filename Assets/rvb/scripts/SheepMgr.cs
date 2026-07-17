@@ -432,13 +432,15 @@ namespace rvb.scripts {
 
             return bullet;
         }
-// todo
-        public BulletView getBulletPreView(int index) {
-            if (index < 0 || index >= SheepConfig.MaxBulletCount) return null;
-            BulletView bullet = pre_view_bullets[index];
-            if (bullet == null) {
+
+        public BulletView getBulletPreView(int e) {
+            if (e < 0 || e >= SheepConfig.MaxBulletCount) {
+                return null;
+            }
+            var bullet = this.pre_view_bullets[e];
+            if (bullet==null) {
                 bullet = new BulletView();
-                pre_view_bullets[index] = bullet;
+                this.pre_view_bullets[e] = bullet;
             }
 
             return bullet;
