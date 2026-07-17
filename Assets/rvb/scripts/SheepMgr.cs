@@ -1822,11 +1822,11 @@ namespace rvb.scripts {
                 petSkin.animType = SheepRoleAnimType.Idle;
             }
         }
-// todo
+
         public void update_role_state_buff(PetView petSkin) {
-            SheepSkill skill = SheepSkill.getById(petSkin.readySkillId);
-            SheepSkillSubBuff config = SheepSkillSubBuff.getById(skill.id);
-            if (petSkin.animFrame >= config.endFrame) {
+            var t = petSkin.animFrame;
+            var i = SheepSkill.getById(petSkin.readySkillId);
+            if(t >= SheepSkillSubBuff.getById(i.id).endFrame) {
                 petSkin.state = SheepRoleState.Move;
                 petSkin.subState = SheepRoleSubState.MoveBoss;
                 petSkin.animType = SheepRoleAnimType.Idle;
