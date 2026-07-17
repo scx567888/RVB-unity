@@ -62,7 +62,7 @@ namespace rvb {
         private SheepMgr sheepMgr;
 
         // SheepMgr 的 PetView.index 是稳定的对象池槽位，适合绑定渲染单元。
-        private readonly Dictionary<int, Pet> roleRenderers = new Dictionary<int, Pet>();
+        private readonly Dictionary<int, ScxSpriteRenderUnit> roleRenderers = new Dictionary<int, ScxSpriteRenderUnit>();
         private readonly HashSet<int> seenRoleSlots = new HashSet<int>();
         private readonly List<int> staleRoleSlots = new List<int>();
 
@@ -72,6 +72,7 @@ namespace rvb {
         private readonly List<int> staleBulletIds = new List<int>();
 
         private float logicAccumulator;
+        private LoadRoleResult loadRoleResult;
 
         private void Start() {
             if (texture == null || json == null || mainMaterial == null) {
@@ -80,18 +81,18 @@ namespace rvb {
                 return;
             }
 
-            var atlas = SheepSpriteAtlasLoader.loadRole(texture, json.text);
+            this.loadRoleResult = SheepSpriteAtlasLoader.loadRole(texture, json.text);
             scxSpriteRenderer = new ScxSpriteRenderer(
-                atlas,
-                100,
+                loadRoleResult.spriteAtlas,
+                30,
                 mainMaterial,
                 Mathf.Max(5000, initialCountPerCamp * 4)
             );
             
-            var atlas1 = SheepSpriteAtlasLoader.loadRole(texture1, json1.text);
+            var loadRoleResult1 = SheepSpriteAtlasLoader.loadRole(texture1, json1.text);
             scxSpriteRenderer1 = new ScxSpriteRenderer(
-                atlas1,
-                100,
+                loadRoleResult1.spriteAtlas,
+                30,
                 mainMaterial,
                 Mathf.Max(5000, initialCountPerCamp * 4)
             );
@@ -222,7 +223,7 @@ namespace rvb {
             int slot = view.index;
             seenRoleSlots.Add(slot);
 
-            if (!roleRenderers.TryGetValue(slot, out Pet renderPet)) {
+            if (!roleRenderers.TryGetValue(slot, out ScxSpriteRenderUnit renderPet)) {
                 ScxSpriteRenderUnit unit = null;
                 if (view.camp==SheepCamp.Red) {
                     unit = scxSpriteRenderer.createUnit();
@@ -234,10 +235,10 @@ namespace rvb {
                 }
                 unit.setRotationFromEuler(45,0,0);
 
-                int initialFrame = ResolveRoleSpriteFrame(view);
+                var initialFrame = ResolveRoleSpriteFrame(view);
                 unit.setFrame(initialFrame);
 
-                renderPet = new Pet(unit, initialFrame);
+                renderPet = unit;
                 roleRenderers.Add(slot, renderPet);
             }
 
@@ -245,12 +246,11 @@ namespace rvb {
             float worldY = view.animZ * logicHeightToWorldScale;
             float worldZ = view.animY * logicToWorldScale;
 
-            renderPet.renderUnit.setVisible(true);
-            renderPet.renderUnit.setPosition(worldX, worldY, worldZ);
+            renderPet.setVisible(true);
+            renderPet.setPosition(worldX, worldY, worldZ);
 
-            int frameIndex = ResolveRoleSpriteFrame(view);
-            renderPet.frameIndex = frameIndex;
-            renderPet.renderUnit.setFrame(frameIndex);
+            var frameIndex = ResolveRoleSpriteFrame(view);
+            renderPet.setFrame(frameIndex);
         }
 
         private void HandleBulletRender(BulletView bullet) {
@@ -272,26 +272,19 @@ namespace rvb {
                 bulletRenderers.Add(id, renderPet);
             }
 
-            float worldX = bullet.x * logicToWorldScale;
-            float worldY = bullet.z * logicHeightToWorldScale;
-            float worldZ = bullet.y * logicToWorldScale;
-
             renderPet.renderUnit.setVisible(true);
-            renderPet.renderUnit.setPosition(worldX, worldY, worldZ);
 
             int frameIndex = ResolveBulletSpriteFrame(bullet);
             renderPet.frameIndex = frameIndex;
             renderPet.renderUnit.setFrame(frameIndex);
         }
 
-        private int ResolveRoleSpriteFrame(PetView view) {
-            int start = view.camp == SheepCamp.Red
-                ? redPreviewStartFrame
-                : bluePreviewStartFrame;
-
-            int count = Mathf.Max(1, previewFrameCount);
-            int localFrame = PositiveModulo(view.animFrame, count);
-            return ClampSpriteIndex(start + localFrame);
+        private string ResolveRoleSpriteFrame(PetView view) {
+            
+            var i = loadRoleResult.animFrame[(int)view.animType];
+            
+            int localFrame = PositiveModulo(view.animFrame, i);
+            return ((int)(view.animType))+"-" +localFrame;
         }
 
         private int ResolveBulletSpriteFrame(BulletView bullet) {
@@ -325,14 +318,14 @@ namespace rvb {
         private void RecycleMissingRoleRenderers() {
             staleRoleSlots.Clear();
 
-            foreach (KeyValuePair<int, Pet> pair in roleRenderers) {
+            foreach (KeyValuePair<int, ScxSpriteRenderUnit> pair in roleRenderers) {
                 if (!seenRoleSlots.Contains(pair.Key)) {
                     staleRoleSlots.Add(pair.Key);
                 }
             }
 
             foreach (int slot in staleRoleSlots) {
-                Pet renderPet = roleRenderers[slot];
+                var renderPet = roleRenderers[slot];
                 roleRenderers.Remove(slot);
                 renderPet.destroy();
             }
@@ -395,7 +388,7 @@ namespace rvb {
         }
 
         private void ClearAllRenderUnits() {
-            foreach (Pet renderPet in roleRenderers.Values) {
+            foreach (var renderPet in roleRenderers.Values) {
                 renderPet.destroy();
             }
             roleRenderers.Clear();
