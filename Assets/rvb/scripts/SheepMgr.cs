@@ -1066,13 +1066,12 @@ namespace rvb.scripts {
                 source.init(index, view);
             }
         }
-// todo
-        public void buff_del_pet(int index) {
-            PetView pet = getPetView(index);
-            if (pet == null) return;
+
+        public void buff_del_pet(int e) {
+            var pet = this.getPetView(e);
             pet.isDie = true;
             pet.id = 0;
-            petsDel.Push(index);
+            this.petsDel.Push(e);
         }
 // todo
         public void clear_pets() {
