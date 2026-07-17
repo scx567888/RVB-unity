@@ -7,6 +7,7 @@ using UnityEngine;
 using static rvb.scripts.BullteCreate;
 using static rvb.scripts.SheepModes;
 using static rvb.scripts.EventBus;
+using Random = UnityEngine.Random;
 
 namespace rvb.scripts {
     /// <summary>
@@ -2498,34 +2499,46 @@ namespace rvb.scripts {
                 if (source.count <= 0) callInfo.pets.RemoveAt(0);
             }
         }
-// todo
-        public Vector3 getPetStartEndPos(int roleId, SheepCamp camp) {
-            Dictionary<int, int> counts = petStartCounts[CampIndex(camp)];
-            counts.TryGetValue(roleId, out int count);
-            counts[roleId] = count + 1;
 
-            SheepRoleTypeInfo roleConfig = SheepRoleTypeInfo.getById(roleId);
-            SheepRoleFormation formation = SheepRoleFormation.getById(roleConfig.formationId);
-            int itemNumY = Math.Max(1, formation.preItemNumY);
-            float x = formation.preStartX + Mathf.FloorToInt(count / (float)itemNumY) * formation.preItemX;
-            int itemIndex = count % itemNumY;
-            float y;
-
-            if (itemNumY % 2 == 0) {
-                y = itemIndex % 2 == 0
-                    ? formation.preItemY * Mathf.FloorToInt(itemIndex / 2f) + formation.preItemY / 2f
-                    : -formation.preItemY * Mathf.FloorToInt(itemIndex / 2f) - formation.preItemY / 2f;
+        public Vector3 getPetStartEndPos(int petId, SheepCamp camp) {
+            var petStartCount = this.petStartCounts[(int)camp];
+            var a = petStartCount.GetValueOrDefault(petId,0);
+            petStartCount[petId]= a + 1;
+            var sheepRoleTypeInfo = SheepRoleTypeInfo.getById(petId);
+            if (sheepRoleTypeInfo==null) {
+                Debug.LogError("SheepMgr.getPetStartEndPos roleId=" + petId + " not found");
             }
-            else {
-                y = itemIndex % 2 == 0
-                    ? formation.preItemY * Mathf.FloorToInt(itemIndex / 2f)
-                    : -formation.preItemY * Mathf.FloorToInt(itemIndex / 2f + 1f);
+            var sheepRoleFormation = SheepRoleFormation.getById(sheepRoleTypeInfo.formationId);
+            if (sheepRoleFormation==null) {
+                Debug.LogError("SheepMgr.getPetStartEndPos formationId=" + sheepRoleTypeInfo.formationId + " not found");
+            }
+            var c = sheepRoleFormation.preItemNumY;
+            var l = sheepRoleFormation.preItemX;
+            var u = sheepRoleFormation.preItemY;
+            var h = sheepRoleFormation.preStartX + Math.Floor((double)(a / c)) * l;
+            var m = Math.Floor((double)(a % c));
+            var d = 0;
+            if (c % 2 == 0) {
+                if (m % 2 == 0) {
+                    d = (int)(u * Math.Floor(m / 2) + u / 2);
+                } else {
+                    d = (int)(-u * Math.Floor(m / 2) - u / 2);
+                }
+            } else {
+                if (m % 2 == 0) {
+                    d = (int)(u * Math.Floor(m / 2));
+                } else {
+                    d = (int)(-u * Math.Floor(m / 2 + 1));
+                }
             }
 
-            if (camp == SheepCamp.Red) x *= -1f;
-            return new Vector3(x, y + UnityEngine.Random.Range(-1f, 1f), 0f);
+            if (camp == SheepCamp.Red) {
+                h *= -1;
+            }
+
+            return new Vector3((float)h, d + Random.Range(-1, 1), 0);
         }
-// todo
+
         public void clearCallPets() {
             redCallInfos.Clear();
             blueCallInfos.Clear();
