@@ -2281,28 +2281,27 @@ namespace rvb.scripts {
             OnRoleRender(e);
         }
 // todo
-        public void produce_pets(int typeId, int count, SheepCamp camp) {
-            if (count <= 0) return;
-            Dictionary<int, SheepCallInfo> callInfos = camp == SheepCamp.Red ? redCallInfos : blueCallInfos;
+        public void produce_pets(int typeID, int count, SheepCamp camp) {
+            // 根据阵营 获取 map
+            var callInfos = camp == SheepCamp.Red ? this.redCallInfos : this.blueCallInfos;
 
-            if (!callInfos.TryGetValue(typeId, out SheepCallInfo callInfo)) {
-                callInfo = new SheepCallInfo {
-                    camp = camp,
-                    type = typeId,
-                    count = 0,
-                    frame = 0,
-                    count_line = 0,
-                    items = Array.Empty<int>(),
-                    pets = new List<SheepCallInfoPet>()
-                };
-                callInfos.Add(typeId, callInfo);
+            // 没有就创建一个 然后加进去
+            if (!callInfos.TryGetValue(typeID,out  SheepCallInfo sheepCallInfo)) {
+                sheepCallInfo = new SheepCallInfo();
+                sheepCallInfo.camp = camp;
+                sheepCallInfo.type = typeID;
+                sheepCallInfo.count = 0;
+                sheepCallInfo.frame = 0;
+                sheepCallInfo.count_line = 0;
+
+                sheepCallInfo.items = new int[]{};
+                sheepCallInfo.pets = new List<SheepCallInfoPet>();
+                callInfos[typeID] = sheepCallInfo;
             }
 
-            callInfo.count += count;
-            callInfo.pets.Add(new SheepCallInfoPet {
-                camp = camp,
-                count = count
-            });
+            // todo 爆炸是什么意思? 用什么用?
+            sheepCallInfo.count += count;
+            sheepCallInfo.pets.Add(new SheepCallInfoPet() { camp = camp, count = count });
         }
 // todo
         public void consume(SheepCtl sheepCtl, float t) {
@@ -2329,7 +2328,7 @@ namespace rvb.scripts {
                 var a = ee.Key;
                 
                 if (o1.count <= 0) {
-                    return;
+                    continue;
                 }
 
                 var c = SheepRoleTypeInfo.getById(a);
@@ -2339,17 +2338,17 @@ namespace rvb.scripts {
 
                 if (c.roleType == SheepRoleType.xiao_bing) {
                     if (u > 14500) {
-                        return;
+                        continue;
                     }
                 } else if (c.roleType == SheepRoleType.ci_ke && u > 9500) {
-                    return;
+                    continue;
                 }
 
                 o1.frame += 1;
 
                 // 限制每帧生成的单位
                 if (o1.frame <= formation.frameItemX) {
-                    return;
+                    continue;
                 }
 
                 o1.frame = 0;
