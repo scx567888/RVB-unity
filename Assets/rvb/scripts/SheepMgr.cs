@@ -2828,23 +2828,6 @@ namespace rvb.scripts {
         }
 // todo
         public static int CampIndex(SheepCamp camp) => (int)camp;
-// todo
-        public static int RoleTypeIndex(SheepRoleType roleType) => (int)roleType;
-// todo
-        public void EnsurePerfCapacity(int roleIndex) {
-            if (roleIndex < 0) return;
-            if (roleIndex >= perfStat.redNums.Length) {
-                Array.Resize(ref perfStat.redNums, roleIndex + 4);
-            }
 
-            if (roleIndex >= perfStat.blueNums.Length) {
-                Array.Resize(ref perfStat.blueNums, roleIndex + 4);
-            }
-        }
-
-        // todo
-        public void RaiseRoomEnd() {
-            OnRoomStateEnd?.Invoke();
-        }
     }
 }
