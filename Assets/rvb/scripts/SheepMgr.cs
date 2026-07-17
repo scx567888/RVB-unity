@@ -385,10 +385,10 @@ namespace rvb.scripts {
             this.cur_rob_bullet_index += t;
             return old;
         }
-// todo
-        public int rob_pre_bullet(int count) {
-            int old = preBulletIndex;
-            preBulletIndex += count;
+
+        public int rob_pre_bullet(int t) {
+            var old = this.preBulletIndex;
+            this.preBulletIndex += t;
             return old;
         }
 // todo
