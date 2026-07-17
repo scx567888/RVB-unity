@@ -279,7 +279,7 @@ MonoBehaviour:
   mainMaterial: {fileID: 2100000, guid: de552a8032c24a2b826d1da4ff7198d9, type: 2}
   highlightMaterial: {fileID: 2100000, guid: 354b83e8760f5654f86b342c00b5e4a2, type: 2}
   logicFPS: 30
-  maxLogicStepsPerUnityFrame: 4
+  maxLogicStepsPerUnityFrame: 6
   logicToWorldScale: 0.01
   logicHeightToWorldScale: 0.01
   fallbackLogicalAnimationFrames: 30
@@ -288,15 +288,10 @@ MonoBehaviour:
   initialCountPerCamp: 1000
   hotkeySpawnCount: 10
   enableAutomaticTroops: 1
-  redPreviewStartFrame: 0
-  bluePreviewStartFrame: 0
-  previewFrameCount: 1
   renderBossMarkers: 1
   renderBulletMarkers: 0
   bulletPreviewStartFrame: 0
   bulletPreviewFrameCount: 1
-  enableRotate: 0
-  rotateSpeed: 1
 --- !u!1 &888998431
 GameObject:
   m_ObjectHideFlags: 0

@@ -37,24 +37,11 @@ namespace rvb {
         [SerializeField] private int hotkeySpawnCount = 10;
         [SerializeField] private bool enableAutomaticTroops = false;
 
-        [Header("Temporary Atlas Mapping")]
-        [Tooltip("红方预览动画在 spriteNames 中的起始下标")]
-        [SerializeField] private int redPreviewStartFrame = 0;
-
-        [Tooltip("蓝方预览动画在 spriteNames 中的起始下标")]
-        [SerializeField] private int bluePreviewStartFrame = 0;
-
-        [Tooltip("从起始下标开始循环多少帧。第一轮测试可以先设为 1。")]
-        [SerializeField] private int previewFrameCount = 1;
 
         [SerializeField] private bool renderBossMarkers = true;
         [SerializeField] private bool renderBulletMarkers = false;
         [SerializeField] private int bulletPreviewStartFrame = 0;
         [SerializeField] private int bulletPreviewFrameCount = 1;
-
-        [Header("View")]
-        [SerializeField] private bool enableRotate = false;
-        [SerializeField] private float rotateSpeed = 1f;
 
         private ScxSpriteRenderer scxSpriteRenderer;
         private ScxSpriteRenderer scxSpriteRenderer1;
@@ -100,11 +87,7 @@ namespace rvb {
             spriteNames = scxSpriteRenderer.getSpriteNames();
             scxSpriteRenderer.setParent(gameObject);
 
-            if (spriteNames == null || spriteNames.Length == 0) {
-                Debug.LogError("RVB: 图集中没有任何 Sprite 帧。");
-                enabled = false;
-                return;
-            }
+         
 
             BindSheepMgr();
             StartBattle();
@@ -151,7 +134,6 @@ namespace rvb {
         }
 
         private void Update() {
-            UpdateRotate();
             UpdateHotkeys();
 
             if (sheepMgr == null || scxSpriteRenderer == null) {
@@ -375,16 +357,6 @@ namespace rvb {
             }
 
             sheepMgr.produce_pets(roleId, count, camp);
-        }
-
-        private void UpdateRotate() {
-            if (!enableRotate) {
-                return;
-            }
-
-            Vector3 euler = transform.eulerAngles;
-            euler.y += rotateSpeed * Time.deltaTime;
-            transform.eulerAngles = euler;
         }
 
         private void ClearAllRenderUnits() {
