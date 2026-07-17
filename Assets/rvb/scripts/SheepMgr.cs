@@ -626,42 +626,37 @@ namespace rvb.scripts {
                 }
             }
         }
-// todo
-        public void game_update(SheepMgr manager, SheepCtl sheepCtl, float deltaMs) {
-            if (manager == null) manager = this;
+
+        public void game_update(SheepMgr sheepMgr, SheepCtl sheepCtl, float i) {
             try {
-                if (advanceGameClockInGameUpdate && manager.state == SheepRoomState.Run) {
-                    manager.gameStartTimerForBuff += deltaMs;
-                }
+                // 处理召唤兵
+                this.consume(sheepCtl, i);
 
-                consume(sheepCtl, deltaMs);
-                buff_add_pets();
-                buff_add_bullets();
+                this.buff_add_pets();
 
-                int unitCount = manager.pets[0].Count + manager.pets[1].Count;
-                if (unitCount <= 0 && manager.petCount <= 2) {
-                    update_merge_workers(manager, sheepCtl, deltaMs);
+                this.buff_add_bullets();
+
+                // 要处理的总数量
+                var n = sheepMgr.pets[(int)SheepCamp.Red].Count + sheepMgr.pets[(int)SheepCamp.Blue].Count;
+                if (n <= 0) {
                     return;
                 }
 
-                cur_rob_role_index = 0;
-                cur_rob_bullet_index = 0;
+                this.cur_rob_role_index = 0;
+                this.cur_rob_bullet_index = 0;
 
-                if (comImages != null) {
-                    curIndexImages = ReadExternal<CurIndexImages>(() => comImages.startAdd(), null);
-                }
+                this.curIndexImages = this.comImages.startAdd();
 
-                role_logic();
+                // 执行主逻辑
+                this.role_logic();
 
-                if (comImages != null) {
-                    IgnoreExternal(() => comImages.endAdd());
-                }
+                this.comImages.endAdd();
 
-                update_merge_workers(manager, sheepCtl, deltaMs);
-            }
-            catch (Exception exception) {
-                Debug.LogError("update逻辑错误: " + exception);
-                throw;
+                this.update_merge_workers(sheepMgr, sheepCtl, i);
+
+            } catch (Exception err) {
+                Debug.LogError("update逻辑错误 "+ err);
+                throw err;
             }
         }
 // todo
