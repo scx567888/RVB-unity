@@ -2585,33 +2585,28 @@ namespace rvb.scripts {
         }
 // todo
         public void mainPreAddBlock(int blockIndex, int buffIndex, SheepCamp camp, int collideId) {
-            if (blockIndex < 0 || blockIndex >= MaxCount) return;
-            int campIndex = CampIndex(camp);
-            int safeCollideId = Mathf.Clamp(collideId, 0, SheepConfig.MaxGroupCount - 1);
-
-            if (!pre_blocks.TryGetValue(blockIndex, out Dictionary<int, Dictionary<int, List<int>>> camps)) {
-                camps = new Dictionary<int, Dictionary<int, List<int>>>();
-                pre_blocks.Add(blockIndex, camps);
+            var o = this.pre_blocks[blockIndex];
+            if (o==null) {
+                o = new Dictionary<int, Dictionary<int, List<int>>>();
+                this.pre_blocks[blockIndex]= o;
             }
 
-            if (!camps.TryGetValue(campIndex, out Dictionary<int, List<int>> groups)) {
-                groups = new Dictionary<int, List<int>>();
-                camps.Add(campIndex, groups);
+            var l = o[(int)camp];
+            if (l==null) {
+                l = new Dictionary<int, List<int>>();
+                o[(int)camp] = l;
             }
-
-            if (!groups.TryGetValue(safeCollideId, out List<int> petIndices)) {
-                petIndices = new List<int>();
-                groups.Add(safeCollideId, petIndices);
+            var n = l[collideId];
+            if (n==null) {
+                n = new List<int>();
+                l[collideId] = n;
             }
-
-            petIndices.Add(buffIndex);
-
-            if (isChangeAckFlags != null && !isChangeAckFlags[campIndex]) {
-                isChangeAckFlags[campIndex] = true;
+            n.Add(buffIndex);
+            if (this.isChangeAckFlags!=null && false == this.isChangeAckFlags[(int)camp]) {
+                this.isChangeAckFlags[(int)camp] = true;
             }
-
-            if (isChangeCollsionFlags != null && !isChangeCollsionFlags[campIndex][safeCollideId]) {
-                isChangeCollsionFlags[campIndex][safeCollideId] = true;
+            if (this.isChangeCollsionFlags!=null && false == this.isChangeCollsionFlags[(int)camp][collideId]) {
+                this.isChangeCollsionFlags[(int)camp][collideId] = true;
             }
         }
 
