@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using static rvb.scripts.SheepMgr;
 using static rvb.scripts.SheepModes;
 
 namespace rvb.scripts {
@@ -64,6 +63,9 @@ namespace rvb.scripts {
         public int petId;
         public Vector3? pos;
         public Vector3? position;
+
+
+        public SheepMgr sheepMgr;
 
 
         public PetView(int t) {

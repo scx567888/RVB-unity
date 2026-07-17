@@ -108,7 +108,7 @@ namespace rvb {
         }
 
         private void BindSheepMgr() {
-            sheepMgr = SheepMgr.sheepMgr;
+            sheepMgr =new SheepMgr(sheepCtl);
 
             // 防止关闭 Domain Reload 后重复订阅。
             sheepMgr.OnRoleRender -= HandleRoleRender;

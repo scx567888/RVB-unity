@@ -19,7 +19,7 @@ namespace rvb.scripts {
     /// 因而可以接入你自己的 SheepCtl/渲染实现。
     /// </summary>
     public class SheepMgr {
-        public static SheepMgr sheepMgr = new SheepMgr();
+        
         public static SheepMgr inc;
 
         // 是否自动出兵
@@ -108,7 +108,7 @@ namespace rvb.scripts {
 
         public Dictionary<int, SheepCallInfo> blueCallInfos = new Dictionary<int, SheepCallInfo>();
 
-        public ComImages comImages = new ComImages();
+        public ComImages comImages;
 
         public int cur_rob_role_index;
         public int cur_rob_bullet_index;
@@ -152,7 +152,7 @@ namespace rvb.scripts {
 
         public int plotRatioIndex;
 
-        private SheepMgr() {
+        public SheepMgr(SheepCtl sheepCtl) {
             // 是否自动出兵
             this.isAutoCall = true;
 
@@ -276,7 +276,7 @@ namespace rvb.scripts {
             /**
              * @type ComSheepImages
              */
-            this.comImages = new ComImages();
+            this.comImages = sheepCtl.comImages;
 
             this.cur_rob_role_index = 0;
             this.cur_rob_bullet_index = 0;
@@ -405,6 +405,7 @@ namespace rvb.scripts {
             var pet = this.view_pets[petIndex];
             if (pet==null) {
                 pet = new PetView(petIndex);
+                pet.sheepMgr = this;
                 this.view_pets[petIndex] = pet;
             }
 
@@ -2386,11 +2387,11 @@ namespace rvb.scripts {
 
         this.autoTime += t;
 
-        if (sheepMgr.isAutoCall && this.autoTime > SheepConfig.systemAutomaticTroopsIntervalTime) {
+        if (this.isAutoCall && this.autoTime > SheepConfig.systemAutomaticTroopsIntervalTime) {
             this.autoTime = 0;
-            if (sheepMgr.pets[0].Count + sheepMgr.pets[1].Count < SheepConfig.systemLongerAutomaticallyDispatch) {
+            if (this.pets[0].Count + this.pets[1].Count < SheepConfig.systemLongerAutomaticallyDispatch) {
                 foreach (var e in new SheepCamp[]{SheepCamp.Red, SheepCamp.Blue}) {
-                    if (sheepMgr.pets[(int)e].Count < SheepConfig.systemAutomaticallyMaxTroops) {
+                    if (this.pets[(int)e].Count < SheepConfig.systemAutomaticallyMaxTroops) {
                         o.produce_pets(SheepConfig.WarmUpID, SheepConfig.systemAutomaticallyTroopsOneNumber, e);
                     }
                 }
@@ -2411,7 +2412,7 @@ namespace rvb.scripts {
                 var c = SheepRoleTypeInfo.getById(a);
                 var formation = SheepRoleFormation.getById(c.formationId);
 
-                var u = n == SheepCamp.Red ? sheepMgr.perfStat.redNums[(int)c.roleType] : sheepMgr.perfStat.blueNums[(int)c.roleType];
+                var u = n == SheepCamp.Red ? this.perfStat.redNums[(int)c.roleType] : this.perfStat.blueNums[(int)c.roleType];
 
                 if (c.roleType == SheepRoleType.xiao_bing) {
                     if (u > 14500) {
@@ -2744,7 +2745,7 @@ namespace rvb.scripts {
             return false;
         }
 // todo
-        public static PetView createPetView(
+        public PetView createPetView(
             SheepCtl sheepCtl,
             SheepCamp camp,
             int roleType,
@@ -2754,7 +2755,7 @@ namespace rvb.scripts {
             Vector3? position = null,
             bool isBoom = false
         ) {
-            SheepMgr manager = sheepMgr;
+            SheepMgr manager = this;
             if (manager == null ||
                 (manager.state != SheepRoomState.Run && manager.state != SheepRoomState.Start)) {
                 return null;
@@ -2772,7 +2773,8 @@ namespace rvb.scripts {
                 buff_index = -1,
                 view_pet = null,
                 attacher = new BuffTimeAttacher(),
-                skinId = roleConfig.animId
+                skinId = roleConfig.animId,
+                sheepMgr = this
             };
 
             SheepRoleFormation formation = SheepRoleFormation.getById(roleConfig.formationId);
