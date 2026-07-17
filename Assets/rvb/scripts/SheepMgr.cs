@@ -1832,14 +1832,14 @@ namespace rvb.scripts {
                 petSkin.animType = SheepRoleAnimType.Idle;
             }
         }
-// todo
+
         public void update_role_state_rigidity(PetView petSkin) {
-            SheepSkill skill = SheepSkill.getById(petSkin.readySkillId);
-            SheepSkillSubRigidity config = SheepSkillSubRigidity.getById(skill.id);
-            if (petSkin.animFrame >= config.endFrame) {
+            var t = SheepSkill.getById(petSkin.readySkillId);
+            var i = SheepSkillSubRigidity.getById(t.id);
+            if (petSkin.animFrame >= i.endFrame) {
                 petSkin.state = SheepRoleState.SpinAtk;
                 petSkin.animType = SheepRoleAnimType.Attack;
-                petSkin.readySkillId = config.endSkill;
+                petSkin.readySkillId = i.endSkill;
             }
         }
 // todo
