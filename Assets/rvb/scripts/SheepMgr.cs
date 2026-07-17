@@ -419,13 +419,15 @@ namespace rvb.scripts {
                 viewElement.clear();
             }
         }
-// todo
-        public BulletView getBulletView(int index) {
-            if (index < 0 || index >= SheepConfig.MaxBulletCount) return null;
-            BulletView bullet = view_bullets[index];
-            if (bullet == null) {
+
+        public BulletView getBulletView(int e) {
+            if (e < 0 || e >= SheepConfig.MaxBulletCount) {
+                return null;
+            }
+            var bullet = this.view_bullets[e];
+            if (bullet==null) {
                 bullet = new BulletView();
-                view_bullets[index] = bullet;
+                this.view_bullets[e] = bullet;
             }
 
             return bullet;
