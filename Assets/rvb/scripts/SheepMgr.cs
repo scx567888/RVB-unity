@@ -2671,11 +2671,15 @@ namespace rvb.scripts {
                 }
             }
         }
-// todo
-        public void forEachBlock(IndexLen[] blocks, int[] indices, int blockIndex, Action<int> callback) {
-            IndexLen block = getBlockByIndex(blocks, blockIndex);
-            for (int index = 0; index < block.Len; index++) {
-                callback(indices[block.Index + index]);
+
+        public void forEachBlock(IndexLen[] e, int[] t, int blockIndex, Action<int> callback) {
+            var blockByIndex = this.getBlockByIndex(e, blockIndex);
+            var o = blockByIndex.Index;
+            var l = blockByIndex.Len;
+            if (l!=0) {
+                for (var e1 = 0; e1 < l; e1++) {
+                    callback(t[o + e1]);
+                }
             }
         }
 
