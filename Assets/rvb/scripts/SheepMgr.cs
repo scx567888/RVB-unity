@@ -391,10 +391,10 @@ namespace rvb.scripts {
             this.preBulletIndex += t;
             return old;
         }
-// todo
+
         public void clearPetViews() {
-            for (int i = 0; i < view_pets.Length; i++) {
-                view_pets[i]?.clear();
+            foreach (var element in this.view_pets) {
+                element.clear();
             }
         }
 // todo
