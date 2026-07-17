@@ -2280,7 +2280,7 @@ namespace rvb.scripts {
             e.animFrame = e.animFrame + 1;
             OnRoleRender(e);
         }
-// todo
+
         public void produce_pets(int typeID, int count, SheepCamp camp) {
             // 根据阵营 获取 map
             var callInfos = camp == SheepCamp.Red ? this.redCallInfos : this.blueCallInfos;
@@ -2303,7 +2303,7 @@ namespace rvb.scripts {
             sheepCallInfo.count += count;
             sheepCallInfo.pets.Add(new SheepCallInfoPet() { camp = camp, count = count });
         }
-// todo
+
         public void consume(SheepCtl sheepCtl, float t) {
            var o = this;
 
