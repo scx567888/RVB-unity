@@ -89,6 +89,22 @@ namespace rvb {
             scxSpriteRenderer.setParent(gameObject);
             scxSpriteRenderer1.setParent(gameObject);
 
+            sheepCtl.comImages.roles_framess[0] = new Dictionary<int, Dictionary<int,int[]>>();
+            sheepCtl.comImages.roles_framess[1] = new Dictionary<int, Dictionary<int,int[]>>();
+            sheepCtl.comImages.roles_framess[0][100] = new Dictionary<int, int[]>();
+            sheepCtl.comImages.roles_framess[1][100] = new Dictionary<int, int[]>();
+            
+            foreach (var keyValuePair in loadRoleResult.animFrame) {
+                var k = keyValuePair.Key;
+                var v = keyValuePair.Value;
+                sheepCtl.comImages.roles_framess[0][100][k]=new int[v];
+            }
+            
+            foreach (var keyValuePair in loadRoleResult1.animFrame) {
+                var k = keyValuePair.Key;
+                var v = keyValuePair.Value;
+                sheepCtl.comImages.roles_framess[1][100][k]=new int[v];
+            }
          
 
             BindSheepMgr();

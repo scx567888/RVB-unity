@@ -394,7 +394,9 @@ namespace rvb.scripts {
 
         public void clearPetViews() {
             foreach (var element in this.view_pets) {
-                element.clear();
+                if (element!=null) {
+                    element.clear();    
+                }
             }
         }
 
@@ -414,10 +416,16 @@ namespace rvb.scripts {
 
         public void clearViewBullets() {
             foreach (var viewElement in this.view_bullets) {
-                viewElement.clear();
+                if (viewElement!=null) {
+                    viewElement.clear();    
+                }
+                
             }
             foreach (var viewElement in this.pre_view_bullets) {
-                viewElement.clear();
+                if (viewElement != null) {
+                    viewElement.clear();    
+                }
+                
             }
         }
 
