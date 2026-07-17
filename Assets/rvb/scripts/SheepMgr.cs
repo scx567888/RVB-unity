@@ -2678,18 +2678,22 @@ namespace rvb.scripts {
                 callback(indices[block.Index + index]);
             }
         }
-// todo
-        public bool findBlock(IndexLen[] blocks, int[] indices, int blockIndex, Func<int, bool> callback) {
-            IndexLen block = getBlockByIndex(blocks, blockIndex);
-            if (block.Len == 0) return false;
 
-            for (int index = 0; index < block.Len; index++) {
-                int secondLevelIndex = block.Index + index;
-                if (secondLevelIndex < 0 || secondLevelIndex >= indices.Length) {
-                    throw new IndexOutOfRangeException("二级空间索引越界");
+        public bool findBlock(IndexLen[] e, int[] t, int blockIndex, Func<int, bool> callback) {
+            var blockByIndex = this.getBlockByIndex(e, blockIndex);
+            var Index = blockByIndex.Index;
+            var Len = blockByIndex.Len;
+            if (Len==0) {
+                return false;
+            }
+            for (var j = 0; j < Len; j++) {
+                var petIndex = t[Index + j];
+                if (null == petIndex) {
+                    throw new Exception("二级内存取出空???");
                 }
-
-                if (callback(indices[secondLevelIndex])) return true;
+                if (callback(petIndex)) {
+                    return true;
+                }
             }
 
             return false;
