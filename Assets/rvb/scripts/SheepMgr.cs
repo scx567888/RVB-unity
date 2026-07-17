@@ -1842,46 +1842,51 @@ namespace rvb.scripts {
                 petSkin.readySkillId = i.endSkill;
             }
         }
-// todo
-        public void update_role_state_spinatk(PetView petSkin, bool logicTick, float deltaSeconds) {
-            (int xn, int yn) block = Util.getXnYn(petSkin.posX, petSkin.posY);
-            int animationFrame = petSkin.animFrame;
-            SheepSkill skill = SheepSkill.getById(petSkin.readySkillId);
-            SheepSkillSubSpinAtk config = SheepSkillSubSpinAtk.getById(skill.id);
 
-            if (animationFrame == 1) {
-                PetView target = UtilFind.findSortAck1(petSkin, petSkin.conf.findR);
-                if (target != null) Util.dirTar(petSkin, target);
+        public void update_role_state_spinatk(PetView petSkin, bool t, float i) {
+            var s = petSkin.posX;
+            var o = petSkin.posY;
+            var xnyn = Util.getXnYn(s, o);
+            var l = xnyn.xn;
+            var n = xnyn.yn;
+            var r = petSkin.animFrame;
+            var a = SheepSkill.getById(petSkin.readySkillId);
+            var c = SheepSkillSubSpinAtk.getById(a.id);
+            if (1 == r) {
+                var t1 = UtilFind.findSortAck1(petSkin, petSkin.conf.findR);
+
+                if (t1!=null) {
+                    Util.dirTar(petSkin, t1);
+                }
             }
-
-            if (logicTick) {
-                bool noShieldTarget = true;
-                UtilFind.forNearBlocksByAckView(
-                    petSkin,
-                    block.xn,
-                    block.yn,
-                    petSkin.conf.findR,
-                    target => {
-                        if (target.isDie || target.camp == petSkin.camp || target.roleId == 0) return false;
-                        bool canAttack = Util.isCanAckByRole(petSkin, target);
-                        if (noShieldTarget &&
-                            target.conf.roleType == SheepRoleType.dun_bing &&
-                            canAttack) {
-                            noShieldTarget = false;
+            if (t) {
+                var s1 = true;
+                UtilFind.forNearBlocksByAckView(petSkin, l, n, petSkin.conf.findR,
+                    t1 => {
+                        if (t1.isDie || t1.camp == petSkin.camp || 0 == t1.roleId) {
+                            return false;
                         }
 
-                        if (!canAttack) return false;
-                        UtilAck.ackTar(petSkin, target);
+                        if (s1 && t1.conf.roleType == SheepRoleType.dun_bing && Util.isCanAckByRole(petSkin, t1)) {
+                            s1 = false;
+                        }
+                        
+                        if (!Util.isCanAckByRole(petSkin, t1)) {
+                            return false;
+                        }
+
+                        UtilAck.ackTar(petSkin, t1);
                         return false;
-                    }
-                );
-                if (noShieldTarget) Util.moveTar(petSkin, null, deltaSeconds, true);
+                    });
+                if (s1) {
+                    Util.moveTar(petSkin, null, i, t);
+                }
             }
 
-            if (animationFrame >= config.endFrame) {
-                petSkin.state = (SheepRoleState)config.endState;
+            if (r >= c.endFrame) {
+                petSkin.state = (SheepRoleState)c.endState;
                 petSkin.animType = SheepRoleAnimType.Boom;
-                petSkin.readySkillId = config.endSkill;
+                petSkin.readySkillId = c.endSkill;
             }
         }
 // todo
