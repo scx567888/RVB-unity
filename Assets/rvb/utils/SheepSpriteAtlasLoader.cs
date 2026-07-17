@@ -6,12 +6,13 @@ using UnityEngine;
 
 namespace rvb.utils {
     public static class SheepSpriteAtlasLoader {
-        public static ScxSpriteAtlas loadRole(Texture2D texture, string json) {
+        public static LoadRoleResult loadRole(Texture2D texture, string json) {
             var data0 = JsonConvert.DeserializeObject<Dictionary<string, SheepRoleSprite[][]>>(json).First()
                 .Value;
 
             var sprites = new List<SheepRoleSprite>();
 
+            var animFrame = new Dictionary<int, int>();
             for (var i = 0; i < data0.Length; i++) {
                 var data1 = data0[i];
                 if (data1 == null) {
@@ -23,9 +24,15 @@ namespace rvb.utils {
                     sprite._name = i + "-" + j;
                     sprites.Add(sprite);
                 }
+
+                animFrame[i] = data1.Length;
             }
 
-            return new ScxSpriteAtlas(texture, sprites.ToArray());
+            var spriteAtlas = new ScxSpriteAtlas(texture, sprites.ToArray());
+            return new LoadRoleResult() {
+                spriteAtlas = spriteAtlas,
+                animFrame = animFrame
+            };
         }
 
         public static ScxSpriteAtlas loadBullet(Texture2D texture, string json) {
@@ -47,5 +54,13 @@ namespace rvb.utils {
 
             return new ScxSpriteAtlas(texture, sprites.ToArray());
         }
+    }
+
+    public class LoadRoleResult {
+        // 图集 name 为 2_0, 2_1 这种 anim + "_" + index 的拼接方法
+        public ScxSpriteAtlas spriteAtlas;
+
+        // 每个动画一共有多少帧
+        public Dictionary<int, int> animFrame;
     }
 }

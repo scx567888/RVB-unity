@@ -49,8 +49,8 @@ namespace rvb {
         private int lastTargetPetCount = -1;
 
         void Start() {
-            var scxSpriteAtlas = SheepSpriteAtlasLoader.loadRole(texture, json.text);
-            this.scxSpriteRenderer = new ScxSpriteRenderer(scxSpriteAtlas, 100, mainMaterial, 5000);
+            var loadRoleResult = SheepSpriteAtlasLoader.loadRole(texture, json.text);
+            this.scxSpriteRenderer = new ScxSpriteRenderer(loadRoleResult.spriteAtlas, 100, mainMaterial, 5000);
             this.spriteNames = this.scxSpriteRenderer.getSpriteNames();
 
             this.scxSpriteRenderer.setParent(this.gameObject);
