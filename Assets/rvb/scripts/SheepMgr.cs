@@ -1069,31 +1069,26 @@ namespace rvb.scripts {
             petsAdd.Clear();
             petsDel.Clear();
         }
-// todo
+
         public void buff_add_bullets() {
-            int pendingCount = preBulletIndex;
-            while (pendingCount > 0) {
-                int index;
-                if (bulletsDel.Count > 0) {
-                    index = bulletsDel.Pop();
-                }
-                else {
-                    if (bulletCount >= SheepConfig.MaxBulletCount) {
-                        Debug.LogWarning($"预加入子弹超过最大数量: {bulletCount}/{SheepConfig.MaxBulletCount}");
-                        break;
+            var e = this.preBulletIndex;
+            if (e!=0) {
+                for (; e!=0;) {
+                    if (!this.bulletsDel.TryPop(out var t)) {
+                        if (this.bulletCount >= SheepConfig.MaxBulletCount - 1) {
+                            Debug.LogWarning("预加入子弹加入buff超过最大数量"+ this.bulletCount+ SheepConfig.MaxBulletCount);
+                            break;
+                        }
+
+                        t = this.bulletCount++;
                     }
+                    --e;
 
-                    index = bulletCount++;
+                    this.getBulletView(t).init(++this.bulletId, this.pre_view_bullets[e]);
                 }
 
-                pendingCount--;
-                BulletView preview = pre_view_bullets[pendingCount];
-                if (preview != null) {
-                    getBulletView(index).init(++bulletId, preview);
-                }
+                this.preBulletIndex = 0;
             }
-
-            preBulletIndex = 0;
         }
 
         public void buff_del_bullet(int e) {
