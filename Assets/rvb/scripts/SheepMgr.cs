@@ -1914,76 +1914,92 @@ namespace rvb.scripts {
                 petSkin.readySkillId = c.endSkill;
             }
         }
-// todo
-        public void update_role_state(PetView petSkin, bool logicTick, float deltaSeconds = 0.033f) {
-            Util.subAtkCd(petSkin, deltaSeconds);
 
-            switch (petSkin.state) {
-                case SheepRoleState.Start:
-                    if (logicTick) update_role_state_start(petSkin, true, deltaSeconds);
+        public void update_role_state(PetView petSkin, bool t, float i = 0.033f) {
+            Util.subAtkCd(petSkin, i);
+        switch (petSkin.state) {
+            case SheepRoleState.Start:
+                if (!t) {
                     break;
-                case SheepRoleState.In:
-                    update_role_state_in(petSkin);
+                }
+                this.update_role_state_start(petSkin, t, i);
+                break;
+            case SheepRoleState.In:
+                // 这一整段都是羊神专属进场逻辑 !!!
+                this.update_role_state_in(petSkin);
+                break;
+            case SheepRoleState.Spurt:
+                if (!t) {
                     break;
-                case SheepRoleState.Spurt:
-                    if (logicTick) update_role_state_spurt(petSkin, true, deltaSeconds);
+                }
+                this.update_role_state_spurt(petSkin, t, i);
+                break;
+            case SheepRoleState.Charge:
+                if (!t) {
                     break;
-                case SheepRoleState.Charge:
-                    if (logicTick) update_role_state_charge(petSkin, true, deltaSeconds);
+                }
+                this.update_role_state_charge(petSkin, t, i);
+                break;
+            case SheepRoleState.ChargePlus:
+                if (!t) {
                     break;
-                case SheepRoleState.ChargePlus:
-                    if (logicTick) update_role_state_charge_plus(petSkin, true, deltaSeconds);
+                }
+                this.update_role_state_charge_plus(petSkin, t, i);
+                break;
+            case SheepRoleState.SpinSpurt:
+                if (!t) {
                     break;
-                case SheepRoleState.SpinSpurt:
-                    if (logicTick) update_role_state_spinspurt(petSkin, true, deltaSeconds);
+                }
+                this.update_role_state_spinspurt(petSkin, t, i);
+                break;
+            case SheepRoleState.Move:
+                if (!t) {
                     break;
-                case SheepRoleState.Move:
-                    if (logicTick) update_role_state_move(petSkin, true, deltaSeconds);
-                    break;
-                case SheepRoleState.Attack:
-                    update_role_state_attack(petSkin, logicTick, deltaSeconds);
-                    break;
-                case SheepRoleState.Killer:
-                    update_role_state_killer(petSkin);
-                    break;
-                case SheepRoleState.Boom:
-                    update_role_state_boom(petSkin);
-                    break;
-                case SheepRoleState.Invincible:
-                    update_role_state_invincible(petSkin);
-                    break;
-                case SheepRoleState.Bladestorm:
-                    update_role_state_bladestorm(petSkin, logicTick, deltaSeconds);
-                    break;
-                case SheepRoleState.Palm:
-                    update_role_state_palm(petSkin);
-                    break;
-                case SheepRoleState.CallBullets:
-                    update_role_state_callbullets(petSkin);
-                    break;
-                case SheepRoleState.Buff:
-                    update_role_state_buff(petSkin);
-                    break;
-                case SheepRoleState.Rigidity:
-                    update_role_state_rigidity(petSkin);
-                    break;
-                case SheepRoleState.SpinAtk:
-                    update_role_state_spinatk(petSkin, logicTick, deltaSeconds);
-                    break;
-            }
-
-            if (Mathf.Abs(petSkin.impulseX) > Mathf.Epsilon ||
-                Mathf.Abs(petSkin.impulseY) > Mathf.Epsilon) {
-                if (!petSkin.isDie && petSkin.curHp > 0f) {
-                    petSkin.logicMove(
-                        petSkin.animX + petSkin.impulseX,
-                        petSkin.posY + petSkin.impulseY
-                    );
                 }
 
-                petSkin.impulseX = 0f;
-                petSkin.impulseY = 0f;
+                this.update_role_state_move(petSkin, t, i);
+                break;
+            case SheepRoleState.Attack:
+                this.update_role_state_attack(petSkin,t,i);
+                break;
+            case SheepRoleState.Killer:
+                this.update_role_state_killer(petSkin);
+                break;
+            case SheepRoleState.Boom:
+                this.update_role_state_boom(petSkin);
+                break;
+            case SheepRoleState.Invincible:
+                this.update_role_state_invincible(petSkin);
+                break;
+            case SheepRoleState.Bladestorm:
+                this.update_role_state_bladestorm(petSkin,t,i);
+                break;
+            case SheepRoleState.Palm:
+                this.update_role_state_palm(petSkin);
+                break;
+            case SheepRoleState.CallBullets:
+                this.update_role_state_callbullets(petSkin);
+                break;
+            case SheepRoleState.Buff:
+                this.update_role_state_buff(petSkin);
+                break;
+            case SheepRoleState.Rigidity:
+                this.update_role_state_rigidity(petSkin);
+                break;
+            case SheepRoleState.SpinAtk:
+                this.update_role_state_spinatk(petSkin,t,i);
+                break;
+        }
+
+        if (petSkin.impulseX!=0 || petSkin.impulseY!=0) {
+            if (!petSkin.isDie && petSkin.curHp > 0) {
+                var t1 = petSkin.impulseX;
+                var i1 = petSkin.impulseY;
+                petSkin.logicMove(petSkin.animX + t1, petSkin.posY + i1);
             }
+            petSkin.impulseX = 0;
+            petSkin.impulseY = 0;
+        }
         }
 
         public void update_role_state_start(PetView petSkin, bool t, float s) {
