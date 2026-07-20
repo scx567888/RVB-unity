@@ -1741,39 +1741,38 @@ namespace rvb.scripts {
                 petSkin.animType = SheepRoleAnimType.Idle;
             }
         }
-// todo
+
         public void update_role_state_palm(PetView petSkin) {
-            int animationFrame = petSkin.animFrame;
-            SheepSkill skill = SheepSkill.getById(petSkin.readySkillId);
-            SheepSkillSubPalm config = SheepSkillSubPalm.getById(skill.id);
-
-            foreach (int healFrame in config.healFrames ?? Array.Empty<int>()) {
-                if (animationFrame != healFrame) continue;
-                int heal = Mathf.FloorToInt((petSkin.conf.hp - petSkin.curHp) * (config.healHealthPercent / 100f));
-                UtilAck.hurtByRole(petSkin, petSkin, -heal);
+            var t1 = petSkin.animFrame;
+            var i1 = SheepSkill.getById(petSkin.readySkillId);
+            var s = SheepSkillSubPalm.getById(i1.id);
+            var o1 = s.healFrames;
+            foreach (var i in o1){ if (t1 == i) {
+                var t =(float) Math.Floor((petSkin.conf.hp - petSkin.curHp) * (s.healHealthPercent / 100f));
+                UtilAck.hurtByRole(petSkin, petSkin, -t);
                 break;
+            }}
+            var l1 = s.atkFrames;
+            foreach (var i in l1) {if (t1 == i) {
+                UtilAck.ackMe(petSkin, s.spiltRadiusBet, s.atkBet, s.atkFindR);
+                break;
+            }}
+            var n = s.hitBackFrames;
+            for (var i = 0; i < n.Length; i++) {
+                var o = n[i];
+                var l = s.hitBackDistances[i];
+                if (t1 == o) {
+                    UtilAck.hitBackMe(petSkin, s.spiltRadiusBet, s.atkFindR, l);
+                    break;
+                }
             }
 
-            foreach (int attackFrame in config.atkFrames ?? Array.Empty<int>()) {
-                if (animationFrame != attackFrame) continue;
-                UtilAck.ackMe(petSkin, config.spiltRadiusBet, config.atkBet, config.atkFindR);
-                break;
-            }
-
-            int[] hitBackFrames = config.hitBackFrames ?? Array.Empty<int>();
-            int[] hitBackDistances = config.hitBackDistances ?? Array.Empty<int>();
-            for (int index = 0; index < hitBackFrames.Length; index++) {
-                if (animationFrame != hitBackFrames[index]) continue;
-                float distance = index < hitBackDistances.Length ? hitBackDistances[index] : 0f;
-                UtilAck.hitBackMe(petSkin, config.spiltRadiusBet, config.atkFindR, distance);
-                break;
-            }
-
-            if (animationFrame >= config.endFrame) {
+            if (t1 >= s.endFrame) {
                 petSkin.state = SheepRoleState.Move;
                 petSkin.subState = SheepRoleSubState.MoveBoss;
                 petSkin.animType = SheepRoleAnimType.Idle;
             }
+             
         }
 
         public void update_role_state_callbullets(PetView petSkin) {
