@@ -8,7 +8,6 @@ using UnityEngine;
 using static rvb.scripts.BullteCreate;
 using static rvb.scripts.SheepModes;
 using static rvb.scripts.EventBus;
-using Random = UnityEngine.Random;
 
 namespace rvb.scripts {
     /// <summary>
@@ -123,6 +122,8 @@ namespace rvb.scripts {
         public int blueBuffCount;
 
         public int petId = 0;
+        
+        public System.Random logicRandom=new System.Random(123);
 
         //********************************** 以下字段 待处理 **********************************************
 
@@ -1751,7 +1752,7 @@ namespace rvb.scripts {
                     var t3 = petSkin.posX + s.startOffsetPos[0];
                     var i3 = petSkin.posY + s.startOffsetPos[1];
                     var o3 = s.startOffsetPos[2];
-                    var l = 360 * Random.Range(0f,1f);
+                    var l = 360 * RandomFloat(0f,1f);
                     var n = petSkin.posX + petSkin.dirX * s.len + s.endRadius * Math.Cos(l);
                     var r = petSkin.posY + petSkin.dirY * s.len + s.endRadius * Math.Sin(l);
                     var a = 0;
@@ -1762,7 +1763,7 @@ namespace rvb.scripts {
                     });
                 } else if (2 == s.type) {
                     var t4 = s.startOffsetPos[2];
-                    var i5 = 360 * Random.Range(0f,1f);
+                    var i5 = 360 * RandomFloat(0f,1f);
                     var o5 = petSkin.posX + petSkin.dirX * s.len + s.endRadius * Math.Cos(i5);
                     var l = petSkin.posY + petSkin.dirY * s.len + s.endRadius * Math.Sin(i5);
                     var n = 0;
@@ -2499,7 +2500,7 @@ namespace rvb.scripts {
                 h *= -1;
             }
 
-            return new Vector3((float)h, d + Random.Range(-1, 1), 0);
+            return new Vector3((float)h, d + RandomFloat(-1, 1), 0);
         }
 
         public void clearCallPets() {
@@ -2709,7 +2710,7 @@ namespace rvb.scripts {
 
     if (formation.formationType == SheepRoleFormationType.AngleRandom) {
         var T = Math.Min((a / (float)formation.angleDensity + formation.baseTimes) * formation.startAngle, formation.maxAngle);
-        T = Random.Range(-T, T);
+        T = RandomFloat(-T, T);
         T += T > 0 ? formation.minAngle : -formation.minAngle;
 
         var A = formation.startR + sheepMode.startAddR;
@@ -2727,7 +2728,7 @@ namespace rvb.scripts {
 
     } else if (formation.formationType == SheepRoleFormationType.RectangleRandom) {
         var F = Math.Min((a / (float)formation.density + formation.baseTimes) * formation.startScope, formation.maxScope);
-        var N = Random.Range(-F, F);
+        var N = RandomFloat(-F, F);
         if (formation.minScope!=0) {
             N += N > 0 ? formation.minScope : -formation.minScope;
         }
@@ -2759,6 +2760,30 @@ namespace rvb.scripts {
             catch {
                 return fallback;
             }
+        }
+        
+        public int RandomInt(
+            int minInclusive,
+            int maxExclusive)
+        {
+            return logicRandom.Next(
+                minInclusive,
+                maxExclusive
+            );
+        }
+
+        public  float Random01()
+        {
+            return (float)logicRandom.NextDouble();
+        }
+
+        public  float RandomFloat(
+            float minInclusive,
+            float maxExclusive)
+        {
+            return minInclusive +
+                   (maxExclusive - minInclusive) *
+                   (float)logicRandom.NextDouble();
         }
 
     }

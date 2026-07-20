@@ -87,8 +87,8 @@ namespace rvb.scripts {
             position = null;
         }
 
-        private static T arrOn<T>(T[] r) {
-            return r[UnityEngine.Random.Range(0, r.Length)];
+        private T arrOn<T>(T[] r) {
+            return r[sheepMgr.RandomInt(0, r.Length)];
         }
 
         public void init(int buffIndex, PetView viewPet) {
@@ -114,7 +114,7 @@ namespace rvb.scripts {
                     viewPet.state = SheepRoleState.Start;
                     viewPet.subState = SheepRoleSubState.Start;
                     viewPet.animType = SheepRoleAnimType.Idle;
-                    viewPet.animFrame = UnityEngine.Random.Range(0, 10);
+                    viewPet.animFrame = sheepMgr.RandomInt(0, 10);
                 }
                 else if (conf.skillIn!=0) {
                     viewPet.state = SheepRoleState.In;
@@ -139,11 +139,11 @@ namespace rvb.scripts {
 
                     if (conf.isSpurtAnim) {
                         viewPet.animType = SheepRoleAnimType.Spurt;
-                        viewPet.animFrame = UnityEngine.Random.Range(0, 10);
+                        viewPet.animFrame = sheepMgr.RandomInt(0, 10);
                     }
                     else {
                         viewPet.animType = SheepRoleAnimType.Idle;
-                        viewPet.animFrame = UnityEngine.Random.Range(0, 10);
+                        viewPet.animFrame = sheepMgr.RandomInt(0, 10);
                     }
                 }
             }
@@ -262,7 +262,7 @@ namespace rvb.scripts {
                 }
 
                 if (i.conf.roleType == SheepRoleType.xiao_bing) {
-                    i.animFrame = UnityEngine.Random.Range(0, 10);
+                    i.animFrame = sheepMgr.RandomInt(0, 10);
                 }
 
                 onDead();

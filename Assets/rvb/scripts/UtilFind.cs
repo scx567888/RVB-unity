@@ -399,7 +399,7 @@ namespace rvb.scripts {
                     Vector2Int bottomRight = new Vector2Int(i + n, s - n);
                     Vector2Int bottomLeft = new Vector2Int(i - n, s - n);
 
-                    if (UnityEngine.Random.value < 0.5f) {
+                    if (system.Random01() < 0.5f) {
                         for (int x = topLeft.x; x < topRight.x; x++) {
                             if (r(x, topLeft.y)) return true;
                         }
@@ -510,7 +510,7 @@ namespace rvb.scripts {
                     Vector2Int bottomRight = new Vector2Int(xn + n, yn - n);
                     Vector2Int bottomLeft = new Vector2Int(xn - n, yn - n);
 
-                    if (UnityEngine.Random.value < 0.5f) {
+                    if (system.Random01() < 0.5f) {
                         for (int x = topLeft.x; x < topRight.x; x++) {
                             if (r(x, topLeft.y)) return true;
                         }
@@ -609,7 +609,7 @@ namespace rvb.scripts {
                         points.Add(point);
                     }
 
-                    int randomIndex = UnityEngine.Random.Range(0, c.Count);
+                    int randomIndex = system.RandomInt(0, c.Count);
                     Vector2Int pointToCheck = points[randomIndex];
                     if (a(pointToCheck.x, pointToCheck.y)) {
                         return true;
@@ -653,7 +653,7 @@ namespace rvb.scripts {
                 c.Add(ring);
             }
 
-            c.Sort((left, right) => UnityEngine.Random.value < 0.5f ? -1 : 1);
+            c.Sort((left, right) => system.Random01() < 0.5f ? -1 : 1);
 
             for (int ringIndex = 0; ringIndex <= findR; ringIndex++) {
                 int ring = c[ringIndex];
@@ -679,7 +679,7 @@ namespace rvb.scripts {
                     if (n(bottomLeft.x, y)) h.Add(new Vector2Int(bottomLeft.x, y));
                 }
 
-                h.Sort((left, right) => UnityEngine.Random.value < 0.5f ? -1 : 1);
+                h.Sort((left, right) => system.Random01() < 0.5f ? -1 : 1);
                 while (h.Count != 0) {
                     int lastIndex = h.Count - 1;
                     Vector2Int point = h[lastIndex];
