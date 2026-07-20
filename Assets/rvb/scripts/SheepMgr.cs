@@ -2759,7 +2759,7 @@ namespace rvb.scripts {
                             }
 
                             if (0 == l) {
-                                return;
+                                continue;
                             }
 
                             var a = this.attackViews[o];
