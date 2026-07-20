@@ -1461,30 +1461,33 @@ namespace rvb.scripts {
                 }
             }
         }
-// todo
-        public void update_role_state_move(PetView petSkin, bool logicTick, float deltaSeconds) {
-            if (petSkin.isLock) return;
 
-            FindTarResult result = UtilFind.findTar(petSkin);
-            if (result.atkTar != null) {
+        public void update_role_state_move(PetView petSkin, bool t, float i) {
+            if (petSkin.isLock) {
+                return;
+            }
+            var fff = UtilFind.findTar(petSkin);
+            var s = fff.atkTar;
+            var o = fff.moveTar;
+            var l = fff.moveBoss;
+            
+            if (s!=null) {
                 petSkin.state = SheepRoleState.Attack;
                 petSkin.subState = SheepRoleSubState.AttackAwait;
                 return;
             }
-
-            if (result.moveTar != null) {
+            if (o!=null) {
                 petSkin.subState = SheepRoleSubState.MoveTar;
-                Util.moveTar(petSkin, result.moveTar, deltaSeconds, logicTick);
+                Util.moveTar(petSkin, o, i, t);
                 return;
             }
-
-            if (result.moveBoss != null) {
+            if (l!=null) {
                 petSkin.subState = SheepRoleSubState.MoveBoss;
-                Util.moveTar(petSkin, result.moveBoss, deltaSeconds, logicTick);
+                Util.moveTar(petSkin, l, i, t);
                 return;
             }
 
-            Debug.LogWarning("移动状态没有目标: pet=" + petSkin.index);
+            Debug.LogError("移动状态没有目标??");
         }
 // todo
         public void update_role_state_attack(PetView petSkin, bool logicTick, float deltaSeconds) {
