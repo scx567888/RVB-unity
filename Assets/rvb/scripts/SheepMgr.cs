@@ -131,23 +131,9 @@ namespace rvb.scripts {
 
         public long[] bossBackStateTime={0,0};
 
-        /// <summary>若 SheepCtl 已自行推进 Buff 时钟，可设为 false。</summary>
-        public bool advanceGameClockInGameUpdate = true;
-
         // -------------------- 可选桥接回调 --------------------
-        public Action<SheepRoomState> OnRoomStateChanged;
-        public Action OnRoomStateEnd;
-        public Action OnGameStartHook;
         public Action<PetView> OnRoleRender;
-        public Action<BulletView> OnBulletRender;
-        public Action OnFrameBlockStart;
-        public Action<SheepMgr> OnFrameBlockEnd;
-        public Action<SheepCamp, float, float> OnBossHpChanged;
-        public Action<SheepCamp> OnCounterStarted;
-        public Action<SheepCamp> OnCounterFinished;
-        public Action<int> OnCameraShake;
         public Func<PetView, int> AnimationFrameCountResolver;
-        public Func<SheepCamp, bool> BossShieldConsumer;
 
 
         public int plotRatioIndex;
