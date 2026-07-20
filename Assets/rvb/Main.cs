@@ -120,7 +120,6 @@ namespace rvb {
             sheepMgr.setState(SheepRoomState.Start);
             sheepMgr.onGameStart();
             sheepMgr.game_clear();
-            
         }
 
         private void BindSheepMgr() {
@@ -130,14 +129,14 @@ namespace rvb {
             sheepMgr.OnRoleRender -= HandleRoleRender;
             sheepMgr.OnRoleRender += HandleRoleRender;
 
-            sheepMgr.OnBulletRender -= HandleBulletRender;
-            sheepMgr.OnBulletRender += HandleBulletRender;
+            // sheepMgr.OnBulletRender -= HandleBulletRender;
+            // sheepMgr.OnBulletRender += HandleBulletRender;
 
             // 没有原 SheepCtl.roles_framess 时，必须给逻辑一个动画长度。
             // 否则默认值为 1，In/Dead 等状态可能一帧就结束。
             sheepMgr.AnimationFrameCountResolver = ResolveLogicalAnimationFrameCount;
 
-            sheepMgr.advanceGameClockInGameUpdate = false;
+            // sheepMgr.advanceGameClockInGameUpdate = false;
             sheepMgr.isAutoCall = enableAutomaticTroops;
             sheepMgr.loongHp = SheepConfig.loongHps[0];
         }
@@ -397,7 +396,7 @@ namespace rvb {
         private void OnDestroy() {
             if (sheepMgr != null) {
                 sheepMgr.OnRoleRender -= HandleRoleRender;
-                sheepMgr.OnBulletRender -= HandleBulletRender;
+                // sheepMgr.OnBulletRender -= HandleBulletRender;
 
                 if (sheepMgr.AnimationFrameCountResolver == ResolveLogicalAnimationFrameCount) {
                     sheepMgr.AnimationFrameCountResolver = null;
