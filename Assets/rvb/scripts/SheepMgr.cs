@@ -45,7 +45,7 @@ namespace rvb.scripts {
         // 核心状态机
         public SheepRoomState state = SheepRoomState.Ready;
 
-        // 尝试角色 (todo 但是是哪一种? 当前在场上的? )
+        // 尝试角色 ( 但是是哪一种? 当前在场上的? )
         public HashSet<PetView>[] pets = new[] { new HashSet<PetView>(), new HashSet<PetView>() };
 
         public int gameIndex = 0;
@@ -164,7 +164,7 @@ namespace rvb.scripts {
             // 核心状态机
             this.state = SheepRoomState.Ready;
 
-            // 尝试角色 (todo 但是是哪一种? 当前在场上的? )
+            // 尝试角色 ( 但是是哪一种? 当前在场上的? )
             this.pets = new[] { new HashSet<PetView>(), new HashSet<PetView>() };
 
             this.gameIndex = 0;
@@ -1077,7 +1077,7 @@ namespace rvb.scripts {
             view.befBlockIndex = view.blockIndex;
             view.dirX = camp == SheepCamp.Red ? 1f : -1f;
             view.dirY = 0f;
-            bossHp[index] = ReadExternal(() => Convert.ToSingle(boss[index].curHp), (float)loongHp);
+            bossHp[index] = boss[index].curHp ;
             view.curHp = bossHp[index];
         }
 
@@ -2748,19 +2748,8 @@ namespace rvb.scripts {
     this.pre_add_pet(petSkin);
     return petSkin;
         }
-
-// todo
+        
         public static long NowMs() => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-
-// todo
-        public static T ReadExternal<T>(Func<T> getter, T fallback = default) {
-            try {
-                return getter != null ? getter() : fallback;
-            }
-            catch {
-                return fallback;
-            }
-        }
         
         public int RandomInt(
             int minInclusive,
