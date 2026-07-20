@@ -2133,8 +2133,8 @@ namespace rvb.scripts {
             else {
                 UtilFind.findNearBlocksByAckView(e, n, r, 5, tt2 => {
                     if (!tt2.isDie && tt2.camp != e.camp && 0 != tt2.roleId && Util.isCanAckByRole(e, tt2)) {
-                        var i = SheepConfig.beheadLine;
-                        if (tt2.curHp < i) {
+                        var i7 = SheepConfig.beheadLine;
+                        if (tt2.curHp < i7) {
                             tt2.isDie = true;
                             tt2.state = SheepRoleState.Dead;
                         }
