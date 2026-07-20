@@ -2059,77 +2059,94 @@ namespace rvb.scripts {
                 }
             }
         }
-// todo
-        public void update_role_state_charge(PetView petSkin, bool logicTick, float deltaSeconds) {
-            (int xn, int yn) block = Util.getXnYn(petSkin.posX, petSkin.posY);
-            bool crossedEnd = petSkin.camp == SheepCamp.Red
-                ? petSkin.posX > petSkin.conf.runEndX
-                : petSkin.posX < -petSkin.conf.runEndX;
 
-            if (crossedEnd) {
-                bool hasBlockingEnemy = false;
-                UtilFind.findNearBlocksByAckView(petSkin, block.xn, block.yn, 5, target => {
-                    if (!target.isDie && target.camp != petSkin.camp && target.roleId != 0) {
-                        hasBlockingEnemy = true;
-                        return true;
-                    }
-
-                    return false;
-                });
-
-                if (hasBlockingEnemy) {
-                    petSkin.state = SheepRoleState.Boom;
-                    petSkin.subState = SheepRoleSubState.Boom;
-                    SheepSkillSubCharge charge = SheepSkillSubCharge.getById(petSkin.conf.skillSpurt);
-                    SheepSkillSubBoom boom = SheepSkillSubBoom.getById(charge.endSkill);
-                    petSkin.animType = boom.isAnim != 0 ? SheepRoleAnimType.Boom : SheepRoleAnimType.Idle;
-                    petSkin.readySkillId = boom.id;
+        public void update_role_state_charge(PetView e, bool t, float i) {
+            var o = e.posX;
+            var l = e.posY;
+           var (n, r) = Util.getXnYn(o, l);
+        if (e.camp == SheepCamp.Red && e.posX > e.conf.runEndX || e.camp == SheepCamp.Blue && e.posX < -e.conf.runEndX) {
+            var t6 = false;
+            UtilFind.findNearBlocksByAckView(e, n, r, 5, i => {
+                if (i.isDie || i.camp == e.camp || 0 == i.roleId) {
+                    
                 }
                 else {
-                    petSkin.state = SheepRoleState.Move;
-                    petSkin.subState = SheepRoleSubState.MoveBoss;
-                    petSkin.animType = SheepRoleAnimType.Idle;
+                    t6 = true;
                 }
 
-                return;
+                return t6;
+            });
+            if ( t6) {
+                e.state = SheepRoleState.Boom;
+                e.subState = SheepRoleSubState.Boom;
+                var t3 = SheepSkillSubCharge.getById(e.conf.skillSpurt);
+                var i3 = SheepSkillSubBoom.getById(t3.endSkill);
+                if (i3.isAnim!=0) {
+                    e.animType = SheepRoleAnimType.Boom;   
+                }
+                else {
+                    e.animType = SheepRoleAnimType.Idle;
+                }
+
+                e.readySkillId = i3.id;
+            } else {
+                e.state = SheepRoleState.Move;
+                e.subState = SheepRoleSubState.MoveBoss;
+                e.animType = SheepRoleAnimType.Idle;
             }
-
-            bool hitHeavyTarget = false;
-            UtilFind.findNearBlocksByAckView(petSkin, block.xn, block.yn, 5, target => {
-                if (target.isDie || target.camp == petSkin.camp || target.roleId == 0 ||
-                    !Util.isCanAckByRole(petSkin, target)) {
-                    return false;
-                }
-
-                if (target.conf.roleType == SheepRoleType.xiao_bing) {
-                    UtilAck.ackTar(petSkin, target);
-                }
-                else {
-                    hitHeavyTarget = true;
+        } else {
+            var s = false;
+            UtilFind.findNearBlocksByAckView(e, n, r, 5, t => {
+                if (!t.isDie && t.camp != e.camp && 0 != t.roleId && Util.isCanAckByRole(e, t)) {
+                    if (t.conf.roleType == SheepRoleType.xiao_bing) {
+                        var i = t;
+                        UtilAck.ackTar(e, i);
+                    }
+                    else {
+                        s = true;
+                    }
                 }
 
                 return false;
             });
+            if (s) {
+                e.state = SheepRoleState.Boom;
+                e.subState = SheepRoleSubState.Boom;
+                var t8 = SheepSkillSubCharge.getById(e.conf.skillSpurt);
+                var i8 = SheepSkillSubBoom.getById(t8.endSkill);
+                if (i8.isAnim!=0) {
+                    e.animType = SheepRoleAnimType.Boom;
+                }
+                else {
+                    e.animType = SheepRoleAnimType.Idle;
+                }
 
-            if (hitHeavyTarget) {
-                petSkin.state = SheepRoleState.Boom;
-                petSkin.subState = SheepRoleSubState.Boom;
-                SheepSkillSubCharge charge = SheepSkillSubCharge.getById(petSkin.conf.skillSpurt);
-                SheepSkillSubBoom boom = SheepSkillSubBoom.getById(charge.endSkill);
-                petSkin.animType = boom.isAnim != 0 ? SheepRoleAnimType.Boom : SheepRoleAnimType.Idle;
-                petSkin.readySkillId = boom.id;
-                return;
+                e.readySkillId = i8.id;
+                 return;
             }
+            PetView o3 = null;
+            UtilFind.findNearBlocksByAckView(e, n, r, e.conf.findR, t4 => {
+                // 跳过：死亡的、同阵营的、没有 roleId 的
+                if (t4.isDie || t4.camp == e.camp || t4.roleId == 0) {
+                    return false;
+                }
 
-            PetView archerTarget = null;
-            UtilFind.findNearBlocksByAckView(petSkin, block.xn, block.yn, petSkin.conf.findR, target => {
-                if (target.isDie || target.camp == petSkin.camp || target.roleId == 0) return false;
-                if (target.conf.roleType != SheepRoleType.gong_jian_shou) return false;
-                if (!Util.isCanAckByRole(petSkin, target)) return false;
-                archerTarget = target;
+                // 只允许 roleType = role3
+                if (t4.conf.roleType != SheepRoleType.gong_jian_shou) {
+                    return false;
+                }
+
+                // 必须可攻击
+                if (!Util.isCanAckByRole(e, t4)) {
+                    return false;
+                }
+
+                // 如果满足条件，克隆并返回 true
+                o3 = t4;
                 return true;
             });
-            Util.moveTar(petSkin, archerTarget, deltaSeconds, logicTick);
+            Util.moveTar(e, o3, i, t);
+        }
         }
 
         public void update_role_state_charge_plus(PetView e, bool t, float i) {
