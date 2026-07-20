@@ -1705,29 +1705,38 @@ namespace rvb.scripts {
                 petSkin.animType = SheepRoleAnimType.Idle;
             }
         }
-// todo
-        public void update_role_state_bladestorm(PetView petSkin, bool logicTick, float deltaSeconds) {
-            int animationFrame = petSkin.animFrame;
-            SheepSkill skill = SheepSkill.getById(petSkin.readySkillId);
-            SheepSkillSubBladestorm config = SheepSkillSubBladestorm.getById(skill.id);
 
-            if (logicTick) {
-                FindTarResult result = UtilFind.findTar(petSkin, config.findR);
-                PetView target = result.atkTar ?? result.moveTar ?? result.moveBoss;
-                if (target != null) Util.dirTar(petSkin, target);
-                petSkin.logicMove(
-                    petSkin.posX + petSkin.dirX * config.speed * deltaSeconds * 3f,
-                    petSkin.posY + petSkin.dirY * config.speed * deltaSeconds * 3f
-                );
+        public void update_role_state_bladestorm(PetView petSkin, bool t, float i) {
+            var s = petSkin.animFrame;
+            var o = SheepSkill.getById(petSkin.readySkillId);
+            var l = SheepSkillSubBladestorm.getById(o.id);
+            if (t) {
+                var fff = UtilFind.findTar(petSkin, l.findR);
+                var t1 = fff.atkTar;
+                var s1=fff.moveTar;
+                var o1 = fff.moveBoss;
+                PetView n=null;
+                if (t1!=null) {
+                    n = t1;
+                }else if (s1!=null) {
+                    n = s1;
+                }else if (o1 != null) {
+                    n = o1;
+                }
+                Util.dirTar(petSkin, n);
+                var r = l.speed;
+                var x = petSkin.posX + petSkin.dirX * r * i * 3f;
+                var y = petSkin.posY + petSkin.dirY * r * i * 3f;
+                petSkin.logicMove(x, y);
             }
-
-            foreach (int attackFrame in config.atkFrames ?? Array.Empty<int>()) {
-                if (animationFrame != attackFrame) continue;
-                UtilAck.ackMe(petSkin, config.spiltRadiusBet, config.atkBet, config.atkFindR);
-                break;
+            var n1 = l.atkFrames;
+            foreach (var t3 in n1) {
+                if (s == t3) {
+                    UtilAck.ackMe(petSkin, l.spiltRadiusBet, l.atkBet, l.atkFindR);
+                    break;
+                }
             }
-
-            if (animationFrame >= config.endFrame) {
+            if(s >= l.endFrame) {
                 petSkin.state = SheepRoleState.Move;
                 petSkin.subState = SheepRoleSubState.MoveBoss;
                 petSkin.animType = SheepRoleAnimType.Idle;
