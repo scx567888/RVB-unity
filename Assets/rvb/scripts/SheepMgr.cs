@@ -875,35 +875,6 @@ namespace rvb.scripts {
         this.bulletMaxIndex = this.bulletCount;
 
         }
-// todo
-        private void InitializeBossView(SheepCamp camp) {
-            int index = CampIndex(camp);
-            PetView view = getPetView(index);
-            view.clear();
-            view.id = getNextPetId();
-            view.isActive = true;
-            view.isDie = false;
-            view.camp = camp;
-            view.roleId = 0;
-            view.skinId = 0;
-            view.conf = SheepRoleTypeInfo.getById(0);
-            view.state = (SheepRoleState)(int)SheepBossState.Ready;
-            view.subState = SheepRoleSubState.None;
-            view.animType = SheepRoleAnimType.Idle;
-            view.curHp = loongHp;
-            view.posX = camp == SheepCamp.Red ? -sheepMode.loongX : sheepMode.loongX;
-            view.posY = 0f;
-            view.posBefX = view.posX;
-            view.posBefY = view.posY;
-            view.animX = view.posX;
-            view.animY = view.posY;
-            view.blockIndex = Util.getIndexByXY(view.posX, view.posY);
-            view.befBlockIndex = view.blockIndex;
-            view.dirX = camp == SheepCamp.Red ? 1f : -1f;
-            view.dirY = 0f;
-            bossHp[index] = ReadExternal(() => Convert.ToSingle(boss[index].curHp), (float)loongHp);
-            view.curHp = bossHp[index];
-        }
 
         public bool updateBoss(SheepMgr sheepMgr, SheepCtl sheepCtl, float dt, long c) {
 
@@ -1115,6 +1086,36 @@ namespace rvb.scripts {
             petCount = 2;
             roleMaxIndex = 2;
         }
+// todo        
+        private void InitializeBossView(SheepCamp camp) {
+            int index = CampIndex(camp);
+            PetView view = getPetView(index);
+            view.clear();
+            view.id = getNextPetId();
+            view.isActive = true;
+            view.isDie = false;
+            view.camp = camp;
+            view.roleId = 0;
+            view.skinId = 0;
+            view.conf = SheepRoleTypeInfo.getById(0);
+            view.state = (SheepRoleState)(int)SheepBossState.Ready;
+            view.subState = SheepRoleSubState.None;
+            view.animType = SheepRoleAnimType.Idle;
+            view.curHp = loongHp;
+            view.posX = camp == SheepCamp.Red ? -sheepMode.loongX : sheepMode.loongX;
+            view.posY = 0f;
+            view.posBefX = view.posX;
+            view.posBefY = view.posY;
+            view.animX = view.posX;
+            view.animY = view.posY;
+            view.blockIndex = Util.getIndexByXY(view.posX, view.posY);
+            view.befBlockIndex = view.blockIndex;
+            view.dirX = camp == SheepCamp.Red ? 1f : -1f;
+            view.dirY = 0f;
+            bossHp[index] = ReadExternal(() => Convert.ToSingle(boss[index].curHp), (float)loongHp);
+            view.curHp = bossHp[index];
+        }
+        
 // todo
         public (long time, bool isEndWorker) role_logic() {
             Stopwatch stopwatch = Stopwatch.StartNew();
@@ -2710,83 +2711,74 @@ namespace rvb.scripts {
 
             return false;
         }
-// todo
+
         public PetView createPetView(
-            SheepCtl sheepCtl,
-            SheepCamp camp,
-            int roleType,
-            int formationCount = 1,
-            int unused = 0,
-            bool addToWorld = true,
-            Vector3? position = null,
-            bool isBoom = false
+           SheepCtl sheepCtl,SheepCamp camp,int roleType,int a = 1,int i=0,bool r = true,Vector3 f = new Vector3(),bool s = false
         ) {
-            SheepMgr manager = this;
-            if (manager == null ||
-                (manager.state != SheepRoomState.Run && manager.state != SheepRoomState.Start)) {
-                return null;
-            }
+            
+    if (this.state != SheepRoomState.Run && this.state != SheepRoomState.Start) {
+        return null;
+    }
 
-            SheepRoleTypeInfo roleConfig = SheepRoleTypeInfo.getById(roleType);
-            PetView petSource = new PetView(-1) {
-                uids = new List<int>(),
-                conf = roleConfig,
-                camp = camp,
-                petId = roleType,
-                isDie = false,
-                scale = roleConfig.scale,
-                isBoom = isBoom,
-                buff_index = -1,
-                view_pet = null,
-                attacher = new BuffTimeAttacher(),
-                skinId = roleConfig.animId,
-                sheepMgr = this
-            };
+    var sheepRoleTypeInfo = SheepRoleTypeInfo.getById(roleType);
 
-            SheepRoleFormation formation = SheepRoleFormation.getById(roleConfig.formationId);
-            Vector3 spawnPosition;
-            if (formation.formationType == SheepRoleFormationType.AngleRandom) {
-                float density = Math.Max(1, formation.angleDensity);
-                float maxAngle = Mathf.Min(
-                    (formationCount / density + formation.baseTimes) * formation.startAngle,
-                    formation.maxAngle
-                );
-                float angle = UnityEngine.Random.Range(-maxAngle, maxAngle);
-                angle += angle > 0f ? formation.minAngle : -formation.minAngle;
-                float radius = formation.startR + sheepMode.startAddR;
-                float offsetX = Mathf.Cos(angle * Mathf.Deg2Rad) * radius;
-                float offsetY = Mathf.Sin(angle * Mathf.Deg2Rad) * radius;
-                spawnPosition = camp == SheepCamp.Red
-                    ? new Vector3(sheepMode.loongX - offsetX, offsetY, 0f)
-                    : new Vector3(offsetX - sheepMode.loongX, offsetY, 0f);
-            }
-            else if (formation.formationType == SheepRoleFormationType.RectangleRandom) {
-                float density = Math.Max(1, formation.density);
-                float maxScope = Mathf.Min(
-                    (formationCount / density + formation.baseTimes) * formation.startScope,
-                    formation.maxScope
-                );
-                float y = UnityEngine.Random.Range(-maxScope, maxScope);
-                if (formation.minScope != 0) y += y > 0f ? formation.minScope : -formation.minScope;
-                float x = formation.startX + sheepMode.startAddX;
-                x = camp == SheepCamp.Red ? -Mathf.Abs(x) : Mathf.Abs(x);
-                spawnPosition = new Vector3(x, y, 0f);
-            }
-            else {
-                spawnPosition = position ?? new Vector3(
-                    camp == SheepCamp.Red
-                        ? -(formation.startX + sheepMode.startAddX)
-                        : formation.startX + sheepMode.startAddX,
-                    0f,
-                    0f
-                );
-            }
+    var petSkin = new PetView(-1);
+    petSkin.uids = new List<int>();
+    petSkin.conf = sheepRoleTypeInfo;
+    petSkin.camp = camp;
+    petSkin.petId = roleType;
+    petSkin.isDie = false;
+    petSkin.scale = petSkin.conf.scale;
+    petSkin.isBoom = s;// todo 这里不能写死
+    petSkin.buff_index = -1;
+    petSkin.view_pet = null;
+    petSkin.attacher = new BuffTimeAttacher();
 
-            petSource.position = spawnPosition;
-            petSource.pos = spawnPosition;
-            if (addToWorld) manager.addPet(petSource, camp);
-            manager.pre_add_pet(petSource);
-            return petSource;
+    petSkin.skinId = petSkin.conf.animId;
+
+    petSkin.sheepMgr = this;
+
+    var formation = SheepRoleFormation.getById(sheepRoleTypeInfo.formationId);
+
+    if (formation.formationType == SheepRoleFormationType.AngleRandom) {
+        var T = Math.Min((a / (float)formation.angleDensity + formation.baseTimes) * formation.startAngle, formation.maxAngle);
+        T = Random.Range(-T, T);
+        T += T > 0 ? formation.minAngle : -formation.minAngle;
+
+        var A = formation.startR + sheepMode.startAddR;
+        var H = Math.Cos(T * Math.PI / 180) * A;
+        var P = Math.Sin(T * Math.PI / 180) * A;
+        var M = sheepMode.loongX;
+
+        if (petSkin.camp == SheepCamp.Red) {
+            var x = new Vector3((float)(M - H), (float)P, 0);
+            petSkin.position = x;
+        } else {
+            var D = new Vector3((float)(H - M),(float) P, 0);
+            petSkin.position = D;
+        }
+
+    } else if (formation.formationType == SheepRoleFormationType.RectangleRandom) {
+        var F = Math.Min((a / (float)formation.density + formation.baseTimes) * formation.startScope, formation.maxScope);
+        var N = Random.Range(-F, F);
+        if (formation.minScope!=0) {
+            N += N > 0 ? formation.minScope : -formation.minScope;
+        }
+         
+        var W = 0f;
+        var E = formation.startX + sheepMode.startAddX;
+        W = camp == SheepCamp.Red ? -Math.Abs(E) : Math.Abs(E);
+        var O = new Vector3(W, N, 0f);
+        petSkin.position = O;
+    } else {
+        petSkin.position = f;
+    }
+
+    this.addPet(petSkin, camp);
+
+    petSkin.pos = petSkin.position;
+    this.pre_add_pet(petSkin);
+    return petSkin;
         }
 
 // todo
