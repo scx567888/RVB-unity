@@ -1115,39 +1115,42 @@ namespace rvb.scripts {
             bossHp[index] = ReadExternal(() => Convert.ToSingle(boss[index].curHp), (float)loongHp);
             view.curHp = bossHp[index];
         }
-        
-// todo
+
         public (long time, bool isEndWorker) role_logic() {
-            Stopwatch stopwatch = Stopwatch.StartNew();
-            logic_counts[CampIndex(SheepCamp.Red)] = redBuffCount > 0 ? 2 : 1;
-            logic_counts[CampIndex(SheepCamp.Blue)] = blueBuffCount > 0 ? 2 : 1;
+            var t = NowMs();
+            this.logic_counts[(int)SheepCamp.Red] = this.redBuffCount > 0 ? 2 : 1;
+            this.logic_counts[(int)SheepCamp.Blue] = this.blueBuffCount > 0 ? 2 : 1;
+            var curIndexImages = this.curIndexImages;
+            var o = 0;
+            if (this.roleMaxIndex!=0) {
+                o = this.rob_role_task(this.roleMaxIndex, curIndexImages);
+            }
+            var l = 0;
+            if (this.bulletMaxIndex!=0) {
+                l = this.rob_bullet_task(this.bulletMaxIndex, curIndexImages);
+            }
+            if (this.bullte_creates.Count!=0) {
+                var e = this.rob_pre_bullet(this.bullte_creates.Count);
+                foreach (var t1 in this.bullte_creates) {
+                    var i = e++;
+                    if (i > SheepConfig.MaxBulletCount) {
+                        break;
+                    }
 
-            int roleCount = roleMaxIndex > 0 ? rob_role_task(roleMaxIndex, curIndexImages) : 0;
-            int activeBulletCount = bulletMaxIndex > 0 ? rob_bullet_task(bulletMaxIndex, curIndexImages) : 0;
-
-            if (bullte_creates.Count > 0) {
-                int previewIndex = rob_pre_bullet(bullte_creates.Count);
-                foreach (BullteCreate request in bullte_creates) {
-                    if (previewIndex >= SheepConfig.MaxBulletCount) break;
-                    copyBulletPreView(
-                        previewIndex++,
-                        request.bulletId,
-                        request.view_pet,
-                        request.view_tar_pet,
-                        request.info
-                    );
+                    this.copyBulletPreView(i, t1.bulletId, t1.view_pet, t1.view_tar_pet, t1.info);
                 }
 
-                bullte_creates.Clear();
+                this.bullte_creates = new List<BullteCreate>();
             }
+            var n = true;
 
-            stopwatch.Stop();
-            if (stopwatch.ElapsedMilliseconds > 33) {
-                Debug.Log(
-                    $"count_role:{roleCount} count_bullet:{activeBulletCount} 耗时:{stopwatch.ElapsedMilliseconds}ms");
+            n = true;
+
+            var r = NowMs() - t;
+            if (r > 33) {
+                Debug.LogWarning("count_role:" + o + " count_bullet:" + l + "  耗时:" + r + "ms");
             }
-
-            return (stopwatch.ElapsedMilliseconds, true);
+            return (r, n);
         }
 
         public int rob_role_task(int count, CurIndexImages curIndexImages) {
