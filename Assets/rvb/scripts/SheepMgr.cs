@@ -1088,7 +1088,7 @@ namespace rvb.scripts {
         }
 // todo        
         private void InitializeBossView(SheepCamp camp) {
-            int index = CampIndex(camp);
+            int index = (int)camp;
             PetView view = getPetView(index);
             view.clear();
             view.id = getNextPetId();
@@ -2347,7 +2347,7 @@ namespace rvb.scripts {
                 callInfos[typeID] = sheepCallInfo;
             }
 
-            // todo 爆炸是什么意思? 用什么用?
+            //  爆炸是什么意思? 用什么用?
             sheepCallInfo.count += count;
             sheepCallInfo.pets.Add(new SheepCallInfoPet() { camp = camp, count = count });
         }
@@ -2732,7 +2732,7 @@ namespace rvb.scripts {
     petSkin.petId = roleType;
     petSkin.isDie = false;
     petSkin.scale = petSkin.conf.scale;
-    petSkin.isBoom = s;// todo 这里不能写死
+    petSkin.isBoom = s;//  这里不能写死
     petSkin.buff_index = -1;
     petSkin.view_pet = null;
     petSkin.attacher = new BuffTimeAttacher();
@@ -2796,8 +2796,6 @@ namespace rvb.scripts {
                 return fallback;
             }
         }
-// todo
-        public static int CampIndex(SheepCamp camp) => (int)camp;
 
     }
 }
