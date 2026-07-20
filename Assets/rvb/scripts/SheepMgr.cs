@@ -1361,7 +1361,7 @@ namespace rvb.scripts {
 
             return i;
         }
-// todo
+
         public void update_boss_state(PetView e) {
             switch ((SheepBossState)(int)e.state) {
                 case SheepBossState.NomalRun:
@@ -1372,12 +1372,12 @@ namespace rvb.scripts {
                     if (0 == i) {
                         var ( i9,  o) = Util.getXnYn(e.posX, e.posY);
                         var l = false;
-                        UtilFind.findNearBlocksByAckView(e, i9, o, (int)Math.Floor((double)(t.findR * SheepConfig.loongExaminationRangeBet)), (t => {
+                        UtilFind.findNearBlocksByAckView(e, i9, o, (int)Math.Floor((double)(t.findR * SheepConfig.loongExaminationRangeBet)), (t8 => {
                             if (!!l) {
-                                return false;
+                                return true;
                             }
                             else {
-                                if (!!Util.isCanAckByRole(e, t)) {
+                                if (!!Util.isCanAckByRole(e, t8)) {
                                     l = true;
                                     return true;
                                 }
