@@ -1627,58 +1627,52 @@ namespace rvb.scripts {
                 petSkin.animType = SheepRoleAnimType.Killer;
             }
         }
-// todo
+
         public void update_role_state_boom(PetView petSkin) {
-            SheepSkill skill = SheepSkill.getById(petSkin.readySkillId);
-            SheepSkillSubBoom boom = SheepSkillSubBoom.getById(skill.id);
-            int animationFrame = petSkin.animFrame;
-
-            if (animationFrame == boom.atkFrame) {
-                List<SheepRoleType> excluded = new List<SheepRoleType>();
-                if (petSkin.conf.roleType == SheepRoleType.chong_feng_bing ||
-                    petSkin.conf.roleType == SheepRoleType.qi_lin) {
-                    excluded.Add(SheepRoleType.qi_lin);
+            var t = SheepSkill.getById(petSkin.readySkillId);
+            var i = SheepSkillSubBoom.getById(t.id);
+            var s = petSkin.animFrame;
+            if (s == i.atkFrame) {
+                var t1 = new List<SheepRoleType>();
+                if (petSkin.conf.roleType != SheepRoleType.chong_feng_bing &&
+                    petSkin.conf.roleType != SheepRoleType.qi_lin) {
+                    
                 }
-
-                UtilAck.ackMe(
-                    petSkin,
-                    boom.spiltRadiusBet,
-                    boom.atkBet,
-                    boom.atkFindR,
-                    boom.hitBackDistance,
-                    excluded
-                );
+                else {
+                    t1.Add(SheepRoleType.qi_lin);    
+                }
+                UtilAck.ackMe(petSkin, i.spiltRadiusBet, i.atkBet, i.atkFindR, i.hitBackDistance, t1);
             }
 
-            if (animationFrame < boom.endFrame) return;
-
-            petSkin.isLock = false;
-            SheepRoleState endState = (SheepRoleState)boom.endState;
-            switch (endState) {
-                case SheepRoleState.Move:
+            if (s >= i.endFrame) {
+                petSkin.isLock = false;
+                if (i.endState == (int)SheepRoleState.Move) {
                     petSkin.state = SheepRoleState.Move;
                     petSkin.subState = SheepRoleSubState.MoveBoss;
                     petSkin.animType = SheepRoleAnimType.Idle;
-                    break;
-                case SheepRoleState.Rigidity:
+                }
+                else if (i.endState == (int)SheepRoleState.Rigidity) {
                     petSkin.state = SheepRoleState.Rigidity;
                     petSkin.animType = SheepRoleAnimType.Idle;
-                    petSkin.readySkillId = boom.endSkill;
-                    break;
-                case SheepRoleState.Dead:
-                    petSkin.isDie = true;
-                    petSkin.state = SheepRoleState.Dead;
-                    break;
-                case SheepRoleState.Palm:
-                    petSkin.state = SheepRoleState.Palm;
-                    petSkin.subState = SheepRoleSubState.Palm;
-                    petSkin.animType = SheepRoleAnimType.Palm;
-                    petSkin.readySkillId = boom.endSkill;
-                    break;
-                default:
-                    Debug.LogError("Boom.endState 错误: " + boom.endState);
-                    break;
+                    petSkin.readySkillId = i.endSkill;
+                }
+                else {
+                    if (i.endState == (int)SheepRoleState.Dead) {
+                        petSkin.isDie = true;
+                        petSkin.state = SheepRoleState.Dead;
+                    }
+                    else if (i.endState == (int)SheepRoleState.Palm) {
+                        petSkin.state = SheepRoleState.Palm;
+                        petSkin.subState = SheepRoleSubState.Palm;
+                        petSkin.animType = SheepRoleAnimType.Palm;
+                        petSkin.readySkillId = i.endSkill;
+                    }
+                    else {
+                        Debug.LogError("endState错误");
+                    }
+                }
             }
+             
         }
 
         public void update_role_state_invincible(PetView petSkin) {
