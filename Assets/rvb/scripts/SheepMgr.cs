@@ -559,45 +559,42 @@ namespace rvb.scripts {
         preBullet.atkVue = view_pet!=null ? view_pet.conf.atk : l.atk;
         preBullet.frame = 0;
         }
-// todo
-        public async Task game_run(SheepCtl sheepCtl, CancellationToken cancellationToken = default) {
-            game_clear();
-            mainClearBlocks();
 
-            int runGameIndex = gameIndex;
-            updateTime = NowMs();
+        public void game_run(SheepCtl sheepCtl) {
+            
+            // 清理游戏数据
+            this.game_clear();
 
-            while (!cancellationToken.IsCancellationRequested &&
-                   runGameIndex == gameIndex &&
-                   (state == SheepRoomState.Run || state == SheepRoomState.Start)) {
+            this.mainClearBlocks();
+
+            var i = this.gameIndex;
+
+            this.updateTime = NowMs();
+
+            //只有 游戏处于运行中 或者 局数未改变
+            while (i == this.gameIndex && (this.state == SheepRoomState.Run || this.state == SheepRoomState.Start)) {
+
                 try {
-                    long lastUpdateTime = updateTime;
-                    updateTime = NowMs();
-                    long diff = updateTime - lastUpdateTime;
+                    var lastUpdateTime = this.updateTime;
+                    this.updateTime = NowMs();
+
+                    var diff = this.updateTime - lastUpdateTime;
 
                     if (diff >= 100) {
                         Debug.LogWarning("主线程更新逻辑耗时过长: " + diff + "ms");
                     }
 
                     if (diff < 33) {
-                        await Task.Delay((int)(33 - diff), cancellationToken);
+                        Thread.Sleep((int)(33 - diff));
                     }
 
-                    bool canStep = true;
-                    if (comImages != null) {
-                        canStep = ReadExternal(() => (bool)comImages.isHasFreeImage(), true);
+                    if (this.comImages.isHasFreeImage()) {
+                        var o = NowMs() - lastUpdateTime;
+                        this.game_update(this, sheepCtl, o);
                     }
 
-                    if (canStep) {
-                        float deltaMs = Mathf.Max(1f, NowMs() - lastUpdateTime);
-                        game_update(this, sheepCtl, deltaMs);
-                    }
-                }
-                catch (OperationCanceledException) {
-                    return;
-                }
-                catch (Exception exception) {
-                    Debug.LogError("主线程更新逻辑错误: " + exception);
+                } catch (Exception e) {
+                    Debug.LogWarning("主线程更新逻辑错误:"+ e);
                     return;
                 }
             }
