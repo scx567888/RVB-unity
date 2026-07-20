@@ -2155,39 +2155,31 @@ namespace rvb.scripts {
             });
             Util.moveTar(petSkin, null, deltaSeconds, logicTick);
         }
-// todo
-        public void update_role_state_spinspurt(PetView petSkin, bool logicTick, float deltaSeconds) {
-            (int xn, int yn) block = Util.getXnYn(petSkin.posX, petSkin.posY);
-            bool crossedEnd = petSkin.camp == SheepCamp.Red
-                ? petSkin.posX > petSkin.conf.runEndX
-                : petSkin.posX < -petSkin.conf.runEndX;
 
-            if (crossedEnd) {
-                petSkin.state = SheepRoleState.Boom;
-                petSkin.subState = SheepRoleSubState.Boom;
-                SheepSkillSubSpinSpurt spinSpurt = SheepSkillSubSpinSpurt.getById(petSkin.conf.skillSpurt);
-                SheepSkillSubBoom boom = SheepSkillSubBoom.getById(spinSpurt.endSkill);
-                petSkin.animType = boom.isAnim != 0 ? SheepRoleAnimType.Boom : SheepRoleAnimType.Idle;
-                petSkin.readySkillId = boom.id;
-                return;
+        public void update_role_state_spinspurt(PetView e, bool t, float i) {
+            var o = e.posX;
+            var l = e.posY;
+            (int n, int r) = Util.getXnYn(o, l);
+            if (e.camp == SheepCamp.Red && e.posX > e.conf.runEndX || e.camp == SheepCamp.Blue && e.posX < -e.conf.runEndX) {
+                e.state = SheepRoleState.Boom;
+                e.subState = SheepRoleSubState.Boom;
+                var t1 = SheepSkillSubSpinSpurt.getById(e.conf.skillSpurt);
+                var i1 = SheepSkillSubBoom.getById(t1.endSkill);
+                if (i1.isAnim!=0) {
+                    e.animType = SheepRoleAnimType.Boom;
+                }else{ e.animType = SheepRoleAnimType.Idle;}
+                e.readySkillId = i1.id;
+            } else {
+                Util.moveTar(e, null, i, t);
+                UtilFind.forNearBlocksByAckView(e, n, r, e.conf.findR,
+                    t2 => {
+                        if (t2.isDie || t2.camp == e.camp || 0 == t2.roleId||!Util.isCanAckByRole(e, t2)) {
+                            return false; 
+                        }  
+                        UtilAck.ackTar(e, t2);
+                         return false;
+                    });
             }
-
-            Util.moveTar(petSkin, null, deltaSeconds, logicTick);
-            UtilFind.forNearBlocksByAckView(
-                petSkin,
-                block.xn,
-                block.yn,
-                petSkin.conf.findR,
-                target => {
-                    if (target.isDie || target.camp == petSkin.camp || target.roleId == 0 ||
-                        !Util.isCanAckByRole(petSkin, target)) {
-                        return false;
-                    }
-
-                    UtilAck.ackTar(petSkin, target);
-                    return false;
-                }
-            );
         }
 
         public void update_role_state_spurt(PetView e, bool t, float i) {
