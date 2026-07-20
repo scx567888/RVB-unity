@@ -1362,60 +1362,50 @@ namespace rvb.scripts {
             return i;
         }
 // todo
-        public void update_boss_state(PetView bossView) {
-            SheepBossState bossState = (SheepBossState)(int)bossView.state;
-            switch (bossState) {
+        public void update_boss_state(PetView e) {
+            switch ((SheepBossState)(int)e.state) {
                 case SheepBossState.NomalRun:
                 case SheepBossState.AwakeRun:
-                case SheepBossState.BackRun: {
-                    SheepRoleTypeInfo config = bossView.conf;
-                    int attackFrame = bossView.curAckFrame;
-                    if (attackFrame == 0) {
-                        (int xn, int yn) block = Util.getXnYn(bossView.posX, bossView.posY);
-                        bool hasTarget = false;
-                        UtilFind.findNearBlocksByAckView(
-                            bossView,
-                            block.xn,
-                            block.yn,
-                            Mathf.FloorToInt(config.findR * SheepConfig.loongExaminationRangeBet),
-                            target => {
-                                if (!hasTarget && Util.isCanAckByRole(bossView, target)) {
-                                    hasTarget = true;
-                                    return true;
-                                }
-
+                case SheepBossState.BackRun:
+                    var t = e.conf;
+                    var i = e.curAckFrame;
+                    if (0 == i) {
+                        var ( i9,  o) = Util.getXnYn(e.posX, e.posY);
+                        var l = false;
+                        UtilFind.findNearBlocksByAckView(e, i9, o, (int)Math.Floor((double)(t.findR * SheepConfig.loongExaminationRangeBet)), (t => {
+                            if (!!l) {
                                 return false;
                             }
-                        );
-                        if (!hasTarget) break;
-                    }
-
-                    attackFrame++;
-                    bossView.curAckFrame = attackFrame;
-                    int readyFrame = config.readyAtks != null && config.readyAtks.Length > 0
-                        ? Mathf.FloorToInt(config.readyAtks[0] / 3f)
-                        : 0;
-                    if (attackFrame == readyFrame) {
-                        (int xn, int yn) block = Util.getXnYn(bossView.posX, bossView.posY);
-                        UtilFind.forfeachBlocksByAckView(
-                            bossView.camp,
-                            block.xn,
-                            block.yn,
-                            config.findR,
-                            target => {
-                                if (Util.isCanAckByRole(bossView, target)) {
-                                    UtilAck.hurtByRole(bossView, target, config.atk);
+                            else {
+                                if (!!Util.isCanAckByRole(e, t)) {
+                                    l = true;
+                                    return true;
                                 }
+                                else {
+                                    return false;
+                                }
+                            } 
+                        }));
+                        if (!l) {
+                            break;
+                        }
+                    }
+                    i += 1;
+                    e.curAckFrame = i;
+                    if (i == (int)Math.Floor(t.readyAtks[0] / 3f)) {
+                        var (i3, s) = Util.getXnYn(e.posX, e.posY);
+                        UtilFind.forfeachBlocksByAckView(e.camp, i3, s, t.findR, t5 => {
+                            if (Util.isCanAckByRole(e, t5)) {
+                                UtilAck.hurtByRole(e, t5, e.conf.atk);
                             }
-                        );
+                        });
                     }
 
-                    if (attackFrame >= Mathf.FloorToInt(1000f * config.atkCd / 100f)) {
-                        bossView.curAckFrame = 0;
+                    if (i >= Math.Floor(1e3 * t.atkCd / 100)) {
+                        e.curAckFrame = 0;
+                        
                     }
-
                     break;
-                }
             }
         }
 
