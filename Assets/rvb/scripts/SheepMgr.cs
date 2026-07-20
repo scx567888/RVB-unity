@@ -2767,15 +2767,7 @@ namespace rvb.scripts {
 
 // todo
         public static long NowMs() => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-// todo
-        public static void IgnoreExternal(Action action) {
-            try {
-                action?.Invoke();
-            }
-            catch {
-                // 外部显示桥接是可选的，缺少成员时不应中断核心逻辑。
-            }
-        }
+
 // todo
         public static T ReadExternal<T>(Func<T> getter, T fallback = default) {
             try {
