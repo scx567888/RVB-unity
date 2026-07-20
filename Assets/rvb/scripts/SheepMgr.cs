@@ -2130,24 +2130,25 @@ namespace rvb.scripts {
                 e.animType = SheepRoleAnimType.Boom;
                 e.readySkillId = i3.id;
             }
-            else
+            else {
                 UtilFind.findNearBlocksByAckView(e, n, r, 5, tt2 => {
                     if (!tt2.isDie && tt2.camp != e.camp && 0 != tt2.roleId && Util.isCanAckByRole(e, tt2)) {
-                        var i  = SheepConfig.beheadLine;
+                        var i = SheepConfig.beheadLine;
                         if (tt2.curHp < i) {
                             tt2.isDie = true;
                             tt2.state = SheepRoleState.Dead;
                         }
-                         else {
+                        else {
                             var t1 = e.conf;
                             UtilAck.ackMe(e, t1.collideR, 0, t1.findR, t1.hitBackDistance);
-                         }
+                        }
                     }
 
                     return false;
                 });
 
-            Util.moveTar(e, null, i, t);
+                Util.moveTar(e, null, i, t);
+            }
         }
 
         public void update_role_state_spinspurt(PetView e, bool t, float i) {
