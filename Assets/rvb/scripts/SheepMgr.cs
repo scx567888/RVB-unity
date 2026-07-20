@@ -1032,26 +1032,25 @@ namespace rvb.scripts {
         public void pre_add_pet(PetView e) {
             this.petsAdd.Add(e);
         }
-// todo
+
         public void buff_add_pets() {
-            while (petsAdd.Count > 0) {
-                int index;
-                if (petsDel.Count > 0) {
-                    index = petsDel.Pop();
-                }
-                else {
-                    if (petCount >= SheepConfig.MaxPetCount) {
-                        Debug.LogWarning($"预加入怪物超过最大数量: {petCount}/{SheepConfig.MaxPetCount}");
+            if (this.petsAdd.Count <= 0) {
+                return;
+            }
+
+            for (; this.petsAdd.Count!=0;) {
+                if (!this.petsDel.TryPop(out var e)) {
+                    if (this.petCount >= SheepConfig.MaxPetCount - 1) {
+                        Debug.LogWarning("预加入怪物加入buff超过最大数量"+ this.petCount+" "+SheepConfig.MaxPetCount);
                         break;
                     }
 
-                    index = petCount++;
+                    e = this.petCount++;
                 }
-
-                PetView source = petsAdd[0];
-                petsAdd.RemoveAt(0);
-                PetView view = getPetView(index);
-                source.init(index, view);
+                var t = this.petsAdd[0];
+                 this.petsAdd.RemoveAt(0);
+                var r = this.getPetView(e);
+                t.init(e, r);
             }
         }
 
