@@ -1154,13 +1154,13 @@ namespace rvb.scripts {
 
             return (stopwatch.ElapsedMilliseconds, true);
         }
-// todo
-        public int rob_role_task(int count, CurIndexImages currentImages) {
-            int start = rob_role(count);
-            int end = start + count;
-            int updated = update_role(start, end);
-            if (comImages != null) IgnoreExternal(() => comImages.update_role(currentImages));
-            return updated;
+
+        public int rob_role_task(int count, CurIndexImages curIndexImages) {
+            var start = this.rob_role(count);
+            var end = start + count;
+            var i = this.update_role(start, end);
+            this.comImages.update_role(curIndexImages);
+            return i;
         }
 
         public int rob_bullet_task(int count, CurIndexImages curIndexImages) {
