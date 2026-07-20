@@ -1483,96 +1483,96 @@ namespace rvb.scripts {
 
             Debug.LogError("移动状态没有目标??");
         }
-// todo
-        public void update_role_state_attack(PetView petSkin, bool logicTick, float deltaSeconds) {
-            SheepRoleAtkMoveType attackMoveType = (SheepRoleAtkMoveType)petSkin.conf.atkMoveType;
-            if (petSkin.conf.isLoongStopDistance != 0) {
-                float bossX = petSkin.camp == SheepCamp.Red ? sheepMode.loongX : -sheepMode.loongX;
-                if (Util.dis(petSkin.posX, petSkin.posY, bossX, 0f) <= petSkin.conf.loongStopDistanceR) {
-                    attackMoveType = SheepRoleAtkMoveType.None;
-                }
+
+        public void update_role_state_attack(PetView petSkin, bool t, float i) {
+            var o = petSkin.conf.atkMoveType;
+        if (petSkin.conf.isLoongStopDistance!=0) {
+            var t3 = sheepMode;
+            var i1 = petSkin.conf.loongStopDistanceR;
+            if (Util.dis(petSkin.posX, petSkin.posY, petSkin.camp == SheepCamp.Red ? t3.loongX : -t3.loongX, 0) <= i1) {
+                o = (int)SheepRoleAtkMoveType.None;
             }
-
-            if (petSkin.subState == SheepRoleSubState.AttackAwait) {
-                if (!Util.isAtkCd(petSkin)) {
-                    petSkin.subState = SheepRoleSubState.AttackAnim;
-                    petSkin.animType = SheepRoleAnimType.Attack;
-                }
+        }
+        if (petSkin.subState == SheepRoleSubState.AttackAwait) {
+            if (!Util.isAtkCd(petSkin)) {
+                petSkin.subState = SheepRoleSubState.AttackAnim;
+                petSkin.animType = SheepRoleAnimType.Attack;
             }
-            else if (petSkin.subState == SheepRoleSubState.AttackAnim) {
-                SheepRoleTypeInfo config = petSkin.conf;
-                int finishFrame = config.finishAtk;
-                int animationFrame = petSkin.animFrame;
-                int[] readyFrames = config.readyAtks ?? Array.Empty<int>();
-
-                foreach (int readyFrame in readyFrames) {
-                    if (animationFrame != readyFrame) continue;
-
-                    PetView target;
-                    if (config.atkType == SheepRoleAtkType.Throw) {
-                        target = UtilFind.findSortAck(petSkin, config.findR);
-                        if (config.roleType == SheepRoleType.pao_che) {
-                            PetView backBoss = Util.getBackBoss(petSkin.camp);
-                            if (backBoss != null && Util.isCanAckByRole(petSkin, backBoss)) {
-                                target = backBoss;
+        } else if (petSkin.subState == SheepRoleSubState.AttackAnim) {
+            var t3 = petSkin.conf;
+            var i7 = t3.finishAtk;
+            var atkCd = t3.atkCd;
+            var l = petSkin.animFrame;
+            var n = t3.readyAtks;
+            foreach (var i9 in n) {
+                if (l == i9) {
+                    PetView i5 = null;
+                    if (petSkin.conf.atkType == SheepRoleAtkType.Nearest) {
+                        i5 = UtilFind.findNearAck(petSkin);
+                    } else if (petSkin.conf.atkType == SheepRoleAtkType.Throw) {
+                        i5 = UtilFind.findSortAck(petSkin, petSkin.conf.findR);
+                        if (petSkin.conf.roleType == SheepRoleType.pao_che) {
+                            var t6 = Util.getBackBoss(petSkin.camp);
+                            if (Util.isCanAckByRole(petSkin, t6)) {
+                                i5 = t6;
                             }
                         }
+                    } else {
+                        i5 = UtilFind.findNearAck(petSkin);
                     }
-                    else {
-                        target = UtilFind.findNearAck(petSkin);
-                    }
-
-                    if (config.bullet != null && config.bullet.Length > 0) {
-                        int bulletConfigIndex = petSkin.camp == SheepCamp.Red ? 0 : 1;
-                        bulletConfigIndex = Math.Min(bulletConfigIndex, config.bullet.Length - 1);
-                        bullte_creates.Add(new BullteCreate {
-                            view_pet = petSkin,
-                            bulletId = config.bullet[bulletConfigIndex],
-                            view_tar_pet = target
-                        });
-                    }
-                    else if (target != null) {
-                        UtilAck.ackTar(petSkin, target);
+                    if (t3.bullet!=null && 0 != t3.bullet.Length) {
+                        if (i5!=null) {
+                            this.bullte_creates.Add(new BullteCreate(){
+                                view_pet= petSkin,
+                                bulletId= t3.bullet[petSkin.camp == SheepCamp.Red ? 0 : 1],
+                                view_tar_pet= i5
+                            });
+                        } else {
+                            this.bullte_creates.Add(new BullteCreate(){
+                                view_pet= petSkin,
+                                bulletId= t3.bullet[petSkin.camp == SheepCamp.Red ? 0 : 1]
+                            });
+                        }
+                    } else {
+                        if (i5!=null) {
+                            UtilAck.ackTar(petSkin, i5);    
+                        }
                     }
 
                     break;
                 }
-
-                if (animationFrame >= finishFrame) {
-                    Util.resetAtkCd(petSkin, config.atkCd);
-                    FindTarResult result = UtilFind.findTar(petSkin);
-                    if (result.atkTar != null) {
-                        petSkin.subState = SheepRoleSubState.AttackAwait;
-                        petSkin.animType = SheepRoleAnimType.Idle;
-                        return;
-                    }
-
-                    if (result.moveTar != null) {
-                        petSkin.state = SheepRoleState.Move;
-                        petSkin.subState = SheepRoleSubState.MoveTar;
-                        petSkin.animType = SheepRoleAnimType.Idle;
-                        return;
-                    }
-
-                    if (result.moveBoss != null) {
-                        petSkin.state = SheepRoleState.Move;
-                        petSkin.subState = SheepRoleSubState.MoveBoss;
-                        petSkin.animType = SheepRoleAnimType.Idle;
-                        return;
-                    }
+            }
+            if (l >= i7) {
+                Util.resetAtkCd(petSkin, atkCd);
+                var fff = UtilFind.findTar(petSkin);
+                var t5 = fff.atkTar;
+                var i5 = fff.moveTar;
+                var s = fff.moveBoss;
+                if (t5!=null) {
+                    petSkin.subState = SheepRoleSubState.AttackAwait;
+                    petSkin.animType = SheepRoleAnimType.Idle;
+                    return;
+                }
+                if (i5!=null) {
+                    petSkin.state = SheepRoleState.Move;
+                    petSkin.subState = SheepRoleSubState.MoveTar;
+                    petSkin.animType = SheepRoleAnimType.Idle;
+                    return;
+                }
+                if (s!=null) {
+                    petSkin.state = SheepRoleState.Move;
+                    petSkin.subState = SheepRoleSubState.MoveBoss;
+                    petSkin.animType = SheepRoleAnimType.Idle;
+                    return;
                 }
             }
-
-            bool canMoveDuringAttack = attackMoveType == SheepRoleAtkMoveType.Move ||
-                                       (attackMoveType == SheepRoleAtkMoveType.CdMove &&
-                                        petSkin.subState == SheepRoleSubState.AttackAwait);
-            if (logicTick && canMoveDuringAttack) {
-                PetView target = UtilFind.findNearAck(petSkin);
-                if (target != null &&
-                    Util.disByRole(petSkin, target) > petSkin.conf.atkMinMoveR + target.conf.collideR) {
-                    Util.moveTar(petSkin, target, deltaSeconds, true);
-                }
+        }
+        if (t && (o == (int)SheepRoleAtkMoveType.Move || o == (int)SheepRoleAtkMoveType.CdMove && petSkin.subState == SheepRoleSubState.AttackAwait)) {
+            var s = UtilFind.findNearAck(petSkin);
+            if (s!=null&&Util.disByRole(petSkin, s) > petSkin.conf.atkMinMoveR + s.conf.collideR) {
+                Util.moveTar(petSkin, s, i, t);
             }
+        }
         }
 
         public void update_role_state_killer(PetView petSkin) {
