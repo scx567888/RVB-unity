@@ -2066,8 +2066,8 @@ namespace rvb.scripts {
            var (n, r) = Util.getXnYn(o, l);
         if (e.camp == SheepCamp.Red && e.posX > e.conf.runEndX || e.camp == SheepCamp.Blue && e.posX < -e.conf.runEndX) {
             var t6 = false;
-            UtilFind.findNearBlocksByAckView(e, n, r, 5, i => {
-                if (i.isDie || i.camp == e.camp || 0 == i.roleId) {
+            UtilFind.findNearBlocksByAckView(e, n, r, 5, i8 => {
+                if (i8.isDie || i8.camp == e.camp || 0 == i8.roleId) {
                     
                 }
                 else {
@@ -2096,10 +2096,10 @@ namespace rvb.scripts {
             }
         } else {
             var s = false;
-            UtilFind.findNearBlocksByAckView(e, n, r, 5, t => {
-                if (!t.isDie && t.camp != e.camp && 0 != t.roleId && Util.isCanAckByRole(e, t)) {
-                    if (t.conf.roleType == SheepRoleType.xiao_bing) {
-                        var i = t;
+            UtilFind.findNearBlocksByAckView(e, n, r, 5, t8 => {
+                if (!t8.isDie && t8.camp != e.camp && 0 != t8.roleId && Util.isCanAckByRole(e, t8)) {
+                    if (t8.conf.roleType == SheepRoleType.xiao_bing) {
+                        var i = t8;
                         UtilAck.ackTar(e, i);
                     }
                     else {
