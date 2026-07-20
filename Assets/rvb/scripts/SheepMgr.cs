@@ -1623,7 +1623,7 @@ namespace rvb.scripts {
                     petSkin.animType = SheepRoleAnimType.Idle;
                     return;
                 }
-                petSkin.subState = i1 + 1;
+                petSkin.subState = (SheepRoleSubState)((int) i1 + 1);
                 petSkin.animType = SheepRoleAnimType.Killer;
             }
         }
