@@ -1061,13 +1061,13 @@ namespace rvb.scripts {
             pet.id = 0;
             this.petsDel.Push(e);
         }
-// todo
+
         public void clear_pets() {
-            cur_rob_role_index = 0;
-            roleMaxIndex = 0;
-            petCount = 0;
-            petsAdd.Clear();
-            petsDel.Clear();
+            this.cur_rob_role_index = 0;
+            this.roleMaxIndex = 0;
+            this.petCount = 0;
+            this.petsAdd.Clear();
+            this.petsDel.Clear();
         }
 
         public void buff_add_bullets() {
