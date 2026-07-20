@@ -1612,8 +1612,8 @@ namespace rvb.scripts {
             }
 
             if (i >= t.endFrame) {
-                var i1 = petSkin.subState;
-                if (i1 == SheepRoleSubState.KillerEnd || i1 - SheepRoleSubState.KillerStart >= t.cnt) {
+                var i1 = (int)petSkin.subState;
+                if (i1 == (int)SheepRoleSubState.KillerEnd || i1 - (int)SheepRoleSubState.KillerStart >= t.cnt) {
                     petSkin.state = SheepRoleState.Move;
                     petSkin.subState = SheepRoleSubState.MoveBoss;
                     petSkin.animType = SheepRoleAnimType.Idle;
@@ -2504,7 +2504,7 @@ namespace rvb.scripts {
                             o1.count -= 1;
                             I += 1;
 
-                            var R = new Vector3(S, M);
+                            var R = new Vector3(S, M,0f);
                             if (C.booms != null && C.booms.Count > 0) {
                                 createPetView(sheepCtl, C.camp, a, h, 1, true, R, C.booms.Pop());
                             }
@@ -2807,7 +2807,7 @@ namespace rvb.scripts {
 
             for (var j = 0; j < Len; j++) {
                 var petIndex = t[Index + j];
-                if (null == petIndex) {
+                if (-1 == petIndex) {
                     throw new Exception("二级内存取出空???");
                 }
 
