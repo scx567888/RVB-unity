@@ -1680,30 +1680,29 @@ namespace rvb.scripts {
                     break;
             }
         }
-// todo
+
         public void update_role_state_invincible(PetView petSkin) {
-            int animationFrame = petSkin.animFrame;
-            SheepSkill skill = SheepSkill.getById(petSkin.readySkillId);
-            SheepSkillSubInvincible config = SheepSkillSubInvincible.getById(skill.id);
-
-            foreach (int healFrame in config.healFrames ?? Array.Empty<int>()) {
-                if (animationFrame != healFrame) continue;
-                int heal = Mathf.FloorToInt((petSkin.conf.hp - petSkin.curHp) * (config.healHealthPercent / 100f));
-                UtilAck.hurtByRole(petSkin, petSkin, -heal);
+            var t = petSkin.animFrame;
+            var i = SheepSkill.getById(petSkin.readySkillId);
+            var s = SheepSkillSubInvincible.getById(i.id);
+            var o = s.healFrames;
+            foreach (var i1 in o) {if (t == i1) {
+                var t3 =(float) Math.Floor((petSkin.conf.hp - petSkin.curHp) * (s.healHealthPercent / 100f));
+                UtilAck.hurtByRole(petSkin, petSkin, -t3);
                 break;
-            }
-
-            foreach (int attackFrame in config.atkFrames ?? Array.Empty<int>()) {
-                if (animationFrame != attackFrame) continue;
-                UtilAck.ackMe(petSkin, config.spiltRadiusBet, config.atkBet, config.atkFindR);
+            }}
+            var l = s.atkFrames;
+            foreach (var i2 in l) {if (t == i2) {
+                UtilAck.ackMe(petSkin, s.spiltRadiusBet, s.atkBet, s.atkFindR);
                 break;
-            }
+            }}
 
-            if (animationFrame >= config.endFrame) {
+            if (t >= s.endFrame) {
                 petSkin.state = SheepRoleState.Move;
                 petSkin.subState = SheepRoleSubState.MoveBoss;
                 petSkin.animType = SheepRoleAnimType.Idle;
             }
+            
         }
 
         public void update_role_state_bladestorm(PetView petSkin, bool t, float i) {
