@@ -1574,59 +1574,56 @@ namespace rvb.scripts {
                 }
             }
         }
-// todo
+
         public void update_role_state_killer(PetView petSkin) {
-            SheepSkillSubKiller killer = SheepSkillSubKiller.getById(petSkin.readySkillId);
-            int animationFrame = petSkin.animFrame;
-
-            if (animationFrame == killer.findMoveFrame) {
-                bool interruptedByShield = false;
+            var t = SheepSkillSubKiller.getById(petSkin.readySkillId);
+            var i = petSkin.animFrame;
+            if (i == t.findMoveFrame) {
+                var i3 = false;
+                var s = petSkin.conf;
                 if (petSkin.conf.roleType == SheepRoleType.ci_ke) {
-                    UtilFind.foreachFront(
-                        petSkin,
-                        target => {
-                            if (target.conf.roleType == SheepRoleType.dun_bing) {
-                                interruptedByShield = true;
-                            }
-                        },
-                        petSkin.conf.findR,
-                        60f
-                    );
-                }
+                    UtilFind.foreachFront(petSkin, (e => {
+                        if (e.conf.roleType != SheepRoleType.dun_bing) {
+                            
+                        }
+                        else {
+                            i3 = true;
+                        }
+                    }), s.findR, 60);
 
-                if (interruptedByShield) {
+                }
+                if ( i3) {
+                    Debug.LogWarning("刺客被中断，直接回到移动状态");
                     petSkin.state = SheepRoleState.Move;
                     petSkin.subState = SheepRoleSubState.MoveBoss;
                     petSkin.animType = SheepRoleAnimType.Idle;
                     return;
                 }
-
-                PetView target = UtilFind.findFarAck(petSkin, killer.findR);
-                if (target != null) {
-                    petSkin.logicMove(target.posX, target.posY);
+                var o = UtilFind.findFarAck(petSkin, t.findR);
+                if (o!=null) {
+                    petSkin.logicMove(o.posX, o.posY);
                 }
                 else {
                     petSkin.state = SheepRoleState.Move;
                     petSkin.subState = SheepRoleSubState.MoveBoss;
-                    petSkin.animType = SheepRoleAnimType.Idle;
+                    petSkin .animType = SheepRoleAnimType.Idle;
                 }
+                
             }
 
-            if (animationFrame == killer.atkFrame) {
-                UtilAck.ackMe(petSkin, killer.spiltRadiusBet, killer.atkBet, killer.atkFindR);
+            if (i == t.atkFrame) {
+                UtilAck.ackMe(petSkin, t.spiltRadiusBet, t.atkBet, t.atkFindR);
             }
-
-            if (animationFrame >= killer.endFrame) {
-                SheepRoleSubState current = petSkin.subState;
-                if (current == SheepRoleSubState.KillerEnd ||
-                    (int)current - (int)SheepRoleSubState.KillerStart >= killer.cnt) {
+            
+            if (i >= t.endFrame) {
+                var i1 = petSkin.subState;
+                if (i1 == SheepRoleSubState.KillerEnd || i1 - SheepRoleSubState.KillerStart >= t.cnt) {
                     petSkin.state = SheepRoleState.Move;
                     petSkin.subState = SheepRoleSubState.MoveBoss;
                     petSkin.animType = SheepRoleAnimType.Idle;
                     return;
                 }
-
-                petSkin.subState = (SheepRoleSubState)((int)current + 1);
+                petSkin.subState = i1 + 1;
                 petSkin.animType = SheepRoleAnimType.Killer;
             }
         }
