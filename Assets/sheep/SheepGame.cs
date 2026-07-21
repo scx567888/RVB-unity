@@ -7,6 +7,7 @@ namespace sheep {
         // ********************* 逻辑帧相关 *********************
 
         // 逻辑帧率
+        [Range(1, 240)] 
         public int tickRate = 30;
 
         // 逻辑帧率累加器
@@ -23,10 +24,11 @@ namespace sheep {
 
         private ScxSpriteRenderer scxSpriteRenderer;
         private ScxSpriteRenderUnit scxSpriteRenderUnit;
+        private ScxSpriteRenderUnit scxSpriteRenderUnit1;
 
         // ********************* 渲染插值相关 *********************
 
-        public bool useLerp;
+        public bool useLerp = true;
         private Vector3 previousPosition;
         private Vector3 currentPosition;
 
@@ -45,6 +47,8 @@ namespace sheep {
             );
             this.scxSpriteRenderUnit = scxSpriteRenderer.createUnit();
             this.scxSpriteRenderUnit.setFrame(0);
+            this.scxSpriteRenderUnit1 = scxSpriteRenderer.createUnit();
+            this.scxSpriteRenderUnit1.setFrame(0);
 
             // 初始化主逻辑
             sheepWorld = new SheepWorld();
@@ -93,6 +97,7 @@ namespace sheep {
             }
 
             scxSpriteRenderUnit.setPosition(renderPosition.x, renderPosition.y, renderPosition.z);
+            scxSpriteRenderUnit1.setPosition(currentPosition.x, currentPosition.y + 1, currentPosition.z);
             scxSpriteRenderer.update();
         }
     }

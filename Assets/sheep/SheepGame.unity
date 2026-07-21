@@ -390,6 +390,7 @@ MonoBehaviour:
   texture: {fileID: 2800000, guid: 194dfda588cc49649980d799777b8130, type: 3}
   json: {fileID: 4900000, guid: 1e8835a799484c07b43cde1bb2398750, type: 3}
   mainMaterial: {fileID: 2100000, guid: de552a8032c24a2b826d1da4ff7198d9, type: 2}
+  useLerp: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
