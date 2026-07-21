@@ -24,6 +24,12 @@ namespace sheep {
         private ScxSpriteRenderer scxSpriteRenderer;
         private ScxSpriteRenderUnit scxSpriteRenderUnit;
 
+        // ********************* 渲染插值相关 *********************
+
+        public bool useLerp;
+        private Vector3 previousPosition;
+        private Vector3 currentPosition;
+
         // ********************* 主逻辑相关 *********************
 
         private SheepWorld sheepWorld;
@@ -46,25 +52,47 @@ namespace sheep {
 
         void Update() {
             // 计算 tick 帧 时长
-            var tickInterval = 1.0 / tickRate;
-            
+            double tickInterval = 1.0 / tickRate;
+
             // 累加 tick 帧 计数
             tickAccumulator += Time.deltaTime;
 
             // 调度逻辑帧
             while (tickAccumulator >= tickInterval) {
-                sheepWorld.tick();
+                tick();
                 tickAccumulator -= tickInterval;
             }
 
+            // 计算插值
+            float alpha = (float)(tickAccumulator / tickInterval);
+
             // 渲染
-            render();
+            render(alpha);
         }
 
+        void tick() {
+            previousPosition = currentPosition;
 
-        void render() {
-            var p = sheepWorld.position;
-            scxSpriteRenderUnit.setPosition(p.x, p.y, p.z);
+            sheepWorld.tick();
+
+            currentPosition = sheepWorld.position;
+        }
+
+        void render(float alpha) {
+            Vector3 renderPosition;
+            // 判断是否启用线性插值
+            if (useLerp) {
+                renderPosition = Vector3.Lerp(
+                    previousPosition,
+                    currentPosition,
+                    alpha
+                );
+            }
+            else {
+                renderPosition = currentPosition;
+            }
+
+            scxSpriteRenderUnit.setPosition(renderPosition.x, renderPosition.y, renderPosition.z);
             scxSpriteRenderer.update();
         }
     }
