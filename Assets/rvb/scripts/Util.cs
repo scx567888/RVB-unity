@@ -188,8 +188,8 @@ namespace rvb.scripts {
         public static PetView getBackBoss(SheepCamp camp) {
             if (!isInitViewBoss) {
                 isInitViewBoss = true;
-                view_boss_red = system.getPetView((int)SheepCamp.Red);
-                view_boss_blue = system.getPetView((int)SheepCamp.Blue);
+                view_boss_red = system.boss[(int)SheepCamp.Red];
+                view_boss_blue = system.boss[(int)SheepCamp.Blue];
             }
 
             if (camp == SheepCamp.Red) {
