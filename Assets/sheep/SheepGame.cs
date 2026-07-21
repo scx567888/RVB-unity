@@ -74,14 +74,19 @@ namespace sheep {
             render(alpha);
         }
 
+        // 执行逻辑帧
         void tick() {
+            // 记录状态 用于插值
             previousPosition = currentPosition;
 
+            // 执行 sheepWorld.tick()
             sheepWorld.tick();
 
+            // 记录状态 用于插值
             currentPosition = sheepWorld.position;
         }
 
+        // 执行渲染
         void render(float alpha) {
             Vector3 renderPosition;
             // 判断是否启用线性插值
