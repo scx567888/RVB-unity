@@ -302,6 +302,7 @@ namespace rvb.scripts {
 
         public void onRes(dynamic e, SheepMgr t) {
             this.isActive = false;
+            id = 0;
             t.buff_del_pet(this);
             sheepMgr.delPet(this);
             view_pet = null;
