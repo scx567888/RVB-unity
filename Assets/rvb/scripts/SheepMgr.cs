@@ -44,9 +44,6 @@ namespace rvb.scripts {
         // 核心状态机
         public SheepRoomState state = SheepRoomState.Ready;
 
-        // 尝试角色 ( 但是是哪一种? 当前在场上的? )
-        public HashSet<PetView>[] pets = new[] { new HashSet<PetView>(), new HashSet<PetView>() };
-
         public int gameIndex = 0;
         public float gameStartTimerForBuff = 0;
         public Vector3 cameraEulerAngles = Vector3.zero;
@@ -137,6 +134,12 @@ namespace rvb.scripts {
 
 
         public int plotRatioIndex;
+        
+        
+        // ********************** 确定字段 *******************************
+        
+        // 当前在场上的角色
+        public HashSet<PetView>[] pets = { new(), new() };
 
         public SheepMgr(SheepCtl sheepCtl) {
             // 是否自动出兵
