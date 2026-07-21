@@ -339,7 +339,7 @@ namespace rvb.scripts {
             forfeachBlocks(n, r, xn, yn, splitN, callback);
         }
 
-        public static void forfeachBlocks(IndexLen[] e, int[] t, int xn, int yn, int splitN, Action<PetView> callback) {
+        public static void forfeachBlocks(IndexLen[] e, PetView[] t, int xn, int yn, int splitN, Action<PetView> callback) {
             for (int n = -splitN; n <= splitN; n++) {
                 for (int r = -splitN; r <= splitN; r++) {
                     if (xn + n < 0 || xn + n >= SheepConfig.line_w) {
@@ -351,8 +351,8 @@ namespace rvb.scripts {
                     }
 
                     int blockIndex = Util.getIndexByXnYn(xn + n, yn + r);
-                    system.forEachBlock(e, t, blockIndex, (Action<int>)(petIndex => {
-                        PetView petView = system.getPetView(petIndex);
+                    system.forEachBlock(e, t, blockIndex, (Action<PetView>)(petIndex => {
+                        PetView petView = petIndex;
                         if (petView != null) {
                             callback(petView);
                             petView = null;
@@ -369,7 +369,7 @@ namespace rvb.scripts {
             return forNearBlocks(n, r, t, i, s, callback);
         }
 
-        public static bool forNearBlocks(IndexLen[] e, int[] t, int i, int s, int findR, Func<PetView, bool> callback) {
+        public static bool forNearBlocks(IndexLen[] e, PetView[] t, int i, int s, int findR, Func<PetView, bool> callback) {
             int n = 0;
 
             Func<int, int, bool> r = (blockX, blockY) => {
@@ -378,8 +378,8 @@ namespace rvb.scripts {
                     return false;
                 }
 
-                system.findBlock(e, t, o, (Func<int, bool>)(petIndex => {
-                    PetView petView = system.getPetView(petIndex);
+                system.findBlock(e, t, o, (Func<PetView, bool>)(petIndex => {
+                    PetView petView = petIndex;
                     if (petView != null) {
                         bool result = callback(petView);
                         petView = null;
@@ -485,14 +485,14 @@ namespace rvb.scripts {
             return findNearBlocks(n, r, xn, yn, s, callback);
         }
 
-        public static bool findNearBlocks(IndexLen[] e, int[] t, int xn, int yn, int o, Func<PetView, bool> callback) {
+        public static bool findNearBlocks(IndexLen[] e, PetView[] t, int xn, int yn, int o, Func<PetView, bool> callback) {
             int n = 0;
 
             Func<int, int, bool> r = (blockX, blockY) => {
                 int blockIndex = Util.getIndexByXnYn(blockX, blockY);
                 return !(blockIndex < 0 || blockIndex >= SheepConfig.line_w * SheepConfig.line_w) &&
-                       system.findBlock(e, t, blockIndex, (Func<int, bool>)(petIndex => {
-                           PetView petView = system.getPetView(petIndex);
+                       system.findBlock(e, t, blockIndex, (Func<PetView, bool>)(petIndex => {
+                           PetView petView = petIndex;
                            if (petView != null) {
                                bool result = callback(petView);
                                petView = null;
@@ -555,7 +555,7 @@ namespace rvb.scripts {
             return false;
         }
 
-        public static bool findFarBlocks(IndexLen[] e, int[] t, int xn, int yn, int o, Func<PetView, bool> callback) {
+        public static bool findFarBlocks(IndexLen[] e, PetView[] t, int xn, int yn, int o, Func<PetView, bool> callback) {
             Func<int, int, bool> n = (blockX, blockY) => {
                 int s = Util.getIndexByXnYn(blockX, blockY);
                 if (s < 0 || s >= SheepConfig.line_w * SheepConfig.line_w) {
@@ -568,8 +568,8 @@ namespace rvb.scripts {
 
             Func<int, int, bool> a = (blockX, blockY) => {
                 int blockIndex = Util.getIndexByXnYn(blockX, blockY);
-                return system.findBlock(e, t, blockIndex, (Func<int, bool>)(petIndex => {
-                    PetView petView = system.getPetView(petIndex);
+                return system.findBlock(e, t, blockIndex, (Func<PetView, bool>)(petIndex => {
+                    PetView petView = petIndex;
                     if (petView != null) {
                         bool result = callback(petView);
                         petView = null;
@@ -622,7 +622,7 @@ namespace rvb.scripts {
             return n(xn, yn) && a(xn, yn);
         }
 
-        public static bool findRandomBlocks(IndexLen[] e, int[] t, int i, int s, int findR,
+        public static bool findRandomBlocks(IndexLen[] e, PetView[] t, int i, int s, int findR,
             Func<PetView, bool> callback) {
             Func<int, int, bool> n = (blockX, blockY) => {
                 int blockIndex = Util.getIndexByXnYn(blockX, blockY);
@@ -636,8 +636,8 @@ namespace rvb.scripts {
 
             Func<int, int, bool> a = (blockX, blockY) => {
                 int blockIndex = Util.getIndexByXnYn(blockX, blockY);
-                return system.findBlock(e, t, blockIndex, (Func<int, bool>)(petIndex => {
-                    PetView petSkin = system.getPetView(petIndex);
+                return system.findBlock(e, t, blockIndex, (Func<PetView, bool>)(petIndex => {
+                    PetView petSkin = petIndex;
                     if (petSkin != null) {
                         bool result = callback(petSkin);
                         petSkin = null;
