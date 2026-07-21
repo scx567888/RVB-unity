@@ -17,11 +17,11 @@ namespace rvb.scripts {
         public float endX = 0;
         public float endY = 0;
         public float endZ = 0;
-        public int tarRoleIndex = 0;
+        public PetView tarRoleIndex =null;
         public float atkVue = 0;
         public int frame = 0;
         public float angle = 0;
-        public int roleIndex = 0;
+        public PetView roleIndex =null;
 
         public SheepBullet conf;
 
@@ -70,11 +70,11 @@ namespace rvb.scripts {
             this.startX = startY = startZ = 0f;
             this.dirX = dirY = dirZ = 0f;
             this.endX = endY = endZ = 0f;
-            this.tarRoleIndex = 0;
+            this.tarRoleIndex = null;
             this.atkVue = 0f;
             this.frame = 0;
             this.angle = 0f;
-            this.roleIndex = 0;
+            this.roleIndex = null;
         }
     }
 }
