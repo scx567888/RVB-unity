@@ -45,6 +45,9 @@ namespace sheep {
                 mainMaterial,
                 100
             );
+            this.scxSpriteRenderer.setParent(this.gameObject);
+            
+            // 创建渲染单元
             this.scxSpriteRenderUnit = scxSpriteRenderer.createUnit();
             this.scxSpriteRenderUnit.setFrame(0);
             this.scxSpriteRenderUnit1 = scxSpriteRenderer.createUnit();
