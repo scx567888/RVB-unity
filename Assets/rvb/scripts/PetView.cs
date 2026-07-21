@@ -56,7 +56,6 @@ namespace rvb.scripts {
 
         public int index;
         public List<int> uids;
-        public int buff_index;
         public PetView view_pet;
         public float scale;
         public BuffTimeAttacher attacher;
@@ -73,7 +72,6 @@ namespace rvb.scripts {
             conf = SheepRoleTypeInfo.getById(roleId);
             uids = new List<int>();
             skinId = null;
-            buff_index = -1;
             view_pet = null;
             scale = 1;
             attacher = null;
@@ -91,8 +89,8 @@ namespace rvb.scripts {
             return r[sheepMgr.RandomInt(0, r.Length)];
         }
 
-        public void init(int buffIndex, PetView viewPet) {
-            viewPet.clear();
+        public void init(PetView buffIndex, PetView viewPet) {
+            // this.clear();
 
             Vector3 a = position.Value;
             int x = Mathf.FloorToInt(a.x);
@@ -100,72 +98,72 @@ namespace rvb.scripts {
 
             int blockIndex = sheepMgr.getBlockIndex(new Vector3(x, y, 0));
 
-            viewPet.id = sheepMgr.getNextPetId();
+            this.id = sheepMgr.getNextPetId();
 
-            viewPet.isActive = true;
-            viewPet.isDie = false;
-            viewPet.camp = camp;
-            viewPet.roleId = petId;
-            viewPet.skinId = skinId ?? 0;
-            viewPet.conf = conf;
+            this.isActive = true;
+            this.isDie = false;
+            this.camp = camp;
+            this.roleId = petId;
+            this.skinId = skinId ?? 0;
+            this.conf = conf;
 
             if (petId != 0) {
                 if (sheepMgr.state == SheepRoomState.Start) {
-                    viewPet.state = SheepRoleState.Start;
-                    viewPet.subState = SheepRoleSubState.Start;
-                    viewPet.animType = SheepRoleAnimType.Idle;
-                    viewPet.animFrame = sheepMgr.RandomInt(0, 10);
+                    this.state = SheepRoleState.Start;
+                    this.subState = SheepRoleSubState.Start;
+                    this.animType = SheepRoleAnimType.Idle;
+                    this.animFrame = sheepMgr.RandomInt(0, 10);
                 }
                 else if (conf.skillIn!=0) {
-                    viewPet.state = SheepRoleState.In;
-                    viewPet.subState = SheepRoleSubState.In;
-                    viewPet.animType = SheepRoleAnimType.In;
-                    viewPet.animFrame = 0;
+                    this.state = SheepRoleState.In;
+                    this.subState = SheepRoleSubState.In;
+                    this.animType = SheepRoleAnimType.In;
+                    this.animFrame = 0;
                 }
                 else if (conf.startState == SheepRoleState.In) {
-                    viewPet.state = conf.startState;
-                    viewPet.subState = SheepRoleSubState.In;
-                    viewPet.animType = SheepRoleAnimType.In;
-                    viewPet.animFrame = 0;
+                   this.state = conf.startState;
+                   this.subState = SheepRoleSubState.In;
+                   this.animType = SheepRoleAnimType.In;
+                   this.animFrame = 0;
                 }
                 else if (conf.startState == SheepRoleState.SpinSpurt) {
-                    viewPet.state = conf.startState;
-                    viewPet.animType = SheepRoleAnimType.Attack;
-                    viewPet.animFrame = 0;
+                    this.state = conf.startState;
+                    this.animType = SheepRoleAnimType.Attack;
+                    this.animFrame = 0;
                 }
                 else {
-                    viewPet.state = conf.startState;
-                    viewPet.subState = SheepRoleSubState.Spurt;
+                    this.state = conf.startState;
+                    this.subState = SheepRoleSubState.Spurt;
 
                     if (conf.isSpurtAnim) {
-                        viewPet.animType = SheepRoleAnimType.Spurt;
-                        viewPet.animFrame = sheepMgr.RandomInt(0, 10);
+                        this.animType = SheepRoleAnimType.Spurt;
+                        this.animFrame = sheepMgr.RandomInt(0, 10);
                     }
                     else {
-                        viewPet.animType = SheepRoleAnimType.Idle;
-                        viewPet.animFrame = sheepMgr.RandomInt(0, 10);
+                        this.animType = SheepRoleAnimType.Idle;
+                        this.animFrame = sheepMgr.RandomInt(0, 10);
                     }
                 }
             }
 
-            viewPet.frame = 0;
-            viewPet.posBefX = x;
-            viewPet.posBefY = y;
-            viewPet.animX = x;
-            viewPet.animY = y;
-            viewPet.posX = x;
-            viewPet.posY = y;
-            viewPet.befBlockIndex = blockIndex;
-            viewPet.blockIndex = blockIndex;
+            this.frame = 0;
+            this.posBefX = x;
+            this.posBefY = y;
+            this.animX = x;
+            this.animY = y;
+            this.posX = x;
+            this.posY = y;
+            this.befBlockIndex = blockIndex;
+            this.blockIndex = blockIndex;
 
             if (petId != 0 && sheepMgr.state == SheepRoomState.Start) {
                 var m = sheepMgr.getPetStartEndPos(petId, camp);
 
-                viewPet.tarPosX = m.x;
-                viewPet.tarPosY = m.y;
-                viewPet.animY = m.y;
-                viewPet.posBefY = m.y;
-                viewPet.posY = m.y;
+                this.tarPosX = m.x;
+                this.tarPosY = m.y;
+                this.animY = m.y;
+                this.posBefY = m.y;
+                this.posY = m.y;
             }
 
             var l = SheepRoleFormation.getById(conf.formationId);
@@ -173,8 +171,8 @@ namespace rvb.scripts {
 
             if (l.formationType == SheepRoleFormationType.RectangleTidy ||
                 l.formationType == SheepRoleFormationType.RectangleRandom) {
-                viewPet.dirX = d;
-                viewPet.dirY = 0;
+                this.dirX = d;
+                this.dirY = 0;
             }
             else if (l.formationType == SheepRoleFormationType.AngleTidy ||
                      l.formationType == SheepRoleFormationType.AngleRandom) {
@@ -184,32 +182,31 @@ namespace rvb.scripts {
                     0
                 ).normalized;
 
-                viewPet.dirX = g.x;
-                viewPet.dirY = g.y;
+                this.dirX = g.x;
+                this.dirY = g.y;
             }
 
             if (petId != 0 && sheepMgr.state == SheepRoomState.Start) {
-                viewPet.isConnNot = true;
+                this.isConnNot = true;
             }
             else {
-                viewPet.isConnNot = false;
+                this.isConnNot = false;
             }
 
-            viewPet.tarIndex = -1;
-            viewPet.tarId = -1;
-            viewPet.curHp = conf.hp;
-            viewPet.curAtkBuff = 0;
+            this.tarIndex = -1;
+            this.tarId = -1;
+            this.curHp = conf.hp;
+            this.curAtkBuff = 0;
 
             if (isBoom) {
-                viewPet.isConnNot = true;
-                viewPet.isBoom = true;
+                this.isConnNot = true;
+                this.isBoom = true;
             }
             else {
-                viewPet.isBoom = false;
+                this.isBoom = false;
             }
-
-            buff_index = buffIndex;
-            view_pet = viewPet;
+            
+            // view_pet = viewPet;
 
             foreach (var e in sheepMgr.buffs) {
                 foreach (var item in e) {
@@ -217,19 +214,18 @@ namespace rvb.scripts {
 
                     int r = item.count;
 
-                    addGeneralOrderBuff(viewPet, i, r);
+                    addGeneralOrderBuff(this, i, r);
                 }
             }
 
-            if (sheepMgr.state == SheepRoomState.Start && viewPet.conf.roleType == SheepRoleType.yang_shen) {
-                sheepMgr.god_view_pets.Add(viewPet);
+            if (sheepMgr.state == SheepRoomState.Start && conf.roleType == SheepRoleType.yang_shen) {
+                sheepMgr.god_view_pets.Add(this);
             }
         }
 
         public void updateSkin(dynamic e, SheepMgr t, SheepMgr n, double o) {
             PetView a = this;
-            PetView i = a.view_pet;
-            int buffIndex = a.buff_index;
+            PetView i = a;
 
             if (i.state == SheepRoleState.Merge) {
                 return;
@@ -269,7 +265,9 @@ namespace rvb.scripts {
             }
 
             if (!isDie) {
-                t.mainPreAddBlock( blockIndex, buffIndex, camp, a.conf.collideId );
+                // todo 用哪个? 
+                t.mainPreAddBlock( blockIndex, this, camp, a.conf.collideId );
+                // t.mainPreAddBlock( blockIndex, null, camp, a.conf.collideId );
 
                 int S = i.conf.detectCollideR;
 
@@ -297,14 +295,14 @@ namespace rvb.scripts {
         }
 
         public void onDead() {
-            view_pet.isDie = true;
-            view_pet.id = 0;
+            this.isDie = true;
+            // this.id = 0;
             attacher.clear();
         }
 
         public void onRes(dynamic e, SheepMgr t) {
-            view_pet.isActive = false;
-            t.buff_del_pet(buff_index);
+            this.isActive = false;
+            t.buff_del_pet(this);
             sheepMgr.delPet(this);
             view_pet = null;
         }

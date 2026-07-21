@@ -210,7 +210,7 @@ namespace rvb {
         }
 
         private void SyncBossMarker(int poolIndex) {
-            PetView bossView = sheepMgr.getPetView(poolIndex);
+            PetView bossView = sheepMgr.boss[poolIndex];
             if (bossView == null || !bossView.isActive) {
                 return;
             }
@@ -219,7 +219,7 @@ namespace rvb {
         }
 
         private void SyncRoleView(PetView view) {
-            int slot = view.index;
+            int slot = view.id;
             seenRoleSlots.Add(((int)view.camp)+"_"+slot);
 
             if (!roleRenderers.TryGetValue(((int)view.camp)+"_"+slot, out ScxSpriteRenderUnit renderPet)) {

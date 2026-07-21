@@ -65,12 +65,12 @@ namespace rvb.scripts {
             blueNums = new[] { 0, 0, 0, 0, 0, 0, 0, 0 }
         };
 
-        public PetView[] view_pets = new PetView[] { };
+        
         public BulletView[] view_bullets = new BulletView[] { };
         public BulletView[] pre_view_bullets = new BulletView[] { };
         public long updateTime = 0;
         public List<PetView> petsAdd = new List<PetView>();
-        public Stack<int> petsDel = new Stack<int>();
+        public Stack<PetView> petsDel = new Stack<PetView>();
         public int petCount = 0;
         public Stack<int> bulletsDel = new Stack<int>();
         public int bulletCount = 0;
@@ -80,8 +80,8 @@ namespace rvb.scripts {
 
         public List<BullteCreate> bullte_creates = new List<BullteCreate>();
 
-        public Dictionary<int, Dictionary<int, Dictionary<int, List<int>>>> pre_blocks =
-            new Dictionary<int, Dictionary<int, Dictionary<int, List<int>>>>();
+        public Dictionary<int, Dictionary<int, Dictionary<int, List<PetView>>>> pre_blocks =
+            new Dictionary<int, Dictionary<int, Dictionary<int, List<PetView>>>>();
 
         public bool[][] isChangeCollsionFlags = null;
         public bool[] isChangeAckFlags = null;
@@ -90,14 +90,14 @@ namespace rvb.scripts {
 
         public IndexLen[][] attackViews;
 
-        public int[][] attackView1s = new int[][] {
-            new int[SheepConfig.MaxPetCount],
-            new int[SheepConfig.MaxPetCount]
+        public PetView[][] attackView1s = new PetView[][] {
+            new PetView[SheepConfig.MaxPetCount],
+            new PetView[SheepConfig.MaxPetCount]
         };
 
         public IndexLen[][][] collisionViews = new IndexLen[][][] { };
 
-        public int[][][] collisionView1s = new int[][][] { };
+        public PetView[][][] collisionView1s = new PetView[][][] { };
 
         public Dictionary<int, SheepCallInfo> redCallInfos = new Dictionary<int, SheepCallInfo>();
 
@@ -189,12 +189,12 @@ namespace rvb.scripts {
                 blueNums = new[] { 0, 0, 0, 0, 0, 0, 0, 0 }
             };
 
-            this.view_pets = new PetView[SheepConfig.MaxPetCount];
+            
             this.view_bullets = new BulletView[SheepConfig.MaxBulletCount];
             this.pre_view_bullets = new BulletView[SheepConfig.MaxBulletCount];
             this.updateTime = 0;
             this.petsAdd = new List<PetView>();
-            this.petsDel = new Stack<int>();
+            this.petsDel = new Stack<PetView>();
             this.petCount = 0;
             this.bulletsDel = new Stack<int>();
             this.bulletCount = 0;
@@ -204,7 +204,7 @@ namespace rvb.scripts {
 
             this.bullte_creates = new List<BullteCreate>();
 
-            this.pre_blocks = new Dictionary<int, Dictionary<int, Dictionary<int, List<int>>>>();
+            this.pre_blocks = new Dictionary<int, Dictionary<int, Dictionary<int, List<PetView>>>>();
             this.isChangeCollsionFlags = null;
             this.isChangeAckFlags = null;
 
@@ -215,9 +215,9 @@ namespace rvb.scripts {
                 new IndexLen[MaxCount],
             };
 
-            this.attackView1s = new int[][] {
-                new int[SheepConfig.MaxPetCount],
-                new int[SheepConfig.MaxPetCount]
+            this.attackView1s = new PetView[][] {
+                new PetView[SheepConfig.MaxPetCount],
+                new PetView[SheepConfig.MaxPetCount]
             };
 
             this.collisionViews = new IndexLen[][][] {
@@ -230,14 +230,14 @@ namespace rvb.scripts {
                 this.collisionViews[(int)SheepCamp.Blue][e] = new IndexLen[this.MaxCount];
             }
 
-            this.collisionView1s = new int[][][] {
-                new int[SheepConfig.MaxGroupCount][],
-                new int[SheepConfig.MaxGroupCount][]
+            this.collisionView1s = new PetView[][][] {
+                new PetView[SheepConfig.MaxGroupCount][],
+                new PetView[SheepConfig.MaxGroupCount][]
             };
 
             for (var e = 0; e < SheepConfig.MaxGroupCount; e++) {
-                this.collisionView1s[(int)SheepCamp.Red][e] = new int[SheepConfig.MaxPetCount];
-                this.collisionView1s[(int)SheepCamp.Blue][e] = new int[SheepConfig.MaxPetCount];
+                this.collisionView1s[(int)SheepCamp.Red][e] = new PetView[SheepConfig.MaxPetCount];
+                this.collisionView1s[(int)SheepCamp.Blue][e] = new PetView[SheepConfig.MaxPetCount];
             }
 
             /**
@@ -384,27 +384,11 @@ namespace rvb.scripts {
         }
 
         public void clearPetViews() {
-            foreach (var element in this.view_pets) {
-                if (element != null) {
-                    element.clear();
-                }
-            }
+            pets[(int)SheepCamp.Red].Clear();
+            pets[(int)SheepCamp.Blue].Clear();
         }
 
-        public PetView getPetView(int petIndex) {
-            if (petIndex < 0 || petIndex >= SheepConfig.MaxPetCount) {
-                return null;
-            }
-
-            var pet = this.view_pets[petIndex];
-            if (pet == null) {
-                pet = new PetView(petIndex);
-                pet.sheepMgr = this;
-                this.view_pets[petIndex] = pet;
-            }
-
-            return pet;
-        }
+        
 
         public void clearViewBullets() {
             foreach (var viewElement in this.view_bullets) {
@@ -454,15 +438,15 @@ namespace rvb.scripts {
             var preBullet = this.getBulletPreView(e);
             preBullet.bulletId = bulletId;
             preBullet.roleUid = view_pet != null ? view_pet.id : 0;
-            preBullet.roleIndex = view_pet != null ? view_pet.index : 0;
+            preBullet.roleIndex =  view_pet ;
 
 
             preBullet.camp = view_pet != null ? view_pet.camp : l.camp;
             if (view_tar_pet != null && 0 == view_tar_pet.roleId) {
-                preBullet.tarRoleIndex = view_tar_pet.index;
+                preBullet.tarRoleIndex = view_tar_pet;
             }
             else {
-                preBullet.tarRoleIndex = -1;
+                preBullet.tarRoleIndex = null;
             }
 
             if (n.moveType == (int)SheepBulletMoveType.Fixed) {
@@ -756,14 +740,11 @@ namespace rvb.scripts {
 
             for (var B = 0; B < x.Count; B++) {
                 var y = x[B];
-                if (y.buff_index == -1) {
-                    continue;
-                }
 
                 y.updateSkin(sheepCtl, this, sheepMgr, dt);
 
                 int[] M;
-                var D = y.view_pet;
+                var D = y;
                 var A = D.state;
                 var P = D.animType;
                 var W = D.animFrame;
@@ -832,7 +813,7 @@ namespace rvb.scripts {
                     this.buff_del_bullet(G);
                 }
                 else {
-                    var z = this.getPetView(X.roleIndex).conf.splitN;
+                    var z = X.roleIndex.conf.splitN;
 
                     for (var O = -z; O <= z; ++O) {
                         for (var Q = -z; Q <= z; ++Q) {
@@ -865,7 +846,7 @@ namespace rvb.scripts {
                 var index = i;
 
 
-                var viewPet = this.getPetView(index);
+                var viewPet = this.boss[index];
                 var camp = viewPet.camp;
                 var state = viewPet.state;
 
@@ -994,18 +975,19 @@ namespace rvb.scripts {
                         break;
                     }
 
-                    e = this.petCount++;
+                    // e = this.petCount++;
                 }
 
                 var t = this.petsAdd[0];
                 this.petsAdd.RemoveAt(0);
-                var r = this.getPetView(e);
-                t.init(e, r);
+                // var r = this.getPetView(e);
+                t.sheepMgr = this;
+                t.init(null, null);
             }
         }
 
-        public void buff_del_pet(int e) {
-            var pet = this.getPetView(e);
+        public void buff_del_pet(PetView e) {
+            var pet = e;
             pet.isDie = true;
             pet.id = 0;
             this.petsDel.Push(e);
@@ -1071,8 +1053,8 @@ namespace rvb.scripts {
 // todo        
         private void InitializeBossView(SheepCamp camp) {
             int index = (int)camp;
-            PetView view = getPetView(index);
-            view.clear();
+            Boss view = new Boss(index);
+            // view.clear();
             view.id = getNextPetId();
             view.isActive = true;
             view.isDie = false;
@@ -1095,7 +1077,8 @@ namespace rvb.scripts {
             view.dirX = camp == SheepCamp.Red ? 1f : -1f;
             view.dirY = 0f;
             bossHp[index] = boss[index].curHp;
-            view.curHp = bossHp[index];
+            view.curHp = 99999;
+            boss[(int)camp] = view;
         }
 
         public (long time, bool isEndWorker) role_logic() {
@@ -1156,8 +1139,8 @@ namespace rvb.scripts {
         }
 
         public int update_role(int start, int end) {
-            for (var i = start; i < end; i++) {
-                var viewPet = this.getPetView(i);
+            foreach (var dddd in boss) {
+                var viewPet = dddd;
                 if (!viewPet.isActive) {
                     viewPet = null;
                     continue;
@@ -1190,6 +1173,42 @@ namespace rvb.scripts {
 
                 viewPet = null;
             }
+            foreach (var ppp in pets) {
+                foreach (var dddd in ppp) {
+                    var viewPet = dddd;
+                    if (!viewPet.isActive) {
+                        viewPet = null;
+                        continue;
+                    }
+
+                    var t = viewPet.isDie;
+                    if (0 == viewPet.roleId) {
+                        var i1 = this.update_frame(viewPet);
+                        if (!t && i1) {
+                            this.update_boss_state(viewPet);
+                        }
+
+                        this.update_role_anim(viewPet);
+                    }
+                    else {
+                        var i1 = (int)viewPet.camp;
+                        var s = this.logic_counts[i1];
+                        for (var i2 = 0; i2 < s; i2++) {
+                            var i3 = this.update_frame(viewPet);
+                            if (!t) {
+                                this.update_role_state(viewPet, i3);
+                            }
+
+                            this.update_role_anim(viewPet);
+                        }
+
+                        var o = viewPet;
+                        this.comImages.addRole(o);
+                    }
+
+                    viewPet = null;
+                }
+            }
 
             return end - start;
         }
@@ -1221,8 +1240,8 @@ namespace rvb.scripts {
                         for (var i1 = 0; i1 < e.Length; i1++) {
                             var n1 = e[i1];
                             if (-1 == n1 || n1 == l) {
-                                if (0 == t.tarRoleIndex || 1 == t.tarRoleIndex) {
-                                    var o1 = this.getPetView(t.tarRoleIndex);
+                                if (boss[0] == t.tarRoleIndex || boss[1] == t.tarRoleIndex) {
+                                    var o1 = t.tarRoleIndex;
                                     if (UtilAck.isCanAckByBullet(t, o1, i1)) {
                                         UtilAck.hurtByBullet(t, o1, t.atkVue);
                                     }
@@ -1292,7 +1311,7 @@ namespace rvb.scripts {
                         case (int)SheepBulletMoveType.RadiusAngle:
                             t.angle += n.speed;
                             var x = t.roleUid;
-                            var _ = this.getPetView(t.roleIndex);
+                            var _ = t.roleIndex;
                             if (x == _.id) {
                                 t.x = (float)(_.animX + n.radius * Math.Cos(t.angle));
                                 t.y = (float)(_.animY + n.radius * Math.Sin(t.angle));
@@ -1314,8 +1333,8 @@ namespace rvb.scripts {
                 }
                 var r = n.createBulletID;
                 if (r != 0 && n.createBulletFrame == l) {
-                    var e = this.getPetView(t.roleIndex);
-                    var i1 = this.getPetView(t.tarRoleIndex);
+                    var e = t.roleIndex;
+                    var i1 = t.tarRoleIndex;
                     this.bullte_creates.Add(new BullteCreate() {
                         view_pet = e,
                         bulletId = r,
@@ -2630,14 +2649,14 @@ namespace rvb.scripts {
         public void clearBlocks() {
             Array.Fill(this.attackViews[(int)SheepCamp.Red], null);
             Array.Fill(this.attackViews[(int)SheepCamp.Blue], null);
-            Array.Fill(this.attackView1s[(int)SheepCamp.Red], 0);
-            Array.Fill(this.attackView1s[(int)SheepCamp.Blue], 0);
+            Array.Fill(this.attackView1s[(int)SheepCamp.Red], null);
+            Array.Fill(this.attackView1s[(int)SheepCamp.Blue], null);
 
             for (var e = 0; e < SheepConfig.MaxGroupCount; e++) {
                 Array.Fill(this.collisionViews[(int)SheepCamp.Red][e], null);
                 Array.Fill(this.collisionViews[(int)SheepCamp.Blue][e], null);
-                Array.Fill(this.collisionView1s[(int)SheepCamp.Red][e], 0);
-                Array.Fill(this.collisionView1s[(int)SheepCamp.Blue][e], 0);
+                Array.Fill(this.collisionView1s[(int)SheepCamp.Red][e], null);
+                Array.Fill(this.collisionView1s[(int)SheepCamp.Blue][e], null);
             }
 
             this.pre_blocks.Clear();
@@ -2695,19 +2714,19 @@ namespace rvb.scripts {
             this.pre_blocks.Clear();
         }
 
-        public void mainPreAddBlock(int blockIndex, int buffIndex, SheepCamp camp, int collideId) {
-            if (!this.pre_blocks.TryGetValue(blockIndex, out Dictionary<int, Dictionary<int, List<int>>> o)) {
-                o = new Dictionary<int, Dictionary<int, List<int>>>();
+        public void mainPreAddBlock(int blockIndex, PetView buffIndex, SheepCamp camp, int collideId) {
+            if (!this.pre_blocks.TryGetValue(blockIndex, out Dictionary<int, Dictionary<int, List<PetView>>> o)) {
+                o = new Dictionary<int, Dictionary<int, List<PetView>>>();
                 this.pre_blocks[blockIndex] = o;
             }
 
-            if (!o.TryGetValue((int)camp, out Dictionary<int, List<int>> l)) {
-                l = new Dictionary<int, List<int>>();
+            if (!o.TryGetValue((int)camp, out Dictionary<int, List<PetView>> l)) {
+                l = new Dictionary<int, List<PetView>>();
                 o[(int)camp] = l;
             }
 
-            if (!l.TryGetValue(collideId, out List<int> n)) {
-                n = new List<int>();
+            if (!l.TryGetValue(collideId, out List<PetView> n)) {
+                n = new List<PetView>();
                 l[collideId] = n;
             }
 
@@ -2789,7 +2808,7 @@ namespace rvb.scripts {
             }
         }
 
-        public void forEachBlock(IndexLen[] e, int[] t, int blockIndex, Action<int> callback) {
+        public void forEachBlock(IndexLen[] e, PetView[] t, int blockIndex, Action<PetView> callback) {
             var blockByIndex = this.getBlockByIndex(e, blockIndex);
             var o = blockByIndex.Index;
             var l = blockByIndex.Len;
@@ -2800,7 +2819,7 @@ namespace rvb.scripts {
             }
         }
 
-        public bool findBlock(IndexLen[] e, int[] t, int blockIndex, Func<int, bool> callback) {
+        public bool findBlock(IndexLen[] e, PetView[] t, int blockIndex, Func<PetView, bool> callback) {
             var blockByIndex = this.getBlockByIndex(e, blockIndex);
             var Index = blockByIndex.Index;
             var Len = blockByIndex.Len;
@@ -2810,7 +2829,7 @@ namespace rvb.scripts {
 
             for (var j = 0; j < Len; j++) {
                 var petIndex = t[Index + j];
-                if (-1 == petIndex) {
+                if (null == petIndex) {
                     throw new Exception("二级内存取出空???");
                 }
 
@@ -2840,8 +2859,7 @@ namespace rvb.scripts {
             petSkin.isDie = false;
             petSkin.scale = petSkin.conf.scale;
             petSkin.isBoom = s; //  这里不能写死
-            petSkin.buff_index = -1;
-            petSkin.view_pet = null;
+            
             petSkin.attacher = new BuffTimeAttacher();
 
             petSkin.skinId = petSkin.conf.animId;
