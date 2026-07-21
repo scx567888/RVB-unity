@@ -157,7 +157,7 @@ namespace rvb.scripts {
 
         // 以 e / t 的概率返回 true
         public static bool numToBool(float e, float t = 1000f) {
-            return UnityEngine.Random.value * t < e;
+            return system.Random01() * t < e;
         }
 
         // 是否处于攻击 cd
@@ -224,12 +224,12 @@ namespace rvb.scripts {
                     // 当红方在中线左侧的时候 逼着往中线推进 (不贴边)
                     if (e.camp == SheepCamp.Red && e.posX < 0f) {
                         e.dirX = 1f;
-                        e.dirY = 0.02f * UnityEngine.Random.value - 0.01f;
+                        e.dirY = 0.02f * system.Random01() - 0.01f;
                     }
                     // 同理当 蓝方在中线右侧的时候  (不贴边)
                     else if (e.camp == SheepCamp.Blue && e.posX > 0f) {
                         e.dirX = -1f;
-                        e.dirY = 0.02f * UnityEngine.Random.value - 0.01f;
+                        e.dirY = 0.02f * system.Random01() - 0.01f;
                     }
                     else {
                         // 否则正常 移动
@@ -354,8 +354,8 @@ namespace rvb.scripts {
                             }
                             else {
                                 // 完全重合防止死锁 给予一个随机数
-                                tCollide.x += 0.1f * UnityEngine.Random.value;
-                                tCollide.y += 0.1f * UnityEngine.Random.value;
+                                tCollide.x += 0.1f * system.Random01();
+                                tCollide.y += 0.1f * system.Random01();
                             }
 
                             collideCount++;
