@@ -133,6 +133,8 @@ GameObject:
   - component: {fileID: 219413641}
   - component: {fileID: 219413640}
   - component: {fileID: 219413639}
+  - component: {fileID: 219413643}
+  - component: {fileID: 219413642}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -214,6 +216,38 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &219413642
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 219413638}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7fc8c32724a34708b7b302986bfb865e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &219413643
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 219413638}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1af280eaf2681ae4e8405f9e71db2045, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveSpeed: 5
+  fastMoveMultiplier: 3
+  scrollSpeedStep: 1
+  minMoveSpeed: 1
+  maxMoveSpeed: 50
+  mouseSensitivity: 2
+  minPitch: -89
+  maxPitch: 89
 --- !u!1 &1275286917
 GameObject:
   m_ObjectHideFlags: 0
@@ -352,6 +386,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8cc52e17eda65cf47b2d9c7c05cc1799, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  tickRate: 30
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
