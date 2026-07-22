@@ -671,7 +671,7 @@ namespace rvb.scripts {
 
             foreach (var e in this.pets) {
                 foreach (var y in e) {
-                    y.updateSkin(sheepCtl, this, this, dt);
+                    updateSkinPet(y,sheepCtl, this, this, dt);
 
                     int[] M;
                     var D = y;
@@ -2828,6 +2828,78 @@ namespace rvb.scripts {
             preBullet.frame = 0;
             pre_bullets.Add(preBullet);
         }
+        
+        
+        public void updateSkinPet(PetView ppp, SheepCtl e, SheepMgr t, SheepMgr n, double o) {
+            PetView a = ppp;
+            PetView i = a;
+
+            if (i.state == SheepRoleState.Merge) {
+                return;
+            }
+
+            bool isDie = i.isDie;
+            int blockIndex = i.blockIndex;
+            float curHp = i.curHp;
+
+            if (isDie) {
+                return;
+            }
+
+            if (curHp <= 0) {
+                isDie = true;
+                i.isDie = isDie;
+                i.state = SheepRoleState.Dead;
+            }
+
+            if (isDie) {
+                i.state = SheepRoleState.Dead;
+                i.subState = SheepRoleSubState.Dead;
+
+                if (i.conf.roleType != SheepRoleType.qi_lin) {
+                    i.animType = SheepRoleAnimType.Dead;
+                }
+
+                if (i.conf.deadAnimType != null && i.conf.deadAnimType.Length != 0) {
+                    i.animType= (SheepRoleAnimType)arrOn(i.conf.deadAnimType);
+                }
+
+                if (i.conf.roleType == SheepRoleType.xiao_bing) {
+                    i.animFrame = RandomInt(0, 10);
+                }
+
+                ppp.isDie = true;
+                // this.id = 0;
+                ppp.attacher.clear();
+            }
+
+            if (!isDie) {
+                t.mainPreAddBlock( blockIndex, ppp, ppp.camp, a.conf.collideId );
+
+                int S = i.conf.detectCollideR;
+
+                for (int y = -S; y <= S; ++y) {
+                    for (int v = -S; v <= S; ++v) {
+                        
+                        e.comImages.mesh_block.addFrameBlockCamp(blockIndex, ppp.camp);
+                    }
+                }
+
+                Vector3 B = new Vector3(i.animX, i.animY, 0);
+
+                a.position = B;
+            }
+
+            if (!isDie) {
+                int countNewBuff = n.countNewBuffs[(int)ppp.camp];
+
+                if (countNewBuff != 0) {
+                    ppp.addGeneralOrderBuff(i, SheepConfig.buffLastTime, countNewBuff);
+                }
+            }
+
+            ppp.attacher.updateTimer(o / 1e3);
+        }
 
         public static long NowMs() => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
@@ -2851,5 +2923,10 @@ namespace rvb.scripts {
                    (maxExclusive - minInclusive) *
                    (float)logicRandom.NextDouble();
         }
+        
+        public T arrOn<T>(T[] r) {
+            return r[RandomInt(0, r.Length)];
+        }
+        
     }
 }
