@@ -53,7 +53,8 @@
         public static int counterBuffNumber = 3;
         public static float counterHpRatio = 0.3f;
         public static int counterTime = 120;
-        public static int WarmUpID = 22;
+        // public static int WarmUpID = 22;
+        public static int WarmUpID = 23;
         public static int beheadLine = 8000;
         public static int startMaxTime = 300;
 
