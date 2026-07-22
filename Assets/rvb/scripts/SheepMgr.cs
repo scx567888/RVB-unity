@@ -2541,13 +2541,147 @@ namespace rvb.scripts {
             }
 
             petSkin.sheepMgr = this;
-            petSkin.init(null, null);
+            initPet(petSkin);
 
             this.spawnPet(petSkin);
 
             petSkin.pos = petSkin.position;
 
             return petSkin;
+        }
+        
+        public void initPet(PetView ppp) {
+            // ppp.clear();
+
+            Vector3 a = ppp.position.Value;
+            int x = Mathf.FloorToInt(a.x);
+            int y = Mathf.FloorToInt(a.y);
+
+            int blockIndex = this.getBlockIndex(new Vector3(x, y, 0));
+
+            ppp.id = this.getNextPetId();
+
+            ppp.isActive = true;
+            ppp.isDie = false;
+            ppp.camp = ppp.camp;
+            ppp.roleId = ppp.petId;
+            ppp.skinId = ppp.skinId ?? 0;
+            ppp.conf = ppp.conf;
+
+            if (ppp.petId != 0) {
+                if (this.state == SheepRoomState.Start) {
+                    ppp.state = SheepRoleState.Start;
+                    ppp.subState = SheepRoleSubState.Start;
+                    ppp.animType = SheepRoleAnimType.Idle;
+                    ppp.animFrame = this.RandomInt(0, 10);
+                }
+                else if (ppp.conf.skillIn!=0) {
+                    ppp.state = SheepRoleState.In;
+                    ppp.subState = SheepRoleSubState.In;
+                    ppp.animType = SheepRoleAnimType.In;
+                    ppp.animFrame = 0;
+                }
+                else if (ppp.conf.startState == SheepRoleState.In) {
+                   ppp.state = ppp.conf.startState;
+                   ppp.subState = SheepRoleSubState.In;
+                   ppp.animType = SheepRoleAnimType.In;
+                   ppp.animFrame = 0;
+                }
+                else if (ppp.conf.startState == SheepRoleState.SpinSpurt) {
+                    ppp.state = ppp.conf.startState;
+                    ppp.animType = SheepRoleAnimType.Attack;
+                    ppp.animFrame = 0;
+                }
+                else {
+                    ppp.state = ppp.conf.startState;
+                    ppp.subState = SheepRoleSubState.Spurt;
+
+                    if (ppp.conf.isSpurtAnim) {
+                        ppp.animType = SheepRoleAnimType.Spurt;
+                        ppp.animFrame = this.RandomInt(0, 10);
+                    }
+                    else {
+                        ppp.animType = SheepRoleAnimType.Idle;
+                        ppp.animFrame = this.RandomInt(0, 10);
+                    }
+                }
+            }
+
+            ppp.frame = 0;
+            ppp.posBefX = x;
+            ppp.posBefY = y;
+            ppp.animX = x;
+            ppp.animY = y;
+            ppp.posX = x;
+            ppp.posY = y;
+            ppp.befBlockIndex = blockIndex;
+            ppp.blockIndex = blockIndex;
+
+            if (ppp.petId != 0 && this.state == SheepRoomState.Start) {
+                var m = this.getPetStartEndPos(ppp.petId, ppp.camp);
+
+                ppp.tarPosX = m.x;
+                ppp.tarPosY = m.y;
+                ppp.animY = m.y;
+                ppp.posBefY = m.y;
+                ppp.posY = m.y;
+            }
+
+            var l = SheepRoleFormation.getById(ppp.conf.formationId);
+            float d = ppp.camp == SheepCamp.Red ? 1 : -1;
+
+            if (l.formationType == SheepRoleFormationType.RectangleTidy ||
+                l.formationType == SheepRoleFormationType.RectangleRandom) {
+                ppp.dirX = d;
+                ppp.dirY = 0;
+            }
+            else if (l.formationType == SheepRoleFormationType.AngleTidy ||
+                     l.formationType == SheepRoleFormationType.AngleRandom) {
+                Vector3 g = new Vector3(
+                    d * sheepMode.loongX - x,
+                    0 - y,
+                    0
+                ).normalized;
+
+                ppp.dirX = g.x;
+                ppp.dirY = g.y;
+            }
+
+            if (ppp.petId != 0 && this.state == SheepRoomState.Start) {
+                ppp.isConnNot = true;
+            }
+            else {
+                ppp.isConnNot = false;
+            }
+
+            ppp.tarIndex = -1;
+            ppp.tarId = -1;
+            ppp.curHp = ppp.conf.hp;
+            ppp.curAtkBuff = 0;
+
+            if (ppp.isBoom) {
+                ppp.isConnNot = true;
+                ppp.isBoom = true;
+            }
+            else {
+                ppp.isBoom = false;
+            }
+            
+            // view_pet = viewPet;
+
+            foreach (var e in this.buffs) {
+                foreach (var item in e) {
+                    double i = (item.time - this.gameStartTimerForBuff) / 1e3;
+
+                    int r = item.count;
+
+                    ppp.addGeneralOrderBuff(ppp, i, r);
+                }
+            }
+
+            if (this.state == SheepRoomState.Start && ppp.conf.roleType == SheepRoleType.yang_shen) {
+                this.god_view_pets.Add(ppp);
+            }
         }
 
         // 生成单位 下一帧才会使用
