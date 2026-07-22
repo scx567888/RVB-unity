@@ -33,6 +33,9 @@ namespace rvb.scripts {
             }
         }
 
+        public BulletView() {
+        }
+
         public void init(int newId, BulletView preview) {
             if (preview == null) return;
             this.id = newId;
