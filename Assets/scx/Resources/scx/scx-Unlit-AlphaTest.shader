@@ -5,6 +5,8 @@
 // - no lightmap support
 // - no per-material color
 
+// 基于 Unity 内置 Unlit/Transparent Cutout, 关闭背面剔除以支持双面渲染.
+
 Shader "scx/Unlit/Transparent Cutout" {
 Properties {
     _MainTex ("Base (RGB) Trans (A)", 2D) = "white" {}

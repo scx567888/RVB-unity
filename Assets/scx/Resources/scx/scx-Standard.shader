@@ -1,5 +1,7 @@
 // Unity built-in shader source. Copyright (c) 2016 Unity Technologies. MIT license (see license.txt)
 
+// 基于 Unity 内置 Standard, 关闭背面剔除以支持双面渲染.
+
 Shader "scx/Standard"
 {
     Properties
