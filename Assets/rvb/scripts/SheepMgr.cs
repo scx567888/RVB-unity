@@ -69,8 +69,7 @@ namespace rvb.scripts {
         public BulletView[] view_bullets = new BulletView[] { };
         public BulletView[] pre_view_bullets = new BulletView[] { };
         public long updateTime = 0;
-        public List<PetView> petsAdd = new List<PetView>();
-        public Stack<PetView> petsDel = new Stack<PetView>();
+        
         public int petCount = 0;
         public Stack<int> bulletsDel = new Stack<int>();
         public int bulletCount = 0;
@@ -130,6 +129,7 @@ namespace rvb.scripts {
 
         // -------------------- 可选桥接回调 --------------------
         public Action<PetView> OnRoleRender;
+        public Action<BulletView> OnBulletRender;
         public Func<PetView, int> AnimationFrameCountResolver;
 
 
@@ -193,8 +193,8 @@ namespace rvb.scripts {
             this.view_bullets = new BulletView[SheepConfig.MaxBulletCount];
             this.pre_view_bullets = new BulletView[SheepConfig.MaxBulletCount];
             this.updateTime = 0;
-            this.petsAdd = new List<PetView>();
-            this.petsDel = new Stack<PetView>();
+            
+            
             this.petCount = 0;
             this.bulletsDel = new Stack<int>();
             this.bulletCount = 0;
@@ -607,8 +607,6 @@ namespace rvb.scripts {
                 // 处理召唤兵
                 this.consume(sheepCtl, i);
 
-                this.buff_add_pets();
-
                 this.buff_add_bullets();
 
                 // 要处理的总数量
@@ -959,46 +957,18 @@ namespace rvb.scripts {
             return isEnd;
         }
 
-        public void pre_add_pet(PetView e) {
-            this.petsAdd.Add(e);
-        }
-
-        public void buff_add_pets() {
-            if (this.petsAdd.Count <= 0) {
-                return;
-            }
-
-            for (; this.petsAdd.Count != 0;) {
-                if (!this.petsDel.TryPop(out var e)) {
-                    if (this.petCount >= SheepConfig.MaxPetCount - 1) {
-                        Debug.LogWarning("预加入怪物加入buff超过最大数量" + this.petCount + " " + SheepConfig.MaxPetCount);
-                        break;
-                    }
-
-                    // e = this.petCount++;
-                }
-
-                var t = this.petsAdd[0];
-                this.petsAdd.RemoveAt(0);
-                // var r = this.getPetView(e);
-                t.sheepMgr = this;
-                t.init(null, null);
-            }
-        }
-
         public void buff_del_pet(PetView e) {
             var pet = e;
             pet.isDie = true;
             pet.id = 0;
-            this.petsDel.Push(e);
+            
         }
 
         public void clear_pets() {
             this.cur_rob_role_index = 0;
             this.roleMaxIndex = 0;
             this.petCount = 0;
-            this.petsAdd.Clear();
-            this.petsDel.Clear();
+            
         }
 
         public void buff_add_bullets() {
@@ -1226,6 +1196,7 @@ namespace rvb.scripts {
 
                 if (t.id != 0 && t.conf.animId != 0) {
                     var e = t;
+                    OnBulletRender?.Invoke(e);
                     this.comImages.addBullet(e);
                 }
 
@@ -2905,11 +2876,14 @@ namespace rvb.scripts {
             else {
                 petSkin.position = f;
             }
+            
+            petSkin.sheepMgr = this;
+            petSkin.init(null, null);
 
             this.addPet(petSkin, camp);
 
             petSkin.pos = petSkin.position;
-            this.pre_add_pet(petSkin);
+            
             return petSkin;
         }
 
