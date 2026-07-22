@@ -361,7 +361,7 @@ namespace rvb.scripts {
 
         public void game_update( SheepCtl sheepCtl, float i) {
             // 处理召唤兵
-            this.consume(i);
+            this.consume(sheepCtl, i);
 
             // 执行主逻辑
             this.role_logic(sheepCtl, i);
@@ -542,7 +542,8 @@ namespace rvb.scripts {
             view.posY = 0f;
             view.posBefX = view.posX;
             view.posBefY = view.posY;
-
+            view.animX = view.posX;
+            view.animY = view.posY;
             view.blockIndex = Util.getIndexByXY(view.posX, view.posY);
             view.befBlockIndex = view.blockIndex;
             view.dirX = camp == SheepCamp.Red ? 1f : -1f;
@@ -951,8 +952,8 @@ namespace rvb.scripts {
                             var x = t.roleUid;
                             var _ = t.roleIndex;
                             if (x == _.id) {
-                                t.x = (float)(_.posX + n.radius * Math.Cos(t.angle));
-                                t.y = (float)(_.posY + n.radius * Math.Sin(t.angle));
+                                t.x = (float)(_.animX + n.radius * Math.Cos(t.angle));
+                                t.y = (float)(_.animY + n.radius * Math.Sin(t.angle));
                             }
                             else {
                                 t.isDie = true;
@@ -992,7 +993,8 @@ namespace rvb.scripts {
             var posX = viewPet.posX;
             var posY = viewPet.posY;
             if (!viewPet.isDie) {
-                
+                viewPet.animX = posBefX + (posX - posBefX) * (frame % loopFrame) / loopFrame;
+                viewPet.animY = posBefY + (posY - posBefY) * (frame % loopFrame) / loopFrame;
             }
 
             frame += 1;
@@ -1073,14 +1075,16 @@ namespace rvb.scripts {
                             petSkin.posBefY = petSkin.posY;
                             petSkin.posX = n.posX;
                             petSkin.posY = n.posY;
-                            
+                            petSkin.animX = petSkin.posX;
+                            petSkin.animY = petSkin.posY;
                         }
                         else {
                             petSkin.posBefX = t1;
                             petSkin.posBefY = 0;
                             petSkin.posX = t1;
                             petSkin.posY = 0;
-                            
+                            petSkin.animX = t1;
+                            petSkin.animY = 0;
                         }
 
                         petSkin.readySkillId = i.id;
@@ -1671,7 +1675,7 @@ namespace rvb.scripts {
                 if (!petSkin.isDie && petSkin.curHp > 0) {
                     var t1 = petSkin.impulseX;
                     var i1 = petSkin.impulseY;
-                    petSkin.logicMove(petSkin.posX + t1, petSkin.posY + i1);
+                    petSkin.logicMove(petSkin.animX + t1, petSkin.posY + i1);
                 }
 
                 petSkin.impulseX = 0;
@@ -2067,7 +2071,7 @@ namespace rvb.scripts {
             sheepCallInfo.pets.Add(new SheepCallInfoPet() { camp = camp, count = count });
         }
 
-        public void consume(float t) {
+        public void consume(SheepCtl sheepCtl, float t) {
             var o = this;
 
             this.autoTime += t;
@@ -2610,7 +2614,8 @@ namespace rvb.scripts {
             ppp.frame = 0;
             ppp.posBefX = x;
             ppp.posBefY = y;
-            
+            ppp.animX = x;
+            ppp.animY = y;
             ppp.posX = x;
             ppp.posY = y;
             ppp.befBlockIndex = blockIndex;
@@ -2621,7 +2626,7 @@ namespace rvb.scripts {
 
                 ppp.tarPosX = m.x;
                 ppp.tarPosY = m.y;
-                
+                ppp.animY = m.y;
                 ppp.posBefY = m.y;
                 ppp.posY = m.y;
             }
@@ -2884,7 +2889,7 @@ namespace rvb.scripts {
                     }
                 }
 
-                Vector3 B = new Vector3(i.posX, i.posY, 0);
+                Vector3 B = new Vector3(i.animX, i.animY, 0);
 
                 a.position = B;
             }

@@ -25,7 +25,9 @@ namespace rvb.scripts {
         public int frame = 0;
         public float posBefX = 0;
         public float posBefY = 0;
-        
+        public float animX = 0;
+        public float animY = 0;
+        public float animZ = 0;
         public float posX = 0;
         public float posY = 0;
         public int befBlockIndex = 0;
