@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace common {
+namespace scx.FreeCameraController {
     public class FreeCameraController : MonoBehaviour {
         [Header("移动设置")] [SerializeField] private float moveSpeed = 5f;
         [SerializeField] private float fastMoveMultiplier = 3f;
