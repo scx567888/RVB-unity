@@ -8,13 +8,7 @@ using static rvb.scripts.SheepModes;
 using static rvb.scripts.EventBus;
 
 namespace rvb.scripts {
-    /// <summary>
-    /// 羊了个羊战斗逻辑管理器。
-    ///
-    /// 说明：原 Cocos 版本把逻辑、渲染和 SheepCtl 组件混在一起。
-    /// 本版本保留战斗逻辑，渲染相关调用均为可选 dynamic 桥接或回调，
-    /// 因而可以接入你自己的 SheepCtl/渲染实现。
-    /// </summary>
+  
     public class SheepMgr {
         public static SheepMgr inc;
 
