@@ -108,10 +108,10 @@ namespace rvb.scripts {
         public Stack<PetView> del_pets = new Stack<PetView>();
 
         // 当前在场上的子弹
-        public List<BulletView> view_bullets = new List<BulletView> { };
+        public List<BulletView> bullets = new List<BulletView> { };
 
         // 准备添加到下一帧的 子弹
-        public List<BulletView> pre_view_bullets = new List<BulletView> { };
+        public List<BulletView> pre_bullets = new List<BulletView> { };
 
         // 准备删除的 子弹
         public Stack<BulletView> del_bullets = new Stack<BulletView>();
@@ -180,8 +180,8 @@ namespace rvb.scripts {
             };
 
 
-            this.view_bullets = new List<BulletView>();
-            this.pre_view_bullets = new List<BulletView>();
+            this.bullets = new List<BulletView>();
+            this.pre_bullets = new List<BulletView>();
             this.updateTime = 0;
 
 
@@ -319,13 +319,13 @@ namespace rvb.scripts {
 
 
         public void clearViewBullets() {
-            foreach (var viewElement in this.view_bullets) {
+            foreach (var viewElement in this.bullets) {
                 if (viewElement != null) {
                     viewElement.clear();
                 }
             }
 
-            foreach (var viewElement in this.pre_view_bullets) {
+            foreach (var viewElement in this.pre_bullets) {
                 if (viewElement != null) {
                     viewElement.clear();
                 }
@@ -565,30 +565,32 @@ namespace rvb.scripts {
         }
 
         public void role_logic(SheepCtl sheepCtl, float dt) {
-            var t = NowMs();
+            
             this.logic_counts[(int)SheepCamp.Red] = this.redBuffCount > 0 ? 2 : 1;
             this.logic_counts[(int)SheepCamp.Blue] = this.blueBuffCount > 0 ? 2 : 1;
 
-
+            // 将 pre_pets 转移到 pets 中
             for (var i = 0; i < pre_pets.Length; i++) {
-                var p = pre_pets[i];
-                var p1 = pets[i];
-                foreach (var petView in p) {
-                    p1.Add(petView);
+                var p1 = pre_pets[i];
+                var p2 = pets[i];
+                foreach (var petView in p1) {
+                    p2.Add(petView);
                 }
 
-                p.Clear();
+                p1.Clear();
             }
 
-            foreach (var preViewBullet in pre_view_bullets) {
-                view_bullets.Add(preViewBullet);
+            // 将 pre_bullets 转移到 bullets 中
+            foreach (var b1 in pre_bullets) {
+                bullets.Add(b1);
             }
-
-            pre_view_bullets.Clear();
-
+            pre_bullets.Clear();
+            
+            
+            // 更新 pet
             this.update_role();
 
-
+            // 更新 bullet
             this.update_bullet();
 
 
@@ -683,16 +685,11 @@ namespace rvb.scripts {
                 }
             }
 
-            var _ = false;
-
-
             var b = 0;
             var I = 0;
 
-            var x = h;
-
-            for (var B = 0; B < x.Count; B++) {
-                var y = x[B];
+            for (var B = 0; B < h.Count; B++) {
+                var y = h[B];
 
                 y.updateSkin(sheepCtl, this, this, dt);
 
@@ -757,7 +754,7 @@ namespace rvb.scripts {
             var j = 0;
 
 
-            foreach (var X in view_bullets) {
+            foreach (var X in bullets) {
                 if (X.isDie) {
                     continue;
                 }
@@ -865,7 +862,7 @@ namespace rvb.scripts {
         }
 
         public void update_bullet() {
-            foreach (var t in view_bullets) {
+            foreach (var t in bullets) {
                 if (t.isDie) {
                     continue;
                 }
@@ -2700,7 +2697,7 @@ namespace rvb.scripts {
 
             preBullet.atkVue = view_pet != null ? view_pet.conf.atk : l.atk;
             preBullet.frame = 0;
-            pre_view_bullets.Add(preBullet);
+            pre_bullets.Add(preBullet);
         }
 
         public static long NowMs() => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
