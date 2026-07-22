@@ -1,22 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Stopwatch = System.Diagnostics.Stopwatch;
 using System.Threading;
-using System.Threading.Tasks;
 using UnityEngine;
 using static rvb.scripts.BullteCreate;
 using static rvb.scripts.SheepModes;
 using static rvb.scripts.EventBus;
 
 namespace rvb.scripts {
-    /// <summary>
-    /// 羊了个羊战斗逻辑管理器。
-    ///
-    /// 说明：原 Cocos 版本把逻辑、渲染和 SheepCtl 组件混在一起。
-    /// 本版本保留战斗逻辑，渲染相关调用均为可选 dynamic 桥接或回调，
-    /// 因而可以接入你自己的 SheepCtl/渲染实现。
-    /// </summary>
     public class SheepMgr {
         public static SheepMgr inc;
 
@@ -35,8 +26,6 @@ namespace rvb.scripts {
         // boss 血量 (外部会设置)
         public int loongHp = 10000;
 
-        // 红蓝 boss
-        public Boss[] boss = { null, null };
 
         // 地块比例
         public float plotRatio = 0.5f;
@@ -44,12 +33,9 @@ namespace rvb.scripts {
         // 核心状态机
         public SheepRoomState state = SheepRoomState.Ready;
 
-        // 尝试角色 ( 但是是哪一种? 当前在场上的? )
-        public HashSet<PetView>[] pets = new[] { new HashSet<PetView>(), new HashSet<PetView>() };
-
         public int gameIndex = 0;
         public float gameStartTimerForBuff = 0;
-        public Vector3 cameraEulerAngles = Vector3.zero;
+
         public long endTime = 0;
         public List<int>[] preBuffs = new[] { new List<int>(), new List<int>() };
         public List<Buff>[] buffs = new[] { new List<Buff>(), new List<Buff>() };
@@ -68,23 +54,12 @@ namespace rvb.scripts {
             blueNums = new[] { 0, 0, 0, 0, 0, 0, 0, 0 }
         };
 
-        public PetView[] view_pets = new PetView[] { };
-        public BulletView[] view_bullets = new BulletView[] { };
-        public BulletView[] pre_view_bullets = new BulletView[] { };
+
         public long updateTime = 0;
-        public List<PetView> petsAdd = new List<PetView>();
-        public Stack<int> petsDel = new Stack<int>();
-        public int petCount = 0;
-        public Stack<int> bulletsDel = new Stack<int>();
-        public int bulletCount = 0;
-        public int bulletId = 0;
 
-        public int[] logic_counts = { 1, 1 };
 
-        public List<BullteCreate> bullte_creates = new List<BullteCreate>();
-
-        public Dictionary<int, Dictionary<int, Dictionary<int, List<int>>>> pre_blocks =
-            new Dictionary<int, Dictionary<int, Dictionary<int, List<int>>>>();
+        public Dictionary<int, Dictionary<int, Dictionary<int, List<PetView>>>> pre_blocks =
+            new Dictionary<int, Dictionary<int, Dictionary<int, List<PetView>>>>();
 
         public bool[][] isChangeCollsionFlags = null;
         public bool[] isChangeAckFlags = null;
@@ -93,50 +68,69 @@ namespace rvb.scripts {
 
         public IndexLen[][] attackViews;
 
-        public int[][] attackView1s = new int[][] {
-            new int[SheepConfig.MaxPetCount],
-            new int[SheepConfig.MaxPetCount]
+        public PetView[][] attackView1s = new PetView[][] {
+            new PetView[SheepConfig.MaxPetCount],
+            new PetView[SheepConfig.MaxPetCount]
         };
 
         public IndexLen[][][] collisionViews = new IndexLen[][][] { };
 
-        public int[][][] collisionView1s = new int[][][] { };
+        public PetView[][][] collisionView1s = new PetView[][][] { };
 
-        public Dictionary<int, SheepCallInfo> redCallInfos = new Dictionary<int, SheepCallInfo>();
-
-        public Dictionary<int, SheepCallInfo> blueCallInfos = new Dictionary<int, SheepCallInfo>();
-
-        public ComImages comImages;
-
-        public int cur_rob_role_index;
-        public int cur_rob_bullet_index;
-        public int cur_rob_role_mesh_index;
-        public int cur_rob_bullet_mesh_index;
-        public int cur_rob_star_mesh_index;
-        public int roleMaxIndex;
-        public int bulletMaxIndex;
-        public int preBulletIndex;
-        public CurIndexImages curIndexImages;
         public int redBuffCount;
         public int blueBuffCount;
 
-        public int petId = 0;
 
         public System.Random logicRandom = new System.Random(123);
 
         //********************************** 以下字段 待处理 **********************************************
 
-        /// <summary>逻辑侧 Boss 当前已结算生命。</summary>
-        public float[] bossHp = { 0, 0 };
-
-        public long[] bossBackStateTime = { 0, 0 };
-
         // -------------------- 可选桥接回调 --------------------
         public Action<PetView> OnRoleRender;
+        public Action<BulletView> OnBulletRender;
         public Func<PetView, int> AnimationFrameCountResolver;
 
 
         public int plotRatioIndex;
+
+
+        // ********************** 确定字段 *******************************
+        
+        // 红蓝 boss
+        public Boss[] boss = { null, null };
+
+        // 当前在场上的角色
+        public HashSet<PetView>[] pets = { new(), new() };
+
+        // 准备添加到下一帧的 角色
+        public HashSet<PetView>[] pre_pets = { new(), new() };
+
+        // 准备删除的 角色
+        public HashSet<PetView>[] del_pets = { new(), new() };
+
+        // 当前在场上的子弹
+        public List<BulletView> bullets = new List<BulletView> { };
+
+        // 准备添加到下一帧的 子弹
+        public List<BulletView> pre_bullets = new List<BulletView> { };
+
+        // 准备删除的 子弹
+        public List<BulletView> del_bullets = new List<BulletView>();
+
+        // 角色自增 id 
+        public int petId = 0;
+
+        // 子弹自增 id
+        public int bulletId = 0;
+
+        // 红方召唤池
+        public Dictionary<int, SheepCallInfo> redCallInfos = new Dictionary<int, SheepCallInfo>();
+
+        // 蓝方召唤池
+        public Dictionary<int, SheepCallInfo> blueCallInfos = new Dictionary<int, SheepCallInfo>();
+
+        // 红蓝双方 每次执行多少逻辑帧 
+        public int[] logic_counts = { 1, 1 };
 
         public SheepMgr(SheepCtl sheepCtl) {
             // 是否自动出兵
@@ -168,7 +162,7 @@ namespace rvb.scripts {
 
             this.gameIndex = 0;
             this.gameStartTimerForBuff = 0;
-            this.cameraEulerAngles = new Vector3();
+
             this.endTime = 0;
             this.preBuffs = new[] { new List<int>(), new List<int>() };
             this.buffs = new[] { new List<Buff>(), new List<Buff>() };
@@ -186,22 +180,16 @@ namespace rvb.scripts {
                 blueNums = new[] { 0, 0, 0, 0, 0, 0, 0, 0 }
             };
 
-            this.view_pets = new PetView[SheepConfig.MaxPetCount];
-            this.view_bullets = new BulletView[SheepConfig.MaxBulletCount];
-            this.pre_view_bullets = new BulletView[SheepConfig.MaxBulletCount];
+
+            this.bullets = new List<BulletView>();
+            this.pre_bullets = new List<BulletView>();
             this.updateTime = 0;
-            this.petsAdd = new List<PetView>();
-            this.petsDel = new Stack<int>();
-            this.petCount = 0;
-            this.bulletsDel = new Stack<int>();
-            this.bulletCount = 0;
+
+
             this.bulletId = 0;
 
-            this.logic_counts = new[] { 1, 1 };
 
-            this.bullte_creates = new List<BullteCreate>();
-
-            this.pre_blocks = new Dictionary<int, Dictionary<int, Dictionary<int, List<int>>>>();
+            this.pre_blocks = new Dictionary<int, Dictionary<int, Dictionary<int, List<PetView>>>>();
             this.isChangeCollsionFlags = null;
             this.isChangeAckFlags = null;
 
@@ -212,9 +200,9 @@ namespace rvb.scripts {
                 new IndexLen[MaxCount],
             };
 
-            this.attackView1s = new int[][] {
-                new int[SheepConfig.MaxPetCount],
-                new int[SheepConfig.MaxPetCount]
+            this.attackView1s = new PetView[][] {
+                new PetView[SheepConfig.MaxPetCount],
+                new PetView[SheepConfig.MaxPetCount]
             };
 
             this.collisionViews = new IndexLen[][][] {
@@ -227,52 +215,23 @@ namespace rvb.scripts {
                 this.collisionViews[(int)SheepCamp.Blue][e] = new IndexLen[this.MaxCount];
             }
 
-            this.collisionView1s = new int[][][] {
-                new int[SheepConfig.MaxGroupCount][],
-                new int[SheepConfig.MaxGroupCount][]
+            this.collisionView1s = new PetView[][][] {
+                new PetView[SheepConfig.MaxGroupCount][],
+                new PetView[SheepConfig.MaxGroupCount][]
             };
 
             for (var e = 0; e < SheepConfig.MaxGroupCount; e++) {
-                this.collisionView1s[(int)SheepCamp.Red][e] = new int[SheepConfig.MaxPetCount];
-                this.collisionView1s[(int)SheepCamp.Blue][e] = new int[SheepConfig.MaxPetCount];
+                this.collisionView1s[(int)SheepCamp.Red][e] = new PetView[SheepConfig.MaxPetCount];
+                this.collisionView1s[(int)SheepCamp.Blue][e] = new PetView[SheepConfig.MaxPetCount];
             }
 
-            /**
-             * 红方召唤池
-             * key 是 类型 id
-             * @type {Map<Number,SheepCallInfo>}
-             */
             this.redCallInfos = new Dictionary<int, SheepCallInfo>();
 
-            /**
-             * 蓝方召唤池
-             * key 是 类型 id
-             * @type {Map<Number,SheepCallInfo>}
-             */
             this.blueCallInfos = new Dictionary<int, SheepCallInfo>();
-
-            /**
-             * 是否自动出兵
-             * @type {boolean}
-             */
 
 
             // ************************ 以下待整理 **************************
 
-            /**
-             * @type ComSheepImages
-             */
-            this.comImages = sheepCtl.comImages;
-
-            this.cur_rob_role_index = 0;
-            this.cur_rob_bullet_index = 0;
-            this.cur_rob_role_mesh_index = 0;
-            this.cur_rob_bullet_mesh_index = 0;
-            this.cur_rob_star_mesh_index = 0;
-            this.roleMaxIndex = 0;
-            this.bulletMaxIndex = 0;
-            this.preBulletIndex = 0;
-            this.curIndexImages = null;
             this.redBuffCount = 0;
             this.blueBuffCount = 0;
 
@@ -324,27 +283,6 @@ namespace rvb.scripts {
             eventBus.emit(EventType.RoomState, (state = e));
         }
 
-        public void addPet(PetView e, SheepCamp camp) {
-            this.pets[(int)camp].Add(e);
-            if (camp == SheepCamp.Red) {
-                this.perfStat.redNums[(int)e.conf.roleType]++;
-            }
-            else {
-                this.perfStat.blueNums[(int)e.conf.roleType]++;
-            }
-        }
-
-        public void delPet(PetView e) {
-            this.pets[(int)SheepCamp.Red].Remove(e);
-            this.pets[(int)SheepCamp.Blue].Remove(e);
-            if (e.camp == SheepCamp.Red) {
-                this.perfStat.redNums[(int)e.conf.roleType]--;
-            }
-            else {
-                this.perfStat.blueNums[(int)e.conf.roleType]--;
-            }
-        }
-
         public void clearPets() {
             this.pets[(int)SheepCamp.Red].Clear();
             this.pets[(int)SheepCamp.Blue].Clear();
@@ -362,220 +300,27 @@ namespace rvb.scripts {
             return ++petId;
         }
 
-        public int rob_role(int t) {
-            var old = this.cur_rob_role_index;
-            this.cur_rob_role_index += t;
-            return old;
-        }
-
-        public int rob_bullet(int t) {
-            var old = this.cur_rob_bullet_index;
-            this.cur_rob_bullet_index += t;
-            return old;
-        }
-
-        public int rob_pre_bullet(int t) {
-            var old = this.preBulletIndex;
-            this.preBulletIndex += t;
-            return old;
-        }
 
         public void clearPetViews() {
-            foreach (var element in this.view_pets) {
-                if (element != null) {
-                    element.clear();
-                }
-            }
+            pets[(int)SheepCamp.Red].Clear();
+            pets[(int)SheepCamp.Blue].Clear();
         }
 
-        public PetView getPetView(int petIndex) {
-            if (petIndex < 0 || petIndex >= SheepConfig.MaxPetCount) {
-                return null;
-            }
-
-            var pet = this.view_pets[petIndex];
-            if (pet == null) {
-                pet = new PetView(petIndex);
-                pet.sheepMgr = this;
-                this.view_pets[petIndex] = pet;
-            }
-
-            return pet;
-        }
 
         public void clearViewBullets() {
-            foreach (var viewElement in this.view_bullets) {
+            foreach (var viewElement in this.bullets) {
                 if (viewElement != null) {
                     viewElement.clear();
                 }
             }
 
-            foreach (var viewElement in this.pre_view_bullets) {
+            foreach (var viewElement in this.pre_bullets) {
                 if (viewElement != null) {
                     viewElement.clear();
                 }
             }
         }
 
-        public BulletView getBulletView(int e) {
-            if (e < 0 || e >= SheepConfig.MaxBulletCount) {
-                return null;
-            }
-
-            var bullet = this.view_bullets[e];
-            if (bullet == null) {
-                bullet = new BulletView();
-                this.view_bullets[e] = bullet;
-            }
-
-            return bullet;
-        }
-
-        public BulletView getBulletPreView(int e) {
-            if (e < 0 || e >= SheepConfig.MaxBulletCount) {
-                return null;
-            }
-
-            var bullet = this.pre_view_bullets[e];
-            if (bullet == null) {
-                bullet = new BulletView();
-                this.pre_view_bullets[e] = bullet;
-            }
-
-            return bullet;
-        }
-
-        public void copyBulletPreView(int e, int bulletId, PetView view_pet, PetView view_tar_pet, Info l = null) {
-            var n = SheepBullet.getById(bulletId);
-            var r = view_pet != null ? view_pet.camp == SheepCamp.Red ? n.startOffsetX : -n.startOffsetX : 0;
-            var preBullet = this.getBulletPreView(e);
-            preBullet.bulletId = bulletId;
-            preBullet.roleUid = view_pet != null ? view_pet.id : 0;
-            preBullet.roleIndex = view_pet != null ? view_pet.index : 0;
-
-
-            preBullet.camp = view_pet != null ? view_pet.camp : l.camp;
-            if (view_tar_pet != null && 0 == view_tar_pet.roleId) {
-                preBullet.tarRoleIndex = view_tar_pet.index;
-            }
-            else {
-                preBullet.tarRoleIndex = -1;
-            }
-
-            if (n.moveType == (int)SheepBulletMoveType.Fixed) {
-                var t = l != null && l.startX != 0 ? l.startX :
-                    view_pet != null && view_pet.posX != 0 ? view_pet.posX : 0;
-                preBullet.x = t;
-                var s = l != null && l.startY != 0 ? l.startY :
-                    view_pet != null && view_pet.posY != 0 ? view_pet.posY : 0;
-                preBullet.y = s;
-
-                preBullet.startY = n.startOffsetY;
-                preBullet.z = 0 + n.startOffsetZ;
-                preBullet.dirX = 0;
-                preBullet.dirY = 0;
-                preBullet.dirZ = 1;
-            }
-            else if (n.moveType == (int)SheepBulletMoveType.LineDir) {
-                preBullet.x = view_pet.posX + r;
-                preBullet.y = view_pet.posY + n.startOffsetY;
-                preBullet.z = 0 + n.startOffsetZ;
-                preBullet.dirX = view_pet.dirX;
-                preBullet.dirY = view_pet.dirY;
-            }
-            else if (n.moveType == (int)SheepBulletMoveType.CurvePosFrame) {
-                var t = view_pet != null ? view_pet.posX : l.startX;
-                var s = view_pet != null ? view_pet.posY : l.startY;
-                var c = view_tar_pet != null ? view_tar_pet.posX : view_pet.tarPosX;
-                var f = view_tar_pet != null ? view_tar_pet.posY : view_pet.tarPosY;
-                preBullet.x = t + r;
-                preBullet.y = s + n.startOffsetY;
-                preBullet.z = 0 + n.startOffsetZ;
-                preBullet.startX = t + r;
-                preBullet.startY = s + n.startOffsetY;
-                preBullet.startZ = 0 + n.startOffsetZ;
-                preBullet.endX = c;
-                preBullet.endY = f;
-                preBullet.endZ = 0 + n.endOffsetZ;
-                preBullet.dirX = 0;
-                preBullet.dirY = 0;
-                preBullet.z = 1;
-            }
-            else if (n.moveType == (int)SheepBulletMoveType.DirAngle) {
-                preBullet.x = view_pet.posX + r;
-                preBullet.y = view_pet.posY + n.startOffsetY;
-                preBullet.z = 0 + n.startOffsetZ;
-                preBullet.dirX = l.dirX;
-                preBullet.dirY = l.dirY;
-                preBullet.dirZ = l.dirZ;
-            }
-            else if (n.moveType == (int)SheepBulletMoveType.RadiusAngle) {
-                preBullet.x = view_pet.posX + r;
-                preBullet.y = view_pet.posY + n.startOffsetY;
-                preBullet.z = 0 + n.startOffsetZ;
-                preBullet.startX = view_pet.posX + r;
-                preBullet.startY = view_pet.posY + n.startOffsetY;
-                preBullet.startZ = 0 + n.startOffsetZ;
-                preBullet.dirX = l.dirX;
-                preBullet.dirY = l.dirY;
-                preBullet.dirZ = l.dirZ;
-                preBullet.angle = l.angle;
-            }
-            else if (n.moveType == (int)SheepBulletMoveType.LineDirEndPos) {
-                preBullet.x = l.startX;
-                preBullet.y = l.startY;
-                preBullet.z = l.startZ;
-                preBullet.startX = l.startX;
-                preBullet.startY = l.startY;
-                preBullet.startZ = l.startZ;
-                preBullet.endX = l.endX;
-                preBullet.endY = l.endY;
-                preBullet.endZ = l.endZ;
-                if (l.dirX != 0 || l.dirY != 0 || l.dirZ != 0) {
-                    preBullet.dirX = l.dirX;
-                    preBullet.dirY = l.dirY;
-                    preBullet.dirZ = l.dirZ;
-                }
-                else {
-                    var t = l.endX - l.startX;
-                    var i = l.endY - l.startY;
-                    var s = l.endZ - l.startZ;
-                    var o = Math.Sqrt(t * t + i * i);
-                    preBullet.dirX = (float)(t / o);
-                    preBullet.dirY = (float)(i / o);
-                    preBullet.dirZ = (float)(s / o);
-                }
-            }
-            else if (n.moveType == (int)SheepBulletMoveType.LinePosFrame) {
-                preBullet.x = l.startX;
-                preBullet.y = l.startY;
-                preBullet.z = l.startZ;
-                preBullet.startX = l.startX;
-                preBullet.startY = l.startY;
-                preBullet.startZ = l.startZ;
-                preBullet.endX = l.endX;
-                preBullet.endY = l.endY;
-                preBullet.endZ = l.endZ;
-                var t = l.endX - l.startX;
-                var i = l.endY - l.startY;
-                var s = l.endZ - l.startZ;
-                var o = Math.Sqrt(t * t + i * i);
-                preBullet.dirX = (float)(t / o);
-                preBullet.dirY = (float)(i / o);
-                preBullet.dirZ = (float)(s / o);
-            }
-            else {
-                preBullet.x = view_pet.posX + r;
-                preBullet.y = view_pet.posY + n.startOffsetY;
-                preBullet.z = 0 + n.startOffsetZ;
-                preBullet.dirX = 0;
-                preBullet.dirY = 0;
-                preBullet.dirZ = 1;
-            }
-
-            preBullet.atkVue = view_pet != null ? view_pet.conf.atk : l.atk;
-            preBullet.frame = 0;
-        }
 
         public void game_run(SheepCtl sheepCtl) {
             // 清理游戏数据
@@ -603,10 +348,9 @@ namespace rvb.scripts {
                         Thread.Sleep((int)(33 - diff));
                     }
 
-                    if (this.comImages.isHasFreeImage()) {
-                        var o = NowMs() - lastUpdateTime;
-                        this.game_update(this, sheepCtl, o);
-                    }
+
+                    var o = NowMs() - lastUpdateTime;
+                    this.game_update(sheepCtl, o);
                 }
                 catch (Exception e) {
                     Debug.LogWarning("主线程更新逻辑错误:" + e);
@@ -615,254 +359,22 @@ namespace rvb.scripts {
             }
         }
 
-        public void game_update(SheepMgr sheepMgr, SheepCtl sheepCtl, float i) {
-            try {
-                // 处理召唤兵
-                this.consume(sheepCtl, i);
+        public void game_update( SheepCtl sheepCtl, float i) {
+            // 处理召唤兵
+            this.consume(sheepCtl, i);
 
-                this.buff_add_pets();
-
-                this.buff_add_bullets();
-
-                // 要处理的总数量
-                var n = sheepMgr.pets[(int)SheepCamp.Red].Count + sheepMgr.pets[(int)SheepCamp.Blue].Count;
-                if (n <= 0) {
-                    return;
-                }
-
-                this.cur_rob_role_index = 0;
-                this.cur_rob_bullet_index = 0;
-
-                this.curIndexImages = this.comImages.startAdd();
-
-                // 执行主逻辑
-                this.role_logic();
-
-                this.comImages.endAdd();
-
-                this.update_merge_workers(sheepMgr, sheepCtl, i);
-            }
-            catch (Exception err) {
-                Debug.LogError("update逻辑错误 " + err);
-                throw;
-            }
+            // 执行主逻辑
+            this.role_logic(sheepCtl, i);
         }
 
-        public void update_merge_workers(SheepMgr sheepMgr, SheepCtl sheepCtl, float dt) {
+        public bool updateBoss( SheepCtl sheepCtl, float dt, long c) {
             var isEnd = false;
-
-            var now = NowMs();
-
-            this.mainClearBlocks();
-            sheepCtl.comImages.mesh_block.onFrameUpdateStart();
-
-
-            if (sheepMgr.endTime != 0 && sheepMgr.endTime < NowMs()) {
-                eventBus.emit(EventType.RoomStateEnd);
-                isEnd = true;
-                sheepMgr.endTime = 0;
-                return;
-            }
-
-
-            sheepMgr.countNewBuffs = new[] { 0, 0 };
-            sheepMgr.countBuffs = new[] { 0, 0 };
-            sheepMgr.countShowBuffs = new[] { 0, 0 };
-
-            // console.log(sheepMgr.buffs)
-            for (var i = 0; i < sheepMgr.buffs.Length; i++) {
-                var r = sheepMgr.buffs[i];
-                var s = i;
-                if (r.Count != 0 && r[0].time < sheepMgr.gameStartTimerForBuff) {
-                    r.RemoveAt(0);
-                    sheepMgr.buffs[s] = r;
-                }
-
-                foreach (var o in r) {
-                    sheepMgr.countBuffs[s] += o.count != 0 ? o.count : SheepConfig.counterBuffNumber;
-                    sheepMgr.countShowBuffs[s] += o.count;
-                }
-            }
-
-            for (var i = 0; i < sheepMgr.preBuffs.Length; i++) {
-                var r = sheepMgr.preBuffs[i];
-                var s = i;
-
-                if (r.Count == 0) {
-                    continue;
-                }
-
-                var sum = 0;
-                var hasZero = false;
-
-                foreach (var f in r) {
-                    if (0 == f) {
-                        hasZero = true;
-                    }
-
-                    sum += f;
-                }
-
-                if (hasZero) {
-                    sheepMgr.buffs[s].Add(new Buff() {
-                        time = (int)(sheepMgr.gameStartTimerForBuff + 1000 * SheepConfig.counterTime),
-                        count = 0
-                    });
-
-                    if (r.Count > 1) {
-                        sheepMgr.buffs[s].Add(new Buff() {
-                            time = (int)(sheepMgr.gameStartTimerForBuff + 1000 * SheepConfig.buffLastTime),
-                            count = sum
-                        });
-                    }
-                }
-                else {
-                    sheepMgr.buffs[s].Add(new Buff() {
-                        time = (int)(sheepMgr.gameStartTimerForBuff + 1000 * SheepConfig.buffLastTime),
-                        count = sum
-                    });
-                }
-
-                sheepMgr.preBuffs[s] = new List<int>();
-                sheepMgr.countNewBuffs[s] += sum;
-            }
-
-            isEnd = this.updateBoss(sheepMgr, sheepCtl, dt, now);
-
-            if (isEnd) {
-                return;
-            }
-
-            var h = new List<PetView>();
-            foreach (var e in sheepMgr.pets) {
-                foreach (var e1 in e) {
-                    h.Add(e1);
-                }
-            }
-
-            var _ = false;
-            if (!sheepMgr.cameraEulerAngles.Equals(sheepCtl.cameraCtl.camera.node.eulerAngles)) {
-                _ = true;
-                sheepMgr.cameraEulerAngles = sheepCtl.cameraCtl.camera.node.eulerAngles;
-            }
-
-            var b = 0;
-            var I = 0;
-
-            var x = h;
-
-            for (var B = 0; B < x.Count; B++) {
-                var y = x[B];
-                if (y.buff_index == -1) {
-                    continue;
-                }
-
-                y.updateSkin(sheepCtl, this, sheepMgr, dt);
-
-                int[] M;
-                var D = y.view_pet;
-                var A = D.state;
-                var P = D.animType;
-                var W = D.animFrame;
-
-                var fgs = sheepCtl.comImages.roles_framess[(int)y.camp];
-
-                var ghg = fgs[(int)y.skinId];
-
-                M = ghg[(int)P];
-
-                if (null == M) {
-                    Debug.LogError("找不到动画 " + y.camp + " " + y.skinId + " " + P);
-                }
-
-                if (A == SheepRoleState.In && W >= M.Length - 1) {
-                    var E = SheepSkill.getById(D.readySkillId);
-                    if (E != null) {
-                        if (E.skillType == SheepSkillType.Boom) {
-                            var F = SheepSkillSubBoom.getById(E.id);
-                            D.state = SheepRoleState.Boom;
-                            if (F.isAnim != 0) {
-                                D.animType = SheepRoleAnimType.Boom;
-                            }
-                            else {
-                                D.animType = SheepRoleAnimType.Idle;
-                            }
-                        }
-                    }
-                    else {
-                        D.state = SheepRoleState.Move;
-                        D.animType = SheepRoleAnimType.Idle;
-                    }
-                }
-                else if (A == SheepRoleState.Dead && W >= M.Length - 1) {
-                    D.state = SheepRoleState.Res;
-                    D.animType = SheepRoleAnimType.None;
-                    y.onRes(sheepCtl, sheepMgr);
-                }
-                else if (A == SheepRoleState.Up && W >= M.Length - 1) {
-                    D.state = SheepRoleState.In;
-                    D.animType = SheepRoleAnimType.In;
-                }
-                else if (A == SheepRoleState.Buff) {
-                    var V = SheepSkillSubBuff.getById(D.readySkillId);
-                    var U = D.animFrame;
-                    if (U > V.buffStratFrame && U < V.buffEndFrame) {
-                        if (y.camp == SheepCamp.Blue) {
-                            I += 1;
-                        }
-                        else {
-                            b += 1;
-                        }
-                    }
-                }
-            }
-
-            var j = 0;
-            for (var G = 0; G < this.bulletCount; ++G) {
-                var X = this.getBulletView(G);
-                if (X.isDie) {
-                    continue;
-                }
-
-                if (X.frame >= X.conf.endFrame) {
-                    X.isDie = true;
-                    this.buff_del_bullet(G);
-                }
-                else {
-                    var z = this.getPetView(X.roleIndex).conf.splitN;
-
-                    for (var O = -z; O <= z; ++O) {
-                        for (var Q = -z; Q <= z; ++Q) {
-                            var Z = Util.getIndexByXY(X.x + O, X.y + Q);
-                            sheepCtl.comImages.mesh_block.addFrameBlockCamp(Z, X.camp);
-                        }
-                    }
-
-                    ++j;
-                }
-            }
-
-            this.mainSyncBlocksToWokers();
-            sheepCtl.comImages.mesh_block.onFrameUpdateEnd(sheepMgr);
-            this.redBuffCount = b;
-            this.blueBuffCount = I;
-
-            if (isEnd) {
-                return;
-            }
-
-            this.roleMaxIndex = this.petCount;
-            this.bulletMaxIndex = this.bulletCount;
-        }
-
-        public bool updateBoss(SheepMgr sheepMgr, SheepCtl sheepCtl, float dt, long c) {
-            var isEnd = false;
-            for (var i = 0; i < sheepMgr.boss.Length; i++) {
-                var t = sheepMgr.boss[i];
+            for (var i = 0; i < this.boss.Length; i++) {
+                var t = this.boss[i];
                 var index = i;
 
 
-                var viewPet = this.getPetView(index);
+                var viewPet = this.boss[index];
                 var camp = viewPet.camp;
                 var state = viewPet.state;
 
@@ -886,7 +398,7 @@ namespace rvb.scripts {
                     var _ = d - curHp;
 
                     if (_ != 0 && curHp != 0) {
-                        var S = sheepMgr.countBuffs[1 - (int)camp];
+                        var S = this.countBuffs[1 - (int)camp];
                         if (S > 0) {
                             var b = 1 + SheepConfig.buffDragonDamageIncreseRate * S;
                             b += 0;
@@ -895,7 +407,7 @@ namespace rvb.scripts {
                             viewPet.curHp = curHp;
                         }
 
-                        var I = sheepMgr.countBuffs[(int)camp];
+                        var I = this.countBuffs[(int)camp];
                         if (I > 0) {
                             var B = Math.Pow(1 - SheepConfig.buffDragonReduceRate, I);
                             B -= 0;
@@ -926,13 +438,13 @@ namespace rvb.scripts {
                         t.hitAnim();
                     }
 
-                    var R = sheepMgr.countShowBuffs[(int)camp];
-                    var M = sheepMgr.countBuffs[(int)camp];
+                    var R = this.countShowBuffs[(int)camp];
+                    var M = this.countBuffs[(int)camp];
 
-                    if (!sheepMgr.flagLongBuffs[(int)camp] && curHp < sheepMgr.loongHp * SheepConfig.counterHpRatio) {
-                        sheepMgr.flagLongBuffs[(int)camp] = true;
+                    if (!this.flagLongBuffs[(int)camp] && curHp < this.loongHp * SheepConfig.counterHpRatio) {
+                        this.flagLongBuffs[(int)camp] = true;
                         t.backStateTime = c;
-                        sheepMgr.preBuffs[(int)camp].Add(0);
+                        this.preBuffs[(int)camp].Add(0);
                         sheepCtl.comMatch.showDoubleAnim(camp);
                         sheepCtl.comUIAnim.backAnim(camp);
                         sheepCtl.cameraCtl.onShake(SheepConfig.shockBeginNumber);
@@ -956,7 +468,7 @@ namespace rvb.scripts {
                     var unuse = viewPet.curAckFrame;
 
                     var T = 0;
-                    var D = sheepMgr.plotRatio;
+                    var D = this.plotRatio;
 
                     for (var A = 0; A < SheepConfig.loongStateSwitching.Length; A++) {
                         if (D <= SheepConfig.loongStateSwitching[A]) {
@@ -965,9 +477,9 @@ namespace rvb.scripts {
                         }
                     }
 
-                    sheepMgr.plotRatioIndex = T;
-                    t.updateState(sheepCtl, sheepMgr, T + 1);
-                    t.updateStateJJL(sheepCtl, sheepMgr, T + 1);
+                    this.plotRatioIndex = T;
+                    t.updateState(sheepCtl, this, T + 1);
+                    t.updateStateJJL(sheepCtl, this, T + 1);
                 }
             }
 
@@ -975,101 +487,46 @@ namespace rvb.scripts {
             return isEnd;
         }
 
-        public void pre_add_pet(PetView e) {
-            this.petsAdd.Add(e);
-        }
-
-        public void buff_add_pets() {
-            if (this.petsAdd.Count <= 0) {
-                return;
-            }
-
-            for (; this.petsAdd.Count != 0;) {
-                if (!this.petsDel.TryPop(out var e)) {
-                    if (this.petCount >= SheepConfig.MaxPetCount - 1) {
-                        Debug.LogWarning("预加入怪物加入buff超过最大数量" + this.petCount + " " + SheepConfig.MaxPetCount);
-                        break;
-                    }
-
-                    e = this.petCount++;
-                }
-
-                var t = this.petsAdd[0];
-                this.petsAdd.RemoveAt(0);
-                var r = this.getPetView(e);
-                t.init(e, r);
-            }
-        }
-
-        public void buff_del_pet(int e) {
-            var pet = this.getPetView(e);
-            pet.isDie = true;
-            pet.id = 0;
-            this.petsDel.Push(e);
-        }
-
         public void clear_pets() {
-            this.cur_rob_role_index = 0;
-            this.roleMaxIndex = 0;
-            this.petCount = 0;
-            this.petsAdd.Clear();
-            this.petsDel.Clear();
-        }
-
-        public void buff_add_bullets() {
-            var e = this.preBulletIndex;
-            if (e != 0) {
-                for (; e != 0;) {
-                    if (!this.bulletsDel.TryPop(out var t)) {
-                        if (this.bulletCount >= SheepConfig.MaxBulletCount - 1) {
-                            Debug.LogWarning("预加入子弹加入buff超过最大数量" + this.bulletCount + SheepConfig.MaxBulletCount);
-                            break;
-                        }
-
-                        t = this.bulletCount++;
-                    }
-
-                    --e;
-
-                    this.getBulletView(t).init(++this.bulletId, this.pre_view_bullets[e]);
-                }
-
-                this.preBulletIndex = 0;
+            foreach (var petView in del_pets) {
             }
         }
 
-        public void buff_del_bullet(int e) {
-            var bullet = this.getBulletView(e);
+        public void del_bullet(BulletView e) {
+            var bullet = e;
             bullet.id = 0;
-            this.bulletsDel.Push(e);
+            del_bullets.Add(bullet);
+        }
+        
+        public void del_pet(PetView e) {
+            e.isActive = false;
+            e.isDie = true;
+            e.id = 0;
+            this.del_pets[(int)e.camp].Add(e);
         }
 
         public void clear_bullets() {
-            this.cur_rob_bullet_index = 0;
-            this.bulletMaxIndex = 0;
-            this.bulletCount = 0;
-            this.bulletsDel.Clear();
+            foreach (var bulletView in del_bullets) {
+            }
         }
 
 // todo
         public void game_clear() {
             this.clearBlocks();
             this.clearPetViews();
-            this.preBulletIndex = 0;
+
             this.clearViewBullets();
             this.clear_pets();
             this.clear_bullets();
             InitializeBossView(SheepCamp.Red);
             InitializeBossView(SheepCamp.Blue);
-            petCount = 2;
-            roleMaxIndex = 2;
         }
 
 // todo        
         private void InitializeBossView(SheepCamp camp) {
             int index = (int)camp;
-            PetView view = getPetView(index);
-            view.clear();
+            Boss view = new Boss(index);
+            // view.clear();
             view.id = getNextPetId();
             view.isActive = true;
             view.isDie = false;
@@ -1091,70 +548,246 @@ namespace rvb.scripts {
             view.befBlockIndex = view.blockIndex;
             view.dirX = camp == SheepCamp.Red ? 1f : -1f;
             view.dirY = 0f;
-            bossHp[index] = boss[index].curHp;
-            view.curHp = bossHp[index];
+
+            view.curHp = 99999;
+            boss[(int)camp] = view;
         }
 
-        public (long time, bool isEndWorker) role_logic() {
-            var t = NowMs();
+        public void role_logic(SheepCtl sheepCtl, float dt) {
             this.logic_counts[(int)SheepCamp.Red] = this.redBuffCount > 0 ? 2 : 1;
             this.logic_counts[(int)SheepCamp.Blue] = this.blueBuffCount > 0 ? 2 : 1;
-            var curIndexImages = this.curIndexImages;
-            var o = 0;
-            if (this.roleMaxIndex != 0) {
-                o = this.rob_role_task(this.roleMaxIndex, curIndexImages);
-            }
 
-            var l = 0;
-            if (this.bulletMaxIndex != 0) {
-                l = this.rob_bullet_task(this.bulletMaxIndex, curIndexImages);
-            }
-
-            if (this.bullte_creates.Count != 0) {
-                var e = this.rob_pre_bullet(this.bullte_creates.Count);
-                foreach (var t1 in this.bullte_creates) {
-                    var i = e++;
-                    if (i > SheepConfig.MaxBulletCount) {
-                        break;
-                    }
-
-                    this.copyBulletPreView(i, t1.bulletId, t1.view_pet, t1.view_tar_pet, t1.info);
+            // 将 pre_pets 转移到 pets 中
+            for (var i = 0; i < pre_pets.Length; i++) {
+                var p1 = pre_pets[i];
+                var p2 = pets[i];
+                foreach (var petView in p1) {
+                    p2.Add(petView);
                 }
 
-                this.bullte_creates = new List<BullteCreate>();
+                p1.Clear();
             }
 
-            var n = true;
-
-            n = true;
-
-            var r = NowMs() - t;
-            if (r > 33) {
-                Debug.LogWarning("count_role:" + o + " count_bullet:" + l + "  耗时:" + r + "ms");
+            // 将 pre_bullets 转移到 bullets 中
+            foreach (var b1 in pre_bullets) {
+                bullets.Add(b1);
             }
 
-            return (r, n);
+            pre_bullets.Clear();
+
+
+            // 更新 pet
+            this.update_role();
+
+            // 更新 bullet
+            this.update_bullet();
+
+
+            var isEnd = false;
+
+            var now = NowMs();
+
+            this.mainClearBlocks();
+            sheepCtl.comImages.mesh_block.onFrameUpdateStart();
+
+
+            if (this.endTime != 0 && this.endTime < NowMs()) {
+                eventBus.emit(EventType.RoomStateEnd);
+                isEnd = true;
+                this.endTime = 0;
+                return;
+            }
+
+
+            this.countNewBuffs = new[] { 0, 0 };
+            this.countBuffs = new[] { 0, 0 };
+            this.countShowBuffs = new[] { 0, 0 };
+
+            // console.log(sheepMgr.buffs)
+            for (var i = 0; i < this.buffs.Length; i++) {
+                var r = this.buffs[i];
+                var s = i;
+                if (r.Count != 0 && r[0].time < this.gameStartTimerForBuff) {
+                    r.RemoveAt(0);
+                    this.buffs[s] = r;
+                }
+
+                foreach (var o in r) {
+                    this.countBuffs[s] += o.count != 0 ? o.count : SheepConfig.counterBuffNumber;
+                    this.countShowBuffs[s] += o.count;
+                }
+            }
+
+            for (var i = 0; i < this.preBuffs.Length; i++) {
+                var r = this.preBuffs[i];
+                var s = i;
+
+                if (r.Count == 0) {
+                    continue;
+                }
+
+                var sum = 0;
+                var hasZero = false;
+
+                foreach (var f in r) {
+                    if (0 == f) {
+                        hasZero = true;
+                    }
+
+                    sum += f;
+                }
+
+                if (hasZero) {
+                    this.buffs[s].Add(new Buff() {
+                        time = (int)(this.gameStartTimerForBuff + 1000 * SheepConfig.counterTime),
+                        count = 0
+                    });
+
+                    if (r.Count > 1) {
+                        this.buffs[s].Add(new Buff() {
+                            time = (int)(this.gameStartTimerForBuff + 1000 * SheepConfig.buffLastTime),
+                            count = sum
+                        });
+                    }
+                }
+                else {
+                    this.buffs[s].Add(new Buff() {
+                        time = (int)(this.gameStartTimerForBuff + 1000 * SheepConfig.buffLastTime),
+                        count = sum
+                    });
+                }
+
+                this.preBuffs[s] = new List<int>();
+                this.countNewBuffs[s] += sum;
+            }
+
+            isEnd = this.updateBoss(sheepCtl, dt, now);
+
+            if (isEnd) {
+                return;
+            }
+
+            var _redBuffCount = 0;
+            var _blueBuffCount = 0;
+
+            foreach (var e in this.pets) {
+                foreach (var y in e) {
+                    updateSkinPet(y,sheepCtl, this, this, dt);
+
+                    int[] M;
+                    var D = y;
+                    var A = D.state;
+                    var P = D.animType;
+                    var W = D.animFrame;
+
+                    var fgs = sheepCtl.comImages.roles_framess[(int)y.camp];
+
+                    var ghg = fgs[(int)y.skinId];
+
+                    M = ghg[(int)P];
+
+                    if (null == M) {
+                        Debug.LogError("找不到动画 " + y.camp + " " + y.skinId + " " + P);
+                    }
+
+                    if (A == SheepRoleState.In && W >= M.Length - 1) {
+                        var E = SheepSkill.getById(D.readySkillId);
+                        if (E != null) {
+                            if (E.skillType == SheepSkillType.Boom) {
+                                var F = SheepSkillSubBoom.getById(E.id);
+                                D.state = SheepRoleState.Boom;
+                                if (F.isAnim != 0) {
+                                    D.animType = SheepRoleAnimType.Boom;
+                                }
+                                else {
+                                    D.animType = SheepRoleAnimType.Idle;
+                                }
+                            }
+                        }
+                        else {
+                            D.state = SheepRoleState.Move;
+                            D.animType = SheepRoleAnimType.Idle;
+                        }
+                    }
+                    else if (A == SheepRoleState.Dead && W >= M.Length - 1) {
+                        D.state = SheepRoleState.Res;
+                        D.animType = SheepRoleAnimType.None;
+                        del_pet(D);
+                    }
+                    else if (A == SheepRoleState.Up && W >= M.Length - 1) {
+                        D.state = SheepRoleState.In;
+                        D.animType = SheepRoleAnimType.In;
+                    }
+                    else if (A == SheepRoleState.Buff) {
+                        var V = SheepSkillSubBuff.getById(D.readySkillId);
+                        var U = D.animFrame;
+                        if (U > V.buffStratFrame && U < V.buffEndFrame) {
+                            if (y.camp == SheepCamp.Blue) {
+                                _blueBuffCount += 1;
+                            }
+                            else {
+                                _redBuffCount += 1;
+                            }
+                        }
+                    }
+                }
+            }
+            
+
+            foreach (var X in bullets) {
+                if (X.isDie) {
+                    continue;
+                }
+
+                if (X.frame >= X.conf.endFrame) {
+                    X.isDie = true;
+                    this.del_bullet(X);
+                }
+                else {
+                    var z = X.roleIndex.conf.splitN;
+
+                    for (var O = -z; O <= z; ++O) {
+                        for (var Q = -z; Q <= z; ++Q) {
+                            var Z = Util.getIndexByXY(X.x + O, X.y + Q);
+                            sheepCtl.comImages.mesh_block.addFrameBlockCamp(Z, X.camp);
+                        }
+                    }
+                }
+            }
+
+
+            this.mainSyncBlocksToWokers();
+            sheepCtl.comImages.mesh_block.onFrameUpdateEnd(this);
+            this.redBuffCount = _redBuffCount;
+            this.blueBuffCount = _blueBuffCount;
+            
+            
+            // 从 pets 中 删除 del_pets 的 对象
+            for (var i = 0; i < del_pets.Length; i++) {
+                var p1 = del_pets[i];
+                var p2 = pets[i];
+                foreach (var petView in p1) {
+                    p2.Remove(petView);
+                }
+
+                p1.Clear();
+            }
+            
+            // 从 bullets 中 删除 del_bullets 的 对象
+            foreach (var b1 in del_bullets) {
+                bullets.Remove(b1);
+            }
+            
+
+            if (isEnd) {
+                return;
+            }
         }
 
-        public int rob_role_task(int count, CurIndexImages curIndexImages) {
-            var start = this.rob_role(count);
-            var end = start + count;
-            var i = this.update_role(start, end);
-            this.comImages.update_role(curIndexImages);
-            return i;
-        }
 
-        public int rob_bullet_task(int count, CurIndexImages curIndexImages) {
-            var start = this.rob_bullet(count);
-            var end = start + count;
-            var i = this.update_bullet(start, end);
-            this.comImages.update_bullet(curIndexImages);
-            return i;
-        }
-
-        public int update_role(int start, int end) {
-            for (var i = start; i < end; i++) {
-                var viewPet = this.getPetView(i);
+        public void update_role() {
+            foreach (var dddd in boss) {
+                var viewPet = dddd;
                 if (!viewPet.isActive) {
                     viewPet = null;
                     continue;
@@ -1182,29 +815,57 @@ namespace rvb.scripts {
                     }
 
                     var o = viewPet;
-                    this.comImages.addRole(o);
                 }
 
                 viewPet = null;
             }
 
-            return end - start;
+            foreach (var ppp in pets) {
+                foreach (var dddd in ppp) {
+                    var viewPet = dddd;
+                    if (!viewPet.isActive) {
+                        viewPet = null;
+                        continue;
+                    }
+
+                    var t = viewPet.isDie;
+                    if (0 == viewPet.roleId) {
+                        var i1 = this.update_frame(viewPet);
+                        if (!t && i1) {
+                            this.update_boss_state(viewPet);
+                        }
+
+                        this.update_role_anim(viewPet);
+                    }
+                    else {
+                        var i1 = (int)viewPet.camp;
+                        var s = this.logic_counts[i1];
+                        for (var i2 = 0; i2 < s; i2++) {
+                            var i3 = this.update_frame(viewPet);
+                            if (!t) {
+                                this.update_role_state(viewPet, i3);
+                            }
+
+                            this.update_role_anim(viewPet);
+                        }
+
+                        var o = viewPet;
+                    }
+
+                    viewPet = null;
+                }
+            }
         }
 
-        public int update_bullet(int start, int end) {
-            for (var i = start; i < end; i++) {
-                if (i >= SheepConfig.MaxBulletCount) {
-                    return i - start;
-                }
-
-                var t = this.getBulletView(i);
+        public void update_bullet() {
+            foreach (var t in bullets) {
                 if (t.isDie) {
                     continue;
                 }
 
                 if (t.id != 0 && t.conf.animId != 0) {
                     var e = t;
-                    this.comImages.addBullet(e);
+                    OnBulletRender?.Invoke(e);
                 }
 
                 var xnyn = Util.getXnYn(t.x, t.y);
@@ -1218,8 +879,8 @@ namespace rvb.scripts {
                         for (var i1 = 0; i1 < e.Length; i1++) {
                             var n1 = e[i1];
                             if (-1 == n1 || n1 == l) {
-                                if (0 == t.tarRoleIndex || 1 == t.tarRoleIndex) {
-                                    var o1 = this.getPetView(t.tarRoleIndex);
+                                if (boss[0] == t.tarRoleIndex || boss[1] == t.tarRoleIndex) {
+                                    var o1 = t.tarRoleIndex;
                                     if (UtilAck.isCanAckByBullet(t, o1, i1)) {
                                         UtilAck.hurtByBullet(t, o1, t.atkVue);
                                     }
@@ -1289,7 +950,7 @@ namespace rvb.scripts {
                         case (int)SheepBulletMoveType.RadiusAngle:
                             t.angle += n.speed;
                             var x = t.roleUid;
-                            var _ = this.getPetView(t.roleIndex);
+                            var _ = t.roleIndex;
                             if (x == _.id) {
                                 t.x = (float)(_.animX + n.radius * Math.Cos(t.angle));
                                 t.y = (float)(_.animY + n.radius * Math.Sin(t.angle));
@@ -1311,20 +972,16 @@ namespace rvb.scripts {
                 }
                 var r = n.createBulletID;
                 if (r != 0 && n.createBulletFrame == l) {
-                    var e = this.getPetView(t.roleIndex);
-                    var i1 = this.getPetView(t.tarRoleIndex);
-                    this.bullte_creates.Add(new BullteCreate() {
+                    var e = t.roleIndex;
+                    var i1 = t.tarRoleIndex;
+                    spawnBullet(new BullteCreate() {
                         view_pet = e,
                         bulletId = r,
                         view_tar_pet = i1,
                         info = new Info() { startX = t.x, startY = t.y, startZ = 100 }
                     });
                 }
-
-                t = null;
             }
-
-            return end - start;
         }
 
         public bool update_frame(PetView viewPet) {
@@ -1512,14 +1169,14 @@ namespace rvb.scripts {
 
                         if (t3.bullet != null && 0 != t3.bullet.Length) {
                             if (i5 != null) {
-                                this.bullte_creates.Add(new BullteCreate() {
+                                spawnBullet(new BullteCreate() {
                                     view_pet = petSkin,
                                     bulletId = t3.bullet[petSkin.camp == SheepCamp.Red ? 0 : 1],
                                     view_tar_pet = i5
                                 });
                             }
                             else {
-                                this.bullte_creates.Add(new BullteCreate() {
+                                spawnBullet(new BullteCreate() {
                                     view_pet = petSkin,
                                     bulletId = t3.bullet[petSkin.camp == SheepCamp.Red ? 0 : 1]
                                 });
@@ -1809,7 +1466,7 @@ namespace rvb.scripts {
                         var n = petSkin.posX + petSkin.dirX * s.len + s.endRadius * Math.Cos(l);
                         var r = petSkin.posY + petSkin.dirY * s.len + s.endRadius * Math.Sin(l);
                         var a = 0;
-                        this.bullte_creates.Add(new BullteCreate() {
+                        spawnBullet(new BullteCreate() {
                             view_pet = petSkin,
                             bulletId = s.bullet,
                             info = new Info()
@@ -1822,7 +1479,7 @@ namespace rvb.scripts {
                         var o5 = petSkin.posX + petSkin.dirX * s.len + s.endRadius * Math.Cos(i5);
                         var l = petSkin.posY + petSkin.dirY * s.len + s.endRadius * Math.Sin(i5);
                         var n = 0;
-                        this.bullte_creates.Add(new BullteCreate() {
+                        spawnBullet(new BullteCreate() {
                             view_pet = petSkin,
                             bulletId = s.bullet,
                             info = new Info() {
@@ -1839,21 +1496,21 @@ namespace rvb.scripts {
                         });
                     }
                     else if (3 == s.type) {
-                        this.bullte_creates.Add(new BullteCreate() {
+                        spawnBullet(new BullteCreate() {
                             view_pet = petSkin,
                             bulletId = s.bullet,
                             info = new Info() { dirX = 0, dirY = 0, dirZ = -1, angle = 360f / o * t1 }
                         });
                     }
                     else if (4 == s.type) {
-                        this.bullte_creates.Add(new BullteCreate() {
+                        spawnBullet(new BullteCreate() {
                             view_pet = petSkin,
                             bulletId = s.bullet,
                             info = new Info() { dirX = 1, dirY = 0, dirZ = 0 }
                         });
                     }
                     else {
-                        this.bullte_creates.Add(new BullteCreate() { view_pet = petSkin, bulletId = s.bullet });
+                        spawnBullet(new BullteCreate() { view_pet = petSkin, bulletId = s.bullet });
                     }
                 }
             }
@@ -2303,7 +1960,7 @@ namespace rvb.scripts {
                     var r = fff.moveBoss;
 
                     if (l != null || n != null || r != null) {
-                        this.bullte_creates.Add(new BullteCreate() {
+                        spawnBullet(new BullteCreate() {
                             view_pet = e,
                             bulletId = o.bullet
                         });
@@ -2504,12 +2161,12 @@ namespace rvb.scripts {
                             o1.count -= 1;
                             I += 1;
 
-                            var R = new Vector3(S, M,0f);
+                            var R = new Vector3(S, M, 0f);
                             if (C.booms != null && C.booms.Count > 0) {
-                                createPetView(sheepCtl, C.camp, a, h, 1, true, R, C.booms.Pop());
+                                createPetView(C.camp, a, h,   R, C.booms.Pop());
                             }
                             else {
-                                createPetView(sheepCtl, C.camp, a, h, 1, true, R);
+                                createPetView(C.camp, a, h,   R);
                             }
 
                             if (C.count <= 0) {
@@ -2558,10 +2215,10 @@ namespace rvb.scripts {
                                     ? new Vector3((float)(L - x), F, 0)
                                     : new Vector3((float)(x - L), F, 0);
                                 if (P.booms != null && P.booms.Count > 0) {
-                                    createPetView(sheepCtl, P.player, a, (int)G, 1, true, X, P.booms.Pop());
+                                    createPetView(P.player, a, (int)G,  X, P.booms.Pop());
                                 }
                                 else {
-                                    createPetView(sheepCtl, P.camp, a, (int)G, 1, true, X);
+                                    createPetView(P.camp, a, (int)G,  X);
                                 }
                             }
 
@@ -2627,14 +2284,14 @@ namespace rvb.scripts {
         public void clearBlocks() {
             Array.Fill(this.attackViews[(int)SheepCamp.Red], null);
             Array.Fill(this.attackViews[(int)SheepCamp.Blue], null);
-            Array.Fill(this.attackView1s[(int)SheepCamp.Red], 0);
-            Array.Fill(this.attackView1s[(int)SheepCamp.Blue], 0);
+            Array.Fill(this.attackView1s[(int)SheepCamp.Red], null);
+            Array.Fill(this.attackView1s[(int)SheepCamp.Blue], null);
 
             for (var e = 0; e < SheepConfig.MaxGroupCount; e++) {
                 Array.Fill(this.collisionViews[(int)SheepCamp.Red][e], null);
                 Array.Fill(this.collisionViews[(int)SheepCamp.Blue][e], null);
-                Array.Fill(this.collisionView1s[(int)SheepCamp.Red][e], 0);
-                Array.Fill(this.collisionView1s[(int)SheepCamp.Blue][e], 0);
+                Array.Fill(this.collisionView1s[(int)SheepCamp.Red][e], null);
+                Array.Fill(this.collisionView1s[(int)SheepCamp.Blue][e], null);
             }
 
             this.pre_blocks.Clear();
@@ -2692,19 +2349,19 @@ namespace rvb.scripts {
             this.pre_blocks.Clear();
         }
 
-        public void mainPreAddBlock(int blockIndex, int buffIndex, SheepCamp camp, int collideId) {
-            if (!this.pre_blocks.TryGetValue(blockIndex, out Dictionary<int, Dictionary<int, List<int>>> o)) {
-                o = new Dictionary<int, Dictionary<int, List<int>>>();
+        public void mainPreAddBlock(int blockIndex, PetView buffIndex, SheepCamp camp, int collideId) {
+            if (!this.pre_blocks.TryGetValue(blockIndex, out Dictionary<int, Dictionary<int, List<PetView>>> o)) {
+                o = new Dictionary<int, Dictionary<int, List<PetView>>>();
                 this.pre_blocks[blockIndex] = o;
             }
 
-            if (!o.TryGetValue((int)camp, out Dictionary<int, List<int>> l)) {
-                l = new Dictionary<int, List<int>>();
+            if (!o.TryGetValue((int)camp, out Dictionary<int, List<PetView>> l)) {
+                l = new Dictionary<int, List<PetView>>();
                 o[(int)camp] = l;
             }
 
-            if (!l.TryGetValue(collideId, out List<int> n)) {
-                n = new List<int>();
+            if (!l.TryGetValue(collideId, out List<PetView> n)) {
+                n = new List<PetView>();
                 l[collideId] = n;
             }
 
@@ -2786,7 +2443,7 @@ namespace rvb.scripts {
             }
         }
 
-        public void forEachBlock(IndexLen[] e, int[] t, int blockIndex, Action<int> callback) {
+        public void forEachBlock(IndexLen[] e, PetView[] t, int blockIndex, Action<PetView> callback) {
             var blockByIndex = this.getBlockByIndex(e, blockIndex);
             var o = blockByIndex.Index;
             var l = blockByIndex.Len;
@@ -2797,7 +2454,7 @@ namespace rvb.scripts {
             }
         }
 
-        public bool findBlock(IndexLen[] e, int[] t, int blockIndex, Func<int, bool> callback) {
+        public bool findBlock(IndexLen[] e, PetView[] t, int blockIndex, Func<PetView, bool> callback) {
             var blockByIndex = this.getBlockByIndex(e, blockIndex);
             var Index = blockByIndex.Index;
             var Len = blockByIndex.Len;
@@ -2807,7 +2464,7 @@ namespace rvb.scripts {
 
             for (var j = 0; j < Len; j++) {
                 var petIndex = t[Index + j];
-                if (-1 == petIndex) {
+                if (null == petIndex) {
                     throw new Exception("二级内存取出空???");
                 }
 
@@ -2819,31 +2476,33 @@ namespace rvb.scripts {
             return false;
         }
 
-        public PetView createPetView(
-            SheepCtl sheepCtl, SheepCamp camp, int roleType, int a = 1, int i = 0, bool r = true,
-            Vector3 f = new Vector3(), bool s = false
+        public void createPetView(
+            SheepCamp camp, 
+            int roleType,
+            int a = 1,
+            Vector3 f = new Vector3(),
+            bool s = false
         ) {
             if (this.state != SheepRoomState.Run && this.state != SheepRoomState.Start) {
-                return null;
+                return ;
             }
 
             var sheepRoleTypeInfo = SheepRoleTypeInfo.getById(roleType);
 
-            var petSkin = new PetView(-1);
-            petSkin.uids = new List<int>();
+            var petSkin = new PetView();
+            
             petSkin.conf = sheepRoleTypeInfo;
             petSkin.camp = camp;
             petSkin.petId = roleType;
             petSkin.isDie = false;
             petSkin.scale = petSkin.conf.scale;
             petSkin.isBoom = s; //  这里不能写死
-            petSkin.buff_index = -1;
-            petSkin.view_pet = null;
+
             petSkin.attacher = new BuffTimeAttacher();
 
             petSkin.skinId = petSkin.conf.animId;
 
-            petSkin.sheepMgr = this;
+            
 
             var formation = SheepRoleFormation.getById(sheepRoleTypeInfo.formationId);
 
@@ -2885,11 +2544,402 @@ namespace rvb.scripts {
                 petSkin.position = f;
             }
 
-            this.addPet(petSkin, camp);
+            
+            initPet(petSkin);
+
+            this.spawnPet(petSkin);
 
             petSkin.pos = petSkin.position;
-            this.pre_add_pet(petSkin);
-            return petSkin;
+
+            
+        }
+        
+        public void initPet(PetView ppp) {
+            // ppp.clear();
+
+            Vector3 a = ppp.position.Value;
+            int x = Mathf.FloorToInt(a.x);
+            int y = Mathf.FloorToInt(a.y);
+
+            int blockIndex = this.getBlockIndex(new Vector3(x, y, 0));
+
+            ppp.id = this.getNextPetId();
+
+            ppp.isActive = true;
+            ppp.isDie = false;
+            ppp.camp = ppp.camp;
+            ppp.roleId = ppp.petId;
+            ppp.skinId = ppp.skinId ?? 0;
+            ppp.conf = ppp.conf;
+
+            if (ppp.petId != 0) {
+                if (this.state == SheepRoomState.Start) {
+                    ppp.state = SheepRoleState.Start;
+                    ppp.subState = SheepRoleSubState.Start;
+                    ppp.animType = SheepRoleAnimType.Idle;
+                    ppp.animFrame = this.RandomInt(0, 10);
+                }
+                else if (ppp.conf.skillIn!=0) {
+                    ppp.state = SheepRoleState.In;
+                    ppp.subState = SheepRoleSubState.In;
+                    ppp.animType = SheepRoleAnimType.In;
+                    ppp.animFrame = 0;
+                }
+                else if (ppp.conf.startState == SheepRoleState.In) {
+                   ppp.state = ppp.conf.startState;
+                   ppp.subState = SheepRoleSubState.In;
+                   ppp.animType = SheepRoleAnimType.In;
+                   ppp.animFrame = 0;
+                }
+                else if (ppp.conf.startState == SheepRoleState.SpinSpurt) {
+                    ppp.state = ppp.conf.startState;
+                    ppp.animType = SheepRoleAnimType.Attack;
+                    ppp.animFrame = 0;
+                }
+                else {
+                    ppp.state = ppp.conf.startState;
+                    ppp.subState = SheepRoleSubState.Spurt;
+
+                    if (ppp.conf.isSpurtAnim) {
+                        ppp.animType = SheepRoleAnimType.Spurt;
+                        ppp.animFrame = this.RandomInt(0, 10);
+                    }
+                    else {
+                        ppp.animType = SheepRoleAnimType.Idle;
+                        ppp.animFrame = this.RandomInt(0, 10);
+                    }
+                }
+            }
+
+            ppp.frame = 0;
+            ppp.posBefX = x;
+            ppp.posBefY = y;
+            ppp.animX = x;
+            ppp.animY = y;
+            ppp.posX = x;
+            ppp.posY = y;
+            ppp.befBlockIndex = blockIndex;
+            ppp.blockIndex = blockIndex;
+
+            if (ppp.petId != 0 && this.state == SheepRoomState.Start) {
+                var m = this.getPetStartEndPos(ppp.petId, ppp.camp);
+
+                ppp.tarPosX = m.x;
+                ppp.tarPosY = m.y;
+                ppp.animY = m.y;
+                ppp.posBefY = m.y;
+                ppp.posY = m.y;
+            }
+
+            var l = SheepRoleFormation.getById(ppp.conf.formationId);
+            float d = ppp.camp == SheepCamp.Red ? 1 : -1;
+
+            if (l.formationType == SheepRoleFormationType.RectangleTidy ||
+                l.formationType == SheepRoleFormationType.RectangleRandom) {
+                ppp.dirX = d;
+                ppp.dirY = 0;
+            }
+            else if (l.formationType == SheepRoleFormationType.AngleTidy ||
+                     l.formationType == SheepRoleFormationType.AngleRandom) {
+                Vector3 g = new Vector3(
+                    d * sheepMode.loongX - x,
+                    0 - y,
+                    0
+                ).normalized;
+
+                ppp.dirX = g.x;
+                ppp.dirY = g.y;
+            }
+
+            if (ppp.petId != 0 && this.state == SheepRoomState.Start) {
+                ppp.isConnNot = true;
+            }
+            else {
+                ppp.isConnNot = false;
+            }
+
+            ppp.tarIndex = -1;
+            ppp.tarId = -1;
+            ppp.curHp = ppp.conf.hp;
+            ppp.curAtkBuff = 0;
+
+            if (ppp.isBoom) {
+                ppp.isConnNot = true;
+                ppp.isBoom = true;
+            }
+            else {
+                ppp.isBoom = false;
+            }
+            
+            // view_pet = viewPet;
+
+            foreach (var e in this.buffs) {
+                foreach (var item in e) {
+                    double i = (item.time - this.gameStartTimerForBuff) / 1e3;
+
+                    int r = item.count;
+
+                    addGeneralOrderBuff(ppp,ppp, i, r);
+                }
+            }
+
+            if (this.state == SheepRoomState.Start && ppp.conf.roleType == SheepRoleType.yang_shen) {
+                this.god_view_pets.Add(ppp);
+            }
+        }
+
+        // 生成单位 下一帧才会使用
+        public void spawnPet(PetView tttt) {
+            this.pre_pets[(int)tttt.camp].Add(tttt);
+        }
+
+        // 生成 子弹 下一帧才会使用
+        public void spawnBullet(BullteCreate tttt) {
+            int bulletId = tttt.bulletId;
+            PetView view_pet = tttt.view_pet;
+            PetView view_tar_pet = tttt.view_tar_pet;
+            Info l = tttt.info;
+
+            var n = SheepBullet.getById(bulletId);
+            var r = view_pet != null ? view_pet.camp == SheepCamp.Red ? n.startOffsetX : -n.startOffsetX : 0;
+            var preBullet = new BulletView();
+            preBullet.id = this.bulletId++;
+            preBullet.bulletId = bulletId;
+            preBullet.roleUid = view_pet != null ? view_pet.id : 0;
+            preBullet.roleIndex = view_pet;
+
+
+            preBullet.camp = view_pet != null ? view_pet.camp : l.camp;
+            if (view_tar_pet != null && 0 == view_tar_pet.roleId) {
+                preBullet.tarRoleIndex = view_tar_pet;
+            }
+            else {
+                preBullet.tarRoleIndex = null;
+            }
+
+            if (n.moveType == (int)SheepBulletMoveType.Fixed) {
+                var t = l != null && l.startX != 0 ? l.startX :
+                    view_pet != null && view_pet.posX != 0 ? view_pet.posX : 0;
+                preBullet.x = t;
+                var s = l != null && l.startY != 0 ? l.startY :
+                    view_pet != null && view_pet.posY != 0 ? view_pet.posY : 0;
+                preBullet.y = s;
+
+                preBullet.startY = n.startOffsetY;
+                preBullet.z = 0 + n.startOffsetZ;
+                preBullet.dirX = 0;
+                preBullet.dirY = 0;
+                preBullet.dirZ = 1;
+            }
+            else if (n.moveType == (int)SheepBulletMoveType.LineDir) {
+                preBullet.x = view_pet.posX + r;
+                preBullet.y = view_pet.posY + n.startOffsetY;
+                preBullet.z = 0 + n.startOffsetZ;
+                preBullet.dirX = view_pet.dirX;
+                preBullet.dirY = view_pet.dirY;
+            }
+            else if (n.moveType == (int)SheepBulletMoveType.CurvePosFrame) {
+                var t = view_pet != null ? view_pet.posX : l.startX;
+                var s = view_pet != null ? view_pet.posY : l.startY;
+                var c = view_tar_pet != null ? view_tar_pet.posX : view_pet.tarPosX;
+                var f = view_tar_pet != null ? view_tar_pet.posY : view_pet.tarPosY;
+                preBullet.x = t + r;
+                preBullet.y = s + n.startOffsetY;
+                preBullet.z = 0 + n.startOffsetZ;
+                preBullet.startX = t + r;
+                preBullet.startY = s + n.startOffsetY;
+                preBullet.startZ = 0 + n.startOffsetZ;
+                preBullet.endX = c;
+                preBullet.endY = f;
+                preBullet.endZ = 0 + n.endOffsetZ;
+                preBullet.dirX = 0;
+                preBullet.dirY = 0;
+                preBullet.z = 1;
+            }
+            else if (n.moveType == (int)SheepBulletMoveType.DirAngle) {
+                preBullet.x = view_pet.posX + r;
+                preBullet.y = view_pet.posY + n.startOffsetY;
+                preBullet.z = 0 + n.startOffsetZ;
+                preBullet.dirX = l.dirX;
+                preBullet.dirY = l.dirY;
+                preBullet.dirZ = l.dirZ;
+            }
+            else if (n.moveType == (int)SheepBulletMoveType.RadiusAngle) {
+                preBullet.x = view_pet.posX + r;
+                preBullet.y = view_pet.posY + n.startOffsetY;
+                preBullet.z = 0 + n.startOffsetZ;
+                preBullet.startX = view_pet.posX + r;
+                preBullet.startY = view_pet.posY + n.startOffsetY;
+                preBullet.startZ = 0 + n.startOffsetZ;
+                preBullet.dirX = l.dirX;
+                preBullet.dirY = l.dirY;
+                preBullet.dirZ = l.dirZ;
+                preBullet.angle = l.angle;
+            }
+            else if (n.moveType == (int)SheepBulletMoveType.LineDirEndPos) {
+                preBullet.x = l.startX;
+                preBullet.y = l.startY;
+                preBullet.z = l.startZ;
+                preBullet.startX = l.startX;
+                preBullet.startY = l.startY;
+                preBullet.startZ = l.startZ;
+                preBullet.endX = l.endX;
+                preBullet.endY = l.endY;
+                preBullet.endZ = l.endZ;
+                if (l.dirX != 0 || l.dirY != 0 || l.dirZ != 0) {
+                    preBullet.dirX = l.dirX;
+                    preBullet.dirY = l.dirY;
+                    preBullet.dirZ = l.dirZ;
+                }
+                else {
+                    var t = l.endX - l.startX;
+                    var i = l.endY - l.startY;
+                    var s = l.endZ - l.startZ;
+                    var o = Math.Sqrt(t * t + i * i);
+                    preBullet.dirX = (float)(t / o);
+                    preBullet.dirY = (float)(i / o);
+                    preBullet.dirZ = (float)(s / o);
+                }
+            }
+            else if (n.moveType == (int)SheepBulletMoveType.LinePosFrame) {
+                preBullet.x = l.startX;
+                preBullet.y = l.startY;
+                preBullet.z = l.startZ;
+                preBullet.startX = l.startX;
+                preBullet.startY = l.startY;
+                preBullet.startZ = l.startZ;
+                preBullet.endX = l.endX;
+                preBullet.endY = l.endY;
+                preBullet.endZ = l.endZ;
+                var t = l.endX - l.startX;
+                var i = l.endY - l.startY;
+                var s = l.endZ - l.startZ;
+                var o = Math.Sqrt(t * t + i * i);
+                preBullet.dirX = (float)(t / o);
+                preBullet.dirY = (float)(i / o);
+                preBullet.dirZ = (float)(s / o);
+            }
+            else {
+                preBullet.x = view_pet.posX + r;
+                preBullet.y = view_pet.posY + n.startOffsetY;
+                preBullet.z = 0 + n.startOffsetZ;
+                preBullet.dirX = 0;
+                preBullet.dirY = 0;
+                preBullet.dirZ = 1;
+            }
+
+            preBullet.atkVue = view_pet != null ? view_pet.conf.atk : l.atk;
+            preBullet.frame = 0;
+            pre_bullets.Add(preBullet);
+        }
+        
+        
+        public void updateSkinPet(PetView ppp, SheepCtl e, SheepMgr t, SheepMgr n, double o) {
+            PetView a = ppp;
+            PetView i = a;
+
+            if (i.state == SheepRoleState.Merge) {
+                return;
+            }
+
+            bool isDie = i.isDie;
+            int blockIndex = i.blockIndex;
+            float curHp = i.curHp;
+
+            if (isDie) {
+                return;
+            }
+
+            if (curHp <= 0) {
+                isDie = true;
+                i.isDie = isDie;
+                i.state = SheepRoleState.Dead;
+            }
+
+            if (isDie) {
+                i.state = SheepRoleState.Dead;
+                i.subState = SheepRoleSubState.Dead;
+
+                if (i.conf.roleType != SheepRoleType.qi_lin) {
+                    i.animType = SheepRoleAnimType.Dead;
+                }
+
+                if (i.conf.deadAnimType != null && i.conf.deadAnimType.Length != 0) {
+                    i.animType= (SheepRoleAnimType)arrOn(i.conf.deadAnimType);
+                }
+
+                if (i.conf.roleType == SheepRoleType.xiao_bing) {
+                    i.animFrame = RandomInt(0, 10);
+                }
+
+                ppp.isDie = true;
+                // this.id = 0;
+                ppp.attacher.clear();
+            }
+
+            if (!isDie) {
+                t.mainPreAddBlock( blockIndex, ppp, ppp.camp, a.conf.collideId );
+
+                int S = i.conf.detectCollideR;
+
+                for (int y = -S; y <= S; ++y) {
+                    for (int v = -S; v <= S; ++v) {
+                        
+                        e.comImages.mesh_block.addFrameBlockCamp(blockIndex, ppp.camp);
+                    }
+                }
+
+                Vector3 B = new Vector3(i.animX, i.animY, 0);
+
+                a.position = B;
+            }
+
+            if (!isDie) {
+                int countNewBuff = n.countNewBuffs[(int)ppp.camp];
+
+                if (countNewBuff != 0) {
+                    addGeneralOrderBuff(ppp,i, SheepConfig.buffLastTime, countNewBuff);
+                }
+            }
+
+            ppp.attacher.updateTimer(o / 1e3);
+        }
+        
+        public void addGeneralOrderBuff(PetView ppp,PetView e, double t, int n) {
+            PetView o = ppp;
+
+            ppp.attacher.addIndependBuff(
+                BuffID.GeneralOrder,
+                t,
+                buff => {
+                    int addHp = (int)Math.Floor(
+                        o.conf.hp *
+                        SheepConfig.buffHpIncreaseRate *
+                        n
+                    );
+
+                    float addAtk =
+                        n *
+                        SheepConfig.buffAtkIncreaseRate *
+                        100;
+
+                    buff.arg = (
+                        addHp: addHp,
+                        addAtk: addAtk
+                    );
+
+                    var arg = ((int addHp, float addAtk))buff.arg;
+
+                    e.curHp += arg.addHp;
+                    e.curAtkBuff += arg.addAtk;
+                },
+                buff => {
+                    var arg = ((int addHp, float addAtk))buff.arg;
+
+                    e.curHp -= arg.addHp;
+                    e.curAtkBuff -= arg.addAtk;
+                }
+            );
         }
 
         public static long NowMs() => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
@@ -2914,5 +2964,10 @@ namespace rvb.scripts {
                    (maxExclusive - minInclusive) *
                    (float)logicRandom.NextDouble();
         }
+        
+        public T arrOn<T>(T[] r) {
+            return r[RandomInt(0, r.Length)];
+        }
+        
     }
 }

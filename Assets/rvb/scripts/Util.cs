@@ -5,9 +5,6 @@ namespace rvb.scripts {
     public static class Util {
         public static SheepMgr system;
 
-        public static bool isInitViewBoss = false;
-        public static PetView view_boss_red = null;
-        public static PetView view_boss_blue = null;
 
         public static (int xn, int yn) getXnYnByIndex(int e) {
             return (
@@ -186,11 +183,10 @@ namespace rvb.scripts {
 
         // 获取 BOSS
         public static PetView getBackBoss(SheepCamp camp) {
-            if (!isInitViewBoss) {
-                isInitViewBoss = true;
-                view_boss_red = system.getPetView((int)SheepCamp.Red);
-                view_boss_blue = system.getPetView((int)SheepCamp.Blue);
-            }
+            
+            var    view_boss_red = system.boss[(int)SheepCamp.Red];
+            var    view_boss_blue = system.boss[(int)SheepCamp.Blue];
+            
 
             if (camp == SheepCamp.Red) {
                 return view_boss_blue;

@@ -6,7 +6,7 @@ namespace rvb.scripts {
         public MeshBlock mesh_block=new MeshBlock();
         public Dictionary<int, Dictionary<int, Dictionary<int,int[]>>> roles_framess = new();  
         public void addBullet(BulletView bullet) {
-            Debug.Log("addBullet");
+            // Debug.Log("addBullet");
         }
 
         public void addRole(PetView viewPet) {
@@ -14,7 +14,7 @@ namespace rvb.scripts {
         }
 
         public void update_bullet(CurIndexImages currentImages) {
-            Debug.Log("update_bullet");
+            // Debug.Log("update_bullet");
         }
 
         public CurIndexImages startAdd() {
