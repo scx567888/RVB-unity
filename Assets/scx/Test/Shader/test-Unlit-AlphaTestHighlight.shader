@@ -1,4 +1,4 @@
-Shader "scx/Unlit/Transparent Cutout_Highlight" {
+Shader "test/Unlit/Transparent Cutout_Highlight" {
 Properties {
     _MainTex ("Base (RGB) Trans (A)", 2D) = "white" {}
     _Cutoff ("Alpha cutoff", Range(0,1)) = 0.5

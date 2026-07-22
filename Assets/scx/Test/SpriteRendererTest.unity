@@ -169,7 +169,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   unitySpriteAtlas: {fileID: 4343727234628468602, guid: a8efa2a6b7b5c984bb03ea87108909e3, type: 2}
   mainMaterial: {fileID: 2100000, guid: de552a8032c24a2b826d1da4ff7198d9, type: 2}
-  highlightMaterial: {fileID: 2100000, guid: 354b83e8760f5654f86b342c00b5e4a2, type: 2}
+  highlightMaterial: {fileID: 2100000, guid: f99dc9165e4bbd348a5a067e31ce258b, type: 2}
 --- !u!114 &678313043
 MonoBehaviour:
   m_ObjectHideFlags: 0
