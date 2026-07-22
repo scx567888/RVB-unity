@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Stopwatch = System.Diagnostics.Stopwatch;
 using System.Threading;
-using System.Threading.Tasks;
 using UnityEngine;
 using static rvb.scripts.BullteCreate;
 using static rvb.scripts.SheepModes;
@@ -46,7 +44,7 @@ namespace rvb.scripts {
 
         public int gameIndex = 0;
         public float gameStartTimerForBuff = 0;
-        public Vector3 cameraEulerAngles = Vector3.zero;
+        
         public long endTime = 0;
         public List<int>[] preBuffs = new[] { new List<int>(), new List<int>() };
         public List<Buff>[] buffs = new[] { new List<Buff>(), new List<Buff>() };
@@ -71,8 +69,8 @@ namespace rvb.scripts {
         
         
         public Stack<int> bulletsDel = new Stack<int>();
-        public int bulletCount = 0;
-        public int bulletId = 0;
+        
+        
 
         public int[] logic_counts = { 1, 1 };
 
@@ -101,20 +99,15 @@ namespace rvb.scripts {
 
         public ComImages comImages;
         
-        public CurIndexImages curIndexImages;
+        
         public int redBuffCount;
         public int blueBuffCount;
 
-        public int petId = 0;
+        
 
         public System.Random logicRandom = new System.Random(123);
 
         //********************************** 以下字段 待处理 **********************************************
-
-        /// <summary>逻辑侧 Boss 当前已结算生命。</summary>
-        public float[] bossHp = { 0, 0 };
-
-        public long[] bossBackStateTime = { 0, 0 };
 
         // -------------------- 可选桥接回调 --------------------
         public Action<PetView> OnRoleRender;
@@ -138,6 +131,12 @@ namespace rvb.scripts {
         
         // 准备添加到下一帧的 子弹
         public List<BulletView> pre_view_bullets = new List<BulletView> { };
+        
+        // 角色自增 id 
+        public int petId = 0;
+        
+        // 子弹自增 id
+        public int bulletId = 0;
 
         public SheepMgr(SheepCtl sheepCtl) {
             // 是否自动出兵
@@ -169,7 +168,7 @@ namespace rvb.scripts {
 
             this.gameIndex = 0;
             this.gameStartTimerForBuff = 0;
-            this.cameraEulerAngles = new Vector3();
+            
             this.endTime = 0;
             this.preBuffs = new[] { new List<int>(), new List<int>() };
             this.buffs = new[] { new List<Buff>(), new List<Buff>() };
@@ -195,7 +194,7 @@ namespace rvb.scripts {
             
             
             this.bulletsDel = new Stack<int>();
-            this.bulletCount = 0;
+            
             this.bulletId = 0;
 
             this.logic_counts = new[] { 1, 1 };
@@ -268,7 +267,6 @@ namespace rvb.scripts {
             
             
             
-            this.curIndexImages = null;
             this.redBuffCount = 0;
             this.blueBuffCount = 0;
 
@@ -569,7 +567,7 @@ namespace rvb.scripts {
 
         public void clear_bullets() {
             
-            this.bulletCount = 0;
+            
             this.bulletsDel.Clear();
         }
 
@@ -613,7 +611,7 @@ namespace rvb.scripts {
             view.befBlockIndex = view.blockIndex;
             view.dirX = camp == SheepCamp.Red ? 1f : -1f;
             view.dirY = 0f;
-            bossHp[index] = boss[index].curHp;
+            
             view.curHp = 99999;
             boss[(int)camp] = view;
         }
@@ -622,7 +620,7 @@ namespace rvb.scripts {
             var t = NowMs();
             this.logic_counts[(int)SheepCamp.Red] = this.redBuffCount > 0 ? 2 : 1;
             this.logic_counts[(int)SheepCamp.Blue] = this.blueBuffCount > 0 ? 2 : 1;
-            var curIndexImages = this.curIndexImages;
+            
             
             
             for (var i = 0; i < pre_pets.Length; i++) {
@@ -640,13 +638,13 @@ namespace rvb.scripts {
             pre_view_bullets.Clear();
             
                  this.update_role();
-                 this.comImages.update_role(curIndexImages);
+                 this.comImages.update_role(null);
             
 
             
             
                 this.update_bullet();
-                this.comImages.update_bullet(curIndexImages);
+                this.comImages.update_bullet(null);
             
 
             
@@ -742,10 +740,7 @@ namespace rvb.scripts {
             }
 
             var _ = false;
-            if (!sheepMgr.cameraEulerAngles.Equals(sheepCtl.cameraCtl.camera.node.eulerAngles)) {
-                _ = true;
-                sheepMgr.cameraEulerAngles = sheepCtl.cameraCtl.camera.node.eulerAngles;
-            }
+           
 
             var b = 0;
             var I = 0;
