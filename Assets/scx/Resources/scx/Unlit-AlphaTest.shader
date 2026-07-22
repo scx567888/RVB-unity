@@ -14,10 +14,10 @@ SubShader {
     Tags {"Queue"="AlphaTest" "IgnoreProjector"="True" "RenderType"="TransparentCutout"}
     LOD 100
 
+    Cull Off
     Lighting Off
 
     Pass {
-        Cull Off   
         CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
