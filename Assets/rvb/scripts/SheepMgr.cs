@@ -2675,7 +2675,7 @@ namespace rvb.scripts {
 
                     int r = item.count;
 
-                    ppp.addGeneralOrderBuff(ppp, i, r);
+                    addGeneralOrderBuff(ppp,ppp, i, r);
                 }
             }
 
@@ -2894,11 +2894,48 @@ namespace rvb.scripts {
                 int countNewBuff = n.countNewBuffs[(int)ppp.camp];
 
                 if (countNewBuff != 0) {
-                    ppp.addGeneralOrderBuff(i, SheepConfig.buffLastTime, countNewBuff);
+                    addGeneralOrderBuff(ppp,i, SheepConfig.buffLastTime, countNewBuff);
                 }
             }
 
             ppp.attacher.updateTimer(o / 1e3);
+        }
+        
+        public void addGeneralOrderBuff(PetView ppp,PetView e, double t, int n) {
+            PetView o = ppp;
+
+            ppp.attacher.addIndependBuff(
+                BuffID.GeneralOrder,
+                t,
+                buff => {
+                    int addHp = (int)Math.Floor(
+                        o.conf.hp *
+                        SheepConfig.buffHpIncreaseRate *
+                        n
+                    );
+
+                    float addAtk =
+                        n *
+                        SheepConfig.buffAtkIncreaseRate *
+                        100;
+
+                    buff.arg = (
+                        addHp: addHp,
+                        addAtk: addAtk
+                    );
+
+                    var arg = ((int addHp, float addAtk))buff.arg;
+
+                    e.curHp += arg.addHp;
+                    e.curAtkBuff += arg.addAtk;
+                },
+                buff => {
+                    var arg = ((int addHp, float addAtk))buff.arg;
+
+                    e.curHp -= arg.addHp;
+                    e.curAtkBuff -= arg.addAtk;
+                }
+            );
         }
 
         public static long NowMs() => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();

@@ -87,42 +87,7 @@ namespace rvb.scripts {
 
        
 
-        public void addGeneralOrderBuff(PetView e, double t, int n) {
-            PetView o = this;
-
-            attacher.addIndependBuff(
-                BuffID.GeneralOrder,
-                t,
-                buff => {
-                    int addHp = (int)Math.Floor(
-                        o.conf.hp *
-                        SheepConfig.buffHpIncreaseRate *
-                        n
-                    );
-
-                    float addAtk =
-                        n *
-                        SheepConfig.buffAtkIncreaseRate *
-                        100;
-
-                    buff.arg = (
-                        addHp: addHp,
-                        addAtk: addAtk
-                    );
-
-                    var arg = ((int addHp, float addAtk))buff.arg;
-
-                    e.curHp += arg.addHp;
-                    e.curAtkBuff += arg.addAtk;
-                },
-                buff => {
-                    var arg = ((int addHp, float addAtk))buff.arg;
-
-                    e.curHp -= arg.addHp;
-                    e.curAtkBuff -= arg.addAtk;
-                }
-            );
-        }
+        
 
         public bool isConnNot {
             set { isNotConn = value; }
