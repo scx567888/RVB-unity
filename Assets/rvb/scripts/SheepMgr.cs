@@ -105,7 +105,7 @@ namespace rvb.scripts {
         public HashSet<PetView>[] pre_pets = { new(), new() };
 
         // 准备删除的 角色
-        public Stack<PetView> del_pets = new Stack<PetView>();
+        public HashSet<PetView>[] del_pets = { new(), new() };
 
         // 当前在场上的子弹
         public List<BulletView> bullets = new List<BulletView> { };
@@ -114,7 +114,7 @@ namespace rvb.scripts {
         public List<BulletView> pre_bullets = new List<BulletView> { };
 
         // 准备删除的 子弹
-        public Stack<BulletView> del_bullets = new Stack<BulletView>();
+        public List<BulletView> del_bullets = new List<BulletView>();
 
         // 角色自增 id 
         public int petId = 0;
@@ -284,14 +284,8 @@ namespace rvb.scripts {
 
 
         public void delPet(PetView e) {
-            this.pets[(int)SheepCamp.Red].Remove(e);
-            this.pets[(int)SheepCamp.Blue].Remove(e);
-            if (e.camp == SheepCamp.Red) {
-                this.perfStat.redNums[(int)e.conf.roleType]--;
-            }
-            else {
-                this.perfStat.blueNums[(int)e.conf.roleType]--;
-            }
+            this.del_pets[(int)e.camp].Add(e);
+            
         }
 
         public void clearPets() {
@@ -771,6 +765,24 @@ namespace rvb.scripts {
             sheepCtl.comImages.mesh_block.onFrameUpdateEnd(this);
             this.redBuffCount = _redBuffCount;
             this.blueBuffCount = _blueBuffCount;
+            
+            
+            // 从 pets 中 删除 del_pets 的 对象
+            for (var i = 0; i < del_pets.Length; i++) {
+                var p1 = del_pets[i];
+                var p2 = pets[i];
+                foreach (var petView in p1) {
+                    p2.Remove(petView);
+                }
+
+                p1.Clear();
+            }
+            
+            // 从 bullets 中 删除 del_bullets 的 对象
+            foreach (var b1 in del_bullets) {
+                bullets.Remove(b1);
+            }
+            
 
             if (isEnd) {
                 return;
