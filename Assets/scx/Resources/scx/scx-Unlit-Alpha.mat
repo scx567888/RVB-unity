@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Unlit-Alpha
+  m_Name: scx-Unlit-Alpha
   m_Shader: {fileID: 4800000, guid: e3d8fe7cccf147d6bc181b120685e2d5, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
