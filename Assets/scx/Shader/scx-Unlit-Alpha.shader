@@ -5,11 +5,12 @@
 // - no lightmap support
 // - no per-material color
 
-// 基于 Unity 内置 Unlit/Transparent, 关闭背面剔除以支持双面渲染.
+// 基于 Unity 内置 Unlit/Transparent 改造, 支持双面渲染.
 
 Shader "scx/Unlit/Transparent" {
 Properties {
     _MainTex ("Base (RGB) Trans (A)", 2D) = "white" {}
+    _Cutoff ("Alpha cutoff", Range(0,1)) = 0.5
 }
 
 SubShader {
@@ -17,7 +18,7 @@ SubShader {
     LOD 100
 
     Cull Off
-    ZWrite Off
+    ZWrite On
     Blend SrcAlpha OneMinusSrcAlpha
 
     Pass {
@@ -44,6 +45,7 @@ SubShader {
 
             sampler2D _MainTex;
             float4 _MainTex_ST;
+            fixed _Cutoff;
 
             v2f vert (appdata_t v)
             {
@@ -59,6 +61,7 @@ SubShader {
             fixed4 frag (v2f i) : SV_Target
             {
                 fixed4 col = tex2D(_MainTex, i.texcoord);
+                clip(col.a - _Cutoff);
                 UNITY_APPLY_FOG(i.fogCoord, col);
                 return col;
             }
