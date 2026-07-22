@@ -85,10 +85,6 @@ namespace rvb.scripts {
             position = null;
         }
 
-       
-
-        
-
         public bool isConnNot {
             set { isNotConn = value; }
         }
