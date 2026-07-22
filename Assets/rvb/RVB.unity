@@ -312,10 +312,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 186455c1c76e4e8bb13887be77e39a70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  texture: {fileID: 2800000, guid: 48f1255034b34ff8b1cd4dc2aac1909f, type: 3}
-  json: {fileID: 4900000, guid: 9cbfdd52c2c54ff6a6171c3df3098c5d, type: 3}
+  texture: {fileID: 2800000, guid: 9f9994da536cd4e46816793a8088ae01, type: 3}
+  json: {fileID: 4900000, guid: 1283cdf6dfdb8914f8aacd19b7e07b2d, type: 3}
   mainMaterial: {fileID: 2100000, guid: de552a8032c24a2b826d1da4ff7198d9, type: 2}
-  highlightMaterial: {fileID: 2100000, guid: 354b83e8760f5654f86b342c00b5e4a2, type: 2}
+  highlightMaterial: {fileID: 2100000, guid: f99dc9165e4bbd348a5a067e31ce258b, type: 2}
   animationFPS: 30
   enableRotate: 0
   rotateSpeed: 1

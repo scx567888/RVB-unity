@@ -14,52 +14,48 @@ namespace rvb {
     /// 3. 后续再把 skinId + animType + animFrame 精确映射到图集帧。
     /// </summary>
     public class Main : MonoBehaviour {
-        [Header("Atlas")]
-        public Texture2D texture;
+        [Header("Atlas")] public Texture2D texture;
         public TextAsset json;
-        [Header("Atlas")]
-        public Texture2D texture1;
+        [Header("Atlas")] public Texture2D texture1;
         public TextAsset json1;
-        [Header("Atlas")]
-        public Texture2D texture2;
+        [Header("Atlas")] public Texture2D texture2;
         public TextAsset json2;
         public Material mainMaterial;
         public Material highlightMaterial;
 
-        [Header("Logic")]
-        [SerializeField] private float logicFPS = 30f;
+        [Header("Logic")] [SerializeField] private float logicFPS = 30f;
         [SerializeField] private int maxLogicStepsPerUnityFrame = 4;
         [SerializeField] private float logicToWorldScale = 0.01f;
         [SerializeField] private float logicHeightToWorldScale = 0.01f;
         [SerializeField] private int fallbackLogicalAnimationFrames = 30;
 
-        [Header("Test Army")]
-        [SerializeField] private int redRoleId = 22;
+        [Header("Test Army")] [SerializeField] private int redRoleId = 22;
         [SerializeField] private int blueRoleId = 22;
         [SerializeField] private int initialCountPerCamp = 300;
         [SerializeField] private int hotkeySpawnCount = 10;
         [SerializeField] private bool enableAutomaticTroops = false;
 
 
-        [SerializeField] private bool renderBossMarkers = true;
-        [SerializeField] private bool renderBulletMarkers = false;
-        [SerializeField] private int bulletPreviewStartFrame = 0;
-        [SerializeField] private int bulletPreviewFrameCount = 1;
+        private int bulletPreviewFrameCount = 1;
 
         private ScxSpriteRenderer scxSpriteRenderer;
         private ScxSpriteRenderer scxSpriteRenderer1;
         private ScxSpriteRenderer scxSpriteRenderer2;
         private string[] spriteNames;
         private SheepMgr sheepMgr;
-        private SheepCtl sheepCtl=new SheepCtl();
+        private SheepCtl sheepCtl = new SheepCtl();
 
         // SheepMgr 的 PetView.index 是稳定的对象池槽位，适合绑定渲染单元。
-        private readonly Dictionary<string, ScxSpriteRenderUnit> roleRenderers = new Dictionary<string, ScxSpriteRenderUnit>();
+        private readonly Dictionary<string, ScxSpriteRenderUnit> roleRenderers =
+            new Dictionary<string, ScxSpriteRenderUnit>();
+
         private readonly HashSet<string> seenRoleSlots = new HashSet<string>();
         private readonly List<string> staleRoleSlots = new List<string>();
 
         // BulletView 没有公开池下标，测试阶段使用唯一 bullet.id。
-        private readonly Dictionary<int, ScxSpriteRenderUnit> bulletRenderers = new Dictionary<int, ScxSpriteRenderUnit>();
+        private readonly Dictionary<int, ScxSpriteRenderUnit> bulletRenderers =
+            new Dictionary<int, ScxSpriteRenderUnit>();
+
         private readonly HashSet<int> seenBulletIds = new HashSet<int>();
         private readonly List<int> staleBulletIds = new List<int>();
 
@@ -80,7 +76,7 @@ namespace rvb {
                 mainMaterial,
                 Mathf.Max(5000, initialCountPerCamp * 4)
             );
-            
+
             var loadRoleResult1 = SheepSpriteAtlasLoader.loadRole(texture1, json1.text);
             scxSpriteRenderer1 = new ScxSpriteRenderer(
                 loadRoleResult1.spriteAtlas,
@@ -88,7 +84,7 @@ namespace rvb {
                 mainMaterial,
                 Mathf.Max(5000, initialCountPerCamp * 4)
             );
-            
+
             var loadRoleResult2 = SheepSpriteAtlasLoader.loadBullet(texture2, json2.text);
             scxSpriteRenderer2 = new ScxSpriteRenderer(
                 loadRoleResult2,
@@ -104,26 +100,26 @@ namespace rvb {
             scxSpriteRenderer1.setParent(gameObject);
             scxSpriteRenderer2.setParent(gameObject);
 
-            sheepCtl.comImages.roles_framess[0] = new Dictionary<int, Dictionary<int,int[]>>();
-            sheepCtl.comImages.roles_framess[1] = new Dictionary<int, Dictionary<int,int[]>>();
+            sheepCtl.comImages.roles_framess[0] = new Dictionary<int, Dictionary<int, int[]>>();
+            sheepCtl.comImages.roles_framess[1] = new Dictionary<int, Dictionary<int, int[]>>();
             sheepCtl.comImages.roles_framess[0][106] = new Dictionary<int, int[]>();
             sheepCtl.comImages.roles_framess[1][106] = new Dictionary<int, int[]>();
-            
+
             foreach (var keyValuePair in loadRoleResult.animFrame) {
                 var k = keyValuePair.Key;
                 var v = keyValuePair.Value;
-                sheepCtl.comImages.roles_framess[0][106][k]=new int[v];
+                sheepCtl.comImages.roles_framess[0][106][k] = new int[v];
             }
-            
+
             foreach (var keyValuePair in loadRoleResult1.animFrame) {
                 var k = keyValuePair.Key;
                 var v = keyValuePair.Value;
-                sheepCtl.comImages.roles_framess[1][106][k]=new int[v];
+                sheepCtl.comImages.roles_framess[1][106][k] = new int[v];
             }
-         
+
 
             BindSheepMgr();
-            
+
             if (sheepMgr == null) {
                 return;
             }
@@ -138,7 +134,7 @@ namespace rvb {
         }
 
         private void BindSheepMgr() {
-            sheepMgr =new SheepMgr(sheepCtl);
+            sheepMgr = new SheepMgr(sheepCtl);
 
             // 防止关闭 Domain Reload 后重复订阅。
             sheepMgr.OnRoleRender -= HandleRoleRender;
@@ -157,12 +153,9 @@ namespace rvb {
         }
 
         public void StartBattle() {
-           
-
             // 这里先跳过倒计时，直接进入战斗状态。
             sheepMgr.setState(SheepRoomState.Run);
             sheepMgr.onGameRun();
-
         }
 
         private void Update() {
@@ -197,12 +190,12 @@ namespace rvb {
             int stepCount = 0;
             while (logicAccumulator >= logicStepSeconds &&
                    stepCount < maxLogicStepsPerUnityFrame) {
-                sheepMgr.game_update(sheepMgr, sheepCtl, logicStepMilliseconds);
+                sheepMgr.game_update(sheepCtl, logicStepMilliseconds);
 
-                if (renderBossMarkers) {
-                    SyncBossMarker(0);
-                    SyncBossMarker(1);
-                }
+
+                SyncBossMarker(0);
+                SyncBossMarker(1);
+
 
                 logicAccumulator -= logicStepSeconds;
                 stepCount++;
@@ -236,26 +229,27 @@ namespace rvb {
 
         private void SyncRoleView(PetView view) {
             int slot = view.id;
-            seenRoleSlots.Add(((int)view.camp)+"_"+slot);
+            seenRoleSlots.Add(((int)view.camp) + "_" + slot);
 
-            if (!roleRenderers.TryGetValue(((int)view.camp)+"_"+slot, out ScxSpriteRenderUnit renderPet)) {
+            if (!roleRenderers.TryGetValue(((int)view.camp) + "_" + slot, out ScxSpriteRenderUnit renderPet)) {
                 ScxSpriteRenderUnit unit = null;
-                if (view.camp==SheepCamp.Red) {
+                if (view.camp == SheepCamp.Red) {
                     unit = scxSpriteRenderer.createUnit();
-                    unit.setVisible(true);    
+                    unit.setVisible(true);
                 }
                 else {
                     unit = scxSpriteRenderer1.createUnit();
-                    unit.setVisible(true);    
+                    unit.setVisible(true);
                 }
-                unit.setScale(view.conf.scale,view.conf.scale,1f);
-                unit.setRotationFromEuler(45,0,0);
+
+                unit.setScale(view.conf.scale, view.conf.scale, 1f);
+                unit.setRotationFromEuler(45, 0, 0);
 
                 var initialFrame = ResolveRoleSpriteFrame(view);
                 unit.setFrame(initialFrame);
 
                 renderPet = unit;
-                roleRenderers.Add(((int)view.camp)+"_"+slot, renderPet);
+                roleRenderers.Add(((int)view.camp) + "_" + slot, renderPet);
             }
 
             float worldX = view.animX * logicToWorldScale;
@@ -269,8 +263,17 @@ namespace rvb {
             renderPet.setFrame(frameIndex);
         }
 
+        // 直接替换 Main/RVB 中原来的 HandleBulletRender。
+// 前提：
+// 1. loadBullet 生成的帧名是 "animId-frame"，例如 "3-12"。
+// 2. ScxSpriteRenderer 构造时 pixelsPerUnit = 100。
+// 3. logicToWorldScale 与 logicHeightToWorldScale 最好相同；相同时与原版完全等价。
         private void HandleBulletRender(BulletView bullet) {
-            if (!renderBulletMarkers || bullet == null || bullet.id == 0 || bullet.isDie) {
+            if (
+                bullet == null ||
+                bullet.id == 0 ||
+                bullet.isDie ||
+                bullet.conf == null) {
                 return;
             }
 
@@ -278,44 +281,248 @@ namespace rvb {
             seenBulletIds.Add(id);
 
             if (!bulletRenderers.TryGetValue(id, out ScxSpriteRenderUnit renderPet)) {
-                var unit = scxSpriteRenderer2.createUnit();
-                unit.setVisible(true);
-                
-                unit.setScale(bullet.conf.scale,bullet.conf.scale,1f);
-                unit.setRotationFromEuler(45,0,0);
-
-                var initialFrame = ResolveBulletSpriteFrame(bullet);
-                unit.setFrame(initialFrame);
-                
-                bulletRenderers.Add(id, unit);
-                renderPet = unit;
+                renderPet = scxSpriteRenderer2.createUnit();
+                renderPet.setVisible(true);
+                bulletRenderers.Add(id, renderPet);
             }
 
-            renderPet.setVisible(true);
+            int animId = bullet.conf.animId;
 
-            var frameIndex = ResolveBulletSpriteFrame(bullet);
-            
-            float worldX = bullet.x * logicToWorldScale;
-            float worldY = bullet.z * logicHeightToWorldScale;
-            float worldZ = bullet.y * logicToWorldScale;
-            
-            renderPet.setPosition(worldX, worldY, worldZ);
-            
-            renderPet.setFrame(frameIndex);
+            // 原 bullets_framess 中各动画的真实帧数。
+            // 未列出的动画退回到 endFrame + 1。
+            int frameCount;
+            switch (animId) {
+                case 1:
+                    frameCount = 1;
+                    break;
+                case 2:
+                    frameCount = 9;
+                    break;
+                case 3:
+                case 18:
+                    frameCount = 38;
+                    break;
+                case 7:
+                case 9:
+                case 12:
+                case 13:
+                    frameCount = 61;
+                    break;
+                case 8:
+                case 19:
+                    frameCount = 24;
+                    break;
+                case 10:
+                    frameCount = 8;
+                    break;
+                case 11:
+                    frameCount = 16;
+                    break;
+                default:
+                    frameCount = Mathf.Max(1, bullet.conf.endFrame + 1);
+                    break;
+            }
+
+            int localFrame = PositiveModulo(bullet.frame, frameCount);
+
+            // loadBullet 的标准命名规则。
+            renderPet.setFrame(localFrame);
+
+            int rotType = 0;
+            if (SheepBulletAnimInfo.TryGetById(animId, out SheepBulletAnimInfo animInfo)) {
+                rotType = animInfo.rotType;
+            }
+
+            const float spritePixelsPerUnit = 100f;
+            const float sin45 = 0.7071067811865475f;
+            const float epsilon = 0.000001f;
+
+            // Cocos 逻辑坐标 (x, y, z) -> Unity 世界坐标 (x, z, y)。
+            Vector3 ToWorldPoint(float x, float y, float z) {
+                return new Vector3(
+                    x * logicToWorldScale,
+                    z * logicHeightToWorldScale,
+                    y * logicToWorldScale
+                );
+            }
+
+            Vector3 ToWorldVector(Vector3 value) {
+                return new Vector3(
+                    value.x * logicToWorldScale,
+                    value.z * logicHeightToWorldScale,
+                    value.y * logicToWorldScale
+                );
+            }
+
+            // rotType 0 的 Sprite 原点在原版中相当于“底边中心”，
+            // 标准 Sprite 通常以图片中心为 Transform 原点，因此需要抬高半个图片高度。
+            float GetFixedFrameHeight(int currentAnimId, int currentFrame) {
+                switch (currentAnimId) {
+                    case 7:
+                    case 9:
+                    case 12:
+                    case 13:
+                        return 452f;
+
+                    case 8:
+                    case 19:
+                        // 原图集中这些帧高度在 42/43 像素之间变化。
+                        if ((currentFrame >= 4 && currentFrame <= 7) ||
+                            (currentFrame >= 16 && currentFrame <= 19)) {
+                            return 42f;
+                        }
+
+                        return 43f;
+
+                    case 10:
+                    case 11:
+                    case 16:
+                    case 17:
+                        return 128f;
+
+                    default:
+                        // 未知固定特效的保守值。
+                        return 128f;
+                }
+            }
+
+            Vector3 centerOriginal;
+            Vector3 rightOriginal;
+            Vector3 upOriginal;
+
+            if (rotType == 3) {
+                // 原版：right = normalize(dirX, dirY, dirZ)
+                //       up    = normalize(cross((0,-1,0), right))
+                rightOriginal = new Vector3(
+                    bullet.dirX,
+                    bullet.dirY,
+                    bullet.dirZ
+                );
+
+                if (rightOriginal.sqrMagnitude <= epsilon) {
+                    rightOriginal = bullet.camp == SheepCamp.Red
+                        ? Vector3.right
+                        : Vector3.left;
+                }
+
+                rightOriginal.Normalize();
+
+                upOriginal = Vector3.Cross(Vector3.down, rightOriginal);
+                if (upOriginal.sqrMagnitude <= epsilon) {
+                    upOriginal = Vector3.forward;
+                }
+
+                upOriginal.Normalize();
+
+                centerOriginal = new Vector3(
+                    bullet.x,
+                    bullet.y,
+                    bullet.z
+                );
+            }
+            else if (rotType == 5) {
+                // 原版：right = normalize(dirX, dirY, 0)
+                //       up    = normalize(cross((0,0,1), right))
+                rightOriginal = new Vector3(
+                    bullet.dirX,
+                    bullet.dirY,
+                    0f
+                );
+
+                if (rightOriginal.sqrMagnitude <= epsilon) {
+                    rightOriginal = bullet.camp == SheepCamp.Red
+                        ? Vector3.right
+                        : Vector3.left;
+                }
+
+                rightOriginal.Normalize();
+
+                upOriginal = Vector3.Cross(Vector3.forward, rightOriginal);
+                if (upOriginal.sqrMagnitude <= epsilon) {
+                    upOriginal = Vector3.up;
+                }
+
+                upOriginal.Normalize();
+
+                centerOriginal = new Vector3(
+                    bullet.x,
+                    bullet.y,
+                    bullet.z
+                );
+            }
+            else {
+                // rotType == 0：爆炸、手掌、金箍棒等固定特效。
+                rightOriginal = Vector3.right;
+                upOriginal = new Vector3(0f, sin45, sin45);
+
+                centerOriginal = new Vector3(
+                    bullet.x,
+                    bullet.y + bullet.startY,
+                    bullet.z
+                );
+            }
+
+            float logicalScale = bullet.conf.scale;
+
+            // 每个 Sprite 像素在世界中的局部 X/Y 方向。
+            Vector3 rightPerPixelWorld =
+                ToWorldVector(rightOriginal * logicalScale);
+
+            Vector3 upPerPixelWorld =
+                ToWorldVector(upOriginal * logicalScale);
+
+            Vector3 worldCenter = ToWorldPoint(
+                centerOriginal.x,
+                centerOriginal.y,
+                centerOriginal.z
+            );
+
+            if (rotType == 0) {
+                float frameHeight = GetFixedFrameHeight(animId, localFrame);
+
+                // 从底边中心换算到标准 Sprite 的图片中心。
+                worldCenter += upPerPixelWorld * (frameHeight * 0.5f);
+            }
+
+            float scaleX = rightPerPixelWorld.magnitude * spritePixelsPerUnit;
+
+            if (scaleX <= epsilon) {
+                renderPet.setVisible(false);
+                return;
+            }
+
+            Vector3 rightAxis = rightPerPixelWorld / rightPerPixelWorld.magnitude;
+
+            // 当 logicToWorldScale != logicHeightToWorldScale 时可能产生轻微剪切。
+            // 标准 Transform 没有 shear，这里用 Gram-Schmidt 去掉剪切分量。
+            Vector3 upOrthogonal = upPerPixelWorld -
+                                   rightAxis * Vector3.Dot(upPerPixelWorld, rightAxis);
+
+            float upLength = upOrthogonal.magnitude;
+            if (upLength <= epsilon) {
+                renderPet.setVisible(false);
+                return;
+            }
+
+            Vector3 upAxis = upOrthogonal / upLength;
+            Vector3 forwardAxis = Vector3.Cross(rightAxis, upAxis).normalized;
+
+            Quaternion rotation = Quaternion.LookRotation(forwardAxis, upAxis);
+            Vector3 euler = rotation.eulerAngles;
+
+            float scaleY = upLength * spritePixelsPerUnit;
+
+            renderPet.setVisible(true);
+            renderPet.setPosition(worldCenter.x, worldCenter.y, worldCenter.z);
+            renderPet.setRotationFromEuler(euler.x, euler.y, euler.z);
+            renderPet.setScale(scaleX, scaleY, 1f);
         }
 
         private string ResolveRoleSpriteFrame(PetView view) {
-            
             var i = loadRoleResult.animFrame[(int)view.animType];
-            
-            int localFrame = PositiveModulo(view.animFrame, i);
-            return ((int)(view.animType))+"-" +localFrame;
-        }
 
-        private int ResolveBulletSpriteFrame(BulletView bullet) {
-            int count = Mathf.Max(1, bulletPreviewFrameCount);
-            int localFrame = PositiveModulo(bullet.frame, count);
-            return ClampSpriteIndex(bulletPreviewStartFrame + localFrame);
+            int localFrame = PositiveModulo(view.animFrame, i);
+            return ((int)(view.animType)) + "-" + localFrame;
         }
 
         private int ResolveLogicalAnimationFrameCount(PetView view) {
@@ -406,6 +613,7 @@ namespace rvb {
             foreach (var renderPet in roleRenderers.Values) {
                 renderPet.destroy();
             }
+
             roleRenderers.Clear();
             seenRoleSlots.Clear();
             staleRoleSlots.Clear();
@@ -413,6 +621,7 @@ namespace rvb {
             foreach (var renderPet in bulletRenderers.Values) {
                 renderPet.destroy();
             }
+
             bulletRenderers.Clear();
             seenBulletIds.Clear();
             staleBulletIds.Clear();
