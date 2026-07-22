@@ -385,19 +385,11 @@ namespace rvb.scripts {
         }
 
         public void game_update(SheepMgr sheepMgr, SheepCtl sheepCtl, float i) {
-            try {
                 // 处理召唤兵
                 this.consume(sheepCtl, i);
 
                 // 执行主逻辑
-                this.role_logic(sheepMgr, sheepCtl, i);
-
-                
-            }
-            catch (Exception err) {
-                Debug.LogError("update逻辑错误 " + err);
-                throw;
-            }
+                this.role_logic(sheepCtl, i);
         }
 
         public bool updateBoss(SheepMgr sheepMgr, SheepCtl sheepCtl, float dt, long c) {
@@ -591,7 +583,7 @@ namespace rvb.scripts {
             boss[(int)camp] = view;
         }
 
-        public void role_logic(SheepMgr sheepMgr, SheepCtl sheepCtl, float dt) {
+        public void role_logic( SheepCtl sheepCtl, float dt) {
             var t = NowMs();
             this.logic_counts[(int)SheepCamp.Red] = this.redBuffCount > 0 ? 2 : 1;
             this.logic_counts[(int)SheepCamp.Blue] = this.blueBuffCount > 0 ? 2 : 1;
@@ -631,35 +623,35 @@ namespace rvb.scripts {
             sheepCtl.comImages.mesh_block.onFrameUpdateStart();
 
 
-            if (sheepMgr.endTime != 0 && sheepMgr.endTime < NowMs()) {
+            if (this.endTime != 0 && this.endTime < NowMs()) {
                 eventBus.emit(EventType.RoomStateEnd);
                 isEnd = true;
-                sheepMgr.endTime = 0;
+                this.endTime = 0;
                 return;
             }
 
 
-            sheepMgr.countNewBuffs = new[] { 0, 0 };
-            sheepMgr.countBuffs = new[] { 0, 0 };
-            sheepMgr.countShowBuffs = new[] { 0, 0 };
+            this.countNewBuffs = new[] { 0, 0 };
+            this.countBuffs = new[] { 0, 0 };
+            this.countShowBuffs = new[] { 0, 0 };
 
             // console.log(sheepMgr.buffs)
-            for (var i = 0; i < sheepMgr.buffs.Length; i++) {
-                var r = sheepMgr.buffs[i];
+            for (var i = 0; i < this.buffs.Length; i++) {
+                var r = this.buffs[i];
                 var s = i;
-                if (r.Count != 0 && r[0].time < sheepMgr.gameStartTimerForBuff) {
+                if (r.Count != 0 && r[0].time < this.gameStartTimerForBuff) {
                     r.RemoveAt(0);
-                    sheepMgr.buffs[s] = r;
+                    this.buffs[s] = r;
                 }
 
                 foreach (var o in r) {
-                    sheepMgr.countBuffs[s] += o.count != 0 ? o.count : SheepConfig.counterBuffNumber;
-                    sheepMgr.countShowBuffs[s] += o.count;
+                    this.countBuffs[s] += o.count != 0 ? o.count : SheepConfig.counterBuffNumber;
+                    this.countShowBuffs[s] += o.count;
                 }
             }
 
-            for (var i = 0; i < sheepMgr.preBuffs.Length; i++) {
-                var r = sheepMgr.preBuffs[i];
+            for (var i = 0; i < this.preBuffs.Length; i++) {
+                var r = this.preBuffs[i];
                 var s = i;
 
                 if (r.Count == 0) {
@@ -678,37 +670,37 @@ namespace rvb.scripts {
                 }
 
                 if (hasZero) {
-                    sheepMgr.buffs[s].Add(new Buff() {
-                        time = (int)(sheepMgr.gameStartTimerForBuff + 1000 * SheepConfig.counterTime),
+                    this.buffs[s].Add(new Buff() {
+                        time = (int)(this.gameStartTimerForBuff + 1000 * SheepConfig.counterTime),
                         count = 0
                     });
 
                     if (r.Count > 1) {
-                        sheepMgr.buffs[s].Add(new Buff() {
-                            time = (int)(sheepMgr.gameStartTimerForBuff + 1000 * SheepConfig.buffLastTime),
+                        this.buffs[s].Add(new Buff() {
+                            time = (int)(this.gameStartTimerForBuff + 1000 * SheepConfig.buffLastTime),
                             count = sum
                         });
                     }
                 }
                 else {
-                    sheepMgr.buffs[s].Add(new Buff() {
-                        time = (int)(sheepMgr.gameStartTimerForBuff + 1000 * SheepConfig.buffLastTime),
+                    this.buffs[s].Add(new Buff() {
+                        time = (int)(this.gameStartTimerForBuff + 1000 * SheepConfig.buffLastTime),
                         count = sum
                     });
                 }
 
-                sheepMgr.preBuffs[s] = new List<int>();
-                sheepMgr.countNewBuffs[s] += sum;
+                this.preBuffs[s] = new List<int>();
+                this.countNewBuffs[s] += sum;
             }
 
-            isEnd = this.updateBoss(sheepMgr, sheepCtl, dt, now);
+            isEnd = this.updateBoss(this, sheepCtl, dt, now);
 
             if (isEnd) {
                 return;
             }
 
             var h = new List<PetView>();
-            foreach (var e in sheepMgr.pets) {
+            foreach (var e in this.pets) {
                 foreach (var e1 in e) {
                     h.Add(e1);
                 }
@@ -725,7 +717,7 @@ namespace rvb.scripts {
             for (var B = 0; B < x.Count; B++) {
                 var y = x[B];
 
-                y.updateSkin(sheepCtl, this, sheepMgr, dt);
+                y.updateSkin(sheepCtl, this, this, dt);
 
                 int[] M;
                 var D = y;
@@ -765,7 +757,7 @@ namespace rvb.scripts {
                 else if (A == SheepRoleState.Dead && W >= M.Length - 1) {
                     D.state = SheepRoleState.Res;
                     D.animType = SheepRoleAnimType.None;
-                    y.onRes(sheepCtl, sheepMgr);
+                    y.onRes(sheepCtl, this);
                 }
                 else if (A == SheepRoleState.Up && W >= M.Length - 1) {
                     D.state = SheepRoleState.In;
@@ -815,7 +807,7 @@ namespace rvb.scripts {
             
 
             this.mainSyncBlocksToWokers();
-            sheepCtl.comImages.mesh_block.onFrameUpdateEnd(sheepMgr);
+            sheepCtl.comImages.mesh_block.onFrameUpdateEnd(this);
             this.redBuffCount = b;
             this.blueBuffCount = I;
 
