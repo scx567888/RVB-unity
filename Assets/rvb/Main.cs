@@ -20,6 +20,9 @@ namespace rvb {
         [Header("Atlas")]
         public Texture2D texture1;
         public TextAsset json1;
+        [Header("Atlas")]
+        public Texture2D texture2;
+        public TextAsset json2;
         public Material mainMaterial;
         public Material highlightMaterial;
 
@@ -45,6 +48,7 @@ namespace rvb {
 
         private ScxSpriteRenderer scxSpriteRenderer;
         private ScxSpriteRenderer scxSpriteRenderer1;
+        private ScxSpriteRenderer scxSpriteRenderer2;
         private string[] spriteNames;
         private SheepMgr sheepMgr;
         private SheepCtl sheepCtl=new SheepCtl();
@@ -55,7 +59,7 @@ namespace rvb {
         private readonly List<string> staleRoleSlots = new List<string>();
 
         // BulletView 没有公开池下标，测试阶段使用唯一 bullet.id。
-        private readonly Dictionary<int, Pet> bulletRenderers = new Dictionary<int, Pet>();
+        private readonly Dictionary<int, ScxSpriteRenderUnit> bulletRenderers = new Dictionary<int, ScxSpriteRenderUnit>();
         private readonly HashSet<int> seenBulletIds = new HashSet<int>();
         private readonly List<int> staleBulletIds = new List<int>();
 
@@ -84,26 +88,37 @@ namespace rvb {
                 mainMaterial,
                 Mathf.Max(5000, initialCountPerCamp * 4)
             );
+            
+            var loadRoleResult2 = SheepSpriteAtlasLoader.loadBullet(texture2, json2.text);
+            scxSpriteRenderer2 = new ScxSpriteRenderer(
+                loadRoleResult2,
+                100,
+                mainMaterial,
+                Mathf.Max(5000, initialCountPerCamp * 4)
+            );
 
-            spriteNames = scxSpriteRenderer.getSpriteNames();
+            bulletPreviewFrameCount = scxSpriteRenderer2.getSpriteNames().Length;
+
+            spriteNames = scxSpriteRenderer2.getSpriteNames();
             scxSpriteRenderer.setParent(gameObject);
             scxSpriteRenderer1.setParent(gameObject);
+            scxSpriteRenderer2.setParent(gameObject);
 
             sheepCtl.comImages.roles_framess[0] = new Dictionary<int, Dictionary<int,int[]>>();
             sheepCtl.comImages.roles_framess[1] = new Dictionary<int, Dictionary<int,int[]>>();
-            sheepCtl.comImages.roles_framess[0][100] = new Dictionary<int, int[]>();
-            sheepCtl.comImages.roles_framess[1][100] = new Dictionary<int, int[]>();
+            sheepCtl.comImages.roles_framess[0][106] = new Dictionary<int, int[]>();
+            sheepCtl.comImages.roles_framess[1][106] = new Dictionary<int, int[]>();
             
             foreach (var keyValuePair in loadRoleResult.animFrame) {
                 var k = keyValuePair.Key;
                 var v = keyValuePair.Value;
-                sheepCtl.comImages.roles_framess[0][100][k]=new int[v];
+                sheepCtl.comImages.roles_framess[0][106][k]=new int[v];
             }
             
             foreach (var keyValuePair in loadRoleResult1.animFrame) {
                 var k = keyValuePair.Key;
                 var v = keyValuePair.Value;
-                sheepCtl.comImages.roles_framess[1][100][k]=new int[v];
+                sheepCtl.comImages.roles_framess[1][106][k]=new int[v];
             }
          
 
@@ -129,8 +144,8 @@ namespace rvb {
             sheepMgr.OnRoleRender -= HandleRoleRender;
             sheepMgr.OnRoleRender += HandleRoleRender;
 
-            // sheepMgr.OnBulletRender -= HandleBulletRender;
-            // sheepMgr.OnBulletRender += HandleBulletRender;
+            sheepMgr.OnBulletRender -= HandleBulletRender;
+            sheepMgr.OnBulletRender += HandleBulletRender;
 
             // 没有原 SheepCtl.roles_framess 时，必须给逻辑一个动画长度。
             // 否则默认值为 1，In/Dead 等状态可能一帧就结束。
@@ -165,6 +180,7 @@ namespace rvb {
             // Unity 每个显示帧提交一次渲染。
             scxSpriteRenderer.update();
             scxSpriteRenderer1.update();
+            scxSpriteRenderer2.update();
         }
 
         private void RunLogicFrames() {
@@ -261,22 +277,31 @@ namespace rvb {
             int id = bullet.id;
             seenBulletIds.Add(id);
 
-            if (!bulletRenderers.TryGetValue(id, out Pet renderPet)) {
-                var unit = scxSpriteRenderer.createUnit();
+            if (!bulletRenderers.TryGetValue(id, out ScxSpriteRenderUnit renderPet)) {
+                var unit = scxSpriteRenderer2.createUnit();
                 unit.setVisible(true);
+                
+                unit.setScale(bullet.conf.scale,bullet.conf.scale,1f);
+                unit.setRotationFromEuler(45,0,0);
 
-                int initialFrame = ResolveBulletSpriteFrame(bullet);
+                var initialFrame = ResolveBulletSpriteFrame(bullet);
                 unit.setFrame(initialFrame);
-
-                renderPet = new Pet(unit, initialFrame);
-                bulletRenderers.Add(id, renderPet);
+                
+                bulletRenderers.Add(id, unit);
+                renderPet = unit;
             }
 
-            renderPet.renderUnit.setVisible(true);
+            renderPet.setVisible(true);
 
-            int frameIndex = ResolveBulletSpriteFrame(bullet);
-            renderPet.frameIndex = frameIndex;
-            renderPet.renderUnit.setFrame(frameIndex);
+            var frameIndex = ResolveBulletSpriteFrame(bullet);
+            
+            float worldX = bullet.x * logicToWorldScale;
+            float worldY = bullet.z * logicHeightToWorldScale;
+            float worldZ = bullet.y * logicToWorldScale;
+            
+            renderPet.setPosition(worldX, worldY, worldZ);
+            
+            renderPet.setFrame(frameIndex);
         }
 
         private string ResolveRoleSpriteFrame(PetView view) {
@@ -334,14 +359,14 @@ namespace rvb {
         private void RecycleMissingBulletRenderers() {
             staleBulletIds.Clear();
 
-            foreach (KeyValuePair<int, Pet> pair in bulletRenderers) {
+            foreach (KeyValuePair<int, ScxSpriteRenderUnit> pair in bulletRenderers) {
                 if (!seenBulletIds.Contains(pair.Key)) {
                     staleBulletIds.Add(pair.Key);
                 }
             }
 
             foreach (int id in staleBulletIds) {
-                Pet renderPet = bulletRenderers[id];
+                var renderPet = bulletRenderers[id];
                 bulletRenderers.Remove(id);
                 renderPet.destroy();
             }
@@ -385,7 +410,7 @@ namespace rvb {
             seenRoleSlots.Clear();
             staleRoleSlots.Clear();
 
-            foreach (Pet renderPet in bulletRenderers.Values) {
+            foreach (var renderPet in bulletRenderers.Values) {
                 renderPet.destroy();
             }
             bulletRenderers.Clear();
@@ -396,7 +421,7 @@ namespace rvb {
         private void OnDestroy() {
             if (sheepMgr != null) {
                 sheepMgr.OnRoleRender -= HandleRoleRender;
-                // sheepMgr.OnBulletRender -= HandleBulletRender;
+                sheepMgr.OnBulletRender -= HandleBulletRender;
 
                 if (sheepMgr.AnimationFrameCountResolver == ResolveLogicalAnimationFrameCount) {
                     sheepMgr.AnimationFrameCountResolver = null;
