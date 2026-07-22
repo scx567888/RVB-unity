@@ -67,12 +67,8 @@ namespace rvb.scripts {
         
         public long updateTime = 0;
         
-        
-        public Stack<int> bulletsDel = new Stack<int>();
-        
-        
 
-        public int[] logic_counts = { 1, 1 };
+        
 
         public Dictionary<int, Dictionary<int, Dictionary<int, List<PetView>>>> pre_blocks =
             new Dictionary<int, Dictionary<int, Dictionary<int, List<PetView>>>>();
@@ -92,13 +88,6 @@ namespace rvb.scripts {
         public IndexLen[][][] collisionViews = new IndexLen[][][] { };
 
         public PetView[][][] collisionView1s = new PetView[][][] { };
-
-        public Dictionary<int, SheepCallInfo> redCallInfos = new Dictionary<int, SheepCallInfo>();
-
-        public Dictionary<int, SheepCallInfo> blueCallInfos = new Dictionary<int, SheepCallInfo>();
-
-        public ComImages comImages;
-        
         
         public int redBuffCount;
         public int blueBuffCount;
@@ -126,17 +115,32 @@ namespace rvb.scripts {
         // 准备添加到下一帧的 角色
         public HashSet<PetView>[] pre_pets = { new(), new() };
         
+        // 准备删除的 角色
+        public Stack<PetView> del_pets = new Stack<PetView>();
+        
         // 当前在场上的子弹
         public List<BulletView> view_bullets = new List<BulletView> { };
         
         // 准备添加到下一帧的 子弹
         public List<BulletView> pre_view_bullets = new List<BulletView> { };
         
+        // 准备删除的 子弹
+        public Stack<BulletView> del_bullets = new Stack<BulletView>();
+        
         // 角色自增 id 
         public int petId = 0;
         
         // 子弹自增 id
         public int bulletId = 0;
+        
+        // 红方召唤池
+        public Dictionary<int, SheepCallInfo> redCallInfos = new Dictionary<int, SheepCallInfo>();
+
+        // 蓝方召唤池
+        public Dictionary<int, SheepCallInfo> blueCallInfos = new Dictionary<int, SheepCallInfo>();
+        
+        // 红蓝双方 每次执行多少逻辑帧 
+        public int[] logic_counts = { 1, 1 };
 
         public SheepMgr(SheepCtl sheepCtl) {
             // 是否自动出兵
@@ -193,11 +197,11 @@ namespace rvb.scripts {
             
             
             
-            this.bulletsDel = new Stack<int>();
+            
             
             this.bulletId = 0;
 
-            this.logic_counts = new[] { 1, 1 };
+            
 
             this.pre_blocks = new Dictionary<int, Dictionary<int, Dictionary<int, List<PetView>>>>();
             this.isChangeCollsionFlags = null;
@@ -235,37 +239,13 @@ namespace rvb.scripts {
                 this.collisionView1s[(int)SheepCamp.Blue][e] = new PetView[SheepConfig.MaxPetCount];
             }
 
-            /**
-             * 红方召唤池
-             * key 是 类型 id
-             * @type {Map<Number,SheepCallInfo>}
-             */
             this.redCallInfos = new Dictionary<int, SheepCallInfo>();
 
-            /**
-             * 蓝方召唤池
-             * key 是 类型 id
-             * @type {Map<Number,SheepCallInfo>}
-             */
             this.blueCallInfos = new Dictionary<int, SheepCallInfo>();
-
-            /**
-             * 是否自动出兵
-             * @type {boolean}
-             */
+            
 
 
             // ************************ 以下待整理 **************************
-
-            /**
-             * @type ComSheepImages
-             */
-            this.comImages = sheepCtl.comImages;
-
-            
-            
-            
-            
             
             this.redBuffCount = 0;
             this.blueBuffCount = 0;
@@ -398,10 +378,10 @@ namespace rvb.scripts {
                         Thread.Sleep((int)(33 - diff));
                     }
 
-                    if (this.comImages.isHasFreeImage()) {
+                    
                         var o = NowMs() - lastUpdateTime;
                         this.game_update(this, sheepCtl, o);
-                    }
+                    
                 }
                 catch (Exception e) {
                     Debug.LogWarning("主线程更新逻辑错误:" + e);
@@ -554,8 +534,9 @@ namespace rvb.scripts {
         }
 
         public void clear_pets() {
-            
-            
+            foreach (var petView in del_pets) {
+                
+            }
         }
 
 
@@ -566,9 +547,9 @@ namespace rvb.scripts {
         }
 
         public void clear_bullets() {
-            
-            
-            this.bulletsDel.Clear();
+            foreach (var bulletView in del_bullets) {
+                
+            }
         }
 
 // todo
@@ -638,13 +619,13 @@ namespace rvb.scripts {
             pre_view_bullets.Clear();
             
                  this.update_role();
-                 this.comImages.update_role(null);
+                 
             
 
             
             
                 this.update_bullet();
-                this.comImages.update_bullet(null);
+                
             
 
             
@@ -882,7 +863,7 @@ namespace rvb.scripts {
                     }
 
                     var o = viewPet;
-                    this.comImages.addRole(o);
+                    
                 }
 
                 viewPet = null;
@@ -917,7 +898,7 @@ namespace rvb.scripts {
                         }
 
                         var o = viewPet;
-                        this.comImages.addRole(o);
+                        
                     }
 
                     viewPet = null;
@@ -937,7 +918,7 @@ namespace rvb.scripts {
                 if (t.id != 0 && t.conf.animId != 0) {
                     var e = t;
                     OnBulletRender?.Invoke(e);
-                    this.comImages.addBullet(e);
+                    
                 }
 
                 var xnyn = Util.getXnYn(t.x, t.y);
