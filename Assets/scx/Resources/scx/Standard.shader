@@ -56,6 +56,7 @@ Shader "scx/Standard"
         Tags { "RenderType"="Opaque" "PerformanceChecks"="False" }
         LOD 300
 
+        Cull Off
 
         // ------------------------------------------------------------------
         //  Base forward pass (directional light, emission, lightmaps, ...)
@@ -64,8 +65,6 @@ Shader "scx/Standard"
             Name "FORWARD"
             Tags { "LightMode" = "ForwardBase" }
 
-            Cull Off
-            
             Blend [_SrcBlend] [_DstBlend]
             ZWrite [_ZWrite]
 
@@ -102,9 +101,6 @@ Shader "scx/Standard"
         {
             Name "FORWARD_DELTA"
             Tags { "LightMode" = "ForwardAdd" }
-            
-            Cull Off
-            
             Blend [_SrcBlend] One
             Fog { Color (0,0,0,0) } // in additive pass fog should be black
             ZWrite Off
@@ -141,8 +137,6 @@ Shader "scx/Standard"
             Name "ShadowCaster"
             Tags { "LightMode" = "ShadowCaster" }
 
-            Cull Off
-            
             ZWrite On ZTest LEqual
 
             CGPROGRAM
@@ -174,8 +168,6 @@ Shader "scx/Standard"
             Name "DEFERRED"
             Tags { "LightMode" = "Deferred" }
 
-            Cull Off
-            
             CGPROGRAM
             #pragma target 3.0
             #pragma exclude_renderers nomrt
@@ -234,6 +226,8 @@ Shader "scx/Standard"
     {
         Tags { "RenderType"="Opaque" "PerformanceChecks"="False" }
         LOD 150
+        
+        Cull Off
 
         // ------------------------------------------------------------------
         //  Base forward pass (directional light, emission, lightmaps, ...)
@@ -241,8 +235,6 @@ Shader "scx/Standard"
         {
             Name "FORWARD"
             Tags { "LightMode" = "ForwardBase" }
-            
-            Cull Off 
 
             Blend [_SrcBlend] [_DstBlend]
             ZWrite [_ZWrite]
@@ -277,9 +269,6 @@ Shader "scx/Standard"
         {
             Name "FORWARD_DELTA"
             Tags { "LightMode" = "ForwardAdd" }
-            
-            Cull Off 
-            
             Blend [_SrcBlend] One
             Fog { Color (0,0,0,0) } // in additive pass fog should be black
             ZWrite Off
@@ -312,8 +301,6 @@ Shader "scx/Standard"
             Name "ShadowCaster"
             Tags { "LightMode" = "ShadowCaster" }
 
-            Cull Off
-            
             ZWrite On ZTest LEqual
 
             CGPROGRAM
