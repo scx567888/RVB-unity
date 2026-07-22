@@ -298,13 +298,7 @@ namespace rvb.scripts {
             attacher.clear();
         }
 
-        public void onRes(dynamic e, SheepMgr t) {
-            this.isActive = false;
-            id = 0;
-            t.buff_del_pet(this);
-            sheepMgr.delPet(this);
-            view_pet = null;
-        }
+       
 
         public void addGeneralOrderBuff(PetView e, double t, int n) {
             PetView o = this;
@@ -383,45 +377,5 @@ namespace rvb.scripts {
             this.blockIndex = blockIndex;
         }
 
-        public void clear() {
-            id = 0;
-            isActive = false;
-            isDie = false;
-            camp = (SheepCamp)0;
-            roleId = 0;
-            skinId = 0;
-            state = (SheepRoleState)0;
-            subState = (SheepRoleSubState)0;
-            isLock = false;
-            frame = 0;
-            posBefX = 0;
-            posBefY = 0;
-            animX = 0;
-            animY = 0;
-            animZ = 0;
-            posX = 0;
-            posY = 0;
-            befBlockIndex = 0;
-            blockIndex = 0;
-            dirX = 0;
-            dirY = 0;
-            tarIndex = 0;
-            tarId = 0;
-            curHp = 0;
-            curAtkBuff = 0;
-            curAckFrame = 0;
-            curAckCd = 0;
-            isHeavyAtk = false;
-            isNotConn = false;
-            isBoom = false;
-            _animType = (SheepRoleAnimType)0;
-            animFrame = 0;
-            tarPosX = 0;
-            tarPosY = 0;
-            impulseX = 0;
-            impulseY = 0;
-            readySkillId = 0;
-            energy = 0;
-        }
     }
 }

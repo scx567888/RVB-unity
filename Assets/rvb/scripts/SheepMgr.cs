@@ -282,12 +282,6 @@ namespace rvb.scripts {
             eventBus.emit(EventType.RoomState, (state = e));
         }
 
-
-        public void delPet(PetView e) {
-            this.del_pets[(int)e.camp].Add(e);
-            
-        }
-
         public void clearPets() {
             this.pets[(int)SheepCamp.Red].Clear();
             this.pets[(int)SheepCamp.Blue].Clear();
@@ -492,22 +486,22 @@ namespace rvb.scripts {
             return isEnd;
         }
 
-        public void buff_del_pet(PetView e) {
-            var pet = e;
-            pet.isDie = true;
-            pet.id = 0;
-        }
-
         public void clear_pets() {
             foreach (var petView in del_pets) {
             }
         }
 
-
-        public void buff_del_bullet(BulletView e) {
+        public void del_bullet(BulletView e) {
             var bullet = e;
             bullet.id = 0;
-            // this.bulletsDel.Push(e);
+            del_bullets.Add(bullet);
+        }
+        
+        public void del_pet(PetView e) {
+            e.isActive = false;
+            e.isDie = true;
+            e.id = 0;
+            this.del_pets[(int)e.camp].Add(e);
         }
 
         public void clear_bullets() {
@@ -717,7 +711,7 @@ namespace rvb.scripts {
                     else if (A == SheepRoleState.Dead && W >= M.Length - 1) {
                         D.state = SheepRoleState.Res;
                         D.animType = SheepRoleAnimType.None;
-                        y.onRes(sheepCtl, this);
+                        del_pet(D);
                     }
                     else if (A == SheepRoleState.Up && W >= M.Length - 1) {
                         D.state = SheepRoleState.In;
@@ -746,7 +740,7 @@ namespace rvb.scripts {
 
                 if (X.frame >= X.conf.endFrame) {
                     X.isDie = true;
-                    this.buff_del_bullet(X);
+                    this.del_bullet(X);
                 }
                 else {
                     var z = X.roleIndex.conf.splitN;
