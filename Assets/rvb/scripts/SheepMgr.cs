@@ -2476,8 +2476,14 @@ namespace rvb.scripts {
         }
 
         public PetView createPetView(
-            SheepCtl sheepCtl, SheepCamp camp, int roleType, int a = 1, int i = 0, bool r = true,
-            Vector3 f = new Vector3(), bool s = false
+            SheepCtl sheepCtl,
+            SheepCamp camp, 
+            int roleType,
+            int a = 1,
+            int i = 0,
+            bool r = true,
+            Vector3 f = new Vector3(),
+            bool s = false
         ) {
             if (this.state != SheepRoomState.Run && this.state != SheepRoomState.Start) {
                 return null;
@@ -2485,8 +2491,8 @@ namespace rvb.scripts {
 
             var sheepRoleTypeInfo = SheepRoleTypeInfo.getById(roleType);
 
-            var petSkin = new PetView(-1);
-            petSkin.uids = new List<int>();
+            var petSkin = new PetView();
+            
             petSkin.conf = sheepRoleTypeInfo;
             petSkin.camp = camp;
             petSkin.petId = roleType;
@@ -2498,7 +2504,7 @@ namespace rvb.scripts {
 
             petSkin.skinId = petSkin.conf.animId;
 
-            petSkin.sheepMgr = this;
+            
 
             var formation = SheepRoleFormation.getById(sheepRoleTypeInfo.formationId);
 
@@ -2540,7 +2546,7 @@ namespace rvb.scripts {
                 petSkin.position = f;
             }
 
-            petSkin.sheepMgr = this;
+            
             initPet(petSkin);
 
             this.spawnPet(petSkin);

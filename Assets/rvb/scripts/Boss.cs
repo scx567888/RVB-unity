@@ -4,7 +4,7 @@
         public float curHp;
         public ComProgress comProgress=new ComProgress();
 
-        public Boss(int t) : base(t) {
+        public Boss(int t) : base() {
             
         }
 

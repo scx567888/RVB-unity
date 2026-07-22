@@ -43,7 +43,7 @@ namespace rvb.scripts {
         public bool isHeavyAtk = false;
         public bool isNotConn = false;
         public bool isBoom = false;
-        public SheepRoleAnimType _animType = (SheepRoleAnimType)0;
+        public SheepRoleAnimType _animType = 0;
         public int animFrame = 0;
         public float tarPosX = 0;
         public float tarPosY = 0;
@@ -53,36 +53,15 @@ namespace rvb.scripts {
         public int energy = 0;
 
         public SheepRoleTypeInfo conf;
-
-        public int index;
-        public List<int> uids;
-        public PetView view_pet;
+        
         public float scale;
         public BuffTimeAttacher attacher;
         public int petId;
         public Vector3? pos;
         public Vector3? position;
 
+        public PetView() {
 
-        public SheepMgr sheepMgr;
-
-
-        public PetView(int t) {
-            index = t;
-            conf = SheepRoleTypeInfo.getById(roleId);
-            uids = new List<int>();
-            skinId = null;
-            view_pet = null;
-            scale = 1;
-            attacher = null;
-            camp = default;
-            state = default;
-            petId = default;
-            conf = null;
-            pos = null;
-            isDie = false;
-            isBoom = false;
-            position = null;
         }
 
         public bool isConnNot {
@@ -108,7 +87,7 @@ namespace rvb.scripts {
             posBefX = posX;
             posBefY = posY;
 
-            int befBlockIndex = Util.getIndexByXY(
+            int _befBlockIndex = Util.getIndexByXY(
                 posBefX,
                 posBefY
             );
@@ -116,13 +95,13 @@ namespace rvb.scripts {
             posX = x;
             posY = y;
 
-            int blockIndex = Util.getIndexByXY(
+            int _blockIndex = Util.getIndexByXY(
                 posX,
                 posY
             );
 
-            this.befBlockIndex = befBlockIndex;
-            this.blockIndex = blockIndex;
+            this.befBlockIndex = _befBlockIndex;
+            this.blockIndex = _blockIndex;
         }
 
     }
