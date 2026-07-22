@@ -70,7 +70,7 @@ namespace rvb.scripts {
         public BulletView[] pre_view_bullets = new BulletView[] { };
         public long updateTime = 0;
         
-        public int petCount = 0;
+        
         public Stack<int> bulletsDel = new Stack<int>();
         public int bulletCount = 0;
         public int bulletId = 0;
@@ -103,13 +103,9 @@ namespace rvb.scripts {
         public Dictionary<int, SheepCallInfo> blueCallInfos = new Dictionary<int, SheepCallInfo>();
 
         public ComImages comImages;
-
-        public int cur_rob_role_index;
+        
         public int cur_rob_bullet_index;
-        public int cur_rob_role_mesh_index;
-        public int cur_rob_bullet_mesh_index;
-        public int cur_rob_star_mesh_index;
-        public int roleMaxIndex;
+        
         public int bulletMaxIndex;
         public int preBulletIndex;
         public CurIndexImages curIndexImages;
@@ -195,7 +191,7 @@ namespace rvb.scripts {
             this.updateTime = 0;
             
             
-            this.petCount = 0;
+            
             this.bulletsDel = new Stack<int>();
             this.bulletCount = 0;
             this.bulletId = 0;
@@ -267,12 +263,9 @@ namespace rvb.scripts {
              */
             this.comImages = sheepCtl.comImages;
 
-            this.cur_rob_role_index = 0;
+            
             this.cur_rob_bullet_index = 0;
-            this.cur_rob_role_mesh_index = 0;
-            this.cur_rob_bullet_mesh_index = 0;
-            this.cur_rob_star_mesh_index = 0;
-            this.roleMaxIndex = 0;
+            
             this.bulletMaxIndex = 0;
             this.preBulletIndex = 0;
             this.curIndexImages = null;
@@ -365,11 +358,6 @@ namespace rvb.scripts {
             return ++petId;
         }
 
-        public int rob_role(int t) {
-            var old = this.cur_rob_role_index;
-            this.cur_rob_role_index += t;
-            return old;
-        }
 
         public int rob_bullet(int t) {
             var old = this.cur_rob_bullet_index;
@@ -615,7 +603,7 @@ namespace rvb.scripts {
                     return;
                 }
 
-                this.cur_rob_role_index = 0;
+                
                 this.cur_rob_bullet_index = 0;
 
                 this.curIndexImages = this.comImages.startAdd();
@@ -832,8 +820,7 @@ namespace rvb.scripts {
             if (isEnd) {
                 return;
             }
-
-            this.roleMaxIndex = this.petCount;
+            
             this.bulletMaxIndex = this.bulletCount;
         }
 
@@ -965,9 +952,7 @@ namespace rvb.scripts {
         }
 
         public void clear_pets() {
-            this.cur_rob_role_index = 0;
-            this.roleMaxIndex = 0;
-            this.petCount = 0;
+            
             
         }
 
@@ -1016,8 +1001,8 @@ namespace rvb.scripts {
             this.clear_bullets();
             InitializeBossView(SheepCamp.Red);
             InitializeBossView(SheepCamp.Blue);
-            petCount = 2;
-            roleMaxIndex = 2;
+            
+            
         }
 
 // todo        
@@ -1056,10 +1041,11 @@ namespace rvb.scripts {
             this.logic_counts[(int)SheepCamp.Red] = this.redBuffCount > 0 ? 2 : 1;
             this.logic_counts[(int)SheepCamp.Blue] = this.blueBuffCount > 0 ? 2 : 1;
             var curIndexImages = this.curIndexImages;
-            var o = 0;
-            if (this.roleMaxIndex != 0) {
-                o = this.rob_role_task(this.roleMaxIndex, curIndexImages);
-            }
+            
+            
+                 this.update_role();
+                 this.comImages.update_role(curIndexImages);
+            
 
             var l = 0;
             if (this.bulletMaxIndex != 0) {
@@ -1086,18 +1072,10 @@ namespace rvb.scripts {
 
             var r = NowMs() - t;
             if (r > 33) {
-                Debug.LogWarning("count_role:" + o + " count_bullet:" + l + "  耗时:" + r + "ms");
+                Debug.LogWarning(" count_bullet:" + l + "  耗时:" + r + "ms");
             }
 
             return (r, n);
-        }
-
-        public int rob_role_task(int count, CurIndexImages curIndexImages) {
-            var start = this.rob_role(count);
-            var end = start + count;
-            var i = this.update_role(start, end);
-            this.comImages.update_role(curIndexImages);
-            return i;
         }
 
         public int rob_bullet_task(int count, CurIndexImages curIndexImages) {
@@ -1108,7 +1086,7 @@ namespace rvb.scripts {
             return i;
         }
 
-        public int update_role(int start, int end) {
+        public void update_role() {
             foreach (var dddd in boss) {
                 var viewPet = dddd;
                 if (!viewPet.isActive) {
@@ -1180,7 +1158,7 @@ namespace rvb.scripts {
                 }
             }
 
-            return end - start;
+            
         }
 
         public int update_bullet(int start, int end) {
