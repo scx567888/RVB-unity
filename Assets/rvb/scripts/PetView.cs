@@ -223,7 +223,7 @@ namespace rvb.scripts {
             }
         }
 
-        public void updateSkin(dynamic e, SheepMgr t, SheepMgr n, double o) {
+        public void updateSkin(SheepCtl e, SheepMgr t, SheepMgr n, double o) {
             PetView a = this;
             PetView i = a;
 
@@ -265,16 +265,14 @@ namespace rvb.scripts {
             }
 
             if (!isDie) {
-                // todo 用哪个? 
                 t.mainPreAddBlock( blockIndex, this, camp, a.conf.collideId );
-                // t.mainPreAddBlock( blockIndex, null, camp, a.conf.collideId );
 
                 int S = i.conf.detectCollideR;
 
                 for (int y = -S; y <= S; ++y) {
                     for (int v = -S; v <= S; ++v) {
-                        // todo 这里需要一些处理
-                        // e.comImages.mesh_block.addFrameBlockCamp(blockIndex, camp);
+                        
+                        e.comImages.mesh_block.addFrameBlockCamp(blockIndex, camp);
                     }
                 }
 

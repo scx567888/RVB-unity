@@ -565,7 +565,6 @@ namespace rvb.scripts {
         }
 
         public void role_logic(SheepCtl sheepCtl, float dt) {
-            
             this.logic_counts[(int)SheepCamp.Red] = this.redBuffCount > 0 ? 2 : 1;
             this.logic_counts[(int)SheepCamp.Blue] = this.blueBuffCount > 0 ? 2 : 1;
 
@@ -584,9 +583,10 @@ namespace rvb.scripts {
             foreach (var b1 in pre_bullets) {
                 bullets.Add(b1);
             }
+
             pre_bullets.Clear();
-            
-            
+
+
             // 更新 pet
             this.update_role();
 
@@ -678,81 +678,72 @@ namespace rvb.scripts {
                 return;
             }
 
-            var h = new List<PetView>();
+            var _redBuffCount = 0;
+            var _blueBuffCount = 0;
+
             foreach (var e in this.pets) {
-                foreach (var e1 in e) {
-                    h.Add(e1);
-                }
-            }
+                foreach (var y in e) {
+                    y.updateSkin(sheepCtl, this, this, dt);
 
-            var b = 0;
-            var I = 0;
+                    int[] M;
+                    var D = y;
+                    var A = D.state;
+                    var P = D.animType;
+                    var W = D.animFrame;
 
-            for (var B = 0; B < h.Count; B++) {
-                var y = h[B];
+                    var fgs = sheepCtl.comImages.roles_framess[(int)y.camp];
 
-                y.updateSkin(sheepCtl, this, this, dt);
+                    var ghg = fgs[(int)y.skinId];
 
-                int[] M;
-                var D = y;
-                var A = D.state;
-                var P = D.animType;
-                var W = D.animFrame;
+                    M = ghg[(int)P];
 
-                var fgs = sheepCtl.comImages.roles_framess[(int)y.camp];
-
-                var ghg = fgs[(int)y.skinId];
-
-                M = ghg[(int)P];
-
-                if (null == M) {
-                    Debug.LogError("找不到动画 " + y.camp + " " + y.skinId + " " + P);
-                }
-
-                if (A == SheepRoleState.In && W >= M.Length - 1) {
-                    var E = SheepSkill.getById(D.readySkillId);
-                    if (E != null) {
-                        if (E.skillType == SheepSkillType.Boom) {
-                            var F = SheepSkillSubBoom.getById(E.id);
-                            D.state = SheepRoleState.Boom;
-                            if (F.isAnim != 0) {
-                                D.animType = SheepRoleAnimType.Boom;
-                            }
-                            else {
-                                D.animType = SheepRoleAnimType.Idle;
-                            }
-                        }
+                    if (null == M) {
+                        Debug.LogError("找不到动画 " + y.camp + " " + y.skinId + " " + P);
                     }
-                    else {
-                        D.state = SheepRoleState.Move;
-                        D.animType = SheepRoleAnimType.Idle;
-                    }
-                }
-                else if (A == SheepRoleState.Dead && W >= M.Length - 1) {
-                    D.state = SheepRoleState.Res;
-                    D.animType = SheepRoleAnimType.None;
-                    y.onRes(sheepCtl, this);
-                }
-                else if (A == SheepRoleState.Up && W >= M.Length - 1) {
-                    D.state = SheepRoleState.In;
-                    D.animType = SheepRoleAnimType.In;
-                }
-                else if (A == SheepRoleState.Buff) {
-                    var V = SheepSkillSubBuff.getById(D.readySkillId);
-                    var U = D.animFrame;
-                    if (U > V.buffStratFrame && U < V.buffEndFrame) {
-                        if (y.camp == SheepCamp.Blue) {
-                            I += 1;
+
+                    if (A == SheepRoleState.In && W >= M.Length - 1) {
+                        var E = SheepSkill.getById(D.readySkillId);
+                        if (E != null) {
+                            if (E.skillType == SheepSkillType.Boom) {
+                                var F = SheepSkillSubBoom.getById(E.id);
+                                D.state = SheepRoleState.Boom;
+                                if (F.isAnim != 0) {
+                                    D.animType = SheepRoleAnimType.Boom;
+                                }
+                                else {
+                                    D.animType = SheepRoleAnimType.Idle;
+                                }
+                            }
                         }
                         else {
-                            b += 1;
+                            D.state = SheepRoleState.Move;
+                            D.animType = SheepRoleAnimType.Idle;
+                        }
+                    }
+                    else if (A == SheepRoleState.Dead && W >= M.Length - 1) {
+                        D.state = SheepRoleState.Res;
+                        D.animType = SheepRoleAnimType.None;
+                        y.onRes(sheepCtl, this);
+                    }
+                    else if (A == SheepRoleState.Up && W >= M.Length - 1) {
+                        D.state = SheepRoleState.In;
+                        D.animType = SheepRoleAnimType.In;
+                    }
+                    else if (A == SheepRoleState.Buff) {
+                        var V = SheepSkillSubBuff.getById(D.readySkillId);
+                        var U = D.animFrame;
+                        if (U > V.buffStratFrame && U < V.buffEndFrame) {
+                            if (y.camp == SheepCamp.Blue) {
+                                _blueBuffCount += 1;
+                            }
+                            else {
+                                _redBuffCount += 1;
+                            }
                         }
                     }
                 }
             }
-
-            var j = 0;
-
+            
 
             foreach (var X in bullets) {
                 if (X.isDie) {
@@ -772,16 +763,14 @@ namespace rvb.scripts {
                             sheepCtl.comImages.mesh_block.addFrameBlockCamp(Z, X.camp);
                         }
                     }
-
-                    ++j;
                 }
             }
 
 
             this.mainSyncBlocksToWokers();
             sheepCtl.comImages.mesh_block.onFrameUpdateEnd(this);
-            this.redBuffCount = b;
-            this.blueBuffCount = I;
+            this.redBuffCount = _redBuffCount;
+            this.blueBuffCount = _blueBuffCount;
 
             if (isEnd) {
                 return;
