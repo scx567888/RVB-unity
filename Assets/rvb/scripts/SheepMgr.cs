@@ -349,7 +349,7 @@ namespace rvb.scripts {
 
 
                     var o = NowMs() - lastUpdateTime;
-                    this.game_update(this, sheepCtl, o);
+                    this.game_update(sheepCtl, o);
                 }
                 catch (Exception e) {
                     Debug.LogWarning("主线程更新逻辑错误:" + e);
@@ -358,7 +358,7 @@ namespace rvb.scripts {
             }
         }
 
-        public void game_update(SheepMgr sheepMgr, SheepCtl sheepCtl, float i) {
+        public void game_update( SheepCtl sheepCtl, float i) {
             // 处理召唤兵
             this.consume(sheepCtl, i);
 
@@ -366,10 +366,10 @@ namespace rvb.scripts {
             this.role_logic(sheepCtl, i);
         }
 
-        public bool updateBoss(SheepMgr sheepMgr, SheepCtl sheepCtl, float dt, long c) {
+        public bool updateBoss( SheepCtl sheepCtl, float dt, long c) {
             var isEnd = false;
-            for (var i = 0; i < sheepMgr.boss.Length; i++) {
-                var t = sheepMgr.boss[i];
+            for (var i = 0; i < this.boss.Length; i++) {
+                var t = this.boss[i];
                 var index = i;
 
 
@@ -397,7 +397,7 @@ namespace rvb.scripts {
                     var _ = d - curHp;
 
                     if (_ != 0 && curHp != 0) {
-                        var S = sheepMgr.countBuffs[1 - (int)camp];
+                        var S = this.countBuffs[1 - (int)camp];
                         if (S > 0) {
                             var b = 1 + SheepConfig.buffDragonDamageIncreseRate * S;
                             b += 0;
@@ -406,7 +406,7 @@ namespace rvb.scripts {
                             viewPet.curHp = curHp;
                         }
 
-                        var I = sheepMgr.countBuffs[(int)camp];
+                        var I = this.countBuffs[(int)camp];
                         if (I > 0) {
                             var B = Math.Pow(1 - SheepConfig.buffDragonReduceRate, I);
                             B -= 0;
@@ -437,13 +437,13 @@ namespace rvb.scripts {
                         t.hitAnim();
                     }
 
-                    var R = sheepMgr.countShowBuffs[(int)camp];
-                    var M = sheepMgr.countBuffs[(int)camp];
+                    var R = this.countShowBuffs[(int)camp];
+                    var M = this.countBuffs[(int)camp];
 
-                    if (!sheepMgr.flagLongBuffs[(int)camp] && curHp < sheepMgr.loongHp * SheepConfig.counterHpRatio) {
-                        sheepMgr.flagLongBuffs[(int)camp] = true;
+                    if (!this.flagLongBuffs[(int)camp] && curHp < this.loongHp * SheepConfig.counterHpRatio) {
+                        this.flagLongBuffs[(int)camp] = true;
                         t.backStateTime = c;
-                        sheepMgr.preBuffs[(int)camp].Add(0);
+                        this.preBuffs[(int)camp].Add(0);
                         sheepCtl.comMatch.showDoubleAnim(camp);
                         sheepCtl.comUIAnim.backAnim(camp);
                         sheepCtl.cameraCtl.onShake(SheepConfig.shockBeginNumber);
@@ -467,7 +467,7 @@ namespace rvb.scripts {
                     var unuse = viewPet.curAckFrame;
 
                     var T = 0;
-                    var D = sheepMgr.plotRatio;
+                    var D = this.plotRatio;
 
                     for (var A = 0; A < SheepConfig.loongStateSwitching.Length; A++) {
                         if (D <= SheepConfig.loongStateSwitching[A]) {
@@ -476,9 +476,9 @@ namespace rvb.scripts {
                         }
                     }
 
-                    sheepMgr.plotRatioIndex = T;
-                    t.updateState(sheepCtl, sheepMgr, T + 1);
-                    t.updateStateJJL(sheepCtl, sheepMgr, T + 1);
+                    this.plotRatioIndex = T;
+                    t.updateState(sheepCtl, this, T + 1);
+                    t.updateStateJJL(sheepCtl, this, T + 1);
                 }
             }
 
@@ -660,7 +660,7 @@ namespace rvb.scripts {
                 this.countNewBuffs[s] += sum;
             }
 
-            isEnd = this.updateBoss(this, sheepCtl, dt, now);
+            isEnd = this.updateBoss(sheepCtl, dt, now);
 
             if (isEnd) {
                 return;
