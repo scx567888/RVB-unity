@@ -272,6 +272,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2c557eff53575a47b7cc4d8b4bf495d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  pets:
+  - id: 
+    json: {fileID: 4900000, guid: 9cbfdd52c2c54ff6a6171c3df3098c5d, type: 3}
+    image: {fileID: 21300000, guid: 48f1255034b34ff8b1cd4dc2aac1909f, type: 3}
+  - id: 
+    json: {fileID: 0}
+    image: {fileID: 0}
+  - id: 
+    json: {fileID: 0}
+    image: {fileID: 0}
+  bullets: []
   texture: {fileID: 2800000, guid: 575a93a600b640bd8c566ea188957696, type: 3}
   json: {fileID: 4900000, guid: 62ac99ddefc04cdf9ce5e2a9c386dc43, type: 3}
   texture1: {fileID: 2800000, guid: ec079d659f8d474aa66dc878546f2435, type: 3}
