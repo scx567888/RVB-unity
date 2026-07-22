@@ -2162,10 +2162,10 @@ namespace rvb.scripts {
 
                             var R = new Vector3(S, M, 0f);
                             if (C.booms != null && C.booms.Count > 0) {
-                                createPetView(sheepCtl, C.camp, a, h, 1, true, R, C.booms.Pop());
+                                createPetView(C.camp, a, h,   R, C.booms.Pop());
                             }
                             else {
-                                createPetView(sheepCtl, C.camp, a, h, 1, true, R);
+                                createPetView(C.camp, a, h,   R);
                             }
 
                             if (C.count <= 0) {
@@ -2214,10 +2214,10 @@ namespace rvb.scripts {
                                     ? new Vector3((float)(L - x), F, 0)
                                     : new Vector3((float)(x - L), F, 0);
                                 if (P.booms != null && P.booms.Count > 0) {
-                                    createPetView(sheepCtl, P.player, a, (int)G, 1, true, X, P.booms.Pop());
+                                    createPetView(P.player, a, (int)G,  X, P.booms.Pop());
                                 }
                                 else {
-                                    createPetView(sheepCtl, P.camp, a, (int)G, 1, true, X);
+                                    createPetView(P.camp, a, (int)G,  X);
                                 }
                             }
 
@@ -2475,18 +2475,15 @@ namespace rvb.scripts {
             return false;
         }
 
-        public PetView createPetView(
-            SheepCtl sheepCtl,
+        public void createPetView(
             SheepCamp camp, 
             int roleType,
             int a = 1,
-            int i = 0,
-            bool r = true,
             Vector3 f = new Vector3(),
             bool s = false
         ) {
             if (this.state != SheepRoomState.Run && this.state != SheepRoomState.Start) {
-                return null;
+                return ;
             }
 
             var sheepRoleTypeInfo = SheepRoleTypeInfo.getById(roleType);
@@ -2553,7 +2550,7 @@ namespace rvb.scripts {
 
             petSkin.pos = petSkin.position;
 
-            return petSkin;
+            
         }
         
         public void initPet(PetView ppp) {
