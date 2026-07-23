@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using scx.GridMap;
 using UnityEngine;
 using static rvb.scripts.BullteCreate;
 using static rvb.scripts.SheepModes;
@@ -122,6 +123,9 @@ namespace rvb.scripts {
             new int[(int)SheepRoleType.Count]
         };
 
+        // 格子空间, 用于加速索敌碰撞
+        private GridMap<SheepCell> gridMap;
+
         // 红方召唤池
         public Dictionary<int, SheepCallInfo> redCallInfos = new Dictionary<int, SheepCallInfo>();
 
@@ -228,6 +232,15 @@ namespace rvb.scripts {
             UtilFind.system = this;
             UtilAck.system = this;
             inc = this;
+
+
+            gridMap = new GridMap<SheepCell>(
+                -SheepConfig.w / 2f, -SheepConfig.h / 2f,
+                SheepConfig.w, SheepConfig.h,
+                SheepConfig.d,
+                (gridX, gridY, worldStartX, worldStartY, worldEndX, worldEndY) =>
+                    new SheepCell(gridX, gridY, worldStartX, worldStartY, worldEndX, worldEndY)
+            );
         }
 
         // ************************* 生成相关 **************************
@@ -2231,7 +2244,7 @@ namespace rvb.scripts {
                                 createPetView(C.camp, a, h, R, C.booms.Pop());
                             }
                             else {
-                                createPetView(C.camp, a, h, R,false);
+                                createPetView(C.camp, a, h, R, false);
                             }
 
                             if (C.count <= 0) {
@@ -2283,7 +2296,7 @@ namespace rvb.scripts {
                                     createPetView(P.player, a, (int)G, X, P.booms.Pop());
                                 }
                                 else {
-                                    createPetView(P.camp, a, (int)G, X,false);
+                                    createPetView(P.camp, a, (int)G, X, false);
                                 }
                             }
 
@@ -2542,7 +2555,7 @@ namespace rvb.scripts {
         }
 
         // 创建 单位, 下一帧才会生效
-        public void createPetView(SheepCamp camp, int roleType, int a , Vector3 f , bool s) {
+        public void createPetView(SheepCamp camp, int roleType, int a, Vector3 f, bool s) {
             if (this.state != SheepRoomState.Run && this.state != SheepRoomState.Start) {
                 return;
             }
