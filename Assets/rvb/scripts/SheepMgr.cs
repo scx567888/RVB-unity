@@ -11,7 +11,6 @@ namespace rvb.scripts {
     public class SheepMgr {
         public static SheepMgr inc;
 
-        
 
         // 自动出兵计时器
         public float autoTime = 0f;
@@ -130,12 +129,11 @@ namespace rvb.scripts {
 
         // 红蓝双方 每次执行多少逻辑帧 
         public int[] logic_counts = { 1, 1 };
-        
+
         // 是否自动出兵
         public bool isAutoCall = true;
 
         public SheepMgr(SheepCtl sheepCtl) {
-
             // 自动出兵计时器
             this.autoTime = 0;
 
@@ -178,8 +176,6 @@ namespace rvb.scripts {
             };
 
 
-            
-            
             this.updateTime = 0;
 
 
@@ -235,6 +231,8 @@ namespace rvb.scripts {
             UtilFind.system = this;
             UtilAck.system = this;
         }
+        
+        // ************************* 生成相关 **************************
 
         // 获取 petId
         public int getNextPetId() {
@@ -245,12 +243,12 @@ namespace rvb.scripts {
         public int getNextBulletId() {
             return ++bulletId;
         }
-        
+
         // 添加单位 下一帧才会使用
         public void addPrePet(PetView pet) {
             pre_pets[(int)pet.camp].Add(pet);
         }
-        
+
         // 添加子弹 下一帧才会使用
         public void addPrePet(BulletView bullet) {
             pre_bullets.Add(bullet);
@@ -268,16 +266,49 @@ namespace rvb.scripts {
                 p1.Clear();
             }
         }
-        
+
         // 将 pre_bullets 应用到 bullets 中
         public void applyPreBullets() {
             foreach (var bullet in pre_bullets) {
                 bullets.Add(bullet);
             }
+
             pre_bullets.Clear();
         }
+
+        // ********************* 删除相关 **************************
         
+        // 添加 删除单位.
+        public void addDelPet(PetView pet) {
+            del_pets[(int)pet.camp].Add(pet);
+        }
         
+        // 添加 删除子弹.
+        public void addDelBullet(BulletView bullet) {
+            del_bullets.Add(bullet);
+        }
+
+        // 从 pets 中 删除 del_pets 中的 单位
+        public void applyDelPets() {
+            for (var i = 0; i < del_pets.Length; i++) {
+                var p1 = del_pets[i];
+                var p2 = pets[i];
+                foreach (var pet in p1) {
+                    p2.Remove(pet);
+                }
+
+                p1.Clear();
+            }
+        }
+
+        // 从 bullets 中 删除 del_bullets 中的 对象
+        public void applyDelBullets() {
+            foreach (var bullet in del_bullets) {
+                bullets.Remove(bullet);
+            }
+            del_bullets.Clear();
+        }
+
         // ***************************** 旧方法 ************************************
 
         public void onGameStart() {
@@ -526,14 +557,14 @@ namespace rvb.scripts {
         public void del_bullet(BulletView e) {
             var bullet = e;
             bullet.id = 0;
-            del_bullets.Add(bullet);
+            addDelBullet(bullet);
         }
 
         public void del_pet(PetView e) {
             e.isActive = false;
             e.isDie = true;
             e.id = 0;
-            this.del_pets[(int)e.camp].Add(e);
+            addDelPet(e);
         }
 
         public void clear_bullets() {
@@ -777,22 +808,9 @@ namespace rvb.scripts {
             this.blueBuffCount = _blueBuffCount;
 
 
-            // 从 pets 中 删除 del_pets 的 对象
-            for (var i = 0; i < del_pets.Length; i++) {
-                var p1 = del_pets[i];
-                var p2 = pets[i];
-                foreach (var petView in p1) {
-                    p2.Remove(petView);
-                }
-
-                p1.Clear();
-            }
-
-            // 从 bullets 中 删除 del_bullets 的 对象
-            foreach (var b1 in del_bullets) {
-                bullets.Remove(b1);
-            }
-
+            applyDelPets();
+            
+            applyDelBullets();
 
             if (isEnd) {
                 return;
@@ -2559,7 +2577,7 @@ namespace rvb.scripts {
             }
 
 
-             Vector3 p1 = petSkin.position.Value;
+            Vector3 p1 = petSkin.position.Value;
             int x7 = Mathf.FloorToInt(p1.x);
             int y7 = Mathf.FloorToInt(p1.y);
 
@@ -2689,7 +2707,6 @@ namespace rvb.scripts {
             petSkin.pos = petSkin.position;
         }
 
-      
 
         // 生成 子弹 下一帧才会使用
         public void spawnBullet(BullteCreate tttt) {
