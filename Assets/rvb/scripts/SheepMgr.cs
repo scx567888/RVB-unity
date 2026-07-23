@@ -236,12 +236,19 @@ namespace rvb.scripts {
             UtilAck.system = this;
         }
 
+        // 获取 petId
         public int getNextPetId() {
             return ++petId;
         }
 
+        // 获取 bulletId
         public int getNextBulletId() {
             return ++bulletId;
+        }
+        
+        // 生成单位 下一帧才会使用
+        public void addPrePet(PetView pet) {
+            this.pre_pets[(int)pet.camp].Add(pet);
         }
 
         public void onGameStart() {
@@ -2663,15 +2670,12 @@ namespace rvb.scripts {
                 this.god_view_pets.Add(petSkin);
             }
 
-            this.spawnPet(petSkin);
+            this.addPrePet(petSkin);
 
             petSkin.pos = petSkin.position;
         }
 
-        // 生成单位 下一帧才会使用
-        public void spawnPet(PetView tttt) {
-            this.pre_pets[(int)tttt.camp].Add(tttt);
-        }
+      
 
         // 生成 子弹 下一帧才会使用
         public void spawnBullet(BullteCreate tttt) {
