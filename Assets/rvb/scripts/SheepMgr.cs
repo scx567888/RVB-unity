@@ -47,11 +47,6 @@ namespace rvb.scripts {
         public Dictionary<int, int>[] petStartCounts = { new Dictionary<int, int>(), new Dictionary<int, int>() };
         public List<PetView> god_view_pets = new List<PetView>();
 
-        public PerfStat perfStat = new PerfStat() {
-            redNums = new[] { 0, 0, 0, 0, 0, 0, 0, 0 },
-            blueNums = new[] { 0, 0, 0, 0, 0, 0, 0, 0 }
-        };
-
 
         public long updateTime = 0;
 
@@ -176,10 +171,6 @@ namespace rvb.scripts {
 
             this.petStartCounts = new[] { new Dictionary<int, int>(), new Dictionary<int, int>() };
             this.god_view_pets = new List<PetView>();
-            this.perfStat = new PerfStat() {
-                redNums = new[] { 0, 0, 0, 0, 0, 0, 0, 0 },
-                blueNums = new[] { 0, 0, 0, 0, 0, 0, 0, 0 }
-            };
 
 
             this.updateTime = 0;
@@ -399,8 +390,6 @@ namespace rvb.scripts {
         public void clearPets() {
             this.pets[(int)SheepCamp.Red].Clear();
             this.pets[(int)SheepCamp.Blue].Clear();
-            Array.Fill(this.perfStat.redNums, 0);
-            Array.Fill(this.perfStat.blueNums, 0);
         }
 
         public int getBlockIndex(Vector3 e) {
@@ -2242,7 +2231,7 @@ namespace rvb.scripts {
                                 createPetView(C.camp, a, h, R, C.booms.Pop());
                             }
                             else {
-                                createPetView(C.camp, a, h, R);
+                                createPetView(C.camp, a, h, R,false);
                             }
 
                             if (C.count <= 0) {
@@ -2294,7 +2283,7 @@ namespace rvb.scripts {
                                     createPetView(P.player, a, (int)G, X, P.booms.Pop());
                                 }
                                 else {
-                                    createPetView(P.camp, a, (int)G, X);
+                                    createPetView(P.camp, a, (int)G, X,false);
                                 }
                             }
 
@@ -2553,7 +2542,7 @@ namespace rvb.scripts {
         }
 
         // 创建 单位, 下一帧才会生效
-        public void createPetView(SheepCamp camp, int roleType, int a = 1, Vector3 f = new Vector3(), bool s = false) {
+        public void createPetView(SheepCamp camp, int roleType, int a , Vector3 f , bool s) {
             if (this.state != SheepRoomState.Run && this.state != SheepRoomState.Start) {
                 return;
             }
