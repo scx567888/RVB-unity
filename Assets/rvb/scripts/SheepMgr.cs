@@ -121,6 +121,12 @@ namespace rvb.scripts {
         // 子弹自增 id
         public int bulletId = 0;
 
+        // 场上角色数量, 按照 [阵营][角色类型] 存储
+        public int[][] petCounts = new[] {
+            new int[(int)SheepRoleType.Count],
+            new int[(int)SheepRoleType.Count]
+        };
+
         // 红方召唤池
         public Dictionary<int, SheepCallInfo> redCallInfos = new Dictionary<int, SheepCallInfo>();
 
@@ -329,6 +335,7 @@ namespace rvb.scripts {
         // 添加单位, 不要在逻辑帧循环中调用
         public void addPet(PetView pet) {
             pets[(int)pet.camp].Add(pet);
+            petCounts[(int)pet.camp][(int)pet.conf.roleType] += 1;
         }
 
         // 添加子弹, 不要在逻辑帧循环中调用
@@ -339,6 +346,7 @@ namespace rvb.scripts {
         // 删除单位, 不要在逻辑帧循环中调用
         public void delPet(PetView pet) {
             pets[(int)pet.camp].Remove(pet);
+            petCounts[(int)pet.camp][(int)pet.conf.roleType] -= 1;
         }
 
         // 添加子弹, 不要在逻辑帧循环中调用
@@ -2170,9 +2178,7 @@ namespace rvb.scripts {
                     var c = SheepRoleTypeInfo.getById(a);
                     var formation = SheepRoleFormation.getById(c.formationId);
 
-                    var u = n == SheepCamp.Red
-                        ? this.perfStat.redNums[(int)c.roleType]
-                        : this.perfStat.blueNums[(int)c.roleType];
+                    var u = petCounts[(int)n][(int)c.roleType];
 
                     if (c.roleType == SheepRoleType.xiao_bing) {
                         if (u > 14500) {

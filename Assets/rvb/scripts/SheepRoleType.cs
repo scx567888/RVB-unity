@@ -31,6 +31,8 @@
         qi_lin = 9,
         buff = 10,
         tower = 11,
-        loongMiao = 12
+        loongMiao = 12,
+        
+        Count
     }
 }
