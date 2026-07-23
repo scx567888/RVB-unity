@@ -231,7 +231,7 @@ namespace rvb.scripts {
             UtilFind.system = this;
             UtilAck.system = this;
         }
-        
+
         // ************************* 生成相关 **************************
 
         // 获取 petId
@@ -277,12 +277,12 @@ namespace rvb.scripts {
         }
 
         // ********************* 删除相关 **************************
-        
+
         // 添加 删除单位.
         public void addDelPet(PetView pet) {
             del_pets[(int)pet.camp].Add(pet);
         }
-        
+
         // 添加 删除子弹.
         public void addDelBullet(BulletView bullet) {
             del_bullets.Add(bullet);
@@ -293,9 +293,9 @@ namespace rvb.scripts {
             // 复制一份方便 渲染层处理
             var copy = new HashSet<PetView>[del_pets.Length];
             for (var i = 0; i < del_pets.Length; i++) {
-                copy[i]= new HashSet<PetView>(del_pets[i]);
+                copy[i] = new HashSet<PetView>(del_pets[i]);
             }
-            
+
             // 应用移除
             for (var i = 0; i < del_pets.Length; i++) {
                 var p1 = del_pets[i];
@@ -303,20 +303,23 @@ namespace rvb.scripts {
                 foreach (var pet in p1) {
                     p2.Remove(pet);
                 }
+
                 // 清空
                 p1.Clear();
             }
+
             return copy;
         }
 
         // 从 bullets 中 删除 del_bullets 中的 对象
         public List<BulletView> applyDelBullets() {
             // 复制一份方便 渲染层处理
-            var copy =new List<BulletView>(del_bullets) ;
+            var copy = new List<BulletView>(del_bullets);
             // 应用移除
             foreach (var bullet in del_bullets) {
                 bullets.Remove(bullet);
             }
+
             // 清空
             del_bullets.Clear();
             return copy;
@@ -822,7 +825,7 @@ namespace rvb.scripts {
 
 
             applyDelPets();
-            
+
             applyDelBullets();
 
             if (isEnd) {
