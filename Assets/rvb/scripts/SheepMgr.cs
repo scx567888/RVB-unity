@@ -246,10 +246,18 @@ namespace rvb.scripts {
             return ++bulletId;
         }
         
-        // 生成单位 下一帧才会使用
+        // 添加单位 下一帧才会使用
         public void addPrePet(PetView pet) {
-            this.pre_pets[(int)pet.camp].Add(pet);
+            pre_pets[(int)pet.camp].Add(pet);
         }
+        
+        // 添加子弹 下一帧才会使用
+        public void addPrePet(BulletView bullet) {
+            pre_bullets.Add(bullet);
+        }
+        
+        
+        // ***************************** 旧方法 ************************************
 
         public void onGameStart() {
             this.gameStartTimerForBuff = 0;
@@ -2814,7 +2822,7 @@ namespace rvb.scripts {
 
             preBullet.atkVue = view_pet != null ? view_pet.conf.atk : l.atk;
             preBullet.frame = 0;
-            pre_bullets.Add(preBullet);
+            addPrePet(preBullet);
         }
 
 
