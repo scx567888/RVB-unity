@@ -7,6 +7,8 @@ namespace rvb.scripts {
         // 当前格子的角色列表, 按照 [阵营][碰撞ID] 存储
         private readonly List<PetView>[][] pets;
 
+        public int petCount;
+
         public SheepCell(int gridX, int gridY, float worldStartX, float worldStartY, float worldEndX, float worldEndY) :
             base(gridX, gridY, worldStartX, worldStartY, worldEndX, worldEndY) {
             this.pets = new[] {
@@ -23,6 +25,7 @@ namespace rvb.scripts {
             }
 
             p1.Add(pet);
+            petCount += 1;
         }
 
         // callback 返回 false: 继续  callback 返回 true: 停止
@@ -80,6 +83,7 @@ namespace rvb.scripts {
                     }
                 }
             }
+            petCount = 0;
         }
     }
 }

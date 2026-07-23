@@ -140,7 +140,7 @@ namespace rvb.scripts
                     return false;
                 }
 
-                int petCount = cell.pets?.Count ?? 0;
+                int petCount = cell.petCount;
 
                 if (drawOnlyNonEmptyCells && petCount == 0)
                 {
@@ -177,18 +177,8 @@ namespace rvb.scripts
         /// </summary>
         private void DrawCellPets(SheepCell cell, Vector3 cellCenter)
         {
-            if (cell.pets == null)
-            {
-                return;
-            }
-
-            foreach (var pet in cell.pets)
-            {
-                if (pet == null)
-                {
-                    continue;
-                }
-
+            cell.forEachPet((pet) => {
+                
                 Vector3 petWorldPosition =
                     LogicToWorld(pet.posX, pet.posY);
 
@@ -212,7 +202,9 @@ namespace rvb.scripts
                     Gizmos.color = petToCellLineColor;
                     Gizmos.DrawLine(cellCenter, petWorldPosition);
                 }
-            }
+                return false;
+            });
+          
         }
 
 #if UNITY_EDITOR
@@ -227,27 +219,20 @@ namespace rvb.scripts
             int redCount = 0;
             int blueCount = 0;
 
-            if (cell.pets != null)
-            {
-                foreach (var pet in cell.pets)
-                {
-                    if (pet == null)
-                    {
-                        continue;
-                    }
+            cell.forEachPet((pet) => {
+                
+                switch (pet.camp) {
+                    case SheepCamp.Red:
+                        redCount++;
+                        break;
 
-                    switch (pet.camp)
-                    {
-                        case SheepCamp.Red:
-                            redCount++;
-                            break;
-
-                        case SheepCamp.Blue:
-                            blueCount++;
-                            break;
-                    }
+                    case SheepCamp.Blue:
+                        blueCount++;
+                        break;
                 }
-            }
+
+                return false;
+            });
 
             string text =
                 $"[{cell.gridX}, {cell.gridY}]\n" +
