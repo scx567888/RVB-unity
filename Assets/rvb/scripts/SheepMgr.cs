@@ -124,7 +124,7 @@ namespace rvb.scripts {
         };
 
         // 格子空间, 用于加速索敌碰撞
-        private GridMap<SheepCell> gridMap;
+        public GridMap<SheepCell> gridMap;
 
         // 红方召唤池
         public Dictionary<int, SheepCallInfo> redCallInfos = new Dictionary<int, SheepCallInfo>();
