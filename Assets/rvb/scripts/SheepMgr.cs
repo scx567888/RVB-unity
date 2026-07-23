@@ -2541,19 +2541,11 @@ namespace rvb.scripts {
             }
 
 
-            initPet(petSkin);
+             Vector3 p1 = petSkin.position.Value;
+            int x7 = Mathf.FloorToInt(p1.x);
+            int y7 = Mathf.FloorToInt(p1.y);
 
-            this.spawnPet(petSkin);
-
-            petSkin.pos = petSkin.position;
-        }
-
-        public void initPet(PetView petSkin) {
-            Vector3 a = petSkin.position.Value;
-            int x = Mathf.FloorToInt(a.x);
-            int y = Mathf.FloorToInt(a.y);
-
-            int blockIndex = this.getBlockIndex(new Vector3(x, y, 0));
+            int blockIndex = this.getBlockIndex(new Vector3(x7, y7, 0));
 
             petSkin.id = this.getNextPetId();
 
@@ -2601,12 +2593,12 @@ namespace rvb.scripts {
             }
 
             petSkin.frame = 0;
-            petSkin.posBefX = x;
-            petSkin.posBefY = y;
-            petSkin.animX = x;
-            petSkin.animY = y;
-            petSkin.posX = x;
-            petSkin.posY = y;
+            petSkin.posBefX = x7;
+            petSkin.posBefY = y7;
+            petSkin.animX = x7;
+            petSkin.animY = y7;
+            petSkin.posX = x7;
+            petSkin.posY = y7;
             petSkin.befBlockIndex = blockIndex;
             petSkin.blockIndex = blockIndex;
 
@@ -2631,8 +2623,8 @@ namespace rvb.scripts {
             else if (roleFormation.formationType == SheepRoleFormationType.AngleTidy ||
                      roleFormation.formationType == SheepRoleFormationType.AngleRandom) {
                 Vector3 g = new Vector3(
-                    d7 * sheepMode.loongX - x,
-                    0 - y,
+                    d7 * sheepMode.loongX - x7,
+                    0 - y7,
                     0
                 ).normalized;
 
@@ -2673,6 +2665,10 @@ namespace rvb.scripts {
             if (this.state == SheepRoomState.Start && petSkin.conf.roleType == SheepRoleType.yang_shen) {
                 this.god_view_pets.Add(petSkin);
             }
+
+            this.spawnPet(petSkin);
+
+            petSkin.pos = petSkin.position;
         }
 
         // 生成单位 下一帧才会使用
