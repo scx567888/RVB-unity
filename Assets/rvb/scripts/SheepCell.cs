@@ -19,6 +19,7 @@ namespace rvb.scripts {
             var p1 = this.pets[(int)pet.camp][pet.conf.collideId];
             if (p1 == null) {
                 p1 = new List<PetView>();
+                this.pets[(int)pet.camp][pet.conf.collideId] = p1;
             }
 
             p1.Add(pet);

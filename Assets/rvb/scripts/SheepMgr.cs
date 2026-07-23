@@ -366,7 +366,7 @@ namespace rvb.scripts {
         public void rebuildGridMap() {
             // 清空格子
             gridMap.forEachCell(cell => {
-                cell.pets.Clear();
+                cell.clearPets();
                 return false;
             });
 
@@ -377,7 +377,7 @@ namespace rvb.scripts {
                         pet.posX,
                         pet.posY
                     );
-                    cell.pets.Add(pet);
+                    cell.addPet(pet);
                 }
             }
         }
