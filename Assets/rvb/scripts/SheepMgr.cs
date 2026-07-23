@@ -322,30 +322,30 @@ namespace rvb.scripts {
             del_bullets.Clear();
             return copy;
         }
-        
-        
+
+
         // ****************** 场上单位相关 *************************
 
         // 添加单位, 不要在逻辑帧循环中调用
         public void addPet(PetView pet) {
             pets[(int)pet.camp].Add(pet);
         }
-        
+
         // 添加子弹, 不要在逻辑帧循环中调用
         public void addBullet(BulletView bullet) {
             bullets.Add(bullet);
         }
-        
+
         // 删除单位, 不要在逻辑帧循环中调用
         public void delPet(PetView pet) {
             pets[(int)pet.camp].Remove(pet);
         }
-        
+
         // 添加子弹, 不要在逻辑帧循环中调用
         public void delBullet(BulletView bullet) {
             bullets.Remove(bullet);
         }
-        
+
 
         // ***************************** 旧方法 ************************************
 
@@ -653,7 +653,7 @@ namespace rvb.scripts {
             boss[(int)camp] = view;
         }
 
-        public (HashSet<PetView>[] del_pets,List<BulletView> del_bullets) role_logic(SheepCtl sheepCtl, float dt) {
+        public (HashSet<PetView>[] del_pets, List<BulletView> del_bullets) role_logic(SheepCtl sheepCtl, float dt) {
             this.logic_counts[(int)SheepCamp.Red] = this.redBuffCount > 0 ? 2 : 1;
             this.logic_counts[(int)SheepCamp.Blue] = this.blueBuffCount > 0 ? 2 : 1;
 
@@ -679,7 +679,7 @@ namespace rvb.scripts {
                 eventBus.emit(EventType.RoomStateEnd);
                 isEnd = true;
                 this.endTime = 0;
-                return (Array.Empty<HashSet<PetView>>(),new List<BulletView>());
+                return (Array.Empty<HashSet<PetView>>(), new List<BulletView>());
             }
 
 
@@ -748,7 +748,7 @@ namespace rvb.scripts {
             isEnd = this.updateBoss(sheepCtl, dt, now);
 
             if (isEnd) {
-                return (Array.Empty<HashSet<PetView>>(),new List<BulletView>());
+                return (Array.Empty<HashSet<PetView>>(), new List<BulletView>());
             }
 
             var _redBuffCount = 0;
