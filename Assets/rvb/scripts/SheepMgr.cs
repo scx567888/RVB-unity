@@ -186,9 +186,6 @@ namespace rvb.scripts {
             this.updateTime = 0;
 
 
-            this.bulletId = 0;
-
-
             this.pre_blocks = new Dictionary<int, Dictionary<int, Dictionary<int, List<PetView>>>>();
             this.isChangeCollsionFlags = null;
             this.isChangeAckFlags = null;
@@ -235,14 +232,19 @@ namespace rvb.scripts {
             this.redBuffCount = 0;
             this.blueBuffCount = 0;
 
-            // 角色 id 分配器
-            this.petId = 0;
-
 
             // 绑定 system
             Util.system = this;
             UtilFind.system = this;
             UtilAck.system = this;
+        }
+        
+        public int getNextPetId() {
+            return ++petId;
+        }
+        
+        public int getNextBulletId() {
+            return ++bulletId;
         }
 
         public void onGameStart() {
@@ -296,9 +298,7 @@ namespace rvb.scripts {
             return (int)(t * SheepConfig.line_w + o);
         }
 
-        public int getNextPetId() {
-            return ++petId;
-        }
+        
 
 
         public void clearPetViews() {
@@ -361,7 +361,7 @@ namespace rvb.scripts {
 
         public void game_update( SheepCtl sheepCtl, float i) {
             // 处理召唤兵
-            this.consume(sheepCtl, i);
+            this.consume(i);
 
             // 执行主逻辑
             this.role_logic(sheepCtl, i);
@@ -588,7 +588,6 @@ namespace rvb.scripts {
             var now = NowMs();
 
             this.mainClearBlocks();
-            sheepCtl.comImages.mesh_block.onFrameUpdateStart();
 
 
             if (this.endTime != 0 && this.endTime < NowMs()) {
@@ -757,7 +756,7 @@ namespace rvb.scripts {
 
 
             this.mainSyncBlocksToWokers();
-            sheepCtl.comImages.mesh_block.onFrameUpdateEnd(this);
+            
             this.redBuffCount = _redBuffCount;
             this.blueBuffCount = _blueBuffCount;
             
@@ -2071,7 +2070,7 @@ namespace rvb.scripts {
             sheepCallInfo.pets.Add(new SheepCallInfoPet() { camp = camp, count = count });
         }
 
-        public void consume(SheepCtl sheepCtl, float t) {
+        public void consume( float t) {
             var o = this;
 
             this.autoTime += t;
@@ -2703,7 +2702,7 @@ namespace rvb.scripts {
             var n = SheepBullet.getById(bulletId);
             var r = view_pet != null ? view_pet.camp == SheepCamp.Red ? n.startOffsetX : -n.startOffsetX : 0;
             var preBullet = new BulletView();
-            preBullet.id = this.bulletId++;
+            preBullet.id = getNextBulletId();
             preBullet.bulletId = bulletId;
             preBullet.roleUid = view_pet != null ? view_pet.id : 0;
             preBullet.roleIndex = view_pet;
