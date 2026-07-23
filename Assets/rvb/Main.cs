@@ -190,7 +190,7 @@ namespace rvb {
             int stepCount = 0;
             while (logicAccumulator >= logicStepSeconds &&
                    stepCount < maxLogicStepsPerUnityFrame) {
-                sheepMgr.game_update(sheepCtl, logicStepMilliseconds);
+                var gameUpdate = sheepMgr.game_update(sheepCtl, logicStepMilliseconds);
 
 
                 SyncBossMarker(0);

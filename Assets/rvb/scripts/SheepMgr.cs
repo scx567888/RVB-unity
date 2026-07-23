@@ -437,12 +437,12 @@ namespace rvb.scripts {
             }
         }
 
-        public void game_update(SheepCtl sheepCtl, float i) {
+        public (HashSet<PetView>[] del_pets, List<BulletView> del_bullets) game_update(SheepCtl sheepCtl, float i) {
             // 处理召唤兵
             this.consume(i);
 
             // 执行主逻辑
-            this.role_logic(sheepCtl, i);
+            return this.role_logic(sheepCtl, i);
         }
 
         public bool updateBoss(SheepCtl sheepCtl, float dt, long c) {
@@ -631,7 +631,7 @@ namespace rvb.scripts {
             boss[(int)camp] = view;
         }
 
-        public void role_logic(SheepCtl sheepCtl, float dt) {
+        public (HashSet<PetView>[] del_pets,List<BulletView> del_bullets) role_logic(SheepCtl sheepCtl, float dt) {
             this.logic_counts[(int)SheepCamp.Red] = this.redBuffCount > 0 ? 2 : 1;
             this.logic_counts[(int)SheepCamp.Blue] = this.blueBuffCount > 0 ? 2 : 1;
 
@@ -657,7 +657,7 @@ namespace rvb.scripts {
                 eventBus.emit(EventType.RoomStateEnd);
                 isEnd = true;
                 this.endTime = 0;
-                return;
+                return (Array.Empty<HashSet<PetView>>(),new List<BulletView>());
             }
 
 
@@ -726,7 +726,7 @@ namespace rvb.scripts {
             isEnd = this.updateBoss(sheepCtl, dt, now);
 
             if (isEnd) {
-                return;
+                return (Array.Empty<HashSet<PetView>>(),new List<BulletView>());
             }
 
             var _redBuffCount = 0;
@@ -824,13 +824,11 @@ namespace rvb.scripts {
             this.blueBuffCount = _blueBuffCount;
 
 
-            applyDelPets();
+            var del_pets1 = applyDelPets();
 
-            applyDelBullets();
+            var del_bullets1 = applyDelBullets();
 
-            if (isEnd) {
-                return;
-            }
+            return (del_pets1, del_bullets1);
         }
 
 
