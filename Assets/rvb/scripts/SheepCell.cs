@@ -1,12 +1,84 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using scx.GridMap;
 
 namespace rvb.scripts {
     public class SheepCell : GridCell {
-        public readonly List<PetView> pets;
+        // 当前格子的角色列表, 按照 [阵营][碰撞ID] 存储
+        private readonly List<PetView>[][] pets;
 
-        public SheepCell(int gridX, int gridY, float worldStartX, float worldStartY, float worldEndX, float worldEndY) : base(gridX, gridY, worldStartX, worldStartY, worldEndX, worldEndY) {
-            this.pets = new List<PetView>();
+        public SheepCell(int gridX, int gridY, float worldStartX, float worldStartY, float worldEndX, float worldEndY) :
+            base(gridX, gridY, worldStartX, worldStartY, worldEndX, worldEndY) {
+            this.pets = new[] {
+                new List<PetView>[SheepConfig.MaxGroupCount],
+                new List<PetView>[SheepConfig.MaxGroupCount]
+            };
+        }
+
+        public void addPet(PetView pet) {
+            var p1 = this.pets[(int)pet.camp][pet.conf.collideId];
+            if (p1 == null) {
+                p1 = new List<PetView>();
+            }
+
+            p1.Add(pet);
+        }
+
+        // callback 返回 false: 继续  callback 返回 true: 停止
+        public void forEachPet(Func<PetView, bool> callback) {
+            foreach (var p1 in this.pets) {
+                foreach (var p2 in p1) {
+                    if (p2 != null) {
+                        foreach (var pet in p2) {
+                            var stop = callback(pet);
+                            if (stop == true) {
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // callback 返回 false: 继续  callback 返回 true: 停止
+        public void forEachPet(SheepCamp camp, Func<PetView, bool> callback) {
+            var p1 = pets[(int)camp];
+
+            foreach (var p2 in p1) {
+                if (p2 != null) {
+                    foreach (var pet in p2) {
+                        var stop = callback(pet);
+                        if (stop == true) {
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
+        // callback 返回 false: 继续  callback 返回 true: 停止
+        public void forEachPet(SheepCamp camp, int collideId, Func<PetView, bool> callback) {
+            var p1 = pets[(int)camp];
+            var p2 = p1[collideId];
+
+            if (p2 != null) {
+                foreach (var pet in p2) {
+                    var stop = callback(pet);
+                    if (stop == true) {
+                        return;
+                    }
+                }
+            }
+        }
+
+        public void clearPets() {
+            foreach (var p1 in this.pets) {
+                foreach (var p2 in p1) {
+                    if (p2 != null) {
+                        p2.Clear();
+                    }
+                }
+            }
         }
     }
 }
