@@ -250,7 +250,7 @@ namespace rvb.scripts {
         }
 
         // 添加子弹 下一帧才会使用
-        public void addPrePet(BulletView bullet) {
+        public void addPreBullet(BulletView bullet) {
             pre_bullets.Add(bullet);
         }
 
@@ -258,9 +258,8 @@ namespace rvb.scripts {
         public void applyPrePets() {
             for (var i = 0; i < pre_pets.Length; i++) {
                 var p1 = pre_pets[i];
-                var p2 = pets[i];
                 foreach (var pet in p1) {
-                    p2.Add(pet);
+                    addPet(pet);
                 }
 
                 p1.Clear();
@@ -270,7 +269,7 @@ namespace rvb.scripts {
         // 将 pre_bullets 应用到 bullets 中
         public void applyPreBullets() {
             foreach (var bullet in pre_bullets) {
-                bullets.Add(bullet);
+                addBullet(bullet);
             }
 
             pre_bullets.Clear();
@@ -299,9 +298,8 @@ namespace rvb.scripts {
             // 应用移除
             for (var i = 0; i < del_pets.Length; i++) {
                 var p1 = del_pets[i];
-                var p2 = pets[i];
                 foreach (var pet in p1) {
-                    p2.Remove(pet);
+                    delPet(pet);
                 }
 
                 // 清空
@@ -317,13 +315,37 @@ namespace rvb.scripts {
             var copy = new List<BulletView>(del_bullets);
             // 应用移除
             foreach (var bullet in del_bullets) {
-                bullets.Remove(bullet);
+                delBullet(bullet);
             }
 
             // 清空
             del_bullets.Clear();
             return copy;
         }
+        
+        
+        // ****************** 场上单位相关 *************************
+
+        // 添加单位, 不要在逻辑帧循环中调用
+        public void addPet(PetView pet) {
+            pets[(int)pet.camp].Add(pet);
+        }
+        
+        // 添加子弹, 不要在逻辑帧循环中调用
+        public void addBullet(BulletView bullet) {
+            bullets.Add(bullet);
+        }
+        
+        // 删除单位, 不要在逻辑帧循环中调用
+        public void delPet(PetView pet) {
+            pets[(int)pet.camp].Remove(pet);
+        }
+        
+        // 添加子弹, 不要在逻辑帧循环中调用
+        public void delBullet(BulletView bullet) {
+            bullets.Remove(bullet);
+        }
+        
 
         // ***************************** 旧方法 ************************************
 
@@ -2854,7 +2876,7 @@ namespace rvb.scripts {
 
             preBullet.atkVue = view_pet != null ? view_pet.conf.atk : l.atk;
             preBullet.frame = 0;
-            addPrePet(preBullet);
+            addPreBullet(preBullet);
         }
 
 
