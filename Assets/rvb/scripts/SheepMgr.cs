@@ -1021,7 +1021,7 @@ namespace rvb.scripts {
                 if (r != 0 && n.createBulletFrame == l) {
                     var e = t.roleIndex;
                     var i1 = t.tarRoleIndex;
-                    spawnBullet(new BullteCreate() {
+                    createBullet(new BullteCreate() {
                         view_pet = e,
                         bulletId = r,
                         view_tar_pet = i1,
@@ -1216,14 +1216,14 @@ namespace rvb.scripts {
 
                         if (t3.bullet != null && 0 != t3.bullet.Length) {
                             if (i5 != null) {
-                                spawnBullet(new BullteCreate() {
+                                createBullet(new BullteCreate() {
                                     view_pet = petSkin,
                                     bulletId = t3.bullet[petSkin.camp == SheepCamp.Red ? 0 : 1],
                                     view_tar_pet = i5
                                 });
                             }
                             else {
-                                spawnBullet(new BullteCreate() {
+                                createBullet(new BullteCreate() {
                                     view_pet = petSkin,
                                     bulletId = t3.bullet[petSkin.camp == SheepCamp.Red ? 0 : 1]
                                 });
@@ -1513,7 +1513,7 @@ namespace rvb.scripts {
                         var n = petSkin.posX + petSkin.dirX * s.len + s.endRadius * Math.Cos(l);
                         var r = petSkin.posY + petSkin.dirY * s.len + s.endRadius * Math.Sin(l);
                         var a = 0;
-                        spawnBullet(new BullteCreate() {
+                        createBullet(new BullteCreate() {
                             view_pet = petSkin,
                             bulletId = s.bullet,
                             info = new Info()
@@ -1526,7 +1526,7 @@ namespace rvb.scripts {
                         var o5 = petSkin.posX + petSkin.dirX * s.len + s.endRadius * Math.Cos(i5);
                         var l = petSkin.posY + petSkin.dirY * s.len + s.endRadius * Math.Sin(i5);
                         var n = 0;
-                        spawnBullet(new BullteCreate() {
+                        createBullet(new BullteCreate() {
                             view_pet = petSkin,
                             bulletId = s.bullet,
                             info = new Info() {
@@ -1543,21 +1543,21 @@ namespace rvb.scripts {
                         });
                     }
                     else if (3 == s.type) {
-                        spawnBullet(new BullteCreate() {
+                        createBullet(new BullteCreate() {
                             view_pet = petSkin,
                             bulletId = s.bullet,
                             info = new Info() { dirX = 0, dirY = 0, dirZ = -1, angle = 360f / o * t1 }
                         });
                     }
                     else if (4 == s.type) {
-                        spawnBullet(new BullteCreate() {
+                        createBullet(new BullteCreate() {
                             view_pet = petSkin,
                             bulletId = s.bullet,
                             info = new Info() { dirX = 1, dirY = 0, dirZ = 0 }
                         });
                     }
                     else {
-                        spawnBullet(new BullteCreate() { view_pet = petSkin, bulletId = s.bullet });
+                        createBullet(new BullteCreate() { view_pet = petSkin, bulletId = s.bullet });
                     }
                 }
             }
@@ -2007,7 +2007,7 @@ namespace rvb.scripts {
                     var r = fff.moveBoss;
 
                     if (l != null || n != null || r != null) {
-                        spawnBullet(new BullteCreate() {
+                        createBullet(new BullteCreate() {
                             view_pet = e,
                             bulletId = o.bullet
                         });
@@ -2523,13 +2523,8 @@ namespace rvb.scripts {
             return false;
         }
 
-        public void createPetView(
-            SheepCamp camp,
-            int roleType,
-            int a = 1,
-            Vector3 f = new Vector3(),
-            bool s = false
-        ) {
+        // 创建 单位, 下一帧才会生效
+        public void createPetView(SheepCamp camp, int roleType, int a = 1, Vector3 f = new Vector3(), bool s = false) {
             if (this.state != SheepRoomState.Run && this.state != SheepRoomState.Start) {
                 return;
             }
@@ -2722,8 +2717,8 @@ namespace rvb.scripts {
         }
 
 
-        // 生成 子弹 下一帧才会使用
-        public void spawnBullet(BullteCreate tttt) {
+        // 生成 子弹 下一帧才会生效
+        public void createBullet(BullteCreate tttt) {
             int bulletId = tttt.bulletId;
             PetView view_pet = tttt.view_pet;
             PetView view_tar_pet = tttt.view_tar_pet;
