@@ -236,6 +236,7 @@ namespace rvb.scripts {
             Util.system = this;
             UtilFind.system = this;
             UtilAck.system = this;
+            inc = this;
         }
 
         // ************************* 生成相关 **************************
