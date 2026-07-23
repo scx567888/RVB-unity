@@ -255,6 +255,27 @@ namespace rvb.scripts {
         public void addPrePet(BulletView bullet) {
             pre_bullets.Add(bullet);
         }
+
+        // 将 pre_pets 应用到 pets 中
+        public void applyPrePets() {
+            for (var i = 0; i < pre_pets.Length; i++) {
+                var p1 = pre_pets[i];
+                var p2 = pets[i];
+                foreach (var pet in p1) {
+                    p2.Add(pet);
+                }
+
+                p1.Clear();
+            }
+        }
+        
+        // 将 pre_bullets 应用到 bullets 中
+        public void applyPreBullets() {
+            foreach (var bullet in pre_bullets) {
+                bullets.Add(bullet);
+            }
+            pre_bullets.Clear();
+        }
         
         
         // ***************************** 旧方法 ************************************
@@ -567,24 +588,9 @@ namespace rvb.scripts {
             this.logic_counts[(int)SheepCamp.Red] = this.redBuffCount > 0 ? 2 : 1;
             this.logic_counts[(int)SheepCamp.Blue] = this.blueBuffCount > 0 ? 2 : 1;
 
-            // 将 pre_pets 转移到 pets 中
-            for (var i = 0; i < pre_pets.Length; i++) {
-                var p1 = pre_pets[i];
-                var p2 = pets[i];
-                foreach (var petView in p1) {
-                    p2.Add(petView);
-                }
+            applyPrePets();
 
-                p1.Clear();
-            }
-
-            // 将 pre_bullets 转移到 bullets 中
-            foreach (var b1 in pre_bullets) {
-                bullets.Add(b1);
-            }
-
-            pre_bullets.Clear();
-
+            applyPreBullets();
 
             // 更新 pet
             this.update_role();
