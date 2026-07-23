@@ -358,6 +358,29 @@ namespace rvb.scripts {
         public void delBullet(BulletView bullet) {
             bullets.Remove(bullet);
         }
+        
+        
+        // ******************** 格子相关 **************************
+        public void rebuildGridMap() {
+            gridMap.forEachCell(cell => {
+                cell.pets.Clear();
+                return false;
+            });
+            
+            
+            foreach (var p1 in pets)
+            {
+                foreach (var pet in p1)
+                {
+                    var cell = gridMap.getCellByWorldPositionSafe(
+                        pet.posX,
+                        pet.posY
+                    );
+                    cell.pets.Add(pet);
+                }
+            }
+            
+        }
 
 
         // ***************************** 旧方法 ************************************
@@ -672,6 +695,8 @@ namespace rvb.scripts {
 
             applyPreBullets();
 
+            rebuildGridMap();
+
             // 更新 pet
             this.update_role();
 
@@ -863,6 +888,7 @@ namespace rvb.scripts {
 
             return (del_pets1, del_bullets1);
         }
+
 
 
         public void update_role() {
