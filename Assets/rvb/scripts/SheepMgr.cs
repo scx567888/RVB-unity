@@ -11,8 +11,7 @@ namespace rvb.scripts {
     public class SheepMgr {
         public static SheepMgr inc;
 
-        // 是否自动出兵
-        public bool isAutoCall = true;
+        
 
         // 自动出兵计时器
         public float autoTime = 0f;
@@ -109,13 +108,13 @@ namespace rvb.scripts {
         public HashSet<PetView>[] del_pets = { new(), new() };
 
         // 当前在场上的子弹
-        public List<BulletView> bullets = new List<BulletView> { };
+        public List<BulletView> bullets = new();
 
         // 准备添加到下一帧的 子弹
-        public List<BulletView> pre_bullets = new List<BulletView> { };
+        public List<BulletView> pre_bullets = new();
 
         // 准备删除的 子弹
-        public List<BulletView> del_bullets = new List<BulletView>();
+        public List<BulletView> del_bullets = new();
 
         // 角色自增 id 
         public int petId = 0;
@@ -131,10 +130,11 @@ namespace rvb.scripts {
 
         // 红蓝双方 每次执行多少逻辑帧 
         public int[] logic_counts = { 1, 1 };
+        
+        // 是否自动出兵
+        public bool isAutoCall = true;
 
         public SheepMgr(SheepCtl sheepCtl) {
-            // 是否自动出兵
-            this.isAutoCall = true;
 
             // 自动出兵计时器
             this.autoTime = 0;
@@ -157,9 +157,6 @@ namespace rvb.scripts {
             // 核心状态机
             this.state = SheepRoomState.Ready;
 
-            // 尝试角色 ( 但是是哪一种? 当前在场上的? )
-            this.pets = new[] { new HashSet<PetView>(), new HashSet<PetView>() };
-
             this.gameIndex = 0;
             this.gameStartTimerForBuff = 0;
 
@@ -181,8 +178,8 @@ namespace rvb.scripts {
             };
 
 
-            this.bullets = new List<BulletView>();
-            this.pre_bullets = new List<BulletView>();
+            
+            
             this.updateTime = 0;
 
 
