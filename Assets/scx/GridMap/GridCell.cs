@@ -3,7 +3,6 @@
  * 表示 GridMap 中的一个单元, 可以继承以实现更多功能
  */
     public class GridCell {
-
         /**
      *  自己所在的 列 (Grid 坐标系)
      *  @type {number}
@@ -56,6 +55,5 @@
             this.worldEndX = worldEndX;
             this.worldEndY = worldEndY;
         }
-
     }
 }
