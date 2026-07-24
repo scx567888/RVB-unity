@@ -452,13 +452,7 @@ namespace rvb.scripts {
             return forNearBlocks(r, a, t, i, o, callback);
         }
 
-        public static bool findNearBlocksByAckView(PetView e, int xn, int yn, int o, Func<PetView, bool> callback) {
-            SheepCamp camp = e.camp;
-            camp = camp == SheepCamp.Red ? SheepCamp.Blue : SheepCamp.Red;
-            var r = system.attackViews[(int)camp];
-            var a = system.attackView1s[(int)camp];
-            return findNearBlocks(r, a, xn, yn, o, callback);
-        }
+       
 
         public static bool findFarBlocksByAckView(PetView petSkin, int xn, int yn, int findR,
             Func<PetView, bool> callback) {
@@ -476,17 +470,168 @@ namespace rvb.scripts {
             var a = system.attackView1s[(int)camp];
             return findRandomBlocks(r, a, t, i, findR, callback);
         }
+        
+        public static bool findNearBlocksByAckView(PetView e, int xn, int yn, int o, Func<PetView, bool> callback) {
+            // 寻找地方阵营
+            var enemyCamp = e.camp == SheepCamp.Red ? SheepCamp.Blue : SheepCamp.Red;
 
-        public static bool
-            findNearBlocksByCollisionView(PetView e, int xn, int yn, int s, Func<PetView, bool> callback) {
-            SheepCamp camp = e.camp;
-            var n = system.collisionViews[(int)camp][e.conf.collideId];
-            var r = system.collisionView1s[(int)camp][e.conf.collideId];
-            return findNearBlocks(n, r, xn, yn, s, callback);
+            Func<int, int, bool> forEachPetByCell = (blockX, blockY) => {
+                var sheepCell = system.gridMap.getCellSafe(blockX, blockY);
+                return sheepCell.forEachPet(enemyCamp,callback);
+            };
+            
+            int n = 0;
+
+            for (int ring = 0; ring <= o; ring++) {
+                if (ring != 0) {
+                    Vector2Int topLeft = new Vector2Int(xn - n, yn + n);
+                    Vector2Int topRight = new Vector2Int(xn + n, yn + n);
+                    Vector2Int bottomRight = new Vector2Int(xn + n, yn - n);
+                    Vector2Int bottomLeft = new Vector2Int(xn - n, yn - n);
+
+                    if (system.Random01() < 0.5f) {
+                        for (int x = topLeft.x; x < topRight.x; x++) {
+                            if (forEachPetByCell(x, topLeft.y)) {
+                                return true;
+                            }
+                        }
+
+                        for (int y = topRight.y; y > bottomRight.y; y--) {
+                            if (forEachPetByCell(topRight.x, y)) {
+                                return true;
+                            }
+                        }
+
+                        for (int x = bottomRight.x; x > bottomLeft.x; x--) {
+                            if (forEachPetByCell(x, bottomRight.y)) {
+                                return true;
+                            }
+                        }
+
+                        for (int y = bottomLeft.y; y < topLeft.y; y++) {
+                            if (forEachPetByCell(bottomLeft.x, y)) {
+                                return true;
+                            }
+                        }
+                    }
+                    else {
+                        for (int x = topRight.x; x > topLeft.x; x--) {
+                            if (forEachPetByCell(x, topLeft.y)) {
+                                return true;
+                            }
+                        }
+
+                        for (int y = topLeft.y; y > bottomLeft.y; y--) {
+                            if (forEachPetByCell(bottomLeft.x, y)) {
+                                return true;
+                            }
+                        }
+
+                        for (int x = bottomLeft.x; x < bottomRight.x; x++) {
+                            if (forEachPetByCell(x, bottomRight.y)) {
+                                return true;
+                            }
+                        }
+
+                        for (int y = bottomRight.y; y < topRight.y; y++) {
+                            if (forEachPetByCell(topRight.x, y)) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                else if (forEachPetByCell(xn, yn)) {
+                    return true;
+                }
+
+                n += 1;
+            }
+
+            return false;
+        }
+
+        public static bool findNearBlocksByCollisionView(PetView e, int xn, int yn, int o, Func<PetView, bool> callback) {
+            // 寻找乙方阵营 和 碰撞 id 相同的 
+            var camp = e.camp;
+            var collideId = e.conf.collideId;
+
+            Func<int, int, bool> forEachPetByCell = (blockX, blockY) => {
+                var sheepCell = system.gridMap.getCellSafe(blockX, blockY);
+                return sheepCell.forEachPet(camp,collideId,callback);
+            };
+            
+            int n = 0;
+
+            for (int ring = 0; ring <= o; ring++) {
+                if (ring != 0) {
+                    Vector2Int topLeft = new Vector2Int(xn - n, yn + n);
+                    Vector2Int topRight = new Vector2Int(xn + n, yn + n);
+                    Vector2Int bottomRight = new Vector2Int(xn + n, yn - n);
+                    Vector2Int bottomLeft = new Vector2Int(xn - n, yn - n);
+
+                    if (system.Random01() < 0.5f) {
+                        for (int x = topLeft.x; x < topRight.x; x++) {
+                            if (forEachPetByCell(x, topLeft.y)) {
+                                return true;
+                            }
+                        }
+
+                        for (int y = topRight.y; y > bottomRight.y; y--) {
+                            if (forEachPetByCell(topRight.x, y)) {
+                                return true;
+                            }
+                        }
+
+                        for (int x = bottomRight.x; x > bottomLeft.x; x--) {
+                            if (forEachPetByCell(x, bottomRight.y)) {
+                                return true;
+                            }
+                        }
+
+                        for (int y = bottomLeft.y; y < topLeft.y; y++) {
+                            if (forEachPetByCell(bottomLeft.x, y)) {
+                                return true;
+                            }
+                        }
+                    }
+                    else {
+                        for (int x = topRight.x; x > topLeft.x; x--) {
+                            if (forEachPetByCell(x, topLeft.y)) {
+                                return true;
+                            }
+                        }
+
+                        for (int y = topLeft.y; y > bottomLeft.y; y--) {
+                            if (forEachPetByCell(bottomLeft.x, y)) {
+                                return true;
+                            }
+                        }
+
+                        for (int x = bottomLeft.x; x < bottomRight.x; x++) {
+                            if (forEachPetByCell(x, bottomRight.y)) {
+                                return true;
+                            }
+                        }
+
+                        for (int y = bottomRight.y; y < topRight.y; y++) {
+                            if (forEachPetByCell(topRight.x, y)) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                else if (forEachPetByCell(xn, yn)) {
+                    return true;
+                }
+
+                n += 1;
+            }
+
+            return false;
         }
 
         public static bool findNearBlocks(IndexLen[] e, PetView[] t, int xn, int yn, int o, Func<PetView, bool> callback) {
-            int n = 0;
+           int n = 0;
 
             Func<int, int, bool> r = (blockX, blockY) => {
                 int blockIndex = Util.getIndexByXnYn(blockX, blockY);
