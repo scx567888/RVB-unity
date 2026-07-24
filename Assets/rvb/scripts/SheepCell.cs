@@ -30,6 +30,7 @@ namespace rvb.scripts {
 
         // callback 返回 false: 继续
         // callback 返回 true: 停止
+        // 返回值表示 是否 调用过 callback 并且 callback 提前终止
         public bool forEachPet(Func<PetView, bool> callback) {
             foreach (var p1 in this.pets) {
                 foreach (var p2 in p1) {
@@ -48,6 +49,7 @@ namespace rvb.scripts {
 
         // callback 返回 false: 继续
         // callback 返回 true: 停止
+        // 返回值表示 是否 调用过 callback 并且 callback 提前终止
         public bool forEachPet(SheepCamp camp, Func<PetView, bool> callback) {
             var p1 = pets[(int)camp];
 
@@ -67,6 +69,7 @@ namespace rvb.scripts {
 
         // callback 返回 false: 继续
         // callback 返回 true: 停止
+        // 返回值表示 是否 调用过 callback 并且 callback 提前终止
         public bool forEachPet(SheepCamp camp, int collideId, Func<PetView, bool> callback) {
             var p1 = pets[(int)camp];
             var p2 = p1[collideId];
