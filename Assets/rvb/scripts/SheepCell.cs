@@ -7,7 +7,8 @@ namespace rvb.scripts {
         // 当前格子的角色列表, 按照 [阵营][碰撞ID] 存储
         private readonly List<PetView>[][] pets;
 
-        public int petCount;
+        // 当前格子的角色数量, 按照 [阵营] 存储
+        public int[] petCounts = { 0, 0 };
 
         public SheepCell(int gridX, int gridY, float worldStartX, float worldStartY, float worldEndX, float worldEndY) :
             base(gridX, gridY, worldStartX, worldStartY, worldEndX, worldEndY) {
@@ -25,7 +26,7 @@ namespace rvb.scripts {
             }
 
             p1.Add(pet);
-            petCount += 1;
+            petCounts[(int)pet.camp] += 1;
         }
 
         // callback 返回 false: 继续
@@ -44,6 +45,7 @@ namespace rvb.scripts {
                     }
                 }
             }
+
             return false;
         }
 
@@ -94,7 +96,8 @@ namespace rvb.scripts {
                     }
                 }
             }
-            petCount = 0;
+
+            petCounts = new[] { 0, 0 };
         }
     }
 }
