@@ -323,12 +323,25 @@ namespace rvb.scripts {
             });
         }
 
-        public static void forfeachBlocksByAckView(SheepCamp camp, int xn, int yn, int splitN,
-            Action<PetView> callback) {
-            camp = camp == SheepCamp.Red ? SheepCamp.Blue : SheepCamp.Red;
-            var r = system.attackViews[(int)camp];
-            var a = system.attackView1s[(int)camp];
-            forfeachBlocks(r, a, xn, yn, splitN, callback);
+        public static void forfeachBlocksByAckView(SheepCamp camp, int xn, int yn, int splitN, Action<PetView> callback) {
+            // 寻找敌方阵营
+            var enemyCamp = camp == SheepCamp.Red ? SheepCamp.Blue : SheepCamp.Red;
+            
+            for (int n = -splitN; n <= splitN; n++) {
+                for (int r = -splitN; r <= splitN; r++) {
+                    
+                    var sheepCell = system.gridMap.getCell(xn + n, yn + r);
+                    if (sheepCell==null) {
+                        continue;
+                    }
+                    sheepCell.forEachPet(enemyCamp, (p) => {
+                        callback(p);
+                        return false;
+                    });
+                    
+                }
+            }
+            
         }
 
         public static void forfeachBlocksByCollView(PetView petSkin, int xn, int yn, int splitN,
@@ -472,7 +485,7 @@ namespace rvb.scripts {
         }
         
         public static bool findNearBlocksByAckView(PetView e, int xn, int yn, int o, Func<PetView, bool> callback) {
-            // 寻找地方阵营
+            // 寻找敌方阵营
             var enemyCamp = e.camp == SheepCamp.Red ? SheepCamp.Blue : SheepCamp.Red;
 
             Func<int, int, bool> forEachPetByCell = (blockX, blockY) => {
@@ -621,76 +634,6 @@ namespace rvb.scripts {
                     }
                 }
                 else if (forEachPetByCell(xn, yn)) {
-                    return true;
-                }
-
-                n += 1;
-            }
-
-            return false;
-        }
-
-        public static bool findNearBlocks(IndexLen[] e, PetView[] t, int xn, int yn, int o, Func<PetView, bool> callback) {
-           int n = 0;
-
-            Func<int, int, bool> r = (blockX, blockY) => {
-                int blockIndex = Util.getIndexByXnYn(blockX, blockY);
-                return !(blockIndex < 0 || blockIndex >= SheepConfig.line_w * SheepConfig.line_w) &&
-                       system.findBlock(e, t, blockIndex, (Func<PetView, bool>)(petIndex => {
-                           PetView petView = petIndex;
-                           if (petView != null) {
-                               bool result = callback(petView);
-                               petView = null;
-                               return result;
-                           }
-
-                           return false;
-                       }));
-            };
-
-            for (int ring = 0; ring <= o; ring++) {
-                if (ring != 0) {
-                    Vector2Int topLeft = new Vector2Int(xn - n, yn + n);
-                    Vector2Int topRight = new Vector2Int(xn + n, yn + n);
-                    Vector2Int bottomRight = new Vector2Int(xn + n, yn - n);
-                    Vector2Int bottomLeft = new Vector2Int(xn - n, yn - n);
-
-                    if (system.Random01() < 0.5f) {
-                        for (int x = topLeft.x; x < topRight.x; x++) {
-                            if (r(x, topLeft.y)) return true;
-                        }
-
-                        for (int y = topRight.y; y > bottomRight.y; y--) {
-                            if (r(topRight.x, y)) return true;
-                        }
-
-                        for (int x = bottomRight.x; x > bottomLeft.x; x--) {
-                            if (r(x, bottomRight.y)) return true;
-                        }
-
-                        for (int y = bottomLeft.y; y < topLeft.y; y++) {
-                            if (r(bottomLeft.x, y)) return true;
-                        }
-                    }
-                    else {
-                        for (int x = topRight.x; x > topLeft.x; x--) {
-                            if (r(x, topLeft.y)) return true;
-                        }
-
-                        for (int y = topLeft.y; y > bottomLeft.y; y--) {
-                            if (r(bottomLeft.x, y)) return true;
-                        }
-
-                        for (int x = bottomLeft.x; x < bottomRight.x; x++) {
-                            if (r(x, bottomRight.y)) return true;
-                        }
-
-                        for (int y = bottomRight.y; y < topRight.y; y++) {
-                            if (r(topRight.x, y)) return true;
-                        }
-                    }
-                }
-                else if (r(xn, yn)) {
                     return true;
                 }
 
