@@ -44,8 +44,9 @@ namespace rvb.scripts {
             }
         }
 
-        // callback 返回 false: 继续  callback 返回 true: 停止
-        public void forEachPet(SheepCamp camp, Func<PetView, bool> callback) {
+        // callback 返回 false: 继续
+        // callback 返回 true: 停止
+        public bool forEachPet(SheepCamp camp, Func<PetView, bool> callback) {
             var p1 = pets[(int)camp];
 
             foreach (var p2 in p1) {
@@ -53,11 +54,13 @@ namespace rvb.scripts {
                     foreach (var pet in p2) {
                         var stop = callback(pet);
                         if (stop == true) {
-                            return;
+                            return true;
                         }
                     }
                 }
             }
+
+            return false;
         }
 
         // callback 返回 false: 继续  callback 返回 true: 停止
