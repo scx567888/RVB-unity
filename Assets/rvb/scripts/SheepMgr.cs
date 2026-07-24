@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using scx.GridMap;
 using UnityEngine;
 using static rvb.scripts.BullteCreate;
 using static rvb.scripts.SheepModes;
@@ -11,8 +12,6 @@ namespace rvb.scripts {
     public class SheepMgr {
         public static SheepMgr inc;
 
-        // 是否自动出兵
-        public bool isAutoCall = true;
 
         // 自动出兵计时器
         public float autoTime = 0f;
@@ -49,33 +48,8 @@ namespace rvb.scripts {
         public Dictionary<int, int>[] petStartCounts = { new Dictionary<int, int>(), new Dictionary<int, int>() };
         public List<PetView> god_view_pets = new List<PetView>();
 
-        public PerfStat perfStat = new PerfStat() {
-            redNums = new[] { 0, 0, 0, 0, 0, 0, 0, 0 },
-            blueNums = new[] { 0, 0, 0, 0, 0, 0, 0, 0 }
-        };
-
 
         public long updateTime = 0;
-
-
-        public Dictionary<int, Dictionary<int, Dictionary<int, List<PetView>>>> pre_blocks =
-            new Dictionary<int, Dictionary<int, Dictionary<int, List<PetView>>>>();
-
-        public bool[][] isChangeCollsionFlags = null;
-        public bool[] isChangeAckFlags = null;
-
-        public int MaxCount = SheepConfig.line_w * SheepConfig.line_w;
-
-        public IndexLen[][] attackViews;
-
-        public PetView[][] attackView1s = new PetView[][] {
-            new PetView[SheepConfig.MaxPetCount],
-            new PetView[SheepConfig.MaxPetCount]
-        };
-
-        public IndexLen[][][] collisionViews = new IndexLen[][][] { };
-
-        public PetView[][][] collisionView1s = new PetView[][][] { };
 
         public int redBuffCount;
         public int blueBuffCount;
@@ -95,7 +69,7 @@ namespace rvb.scripts {
 
 
         // ********************** 确定字段 *******************************
-        
+
         // 红蓝 boss
         public Boss[] boss = { null, null };
 
@@ -109,19 +83,28 @@ namespace rvb.scripts {
         public HashSet<PetView>[] del_pets = { new(), new() };
 
         // 当前在场上的子弹
-        public List<BulletView> bullets = new List<BulletView> { };
+        public List<BulletView> bullets = new();
 
         // 准备添加到下一帧的 子弹
-        public List<BulletView> pre_bullets = new List<BulletView> { };
+        public List<BulletView> pre_bullets = new();
 
         // 准备删除的 子弹
-        public List<BulletView> del_bullets = new List<BulletView>();
+        public List<BulletView> del_bullets = new();
 
         // 角色自增 id 
         public int petId = 0;
 
         // 子弹自增 id
         public int bulletId = 0;
+
+        // 场上角色数量, 按照 [阵营][角色类型] 存储
+        public int[][] petCounts = new[] {
+            new int[(int)SheepRoleType.Count],
+            new int[(int)SheepRoleType.Count]
+        };
+
+        // 格子空间, 用于加速索敌碰撞
+        public GridMap<SheepCell> gridMap;
 
         // 红方召唤池
         public Dictionary<int, SheepCallInfo> redCallInfos = new Dictionary<int, SheepCallInfo>();
@@ -132,10 +115,10 @@ namespace rvb.scripts {
         // 红蓝双方 每次执行多少逻辑帧 
         public int[] logic_counts = { 1, 1 };
 
-        public SheepMgr(SheepCtl sheepCtl) {
-            // 是否自动出兵
-            this.isAutoCall = true;
+        // 是否自动出兵
+        public bool isAutoCall = true;
 
+        public SheepMgr(SheepCtl sheepCtl) {
             // 自动出兵计时器
             this.autoTime = 0;
 
@@ -157,9 +140,6 @@ namespace rvb.scripts {
             // 核心状态机
             this.state = SheepRoomState.Ready;
 
-            // 尝试角色 ( 但是是哪一种? 当前在场上的? )
-            this.pets = new[] { new HashSet<PetView>(), new HashSet<PetView>() };
-
             this.gameIndex = 0;
             this.gameStartTimerForBuff = 0;
 
@@ -175,56 +155,10 @@ namespace rvb.scripts {
 
             this.petStartCounts = new[] { new Dictionary<int, int>(), new Dictionary<int, int>() };
             this.god_view_pets = new List<PetView>();
-            this.perfStat = new PerfStat() {
-                redNums = new[] { 0, 0, 0, 0, 0, 0, 0, 0 },
-                blueNums = new[] { 0, 0, 0, 0, 0, 0, 0, 0 }
-            };
 
 
-            this.bullets = new List<BulletView>();
-            this.pre_bullets = new List<BulletView>();
             this.updateTime = 0;
-
-
-            this.bulletId = 0;
-
-
-            this.pre_blocks = new Dictionary<int, Dictionary<int, Dictionary<int, List<PetView>>>>();
-            this.isChangeCollsionFlags = null;
-            this.isChangeAckFlags = null;
-
-            this.MaxCount = SheepConfig.line_w * SheepConfig.line_w;
-
-            this.attackViews = new IndexLen[][] {
-                new IndexLen[MaxCount],
-                new IndexLen[MaxCount],
-            };
-
-            this.attackView1s = new PetView[][] {
-                new PetView[SheepConfig.MaxPetCount],
-                new PetView[SheepConfig.MaxPetCount]
-            };
-
-            this.collisionViews = new IndexLen[][][] {
-                new IndexLen[SheepConfig.MaxGroupCount][],
-                new IndexLen[SheepConfig.MaxGroupCount][]
-            };
-
-            for (var e = 0; e < SheepConfig.MaxGroupCount; e++) {
-                this.collisionViews[(int)SheepCamp.Red][e] = new IndexLen[this.MaxCount];
-                this.collisionViews[(int)SheepCamp.Blue][e] = new IndexLen[this.MaxCount];
-            }
-
-            this.collisionView1s = new PetView[][][] {
-                new PetView[SheepConfig.MaxGroupCount][],
-                new PetView[SheepConfig.MaxGroupCount][]
-            };
-
-            for (var e = 0; e < SheepConfig.MaxGroupCount; e++) {
-                this.collisionView1s[(int)SheepCamp.Red][e] = new PetView[SheepConfig.MaxPetCount];
-                this.collisionView1s[(int)SheepCamp.Blue][e] = new PetView[SheepConfig.MaxPetCount];
-            }
-
+        
             this.redCallInfos = new Dictionary<int, SheepCallInfo>();
 
             this.blueCallInfos = new Dictionary<int, SheepCallInfo>();
@@ -235,15 +169,164 @@ namespace rvb.scripts {
             this.redBuffCount = 0;
             this.blueBuffCount = 0;
 
-            // 角色 id 分配器
-            this.petId = 0;
-
 
             // 绑定 system
             Util.system = this;
             UtilFind.system = this;
             UtilAck.system = this;
+            inc = this;
+
+
+            gridMap = new GridMap<SheepCell>(
+                -SheepConfig.w / 2f, -SheepConfig.h / 2f,
+                SheepConfig.w, SheepConfig.h,
+                SheepConfig.d,
+                (gridX, gridY, worldStartX, worldStartY, worldEndX, worldEndY) =>
+                    new SheepCell(gridX, gridY, worldStartX, worldStartY, worldEndX, worldEndY)
+            );
         }
+
+        // ************************* 生成相关 **************************
+
+        // 获取 petId
+        public int getNextPetId() {
+            return ++petId;
+        }
+
+        // 获取 bulletId
+        public int getNextBulletId() {
+            return ++bulletId;
+        }
+
+        // 添加单位 下一帧才会使用
+        public void addPrePet(PetView pet) {
+            pre_pets[(int)pet.camp].Add(pet);
+        }
+
+        // 添加子弹 下一帧才会使用
+        public void addPreBullet(BulletView bullet) {
+            pre_bullets.Add(bullet);
+        }
+
+        // 将 pre_pets 应用到 pets 中
+        public void applyPrePets() {
+            for (var i = 0; i < pre_pets.Length; i++) {
+                var p1 = pre_pets[i];
+                foreach (var pet in p1) {
+                    addPet(pet);
+                }
+
+                p1.Clear();
+            }
+        }
+
+        // 将 pre_bullets 应用到 bullets 中
+        public void applyPreBullets() {
+            foreach (var bullet in pre_bullets) {
+                addBullet(bullet);
+            }
+
+            pre_bullets.Clear();
+        }
+
+        // ********************* 删除相关 **************************
+
+        // 添加 删除单位.
+        public void addDelPet(PetView pet) {
+            del_pets[(int)pet.camp].Add(pet);
+        }
+
+        // 添加 删除子弹.
+        public void addDelBullet(BulletView bullet) {
+            del_bullets.Add(bullet);
+        }
+
+        // 从 pets 中 删除 del_pets 中的 单位
+        public HashSet<PetView>[] applyDelPets() {
+            // 复制一份方便 渲染层处理
+            var copy = new HashSet<PetView>[del_pets.Length];
+            for (var i = 0; i < del_pets.Length; i++) {
+                copy[i] = new HashSet<PetView>(del_pets[i]);
+            }
+
+            // 应用移除
+            for (var i = 0; i < del_pets.Length; i++) {
+                var p1 = del_pets[i];
+                foreach (var pet in p1) {
+                    delPet(pet);
+                }
+
+                // 清空
+                p1.Clear();
+            }
+
+            return copy;
+        }
+
+        // 从 bullets 中 删除 del_bullets 中的 对象
+        public List<BulletView> applyDelBullets() {
+            // 复制一份方便 渲染层处理
+            var copy = new List<BulletView>(del_bullets);
+            // 应用移除
+            foreach (var bullet in del_bullets) {
+                delBullet(bullet);
+            }
+
+            // 清空
+            del_bullets.Clear();
+            return copy;
+        }
+
+
+        // ****************** 场上单位相关 *************************
+
+        // 添加单位, 不要在逻辑帧循环中调用
+        public void addPet(PetView pet) {
+            pets[(int)pet.camp].Add(pet);
+            petCounts[(int)pet.camp][(int)pet.conf.roleType] += 1;
+        }
+
+        // 添加子弹, 不要在逻辑帧循环中调用
+        public void addBullet(BulletView bullet) {
+            bullets.Add(bullet);
+        }
+
+        // 删除单位, 不要在逻辑帧循环中调用
+        public void delPet(PetView pet) {
+            pets[(int)pet.camp].Remove(pet);
+            petCounts[(int)pet.camp][(int)pet.conf.roleType] -= 1;
+        }
+
+        // 添加子弹, 不要在逻辑帧循环中调用
+        public void delBullet(BulletView bullet) {
+            bullets.Remove(bullet);
+        }
+
+
+        // ******************** 格子相关 **************************
+
+        // 重建格子
+        public void rebuildGridMap() {
+            // 清空格子
+            gridMap.forEachCell(cell => {
+                cell.clearPets();
+                return false;
+            });
+
+            // 重建格子
+            foreach (var p1 in pets) {
+                foreach (var pet in p1) {
+                    var cell = gridMap.getCellByWorldPositionSafe(
+                        pet.posX,
+                        pet.posY
+                    );
+                    cell.addPet(pet);
+                }
+            }
+        }
+
+
+        // ***************************** 旧方法 ************************************
 
         public void onGameStart() {
             this.gameStartTimerForBuff = 0;
@@ -286,18 +369,12 @@ namespace rvb.scripts {
         public void clearPets() {
             this.pets[(int)SheepCamp.Red].Clear();
             this.pets[(int)SheepCamp.Blue].Clear();
-            Array.Fill(this.perfStat.redNums, 0);
-            Array.Fill(this.perfStat.blueNums, 0);
         }
 
         public int getBlockIndex(Vector3 e) {
             var t = Math.Floor(e.x / SheepConfig.d + SheepConfig.w / SheepConfig.d / 2);
             var o = Math.Floor(e.y / SheepConfig.d + SheepConfig.h / SheepConfig.d / 2);
             return (int)(t * SheepConfig.line_w + o);
-        }
-
-        public int getNextPetId() {
-            return ++petId;
         }
 
 
@@ -325,8 +402,6 @@ namespace rvb.scripts {
         public void game_run(SheepCtl sheepCtl) {
             // 清理游戏数据
             this.game_clear();
-
-            this.mainClearBlocks();
 
             var i = this.gameIndex;
 
@@ -359,15 +434,15 @@ namespace rvb.scripts {
             }
         }
 
-        public void game_update( SheepCtl sheepCtl, float i) {
+        public (HashSet<PetView>[] del_pets, List<BulletView> del_bullets) game_update(SheepCtl sheepCtl, float i) {
             // 处理召唤兵
-            this.consume(sheepCtl, i);
+            this.consume(i);
 
             // 执行主逻辑
-            this.role_logic(sheepCtl, i);
+            return this.role_logic(sheepCtl, i);
         }
 
-        public bool updateBoss( SheepCtl sheepCtl, float dt, long c) {
+        public bool updateBoss(SheepCtl sheepCtl, float dt, long c) {
             var isEnd = false;
             for (var i = 0; i < this.boss.Length; i++) {
                 var t = this.boss[i];
@@ -495,14 +570,14 @@ namespace rvb.scripts {
         public void del_bullet(BulletView e) {
             var bullet = e;
             bullet.id = 0;
-            del_bullets.Add(bullet);
+            addDelBullet(bullet);
         }
-        
+
         public void del_pet(PetView e) {
             e.isActive = false;
             e.isDie = true;
             e.id = 0;
-            this.del_pets[(int)e.camp].Add(e);
+            addDelPet(e);
         }
 
         public void clear_bullets() {
@@ -512,7 +587,7 @@ namespace rvb.scripts {
 
 // todo
         public void game_clear() {
-            this.clearBlocks();
+            
             this.clearPetViews();
 
             this.clearViewBullets();
@@ -553,28 +628,15 @@ namespace rvb.scripts {
             boss[(int)camp] = view;
         }
 
-        public void role_logic(SheepCtl sheepCtl, float dt) {
+        public (HashSet<PetView>[] del_pets, List<BulletView> del_bullets) role_logic(SheepCtl sheepCtl, float dt) {
             this.logic_counts[(int)SheepCamp.Red] = this.redBuffCount > 0 ? 2 : 1;
             this.logic_counts[(int)SheepCamp.Blue] = this.blueBuffCount > 0 ? 2 : 1;
 
-            // 将 pre_pets 转移到 pets 中
-            for (var i = 0; i < pre_pets.Length; i++) {
-                var p1 = pre_pets[i];
-                var p2 = pets[i];
-                foreach (var petView in p1) {
-                    p2.Add(petView);
-                }
+            applyPrePets();
 
-                p1.Clear();
-            }
+            applyPreBullets();
 
-            // 将 pre_bullets 转移到 bullets 中
-            foreach (var b1 in pre_bullets) {
-                bullets.Add(b1);
-            }
-
-            pre_bullets.Clear();
-
+            
 
             // 更新 pet
             this.update_role();
@@ -587,15 +649,12 @@ namespace rvb.scripts {
 
             var now = NowMs();
 
-            this.mainClearBlocks();
-            sheepCtl.comImages.mesh_block.onFrameUpdateStart();
-
 
             if (this.endTime != 0 && this.endTime < NowMs()) {
                 eventBus.emit(EventType.RoomStateEnd);
                 isEnd = true;
                 this.endTime = 0;
-                return;
+                return (Array.Empty<HashSet<PetView>>(), new List<BulletView>());
             }
 
 
@@ -664,7 +723,7 @@ namespace rvb.scripts {
             isEnd = this.updateBoss(sheepCtl, dt, now);
 
             if (isEnd) {
-                return;
+                return (Array.Empty<HashSet<PetView>>(), new List<BulletView>());
             }
 
             var _redBuffCount = 0;
@@ -672,7 +731,7 @@ namespace rvb.scripts {
 
             foreach (var e in this.pets) {
                 foreach (var y in e) {
-                    updateSkinPet(y,sheepCtl, this, this, dt);
+                    updateSkinPet(y, sheepCtl, this, this, dt);
 
                     int[] M;
                     var D = y;
@@ -732,7 +791,7 @@ namespace rvb.scripts {
                     }
                 }
             }
-            
+
 
             foreach (var X in bullets) {
                 if (X.isDie) {
@@ -756,32 +815,17 @@ namespace rvb.scripts {
             }
 
 
-            this.mainSyncBlocksToWokers();
-            sheepCtl.comImages.mesh_block.onFrameUpdateEnd(this);
+            rebuildGridMap();
+
             this.redBuffCount = _redBuffCount;
             this.blueBuffCount = _blueBuffCount;
-            
-            
-            // 从 pets 中 删除 del_pets 的 对象
-            for (var i = 0; i < del_pets.Length; i++) {
-                var p1 = del_pets[i];
-                var p2 = pets[i];
-                foreach (var petView in p1) {
-                    p2.Remove(petView);
-                }
 
-                p1.Clear();
-            }
-            
-            // 从 bullets 中 删除 del_bullets 的 对象
-            foreach (var b1 in del_bullets) {
-                bullets.Remove(b1);
-            }
-            
 
-            if (isEnd) {
-                return;
-            }
+            var del_pets1 = applyDelPets();
+
+            var del_bullets1 = applyDelBullets();
+
+            return (del_pets1, del_bullets1);
         }
 
 
@@ -974,7 +1018,7 @@ namespace rvb.scripts {
                 if (r != 0 && n.createBulletFrame == l) {
                     var e = t.roleIndex;
                     var i1 = t.tarRoleIndex;
-                    spawnBullet(new BullteCreate() {
+                    createBullet(new BullteCreate() {
                         view_pet = e,
                         bulletId = r,
                         view_tar_pet = i1,
@@ -1169,14 +1213,14 @@ namespace rvb.scripts {
 
                         if (t3.bullet != null && 0 != t3.bullet.Length) {
                             if (i5 != null) {
-                                spawnBullet(new BullteCreate() {
+                                createBullet(new BullteCreate() {
                                     view_pet = petSkin,
                                     bulletId = t3.bullet[petSkin.camp == SheepCamp.Red ? 0 : 1],
                                     view_tar_pet = i5
                                 });
                             }
                             else {
-                                spawnBullet(new BullteCreate() {
+                                createBullet(new BullteCreate() {
                                     view_pet = petSkin,
                                     bulletId = t3.bullet[petSkin.camp == SheepCamp.Red ? 0 : 1]
                                 });
@@ -1466,7 +1510,7 @@ namespace rvb.scripts {
                         var n = petSkin.posX + petSkin.dirX * s.len + s.endRadius * Math.Cos(l);
                         var r = petSkin.posY + petSkin.dirY * s.len + s.endRadius * Math.Sin(l);
                         var a = 0;
-                        spawnBullet(new BullteCreate() {
+                        createBullet(new BullteCreate() {
                             view_pet = petSkin,
                             bulletId = s.bullet,
                             info = new Info()
@@ -1479,7 +1523,7 @@ namespace rvb.scripts {
                         var o5 = petSkin.posX + petSkin.dirX * s.len + s.endRadius * Math.Cos(i5);
                         var l = petSkin.posY + petSkin.dirY * s.len + s.endRadius * Math.Sin(i5);
                         var n = 0;
-                        spawnBullet(new BullteCreate() {
+                        createBullet(new BullteCreate() {
                             view_pet = petSkin,
                             bulletId = s.bullet,
                             info = new Info() {
@@ -1496,21 +1540,21 @@ namespace rvb.scripts {
                         });
                     }
                     else if (3 == s.type) {
-                        spawnBullet(new BullteCreate() {
+                        createBullet(new BullteCreate() {
                             view_pet = petSkin,
                             bulletId = s.bullet,
                             info = new Info() { dirX = 0, dirY = 0, dirZ = -1, angle = 360f / o * t1 }
                         });
                     }
                     else if (4 == s.type) {
-                        spawnBullet(new BullteCreate() {
+                        createBullet(new BullteCreate() {
                             view_pet = petSkin,
                             bulletId = s.bullet,
                             info = new Info() { dirX = 1, dirY = 0, dirZ = 0 }
                         });
                     }
                     else {
-                        spawnBullet(new BullteCreate() { view_pet = petSkin, bulletId = s.bullet });
+                        createBullet(new BullteCreate() { view_pet = petSkin, bulletId = s.bullet });
                     }
                 }
             }
@@ -1960,7 +2004,7 @@ namespace rvb.scripts {
                     var r = fff.moveBoss;
 
                     if (l != null || n != null || r != null) {
-                        spawnBullet(new BullteCreate() {
+                        createBullet(new BullteCreate() {
                             view_pet = e,
                             bulletId = o.bullet
                         });
@@ -2045,7 +2089,7 @@ namespace rvb.scripts {
 
         public void update_role_anim(PetView e) {
             e.animFrame = e.animFrame + 1;
-            OnRoleRender(e);
+            OnRoleRender?.Invoke(e);
         }
 
         public void produce_pets(int typeID, int count, SheepCamp camp) {
@@ -2071,7 +2115,7 @@ namespace rvb.scripts {
             sheepCallInfo.pets.Add(new SheepCallInfoPet() { camp = camp, count = count });
         }
 
-        public void consume(SheepCtl sheepCtl, float t) {
+        public void consume(float t) {
             var o = this;
 
             this.autoTime += t;
@@ -2101,9 +2145,7 @@ namespace rvb.scripts {
                     var c = SheepRoleTypeInfo.getById(a);
                     var formation = SheepRoleFormation.getById(c.formationId);
 
-                    var u = n == SheepCamp.Red
-                        ? this.perfStat.redNums[(int)c.roleType]
-                        : this.perfStat.blueNums[(int)c.roleType];
+                    var u = petCounts[(int)n][(int)c.roleType];
 
                     if (c.roleType == SheepRoleType.xiao_bing) {
                         if (u > 14500) {
@@ -2163,10 +2205,10 @@ namespace rvb.scripts {
 
                             var R = new Vector3(S, M, 0f);
                             if (C.booms != null && C.booms.Count > 0) {
-                                createPetView(C.camp, a, h,   R, C.booms.Pop());
+                                createPetView(C.camp, a, h, R, C.booms.Pop());
                             }
                             else {
-                                createPetView(C.camp, a, h,   R);
+                                createPetView(C.camp, a, h, R, false);
                             }
 
                             if (C.count <= 0) {
@@ -2215,10 +2257,10 @@ namespace rvb.scripts {
                                     ? new Vector3((float)(L - x), F, 0)
                                     : new Vector3((float)(x - L), F, 0);
                                 if (P.booms != null && P.booms.Count > 0) {
-                                    createPetView(P.player, a, (int)G,  X, P.booms.Pop());
+                                    createPetView(P.player, a, (int)G, X, P.booms.Pop());
                                 }
                                 else {
-                                    createPetView(P.camp, a, (int)G,  X);
+                                    createPetView(P.camp, a, (int)G, X, false);
                                 }
                             }
 
@@ -2281,216 +2323,17 @@ namespace rvb.scripts {
             blueCallInfos.Clear();
         }
 
-        public void clearBlocks() {
-            Array.Fill(this.attackViews[(int)SheepCamp.Red], null);
-            Array.Fill(this.attackViews[(int)SheepCamp.Blue], null);
-            Array.Fill(this.attackView1s[(int)SheepCamp.Red], null);
-            Array.Fill(this.attackView1s[(int)SheepCamp.Blue], null);
 
-            for (var e = 0; e < SheepConfig.MaxGroupCount; e++) {
-                Array.Fill(this.collisionViews[(int)SheepCamp.Red][e], null);
-                Array.Fill(this.collisionViews[(int)SheepCamp.Blue][e], null);
-                Array.Fill(this.collisionView1s[(int)SheepCamp.Red][e], null);
-                Array.Fill(this.collisionView1s[(int)SheepCamp.Blue][e], null);
-            }
-
-            this.pre_blocks.Clear();
-        }
-
-        public IndexLen getBlockByIndex(IndexLen[] e, int blockIndex) {
-            if (e[blockIndex] == null) {
-                e[blockIndex] = new IndexLen() {
-                    Len = 0,
-                    Index = 0,
-                };
-            }
-
-            return e[blockIndex];
-        }
-
-        public void mainClearBlocks() {
-            if (null == this.isChangeAckFlags) {
-                this.isChangeAckFlags = new[] { true, true };
-            }
-
-            if (null == this.isChangeCollsionFlags) {
-                isChangeCollsionFlags = new bool[2][];
-                isChangeCollsionFlags[0] = new bool[SheepConfig.MaxGroupCount];
-                isChangeCollsionFlags[1] = new bool[SheepConfig.MaxGroupCount];
-                for (var e = 0; e < SheepConfig.MaxGroupCount; e++) {
-                    this.isChangeCollsionFlags[(int)SheepCamp.Red][e] = true;
-                    this.isChangeCollsionFlags[(int)SheepCamp.Blue][e] = true;
-                }
-            }
-
-            if (this.isChangeAckFlags[(int)SheepCamp.Red]) {
-                Array.Fill(this.attackViews[(int)SheepCamp.Red], null);
-            }
-
-            this.isChangeAckFlags[(int)SheepCamp.Red] = false;
-            if (this.isChangeAckFlags[(int)SheepCamp.Blue]) {
-                Array.Fill(this.attackViews[(int)SheepCamp.Blue], null);
-            }
-
-            this.isChangeAckFlags[(int)SheepCamp.Blue] = false;
-            for (var e = 0; e < SheepConfig.MaxGroupCount; e++) {
-                if (this.isChangeCollsionFlags[(int)SheepCamp.Red][e]) {
-                    Array.Fill(this.collisionViews[(int)SheepCamp.Red][e], null);
-                }
-
-                this.isChangeCollsionFlags[(int)SheepCamp.Red][e] = false;
-                if (this.isChangeCollsionFlags[(int)SheepCamp.Blue][e]) {
-                    Array.Fill(this.collisionViews[(int)SheepCamp.Blue][e], null);
-                }
-
-                this.isChangeCollsionFlags[(int)SheepCamp.Blue][e] = false;
-            }
-
-            this.pre_blocks.Clear();
-        }
-
-        public void mainPreAddBlock(int blockIndex, PetView buffIndex, SheepCamp camp, int collideId) {
-            if (!this.pre_blocks.TryGetValue(blockIndex, out Dictionary<int, Dictionary<int, List<PetView>>> o)) {
-                o = new Dictionary<int, Dictionary<int, List<PetView>>>();
-                this.pre_blocks[blockIndex] = o;
-            }
-
-            if (!o.TryGetValue((int)camp, out Dictionary<int, List<PetView>> l)) {
-                l = new Dictionary<int, List<PetView>>();
-                o[(int)camp] = l;
-            }
-
-            if (!l.TryGetValue(collideId, out List<PetView> n)) {
-                n = new List<PetView>();
-                l[collideId] = n;
-            }
-
-            n.Add(buffIndex);
-            if (this.isChangeAckFlags != null && false == this.isChangeAckFlags[(int)camp]) {
-                this.isChangeAckFlags[(int)camp] = true;
-            }
-
-            if (this.isChangeCollsionFlags != null && false == this.isChangeCollsionFlags[(int)camp][collideId]) {
-                this.isChangeCollsionFlags[(int)camp][collideId] = true;
-            }
-        }
-
-        public void mainSyncBlocksToWokers() {
-            var e = new int[] { 0, 0 };
-            var t = new List<int>[] { new List<int>(), new List<int>() };
-            for (var e1 = 0; e1 < SheepConfig.MaxGroupCount; e1++) {
-                t[(int)SheepCamp.Red].Add(0);
-                t[(int)SheepCamp.Blue].Add(0);
-            }
-
-            foreach (var e2 in this.pre_blocks) {
-                var s = e2.Key;
-                var i1 = e2.Value;
-                if (i1 != null && i1.Count != 0) {
-                    foreach (var e3 in i1) {
-                        var i2 = e3.Value;
-                        var o = e3.Key;
-                        if (i2 != null && i2.Count != 0) {
-                            var l = 0;
-                            var n = t[o];
-                            foreach (var e4 in i2) {
-                                var e5 = e4.Value;
-                                var t6 = e4.Key;
-                                if (e5 != null && e5.Count != 0) {
-                                    var i = this.collisionViews[o][t6];
-                                    var a3 = this.collisionView1s[o][t6];
-                                    var c3 = n[t6];
-                                    var f3 = e5.Count;
-                                    l += f3;
-                                    var blockByIndex = this.getBlockByIndex(i, s);
-                                    blockByIndex.Index = c3;
-                                    blockByIndex.Len = f3;
-
-                                    foreach (var e7 in e5) {
-                                        a3[c3] = e7;
-                                        c3++;
-                                    }
-
-                                    n[t6] = c3;
-                                }
-                            }
-
-                            if (0 == l) {
-                                continue;
-                            }
-
-                            var a = this.attackViews[o];
-                            var c = this.attackView1s[o];
-                            var f = e[o];
-                            var blockByIndex1 = this.getBlockByIndex(a, s);
-                            blockByIndex1.Index = f;
-                            blockByIndex1.Len = l;
-                            foreach (var e9 in i2) {
-                                var e10 = e9.Value;
-                                var t8 = e9.Key;
-                                if (e10 != null && e10.Count != 0) {
-                                    foreach (var e11 in e10) {
-                                        c[f] = e11;
-                                        f++;
-                                    }
-                                }
-                            }
-
-                            e[o] = f;
-                        }
-                    }
-                }
-            }
-        }
-
-        public void forEachBlock(IndexLen[] e, PetView[] t, int blockIndex, Action<PetView> callback) {
-            var blockByIndex = this.getBlockByIndex(e, blockIndex);
-            var o = blockByIndex.Index;
-            var l = blockByIndex.Len;
-            if (l != 0) {
-                for (var e1 = 0; e1 < l; e1++) {
-                    callback(t[o + e1]);
-                }
-            }
-        }
-
-        public bool findBlock(IndexLen[] e, PetView[] t, int blockIndex, Func<PetView, bool> callback) {
-            var blockByIndex = this.getBlockByIndex(e, blockIndex);
-            var Index = blockByIndex.Index;
-            var Len = blockByIndex.Len;
-            if (Len == 0) {
-                return false;
-            }
-
-            for (var j = 0; j < Len; j++) {
-                var petIndex = t[Index + j];
-                if (null == petIndex) {
-                    throw new Exception("二级内存取出空???");
-                }
-
-                if (callback(petIndex)) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        public void createPetView(
-            SheepCamp camp, 
-            int roleType,
-            int a = 1,
-            Vector3 f = new Vector3(),
-            bool s = false
-        ) {
+        // 创建 单位, 下一帧才会生效
+        public void createPetView(SheepCamp camp, int roleType, int a, Vector3 f, bool s) {
             if (this.state != SheepRoomState.Run && this.state != SheepRoomState.Start) {
-                return ;
+                return;
             }
 
             var sheepRoleTypeInfo = SheepRoleTypeInfo.getById(roleType);
 
             var petSkin = new PetView();
-            
+
             petSkin.conf = sheepRoleTypeInfo;
             petSkin.camp = camp;
             petSkin.petId = roleType;
@@ -2502,7 +2345,6 @@ namespace rvb.scripts {
 
             petSkin.skinId = petSkin.conf.animId;
 
-            
 
             var formation = SheepRoleFormation.getById(sheepRoleTypeInfo.formationId);
 
@@ -2544,157 +2386,140 @@ namespace rvb.scripts {
                 petSkin.position = f;
             }
 
-            
-            initPet(petSkin);
 
-            this.spawnPet(petSkin);
+            Vector3 p1 = petSkin.position.Value;
+            int x7 = Mathf.FloorToInt(p1.x);
+            int y7 = Mathf.FloorToInt(p1.y);
 
-            petSkin.pos = petSkin.position;
+            int blockIndex = this.getBlockIndex(new Vector3(x7, y7, 0));
 
-            
-        }
-        
-        public void initPet(PetView ppp) {
-            // ppp.clear();
+            petSkin.id = this.getNextPetId();
 
-            Vector3 a = ppp.position.Value;
-            int x = Mathf.FloorToInt(a.x);
-            int y = Mathf.FloorToInt(a.y);
+            petSkin.isActive = true;
+            petSkin.isDie = false;
+            petSkin.roleId = petSkin.petId;
 
-            int blockIndex = this.getBlockIndex(new Vector3(x, y, 0));
-
-            ppp.id = this.getNextPetId();
-
-            ppp.isActive = true;
-            ppp.isDie = false;
-            ppp.camp = ppp.camp;
-            ppp.roleId = ppp.petId;
-            ppp.skinId = ppp.skinId ?? 0;
-            ppp.conf = ppp.conf;
-
-            if (ppp.petId != 0) {
+            if (petSkin.petId != 0) {
                 if (this.state == SheepRoomState.Start) {
-                    ppp.state = SheepRoleState.Start;
-                    ppp.subState = SheepRoleSubState.Start;
-                    ppp.animType = SheepRoleAnimType.Idle;
-                    ppp.animFrame = this.RandomInt(0, 10);
+                    petSkin.state = SheepRoleState.Start;
+                    petSkin.subState = SheepRoleSubState.Start;
+                    petSkin.animType = SheepRoleAnimType.Idle;
+                    petSkin.animFrame = this.RandomInt(0, 10);
                 }
-                else if (ppp.conf.skillIn!=0) {
-                    ppp.state = SheepRoleState.In;
-                    ppp.subState = SheepRoleSubState.In;
-                    ppp.animType = SheepRoleAnimType.In;
-                    ppp.animFrame = 0;
+                else if (petSkin.conf.skillIn != 0) {
+                    petSkin.state = SheepRoleState.In;
+                    petSkin.subState = SheepRoleSubState.In;
+                    petSkin.animType = SheepRoleAnimType.In;
+                    petSkin.animFrame = 0;
                 }
-                else if (ppp.conf.startState == SheepRoleState.In) {
-                   ppp.state = ppp.conf.startState;
-                   ppp.subState = SheepRoleSubState.In;
-                   ppp.animType = SheepRoleAnimType.In;
-                   ppp.animFrame = 0;
+                else if (petSkin.conf.startState == SheepRoleState.In) {
+                    petSkin.state = petSkin.conf.startState;
+                    petSkin.subState = SheepRoleSubState.In;
+                    petSkin.animType = SheepRoleAnimType.In;
+                    petSkin.animFrame = 0;
                 }
-                else if (ppp.conf.startState == SheepRoleState.SpinSpurt) {
-                    ppp.state = ppp.conf.startState;
-                    ppp.animType = SheepRoleAnimType.Attack;
-                    ppp.animFrame = 0;
+                else if (petSkin.conf.startState == SheepRoleState.SpinSpurt) {
+                    petSkin.state = petSkin.conf.startState;
+                    petSkin.animType = SheepRoleAnimType.Attack;
+                    petSkin.animFrame = 0;
                 }
                 else {
-                    ppp.state = ppp.conf.startState;
-                    ppp.subState = SheepRoleSubState.Spurt;
+                    petSkin.state = petSkin.conf.startState;
+                    petSkin.subState = SheepRoleSubState.Spurt;
 
-                    if (ppp.conf.isSpurtAnim) {
-                        ppp.animType = SheepRoleAnimType.Spurt;
-                        ppp.animFrame = this.RandomInt(0, 10);
+                    if (petSkin.conf.isSpurtAnim) {
+                        petSkin.animType = SheepRoleAnimType.Spurt;
+                        petSkin.animFrame = this.RandomInt(0, 10);
                     }
                     else {
-                        ppp.animType = SheepRoleAnimType.Idle;
-                        ppp.animFrame = this.RandomInt(0, 10);
+                        petSkin.animType = SheepRoleAnimType.Idle;
+                        petSkin.animFrame = this.RandomInt(0, 10);
                     }
                 }
             }
 
-            ppp.frame = 0;
-            ppp.posBefX = x;
-            ppp.posBefY = y;
-            ppp.animX = x;
-            ppp.animY = y;
-            ppp.posX = x;
-            ppp.posY = y;
-            ppp.befBlockIndex = blockIndex;
-            ppp.blockIndex = blockIndex;
+            petSkin.frame = 0;
+            petSkin.posBefX = x7;
+            petSkin.posBefY = y7;
+            petSkin.animX = x7;
+            petSkin.animY = y7;
+            petSkin.posX = x7;
+            petSkin.posY = y7;
+            petSkin.befBlockIndex = blockIndex;
+            petSkin.blockIndex = blockIndex;
 
-            if (ppp.petId != 0 && this.state == SheepRoomState.Start) {
-                var m = this.getPetStartEndPos(ppp.petId, ppp.camp);
+            if (petSkin.petId != 0 && this.state == SheepRoomState.Start) {
+                var m = this.getPetStartEndPos(petSkin.petId, petSkin.camp);
 
-                ppp.tarPosX = m.x;
-                ppp.tarPosY = m.y;
-                ppp.animY = m.y;
-                ppp.posBefY = m.y;
-                ppp.posY = m.y;
+                petSkin.tarPosX = m.x;
+                petSkin.tarPosY = m.y;
+                petSkin.animY = m.y;
+                petSkin.posBefY = m.y;
+                petSkin.posY = m.y;
             }
 
-            var l = SheepRoleFormation.getById(ppp.conf.formationId);
-            float d = ppp.camp == SheepCamp.Red ? 1 : -1;
+            var roleFormation = SheepRoleFormation.getById(petSkin.conf.formationId);
+            float d7 = petSkin.camp == SheepCamp.Red ? 1 : -1;
 
-            if (l.formationType == SheepRoleFormationType.RectangleTidy ||
-                l.formationType == SheepRoleFormationType.RectangleRandom) {
-                ppp.dirX = d;
-                ppp.dirY = 0;
+            if (roleFormation.formationType == SheepRoleFormationType.RectangleTidy ||
+                roleFormation.formationType == SheepRoleFormationType.RectangleRandom) {
+                petSkin.dirX = d7;
+                petSkin.dirY = 0;
             }
-            else if (l.formationType == SheepRoleFormationType.AngleTidy ||
-                     l.formationType == SheepRoleFormationType.AngleRandom) {
+            else if (roleFormation.formationType == SheepRoleFormationType.AngleTidy ||
+                     roleFormation.formationType == SheepRoleFormationType.AngleRandom) {
                 Vector3 g = new Vector3(
-                    d * sheepMode.loongX - x,
-                    0 - y,
+                    d7 * sheepMode.loongX - x7,
+                    0 - y7,
                     0
                 ).normalized;
 
-                ppp.dirX = g.x;
-                ppp.dirY = g.y;
+                petSkin.dirX = g.x;
+                petSkin.dirY = g.y;
             }
 
-            if (ppp.petId != 0 && this.state == SheepRoomState.Start) {
-                ppp.isConnNot = true;
-            }
-            else {
-                ppp.isConnNot = false;
-            }
-
-            ppp.tarIndex = -1;
-            ppp.tarId = -1;
-            ppp.curHp = ppp.conf.hp;
-            ppp.curAtkBuff = 0;
-
-            if (ppp.isBoom) {
-                ppp.isConnNot = true;
-                ppp.isBoom = true;
+            if (petSkin.petId != 0 && this.state == SheepRoomState.Start) {
+                petSkin.isConnNot = true;
             }
             else {
-                ppp.isBoom = false;
+                petSkin.isConnNot = false;
             }
-            
-            // view_pet = viewPet;
 
-            foreach (var e in this.buffs) {
-                foreach (var item in e) {
-                    double i = (item.time - this.gameStartTimerForBuff) / 1e3;
+            petSkin.tarIndex = -1;
+            petSkin.tarId = -1;
+            petSkin.curHp = petSkin.conf.hp;
+            petSkin.curAtkBuff = 0;
 
-                    int r = item.count;
+            if (petSkin.isBoom) {
+                petSkin.isConnNot = true;
+                petSkin.isBoom = true;
+            }
+            else {
+                petSkin.isBoom = false;
+            }
 
-                    addGeneralOrderBuff(ppp,ppp, i, r);
+            foreach (var b1 in this.buffs) {
+                foreach (var b2 in b1) {
+                    double time = (b2.time - this.gameStartTimerForBuff) / 1e3;
+
+                    int r = b2.count;
+
+                    addGeneralOrderBuff(petSkin, petSkin, time, r);
                 }
             }
 
-            if (this.state == SheepRoomState.Start && ppp.conf.roleType == SheepRoleType.yang_shen) {
-                this.god_view_pets.Add(ppp);
+            if (this.state == SheepRoomState.Start && petSkin.conf.roleType == SheepRoleType.yang_shen) {
+                this.god_view_pets.Add(petSkin);
             }
+
+            this.addPrePet(petSkin);
+
+            petSkin.pos = petSkin.position;
         }
 
-        // 生成单位 下一帧才会使用
-        public void spawnPet(PetView tttt) {
-            this.pre_pets[(int)tttt.camp].Add(tttt);
-        }
 
-        // 生成 子弹 下一帧才会使用
-        public void spawnBullet(BullteCreate tttt) {
+        // 生成 子弹 下一帧才会生效
+        public void createBullet(BullteCreate tttt) {
             int bulletId = tttt.bulletId;
             PetView view_pet = tttt.view_pet;
             PetView view_tar_pet = tttt.view_tar_pet;
@@ -2703,7 +2528,7 @@ namespace rvb.scripts {
             var n = SheepBullet.getById(bulletId);
             var r = view_pet != null ? view_pet.camp == SheepCamp.Red ? n.startOffsetX : -n.startOffsetX : 0;
             var preBullet = new BulletView();
-            preBullet.id = this.bulletId++;
+            preBullet.id = getNextBulletId();
             preBullet.bulletId = bulletId;
             preBullet.roleUid = view_pet != null ? view_pet.id : 0;
             preBullet.roleIndex = view_pet;
@@ -2830,10 +2655,10 @@ namespace rvb.scripts {
 
             preBullet.atkVue = view_pet != null ? view_pet.conf.atk : l.atk;
             preBullet.frame = 0;
-            pre_bullets.Add(preBullet);
+            addPreBullet(preBullet);
         }
-        
-        
+
+
         public void updateSkinPet(PetView ppp, SheepCtl e, SheepMgr t, SheepMgr n, double o) {
             PetView a = ppp;
             PetView i = a;
@@ -2865,7 +2690,7 @@ namespace rvb.scripts {
                 }
 
                 if (i.conf.deadAnimType != null && i.conf.deadAnimType.Length != 0) {
-                    i.animType= (SheepRoleAnimType)arrOn(i.conf.deadAnimType);
+                    i.animType = (SheepRoleAnimType)arrOn(i.conf.deadAnimType);
                 }
 
                 if (i.conf.roleType == SheepRoleType.xiao_bing) {
@@ -2878,13 +2703,11 @@ namespace rvb.scripts {
             }
 
             if (!isDie) {
-                t.mainPreAddBlock( blockIndex, ppp, ppp.camp, a.conf.collideId );
 
                 int S = i.conf.detectCollideR;
 
                 for (int y = -S; y <= S; ++y) {
                     for (int v = -S; v <= S; ++v) {
-                        
                         e.comImages.mesh_block.addFrameBlockCamp(blockIndex, ppp.camp);
                     }
                 }
@@ -2898,14 +2721,14 @@ namespace rvb.scripts {
                 int countNewBuff = n.countNewBuffs[(int)ppp.camp];
 
                 if (countNewBuff != 0) {
-                    addGeneralOrderBuff(ppp,i, SheepConfig.buffLastTime, countNewBuff);
+                    addGeneralOrderBuff(ppp, i, SheepConfig.buffLastTime, countNewBuff);
                 }
             }
 
             ppp.attacher.updateTimer(o / 1e3);
         }
-        
-        public void addGeneralOrderBuff(PetView ppp,PetView e, double t, int n) {
+
+        public void addGeneralOrderBuff(PetView ppp, PetView e, double t, int n) {
             PetView o = ppp;
 
             ppp.attacher.addIndependBuff(
@@ -2964,10 +2787,9 @@ namespace rvb.scripts {
                    (maxExclusive - minInclusive) *
                    (float)logicRandom.NextDouble();
         }
-        
+
         public T arrOn<T>(T[] r) {
             return r[RandomInt(0, r.Length)];
         }
-        
     }
 }
