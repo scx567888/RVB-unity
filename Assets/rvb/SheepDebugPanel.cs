@@ -5,7 +5,7 @@ namespace rvb.scripts
 {
     public class SheepDebugPanel : MonoBehaviour
     {
-        private bool isVisible;
+        private bool isVisible=true;
         private Rect windowRect = new Rect(20, 20, 420, 480);
         private Vector2 scrollPosition;
 
@@ -27,7 +27,7 @@ namespace rvb.scripts
 
         private void OnGUI()
         {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+
             if (!isVisible)
             {
                 return;
@@ -39,7 +39,7 @@ namespace rvb.scripts
                 DrawWindow,
                 "兵种数量"
             );
-#endif
+
         }
 
         private void DrawWindow(int windowId)

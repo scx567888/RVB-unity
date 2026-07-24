@@ -19,7 +19,7 @@ namespace rvb.scripts
     /// 3. 确保 SheepMgr.gridMap 可以被访问。
     /// 4. 在 Scene 视图中打开 Gizmos。
     /// </summary>
-    public sealed class SheepGridDebugView : MonoBehaviour
+    public class SheepGridDebugView : MonoBehaviour
     {
         [Header("坐标转换")]
 
@@ -140,7 +140,7 @@ namespace rvb.scripts
                     return false;
                 }
 
-                int petCount = cell.petCount;
+                int petCount = cell.petCounts[0]+cell.petCounts[1];
 
                 if (drawOnlyNonEmptyCells && petCount == 0)
                 {
