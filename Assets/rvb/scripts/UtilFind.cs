@@ -344,12 +344,24 @@ namespace rvb.scripts {
             
         }
 
-        public static void forfeachBlocksByCollView(PetView petSkin, int xn, int yn, int splitN,
-            Action<PetView> callback) {
-            SheepCamp camp = petSkin.camp;
-            var n = system.collisionViews[(int)camp][petSkin.conf.collideId];
-            var r = system.collisionView1s[(int)camp][petSkin.conf.collideId];
-            forfeachBlocks(n, r, xn, yn, splitN, callback);
+        public static void forfeachBlocksByCollView(PetView petSkin, int xn, int yn, int splitN, Action<PetView> callback) {
+            var camp = petSkin.camp;
+            var collideId = petSkin.conf.collideId;
+            
+            for (int n = -splitN; n <= splitN; n++) {
+                for (int r = -splitN; r <= splitN; r++) {
+                    
+                    var sheepCell = system.gridMap.getCell(xn + n, yn + r);
+                    if (sheepCell==null) {
+                        continue;
+                    }
+                    sheepCell.forEachPet(camp,collideId, (p) => {
+                        callback(p);
+                        return false;
+                    });
+                    
+                }
+            }
         }
 
         public static void forfeachBlocks(IndexLen[] e, PetView[] t, int xn, int yn, int splitN, Action<PetView> callback) {
