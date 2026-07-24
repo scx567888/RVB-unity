@@ -51,26 +51,6 @@ namespace rvb.scripts {
 
         public long updateTime = 0;
 
-
-        public Dictionary<int, Dictionary<int, Dictionary<int, List<PetView>>>> pre_blocks =
-            new Dictionary<int, Dictionary<int, Dictionary<int, List<PetView>>>>();
-
-        public bool[][] isChangeCollsionFlags = null;
-        public bool[] isChangeAckFlags = null;
-
-        public int MaxCount = SheepConfig.line_w * SheepConfig.line_w;
-
-        public IndexLen[][] attackViews;
-
-        public PetView[][] attackView1s = new PetView[][] {
-            new PetView[SheepConfig.MaxPetCount],
-            new PetView[SheepConfig.MaxPetCount]
-        };
-
-        public IndexLen[][][] collisionViews = new IndexLen[][][] { };
-
-        public PetView[][][] collisionView1s = new PetView[][][] { };
-
         public int redBuffCount;
         public int blueBuffCount;
 
@@ -178,44 +158,7 @@ namespace rvb.scripts {
 
 
             this.updateTime = 0;
-
-
-            this.pre_blocks = new Dictionary<int, Dictionary<int, Dictionary<int, List<PetView>>>>();
-            this.isChangeCollsionFlags = null;
-            this.isChangeAckFlags = null;
-
-            this.MaxCount = SheepConfig.line_w * SheepConfig.line_w;
-
-            this.attackViews = new IndexLen[][] {
-                new IndexLen[MaxCount],
-                new IndexLen[MaxCount],
-            };
-
-            this.attackView1s = new PetView[][] {
-                new PetView[SheepConfig.MaxPetCount],
-                new PetView[SheepConfig.MaxPetCount]
-            };
-
-            this.collisionViews = new IndexLen[][][] {
-                new IndexLen[SheepConfig.MaxGroupCount][],
-                new IndexLen[SheepConfig.MaxGroupCount][]
-            };
-
-            for (var e = 0; e < SheepConfig.MaxGroupCount; e++) {
-                this.collisionViews[(int)SheepCamp.Red][e] = new IndexLen[this.MaxCount];
-                this.collisionViews[(int)SheepCamp.Blue][e] = new IndexLen[this.MaxCount];
-            }
-
-            this.collisionView1s = new PetView[][][] {
-                new PetView[SheepConfig.MaxGroupCount][],
-                new PetView[SheepConfig.MaxGroupCount][]
-            };
-
-            for (var e = 0; e < SheepConfig.MaxGroupCount; e++) {
-                this.collisionView1s[(int)SheepCamp.Red][e] = new PetView[SheepConfig.MaxPetCount];
-                this.collisionView1s[(int)SheepCamp.Blue][e] = new PetView[SheepConfig.MaxPetCount];
-            }
-
+        
             this.redCallInfos = new Dictionary<int, SheepCallInfo>();
 
             this.blueCallInfos = new Dictionary<int, SheepCallInfo>();
@@ -460,8 +403,6 @@ namespace rvb.scripts {
             // 清理游戏数据
             this.game_clear();
 
-            this.mainClearBlocks();
-
             var i = this.gameIndex;
 
             this.updateTime = NowMs();
@@ -646,7 +587,7 @@ namespace rvb.scripts {
 
 // todo
         public void game_clear() {
-            this.clearBlocks();
+            
             this.clearPetViews();
 
             this.clearViewBullets();
@@ -695,7 +636,7 @@ namespace rvb.scripts {
 
             applyPreBullets();
 
-            rebuildGridMap();
+            
 
             // 更新 pet
             this.update_role();
@@ -707,8 +648,6 @@ namespace rvb.scripts {
             var isEnd = false;
 
             var now = NowMs();
-
-            this.mainClearBlocks();
 
 
             if (this.endTime != 0 && this.endTime < NowMs()) {
@@ -876,7 +815,7 @@ namespace rvb.scripts {
             }
 
 
-            this.mainSyncBlocksToWokers();
+            rebuildGridMap();
 
             this.redBuffCount = _redBuffCount;
             this.blueBuffCount = _blueBuffCount;
@@ -2150,7 +2089,7 @@ namespace rvb.scripts {
 
         public void update_role_anim(PetView e) {
             e.animFrame = e.animFrame + 1;
-            OnRoleRender(e);
+            OnRoleRender?.Invoke(e);
         }
 
         public void produce_pets(int typeID, int count, SheepCamp camp) {
@@ -2384,200 +2323,6 @@ namespace rvb.scripts {
             blueCallInfos.Clear();
         }
 
-        public void clearBlocks() {
-            Array.Fill(this.attackViews[(int)SheepCamp.Red], null);
-            Array.Fill(this.attackViews[(int)SheepCamp.Blue], null);
-            Array.Fill(this.attackView1s[(int)SheepCamp.Red], null);
-            Array.Fill(this.attackView1s[(int)SheepCamp.Blue], null);
-
-            for (var e = 0; e < SheepConfig.MaxGroupCount; e++) {
-                Array.Fill(this.collisionViews[(int)SheepCamp.Red][e], null);
-                Array.Fill(this.collisionViews[(int)SheepCamp.Blue][e], null);
-                Array.Fill(this.collisionView1s[(int)SheepCamp.Red][e], null);
-                Array.Fill(this.collisionView1s[(int)SheepCamp.Blue][e], null);
-            }
-
-            this.pre_blocks.Clear();
-        }
-
-        public IndexLen getBlockByIndex(IndexLen[] e, int blockIndex) {
-            if (e[blockIndex] == null) {
-                e[blockIndex] = new IndexLen() {
-                    Len = 0,
-                    Index = 0,
-                };
-            }
-
-            return e[blockIndex];
-        }
-
-        public void mainClearBlocks() {
-            if (null == this.isChangeAckFlags) {
-                this.isChangeAckFlags = new[] { true, true };
-            }
-
-            if (null == this.isChangeCollsionFlags) {
-                isChangeCollsionFlags = new bool[2][];
-                isChangeCollsionFlags[0] = new bool[SheepConfig.MaxGroupCount];
-                isChangeCollsionFlags[1] = new bool[SheepConfig.MaxGroupCount];
-                for (var e = 0; e < SheepConfig.MaxGroupCount; e++) {
-                    this.isChangeCollsionFlags[(int)SheepCamp.Red][e] = true;
-                    this.isChangeCollsionFlags[(int)SheepCamp.Blue][e] = true;
-                }
-            }
-
-            if (this.isChangeAckFlags[(int)SheepCamp.Red]) {
-                Array.Fill(this.attackViews[(int)SheepCamp.Red], null);
-            }
-
-            this.isChangeAckFlags[(int)SheepCamp.Red] = false;
-            if (this.isChangeAckFlags[(int)SheepCamp.Blue]) {
-                Array.Fill(this.attackViews[(int)SheepCamp.Blue], null);
-            }
-
-            this.isChangeAckFlags[(int)SheepCamp.Blue] = false;
-            for (var e = 0; e < SheepConfig.MaxGroupCount; e++) {
-                if (this.isChangeCollsionFlags[(int)SheepCamp.Red][e]) {
-                    Array.Fill(this.collisionViews[(int)SheepCamp.Red][e], null);
-                }
-
-                this.isChangeCollsionFlags[(int)SheepCamp.Red][e] = false;
-                if (this.isChangeCollsionFlags[(int)SheepCamp.Blue][e]) {
-                    Array.Fill(this.collisionViews[(int)SheepCamp.Blue][e], null);
-                }
-
-                this.isChangeCollsionFlags[(int)SheepCamp.Blue][e] = false;
-            }
-
-            this.pre_blocks.Clear();
-        }
-
-        public void mainPreAddBlock(int blockIndex, PetView buffIndex, SheepCamp camp, int collideId) {
-            if (!this.pre_blocks.TryGetValue(blockIndex, out Dictionary<int, Dictionary<int, List<PetView>>> o)) {
-                o = new Dictionary<int, Dictionary<int, List<PetView>>>();
-                this.pre_blocks[blockIndex] = o;
-            }
-
-            if (!o.TryGetValue((int)camp, out Dictionary<int, List<PetView>> l)) {
-                l = new Dictionary<int, List<PetView>>();
-                o[(int)camp] = l;
-            }
-
-            if (!l.TryGetValue(collideId, out List<PetView> n)) {
-                n = new List<PetView>();
-                l[collideId] = n;
-            }
-
-            n.Add(buffIndex);
-            if (this.isChangeAckFlags != null && false == this.isChangeAckFlags[(int)camp]) {
-                this.isChangeAckFlags[(int)camp] = true;
-            }
-
-            if (this.isChangeCollsionFlags != null && false == this.isChangeCollsionFlags[(int)camp][collideId]) {
-                this.isChangeCollsionFlags[(int)camp][collideId] = true;
-            }
-        }
-
-        public void mainSyncBlocksToWokers() {
-            var e = new int[] { 0, 0 };
-            var t = new List<int>[] { new List<int>(), new List<int>() };
-            for (var e1 = 0; e1 < SheepConfig.MaxGroupCount; e1++) {
-                t[(int)SheepCamp.Red].Add(0);
-                t[(int)SheepCamp.Blue].Add(0);
-            }
-
-            foreach (var e2 in this.pre_blocks) {
-                var s = e2.Key;
-                var i1 = e2.Value;
-                if (i1 != null && i1.Count != 0) {
-                    foreach (var e3 in i1) {
-                        var i2 = e3.Value;
-                        var o = e3.Key;
-                        if (i2 != null && i2.Count != 0) {
-                            var l = 0;
-                            var n = t[o];
-                            foreach (var e4 in i2) {
-                                var e5 = e4.Value;
-                                var t6 = e4.Key;
-                                if (e5 != null && e5.Count != 0) {
-                                    var i = this.collisionViews[o][t6];
-                                    var a3 = this.collisionView1s[o][t6];
-                                    var c3 = n[t6];
-                                    var f3 = e5.Count;
-                                    l += f3;
-                                    var blockByIndex = this.getBlockByIndex(i, s);
-                                    blockByIndex.Index = c3;
-                                    blockByIndex.Len = f3;
-
-                                    foreach (var e7 in e5) {
-                                        a3[c3] = e7;
-                                        c3++;
-                                    }
-
-                                    n[t6] = c3;
-                                }
-                            }
-
-                            if (0 == l) {
-                                continue;
-                            }
-
-                            var a = this.attackViews[o];
-                            var c = this.attackView1s[o];
-                            var f = e[o];
-                            var blockByIndex1 = this.getBlockByIndex(a, s);
-                            blockByIndex1.Index = f;
-                            blockByIndex1.Len = l;
-                            foreach (var e9 in i2) {
-                                var e10 = e9.Value;
-                                var t8 = e9.Key;
-                                if (e10 != null && e10.Count != 0) {
-                                    foreach (var e11 in e10) {
-                                        c[f] = e11;
-                                        f++;
-                                    }
-                                }
-                            }
-
-                            e[o] = f;
-                        }
-                    }
-                }
-            }
-        }
-
-        public void forEachBlock(IndexLen[] e, PetView[] t, int blockIndex, Action<PetView> callback) {
-            var blockByIndex = this.getBlockByIndex(e, blockIndex);
-            var o = blockByIndex.Index;
-            var l = blockByIndex.Len;
-            if (l != 0) {
-                for (var e1 = 0; e1 < l; e1++) {
-                    callback(t[o + e1]);
-                }
-            }
-        }
-
-        public bool findBlock(IndexLen[] e, PetView[] t, int blockIndex, Func<PetView, bool> callback) {
-            var blockByIndex = this.getBlockByIndex(e, blockIndex);
-            var Index = blockByIndex.Index;
-            var Len = blockByIndex.Len;
-            if (Len == 0) {
-                return false;
-            }
-
-            for (var j = 0; j < Len; j++) {
-                var petIndex = t[Index + j];
-                if (null == petIndex) {
-                    throw new Exception("二级内存取出空???");
-                }
-
-                if (callback(petIndex)) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
 
         // 创建 单位, 下一帧才会生效
         public void createPetView(SheepCamp camp, int roleType, int a, Vector3 f, bool s) {
@@ -2958,7 +2703,6 @@ namespace rvb.scripts {
             }
 
             if (!isDie) {
-                t.mainPreAddBlock(blockIndex, ppp, ppp.camp, a.conf.collideId);
 
                 int S = i.conf.detectCollideR;
 
