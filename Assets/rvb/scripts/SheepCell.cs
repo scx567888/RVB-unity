@@ -28,20 +28,22 @@ namespace rvb.scripts {
             petCount += 1;
         }
 
-        // callback 返回 false: 继续  callback 返回 true: 停止
-        public void forEachPet(Func<PetView, bool> callback) {
+        // callback 返回 false: 继续
+        // callback 返回 true: 停止
+        public bool forEachPet(Func<PetView, bool> callback) {
             foreach (var p1 in this.pets) {
                 foreach (var p2 in p1) {
                     if (p2 != null) {
                         foreach (var pet in p2) {
                             var stop = callback(pet);
                             if (stop == true) {
-                                return;
+                                return true;
                             }
                         }
                     }
                 }
             }
+            return false;
         }
 
         // callback 返回 false: 继续
@@ -63,8 +65,9 @@ namespace rvb.scripts {
             return false;
         }
 
-        // callback 返回 false: 继续  callback 返回 true: 停止
-        public void forEachPet(SheepCamp camp, int collideId, Func<PetView, bool> callback) {
+        // callback 返回 false: 继续
+        // callback 返回 true: 停止
+        public bool forEachPet(SheepCamp camp, int collideId, Func<PetView, bool> callback) {
             var p1 = pets[(int)camp];
             var p2 = p1[collideId];
 
@@ -72,10 +75,12 @@ namespace rvb.scripts {
                 foreach (var pet in p2) {
                     var stop = callback(pet);
                     if (stop == true) {
-                        return;
+                        return true;
                     }
                 }
             }
+
+            return false;
         }
 
         public void clearPets() {
