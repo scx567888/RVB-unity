@@ -492,9 +492,63 @@ namespace rvb.scripts {
         public static bool findRandomBlocksByAckView(PetView e, int t, int i, int findR, Func<PetView, bool> callback) {
             SheepCamp camp = e.camp;
             camp = camp == SheepCamp.Red ? SheepCamp.Blue : SheepCamp.Red;
-            var r = system.attackViews[(int)camp];
-            var a = system.attackView1s[(int)camp];
-            return findRandomBlocks(r, a, t, i, findR, callback);
+            
+              Func<int, int, bool> n = (blockX, blockY) => {
+                   
+                  var sheepCell = system.gridMap.getCellSafe(blockX, blockY);
+                
+                  return sheepCell.petCounts[(int)camp] != 0;
+            };
+
+            Func<int, int, bool> a = (blockX, blockY) => {
+                var sheepCell = system.gridMap.getCellSafe(blockX, blockY);
+                
+                return sheepCell.forEachPet(camp, callback);
+            };
+
+            List<int> c = new List<int>();
+            for (int ring = 0; ring <= findR; ring++) {
+                c.Add(ring);
+            }
+
+            c.Sort((left, right) => system.Random01() < 0.5f ? -1 : 1);
+
+            for (int ringIndex = 0; ringIndex <= findR; ringIndex++) {
+                int ring = c[ringIndex];
+                Vector2Int topLeft = new Vector2Int(t - ring, i + ring);
+                Vector2Int topRight = new Vector2Int(t + ring, i + ring);
+                Vector2Int bottomRight = new Vector2Int(t + ring, i - ring);
+                Vector2Int bottomLeft = new Vector2Int(t - ring, i - ring);
+                List<Vector2Int> h = new List<Vector2Int>();
+
+                for (int x = topLeft.x; x < topRight.x; x++) {
+                    if (n(x, topLeft.y)) h.Add(new Vector2Int(x, topLeft.y));
+                }
+
+                for (int y = topRight.y; y > bottomRight.y; y--) {
+                    if (n(topRight.x, y)) h.Add(new Vector2Int(topRight.x, y));
+                }
+
+                for (int x = bottomRight.x; x > bottomLeft.x; x--) {
+                    if (n(x, bottomRight.y)) h.Add(new Vector2Int(x, bottomRight.y));
+                }
+
+                for (int y = bottomLeft.y; y < topLeft.y; y++) {
+                    if (n(bottomLeft.x, y)) h.Add(new Vector2Int(bottomLeft.x, y));
+                }
+
+                h.Sort((left, right) => system.Random01() < 0.5f ? -1 : 1);
+                while (h.Count != 0) {
+                    int lastIndex = h.Count - 1;
+                    Vector2Int point = h[lastIndex];
+                    h.RemoveAt(lastIndex);
+                    if (a(point.x, point.y)) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
         
         public static bool findNearBlocksByAckView(PetView e, int xn, int yn, int o, Func<PetView, bool> callback) {
@@ -656,74 +710,5 @@ namespace rvb.scripts {
             return false;
         }
 
-        public static bool findRandomBlocks(IndexLen[] e, PetView[] t, int i, int s, int findR, Func<PetView, bool> callback) {
-            Func<int, int, bool> n = (blockX, blockY) => {
-                int blockIndex = Util.getIndexByXnYn(blockX, blockY);
-                if (blockIndex < 0 || blockIndex >= SheepConfig.line_w * SheepConfig.line_w) {
-                    return false;
-                }
-
-                var block = system.getBlockByIndex(e, blockIndex);
-                return block.Len != 0;
-            };
-
-            Func<int, int, bool> a = (blockX, blockY) => {
-                int blockIndex = Util.getIndexByXnYn(blockX, blockY);
-                return system.findBlock(e, t, blockIndex, (Func<PetView, bool>)(petIndex => {
-                    PetView petSkin = petIndex;
-                    if (petSkin != null) {
-                        bool result = callback(petSkin);
-                        petSkin = null;
-                        return result;
-                    }
-
-                    return false;
-                }));
-            };
-
-            List<int> c = new List<int>();
-            for (int ring = 0; ring <= findR; ring++) {
-                c.Add(ring);
-            }
-
-            c.Sort((left, right) => system.Random01() < 0.5f ? -1 : 1);
-
-            for (int ringIndex = 0; ringIndex <= findR; ringIndex++) {
-                int ring = c[ringIndex];
-                Vector2Int topLeft = new Vector2Int(i - ring, s + ring);
-                Vector2Int topRight = new Vector2Int(i + ring, s + ring);
-                Vector2Int bottomRight = new Vector2Int(i + ring, s - ring);
-                Vector2Int bottomLeft = new Vector2Int(i - ring, s - ring);
-                List<Vector2Int> h = new List<Vector2Int>();
-
-                for (int x = topLeft.x; x < topRight.x; x++) {
-                    if (n(x, topLeft.y)) h.Add(new Vector2Int(x, topLeft.y));
-                }
-
-                for (int y = topRight.y; y > bottomRight.y; y--) {
-                    if (n(topRight.x, y)) h.Add(new Vector2Int(topRight.x, y));
-                }
-
-                for (int x = bottomRight.x; x > bottomLeft.x; x--) {
-                    if (n(x, bottomRight.y)) h.Add(new Vector2Int(x, bottomRight.y));
-                }
-
-                for (int y = bottomLeft.y; y < topLeft.y; y++) {
-                    if (n(bottomLeft.x, y)) h.Add(new Vector2Int(bottomLeft.x, y));
-                }
-
-                h.Sort((left, right) => system.Random01() < 0.5f ? -1 : 1);
-                while (h.Count != 0) {
-                    int lastIndex = h.Count - 1;
-                    Vector2Int point = h[lastIndex];
-                    h.RemoveAt(lastIndex);
-                    if (a(point.x, point.y)) {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        }
     }
 }
