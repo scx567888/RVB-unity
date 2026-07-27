@@ -1,22 +1,21 @@
 ﻿namespace rvb.scripts {
-    
     public class SheepConfig {
         // 地图宽度
         public int w = 12000;
 
         // 地图高度
-        public  int h = 12000;
+        public int h = 12000;
 
         // 格子大小 (格子是正方形)
-        public  int d = 500;
+        public int d = 500;
 
         // 横向分成多少行
-        public  int line_w = 24;
+        public int line_w = 24;
 
         // 纵向分成多少行
-        public  int line_h = 24;
+        public int line_h = 24;
 
-        public  int loopFrame = 4;
+        public int loopFrame = 4;
 
         // 最大单位数
         public int MaxPetCount = 100000;
@@ -54,7 +53,9 @@
         public int counterBuffNumber = 3;
         public float counterHpRatio = 0.3f;
         public int counterTime = 120;
+
         public int WarmUpID = 22;
+
         // public static int WarmUpID = 23;
         public int beheadLine = 8000;
         public int startMaxTime = 300;
@@ -79,102 +80,97 @@
             1
         };
 
-        public string[] groundColor = new[] {
+        public string[] groundColor = {
             "#ecf8fb",
             "#150c0a"
         };
     }
-    
-    
-     public class SheepConfigs {
 
-         public static SheepConfig sheepConfig = new SheepConfig() {
- 
-        // 地图宽度
-        w = 12000,
 
-        // 地图高度
-         h = 12000,
+    public class SheepConfigs {
+        public static SheepConfig sheepConfig = new() {
+            // 地图宽度
+            w = 12000,
 
-        // 格子大小 (格子是正方形)
-         d = 500,
+            // 地图高度
+            h = 12000,
 
-        // 横向分成多少行
-        line_w = 24,
+            // 格子大小 (格子是正方形)
+            d = 500,
 
-        // 纵向分成多少行
-         line_h = 24,
+            // 横向分成多少行
+            line_w = 24,
 
-        loopFrame = 4,
+            // 纵向分成多少行
+            line_h = 24,
 
-        // 最大单位数
-         MaxPetCount = 100000,
+            loopFrame = 4,
 
-        // 最大子弹数
-         MaxBulletCount = 100000,
+            // 最大单位数
+            MaxPetCount = 100000,
 
-        // 最大组数 (跟 碰撞 id 相关联)
-         MaxGroupCount = 15,
-         ImageMaxCount = 5,
+            // 最大子弹数
+            MaxBulletCount = 100000,
 
-         damageK = 2,
-         damageB = 1,
-         costShield = 33,
-         maxShield = 30000,
-         buffLastTime = 60,
-         buffHpIncreaseRate = 0.2f,
-         buffAtkIncreaseRate = 0.1f,
-         buffScoreIncreaseRate = 0.1f,
-         buffDragonDamageIncreseRate = 0.1f,
-         buffDragonReduceRate = 0.4f,
-         buffDragonMaxReduceRate = 0.999f,
-         limitSearchBorderX = 4900,
-         loongExaminationRangeBet = 2,
-         systemAutomaticTroopsIntervalTime = 0.8f,
-         systemAutomaticallyMaxTroops = 3000,
-         systemAutomaticallyTroopsOneNumber = 6,
-         systemLongerAutomaticallyDispatch = 5000,
-         DestructionDecreaseNumber = 5,
-         DestructionMax = 12,
-         DestructionMin = 3,
-         DestructionDefault = 8,
-         shockBeginNumber = 6,
-        shockEndNumber = 6,
-         counterBuffNumber = 3,
-        counterHpRatio = 0.3f,
-         counterTime = 120,
-        WarmUpID = 22,
-        // WarmUpID = 23,
-        beheadLine = 8000,
-        startMaxTime = 300,
+            // 最大组数 (跟 碰撞 id 相关联)
+            MaxGroupCount = 15,
+            ImageMaxCount = 5,
 
-         gameTime = new []{
-            1200,
-            1800,
-            3600
-        },
+            damageK = 2,
+            damageB = 1,
+            costShield = 33,
+            maxShield = 30000,
+            buffLastTime = 60,
+            buffHpIncreaseRate = 0.2f,
+            buffAtkIncreaseRate = 0.1f,
+            buffScoreIncreaseRate = 0.1f,
+            buffDragonDamageIncreseRate = 0.1f,
+            buffDragonReduceRate = 0.4f,
+            buffDragonMaxReduceRate = 0.999f,
+            limitSearchBorderX = 4900,
+            loongExaminationRangeBet = 2,
+            systemAutomaticTroopsIntervalTime = 0.8f,
+            systemAutomaticallyMaxTroops = 700,
+            systemAutomaticallyTroopsOneNumber = 6,
+            systemLongerAutomaticallyDispatch = 5000,
+            DestructionDecreaseNumber = 5,
+            DestructionMax = 12,
+            DestructionMin = 3,
+            DestructionDefault = 8,
+            shockBeginNumber = 6,
+            shockEndNumber = 6,
+            counterBuffNumber = 3,
+            counterHpRatio = 0.3f,
+            counterTime = 120,
+            WarmUpID = 22,
+            // WarmUpID = 23,
+            beheadLine = 8000,
+            startMaxTime = 300,
 
-        loongHps =new[] {
-            888800,
-            1888800,
-            2888800
-        },
+            gameTime = new[] {
+                1200,
+                1800,
+                3600
+            },
 
-         loongStateSwitching =new[] {
-            0.35f,
-            0.45f,
-            0.55f,
-            0.65f,
-            1
-        },
+            loongHps = new[] {
+                888800,
+                1888800,
+                2888800
+            },
 
-         groundColor = new[] {
-            "#ecf8fb",
-            "#150c0a"
-        },
-         };
-        
+            loongStateSwitching = new[] {
+                0.35f,
+                0.45f,
+                0.55f,
+                0.65f,
+                1
+            },
+
+            groundColor = new[] {
+                "#ecf8fb",
+                "#150c0a"
+            },
+        };
     }
-    
-    
 }
