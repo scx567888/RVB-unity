@@ -14,7 +14,7 @@ namespace rvb.scripts {
         
         
         // 固定 30 fps 
-        private const float FixedDeltaTime = 1f / 30f;
+        public static readonly float FixedDeltaTime = 1f / 30f;
 
 
         // 自动出兵计时器
@@ -1089,6 +1089,9 @@ namespace rvb.scripts {
 
         // 移动
         public void update_role_state_move(PetView petSkin, bool t) {
+            if (!t) {
+                return;
+            }
             if (petSkin.isLock) {
                 return;
             }
@@ -1131,7 +1134,7 @@ namespace rvb.scripts {
             }
 
             if (petSkin.subState == SheepRoleSubState.AttackAwait) {
-                if (!isAtkCd(petSkin)) {
+                if (!petSkin.isAtkCd()) {
                     petSkin.subState = SheepRoleSubState.AttackAnim;
                     petSkin.animType = SheepRoleAnimType.Attack;
                 }
@@ -1187,7 +1190,7 @@ namespace rvb.scripts {
                 }
 
                 if (l >= i7) {
-                    resetAtkCd(petSkin, atkCd);
+                    petSkin.resetAtkCd(atkCd);
                     var fff = findTar(petSkin);
                     var t5 = fff.atkTar;
                     var i5 = fff.moveTar;
@@ -1586,52 +1589,27 @@ namespace rvb.scripts {
         }
 
         public void update_role_state(PetView pet, bool isLogicFrame) {
-            subAtkCd(pet);
+            pet.subAtkCd(FixedDeltaTime);
             switch (pet.state) {
                 case SheepRoleState.Start:
-                    if (!isLogicFrame) {
-                        break;
-                    }
-
                     this.update_role_state_start(pet, isLogicFrame);
                     break;
                 case SheepRoleState.In:
-                    // 这一整段都是羊神专属进场逻辑 !!!
                     this.update_role_state_in(pet);
                     break;
                 case SheepRoleState.Spurt:
-                    if (!isLogicFrame) {
-                        break;
-                    }
-
                     this.update_role_state_spurt(pet, isLogicFrame);
                     break;
                 case SheepRoleState.Charge:
-                    if (!isLogicFrame) {
-                        break;
-                    }
-
                     this.update_role_state_charge(pet, isLogicFrame);
                     break;
                 case SheepRoleState.ChargePlus:
-                    if (!isLogicFrame) {
-                        break;
-                    }
-
                     this.update_role_state_charge_plus(pet, isLogicFrame);
                     break;
                 case SheepRoleState.SpinSpurt:
-                    if (!isLogicFrame) {
-                        break;
-                    }
-
                     this.update_role_state_spinspurt(pet, isLogicFrame);
                     break;
                 case SheepRoleState.Move:
-                    if (!isLogicFrame) {
-                        break;
-                    }
-
                     this.update_role_state_move(pet, isLogicFrame);
                     break;
                 case SheepRoleState.Attack:
@@ -1679,6 +1657,9 @@ namespace rvb.scripts {
         }
 
         public void update_role_state_start(PetView petSkin, bool t) {
+            if (!t) {
+                return;
+            }
             if (this.state == SheepRoomState.Start) {
                 if (t) {
                     var t2 = petSkin.posX;
@@ -1736,6 +1717,9 @@ namespace rvb.scripts {
         }
 
         public void update_role_state_charge(PetView e, bool t) {
+            if (!t) {
+                return;
+            }
             var o = e.posX;
             var l = e.posY;
             var (n, r) = getXnYn(o, l);
@@ -1828,6 +1812,9 @@ namespace rvb.scripts {
         }
 
         public void update_role_state_charge_plus(PetView e, bool t) {
+            if (!t) {
+                return;
+            }
             var o = e.posX;
             var l = e.posY;
             var (n, r) = getXnYn(o, l);
@@ -1862,6 +1849,9 @@ namespace rvb.scripts {
         }
 
         public void update_role_state_spinspurt(PetView e, bool t) {
+            if (!t) {
+                return;
+            }
             var o = e.posX;
             var l = e.posY;
             (int n, int r) = getXnYn(o, l);
@@ -1895,6 +1885,9 @@ namespace rvb.scripts {
         }
 
         public void update_role_state_spurt(PetView e, bool t) {
+            if (!t) {
+                return;
+            }
             if (e.conf.skillSpurt != 0) {
                 var s = SheepSkill.getById(e.conf.skillSpurt);
                 if (s.skillType == SheepSkillType.Boom) {
@@ -2791,30 +2784,6 @@ namespace rvb.scripts {
         // 以 e / t 的概率返回 true
         public bool numToBool(float e, float t = 1000f) {
             return Random01() * t < e;
-        }
-
-        // 是否处于攻击 cd
-        public static bool isAtkCd(PetView e) {
-            return e.curAckCd > 0f;
-        }
-
-        public static float subAtkCd(PetView viewPet) {
-            float i = viewPet.curAckCd;
-            if (i != 0f) {
-                i -= FixedDeltaTime;
-                if (i < 0f) {
-                    i = 0f;
-                }
-
-                viewPet.curAckCd = i;
-            }
-
-            return i;
-        }
-
-        // 重置 攻击 cd
-        public void resetAtkCd(PetView e, float t) {
-            e.curAckCd = t;
         }
 
         // 获取 BOSS

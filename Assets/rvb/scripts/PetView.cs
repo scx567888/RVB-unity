@@ -78,6 +78,29 @@ namespace rvb.scripts {
             curHp -= t;
             return old;
         }
+        
+        public float subAtkCd(float deltaTime) {
+            float i = curAckCd;
+            if (i != 0f) {
+                i -= deltaTime;
+                if (i < 0f) {
+                    i = 0f;
+                }
+                curAckCd = i;
+            }
+
+            return i;
+        }
+        
+        // 是否处于攻击 cd
+        public bool isAtkCd() {
+            return curAckCd > 0f;
+        }
+
+        // 重置 攻击 cd
+        public void resetAtkCd( float t) {
+            curAckCd = t;
+        }
 
         public void logicMove(float x, float y) {
             posBefX = posX;
