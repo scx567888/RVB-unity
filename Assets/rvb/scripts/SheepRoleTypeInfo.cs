@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 
 namespace rvb.scripts {
-    // 兵种静态配置, 这里只保存原始配置数据, 不保存单个单位的运行时状态.
+    // 兵种静态配置
     public class SheepRoleTypeInfo {
         
         // 配置 id
