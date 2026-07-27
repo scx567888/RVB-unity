@@ -277,23 +277,19 @@ MonoBehaviour:
   - texture: {fileID: 2800000, guid: 194dfda588cc49649980d799777b8130, type: 3}
     json: {fileID: 4900000, guid: 1e8835a799484c07b43cde1bb2398750, type: 3}
     camp: 0
-    roleType: 1
-    skinID: 100
+    animId: 100
   - texture: {fileID: 2800000, guid: 66e55d3c90bc483682f314f57044eefa, type: 3}
     json: {fileID: 4900000, guid: 8e60092c9ac349dc95dd27f98c58c057, type: 3}
     camp: 1
-    roleType: 1
-    skinID: 100
+    animId: 100
   - texture: {fileID: 2800000, guid: 575a93a600b640bd8c566ea188957696, type: 3}
     json: {fileID: 4900000, guid: 62ac99ddefc04cdf9ce5e2a9c386dc43, type: 3}
     camp: 0
-    roleType: 7
-    skinID: 106
+    animId: 106
   - texture: {fileID: 2800000, guid: ec079d659f8d474aa66dc878546f2435, type: 3}
     json: {fileID: 4900000, guid: 72923cb39d9c455e9b5e193ee42e1d20, type: 3}
     camp: 1
-    roleType: 7
-    skinID: 106
+    animId: 106
   bulletRenderConfigs: []
   mainMaterial: {fileID: 2100000, guid: de552a8032c24a2b826d1da4ff7198d9, type: 2}
   logicFPS: 30

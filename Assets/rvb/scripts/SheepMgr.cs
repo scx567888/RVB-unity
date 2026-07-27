@@ -2154,7 +2154,7 @@ namespace rvb.scripts {
                     o1.frame += 1;
 
                     // 限制每帧生成的单位
-                    if (o1.frame <= formation.frameItemX && false) {
+                    if (o1.frame <= formation.frameItemX) {
                         continue;
                     }
 

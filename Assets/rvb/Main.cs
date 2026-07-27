@@ -13,8 +13,7 @@ namespace rvb {
         public Texture2D texture;
         public TextAsset json;
         public SheepCamp camp;
-        public SheepRoleType roleType;
-        public int skinID;
+        public int animId;
     }
     
     // 字段渲染配置
@@ -73,15 +72,15 @@ namespace rvb {
                     mainMaterial,
                     2000
                 );
-                sheepCtl.comImages.roles_framess[(int)petRenderConfig.camp][petRenderConfig.skinID] = new Dictionary<int, int>();
+                sheepCtl.comImages.roles_framess[(int)petRenderConfig.camp][petRenderConfig.animId] = new Dictionary<int, int>();
                 foreach (var keyValuePair in loadRoleResult.animFrame) {
                     var k = keyValuePair.Key;
                     var v = keyValuePair.Value;
-                    sheepCtl.comImages.roles_framess[(int)petRenderConfig.camp][petRenderConfig.skinID][k] = v;
+                    sheepCtl.comImages.roles_framess[(int)petRenderConfig.camp][petRenderConfig.animId][k] = v;
                 }
 
                 scxSpriteRenderer.setParent(gameObject);
-                this.petSpriteRenderers[(int)petRenderConfig.camp][(int)petRenderConfig.roleType] = scxSpriteRenderer;
+                this.petSpriteRenderers[(int)petRenderConfig.camp][(int)petRenderConfig.animId] = scxSpriteRenderer;
             }
             
 
@@ -173,7 +172,7 @@ namespace rvb {
         private void SyncRoleView(PetView view) {
             var renderUnit = view.renderUnit;
             if (renderUnit==null) {
-                renderUnit = petSpriteRenderers[(int)view.camp][(int)view.conf.roleType].createUnit();
+                renderUnit = petSpriteRenderers[(int)view.camp][(int)view.conf.animId].createUnit();
                 view.renderUnit = renderUnit;
                 renderUnit.setScale(view.conf.scale, view.conf.scale, 1f);
                 renderUnit.setRotationFromEuler(45, 0, 0);
