@@ -1,3 +1,5 @@
+using scx.SpriteRenderer;
+
 namespace rvb.scripts {
     public class BulletView {
         public int id = 0;
@@ -24,6 +26,9 @@ namespace rvb.scripts {
         public PetView roleIndex =null;
 
         public SheepBullet conf;
+        
+        // 渲染单位
+        public ScxSpriteRenderUnit renderUnit;
 
         public int bulletId {
             get { return _bulletId; }

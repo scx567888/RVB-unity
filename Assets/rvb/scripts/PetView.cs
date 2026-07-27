@@ -2,35 +2,46 @@ using scx.SpriteRenderer;
 
 namespace rvb.scripts {
     
-    public enum BuffID {
-        GeneralOrder = 0,
-        CardBuff = 1
-    }
-
-    /// <summary>
     /// 单位数据定义
-    /// </summary>
     public class PetView {
+        // 唯一 id
         public int id = 0;
+        // 是否活跃
         public bool isActive = false;
+        // 是否死亡
         public bool isDie = false;
+        // 阵营
         public SheepCamp camp = SheepCamp.Red;
+        // 静态配置
+        public SheepRoleTypeInfo conf;
+        // 
         public int roleId = 0;
-        public int skinId = 0;
+        // 主状态
         public SheepRoleState state = SheepRoleState.In;
+        // 子状态
         public SheepRoleSubState subState = SheepRoleSubState.None;
-        public bool isLock = false;
-        public int frame = 0;
+        
+        // 逻辑位置相关
         public float posBefX = 0;
         public float posBefY = 0;
+        public float posX = 0;
+        public float posY = 0;
+        public float tarPosX = 0;
+        public float tarPosY = 0;
+        public float dirX = 0;
+        public float dirY = 0;
+        public float impulseX = 0;
+        public float impulseY = 0;
+        public int frame = 0;
+        
+        // 动画位置相关
         public float animX = 0;
         public float animY = 0;
         public float animZ = 0;
-        public float posX = 0;
-        public float posY = 0;
-        public int blockIndex = 0;
-        public float dirX = 0;
-        public float dirY = 0;
+        public SheepRoleAnimType _animType = 0;
+        public int animFrame = 0;
+
+        // 当前 血量
         public float curHp = 0;
         public float curAtkBuff = 0;
         public int curAckFrame = 0;
@@ -38,24 +49,19 @@ namespace rvb.scripts {
         public bool isHeavyAtk = false;
         public bool isNotConn = false;
         public bool isBoom = false;
-        public SheepRoleAnimType _animType = 0;
-        public int animFrame = 0;
-        public float tarPosX = 0;
-        public float tarPosY = 0;
-        public float impulseX = 0;
-        public float impulseY = 0;
+        
+        public bool isLock = false;
+        
         public int readySkillId = 0;
         public int energy = 0;
 
-        public SheepRoleTypeInfo conf;
-
-        public float scale;
         public BuffTimeAttacher attacher;
-        public int petId;
 
+        // 渲染器句柄
         public ScxSpriteRenderUnit renderUnit;
 
         public PetView() {
+            
         }
 
         public SheepRoleAnimType animType {
@@ -68,7 +74,7 @@ namespace rvb.scripts {
         }
 
         public float subCurHp(int t) {
-            float old = curHp;
+            var old = curHp;
             curHp -= t;
             return old;
         }

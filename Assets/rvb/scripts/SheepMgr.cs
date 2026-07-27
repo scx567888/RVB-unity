@@ -606,7 +606,7 @@ namespace rvb.scripts {
             view.isDie = false;
             view.camp = camp;
             view.roleId = 0;
-            view.skinId = 0;
+            
             view.conf = SheepRoleTypeInfo.getById(0);
             view.state = (SheepRoleState)(int)SheepBossState.Ready;
             view.subState = SheepRoleSubState.None;
@@ -618,7 +618,6 @@ namespace rvb.scripts {
             view.posBefY = view.posY;
             view.animX = view.posX;
             view.animY = view.posY;
-            view.blockIndex = getIndexByXY(view.posX, view.posY);
 
             view.dirX = camp == SheepCamp.Red ? 1f : -1f;
             view.dirY = 0f;
@@ -737,7 +736,7 @@ namespace rvb.scripts {
                 var P = D.animType;
                 var W = D.animFrame;
 
-                int M = animFrameCountResolver.resolve(y.camp, y.skinId, P);
+                int M = animFrameCountResolver.resolve(y.camp, y.conf.animId, P);
 
                 if (A == SheepRoleState.In && W >= M - 1) {
                     var E = SheepSkill.getById(D.readySkillId);
@@ -827,28 +826,15 @@ namespace rvb.scripts {
                 }
 
                 var t = viewPet.isDie;
-                if (0 == viewPet.roleId) {
-                    var i1 = this.update_frame(viewPet);
+                
+                    var i1 = this.update_boss_frame(viewPet);
                     if (!t && i1) {
                         this.update_boss_state(viewPet);
                     }
 
-                    this.update_role_anim(viewPet);
-                }
-                else {
-                    var i1 = (int)viewPet.camp;
-                    var s = this.logic_counts[i1];
-                    for (var i2 = 0; i2 < s; i2++) {
-                        var i3 = this.update_frame(viewPet);
-                        if (!t) {
-                            this.update_role_state(viewPet, i3);
-                        }
-
-                        this.update_role_anim(viewPet);
-                    }
-
-                    var o = viewPet;
-                }
+                    this.update_boss_anim(viewPet);
+                
+              
 
                 viewPet = null;
             }
@@ -862,15 +848,8 @@ namespace rvb.scripts {
                 }
 
                 var t = viewPet.isDie;
-                if (0 == viewPet.roleId) {
-                    var i1 = this.update_frame(viewPet);
-                    if (!t && i1) {
-                        this.update_boss_state(viewPet);
-                    }
-
-                    this.update_role_anim(viewPet);
-                }
-                else {
+              
+                
                     var i1 = (int)viewPet.camp;
                     var s = this.logic_counts[i1];
                     for (var i2 = 0; i2 < s; i2++) {
@@ -883,7 +862,7 @@ namespace rvb.scripts {
                     }
 
                     var o = viewPet;
-                }
+                
 
                 viewPet = null;
             }
@@ -1036,8 +1015,30 @@ namespace rvb.scripts {
 
             return i;
         }
+        
+        public bool update_boss_frame(Boss viewPet) {
+            var frame = viewPet.frame;
+            var loopFrame = sheepConfig.loopFrame;
+            var i = frame % loopFrame == loopFrame - 1;
+            var posBefX = viewPet.posBefX;
+            var posBefY = viewPet.posBefY;
+            var posX = viewPet.posX;
+            var posY = viewPet.posY;
+            if (!viewPet.isDie) {
+                viewPet.animX = posBefX + (posX - posBefX) * (frame % loopFrame) / loopFrame;
+                viewPet.animY = posBefY + (posY - posBefY) * (frame % loopFrame) / loopFrame;
+            }
 
-        public void update_boss_state(PetView e) {
+            frame += 1;
+            viewPet.frame = frame;
+            if (!viewPet.isDie && i) {
+                viewPet.logicMove(posX, posY);
+            }
+
+            return i;
+        }
+
+        public void update_boss_state(Boss e) {
             switch ((SheepBossState)(int)e.state) {
                 case SheepBossState.NomalRun:
                 case SheepBossState.AwakeRun:
@@ -1594,7 +1595,7 @@ namespace rvb.scripts {
                 var s1 = true;
                 forNearBlocksByAckView(petSkin, l, n, petSkin.conf.findR,
                     t1 => {
-                        if (t1.isDie || t1.camp == petSkin.camp || 0 == t1.roleId) {
+                        if (t1.isDie || t1.camp == petSkin.camp) {
                             return false;
                         }
 
@@ -1779,7 +1780,7 @@ namespace rvb.scripts {
                 e.camp == SheepCamp.Blue && e.posX < -e.conf.runEndX) {
                 var t6 = false;
                 findNearBlocksByAckView(e, n, r, 5, i8 => {
-                    if (i8.isDie || i8.camp == e.camp || 0 == i8.roleId) {
+                    if (i8.isDie || i8.camp == e.camp) {
                     }
                     else {
                         t6 = true;
@@ -1810,7 +1811,7 @@ namespace rvb.scripts {
             else {
                 var s = false;
                 findNearBlocksByAckView(e, n, r, 5, t8 => {
-                    if (!t8.isDie && t8.camp != e.camp && 0 != t8.roleId && isCanAckByRole(e, t8)) {
+                    if (!t8.isDie && t8.camp != e.camp && isCanAckByRole(e, t8)) {
                         if (t8.conf.roleType == SheepRoleType.XIAO_BING) {
                             var i = t8;
                             ackTar(e, i);
@@ -1841,7 +1842,7 @@ namespace rvb.scripts {
                 PetView o3 = null;
                 findNearBlocksByAckView(e, n, r, e.conf.findR, t4 => {
                     // 跳过：死亡的、同阵营的、没有 roleId 的
-                    if (t4.isDie || t4.camp == e.camp || t4.roleId == 0) {
+                    if (t4.isDie || t4.camp == e.camp) {
                         return false;
                     }
 
@@ -1878,7 +1879,7 @@ namespace rvb.scripts {
             }
             else {
                 findNearBlocksByAckView(e, n, r, 5, tt2 => {
-                    if (!tt2.isDie && tt2.camp != e.camp && 0 != tt2.roleId && isCanAckByRole(e, tt2)) {
+                    if (!tt2.isDie && tt2.camp != e.camp && isCanAckByRole(e, tt2)) {
                         var i7 = sheepConfig.beheadLine;
                         if (tt2.curHp < i7) {
                             tt2.isDie = true;
@@ -1920,7 +1921,7 @@ namespace rvb.scripts {
                 moveTar(e, null, i, t);
                 forNearBlocksByAckView(e, n, r, e.conf.findR,
                     t2 => {
-                        if (t2.isDie || t2.camp == e.camp || 0 == t2.roleId || !isCanAckByRole(e, t2)) {
+                        if (t2.isDie || t2.camp == e.camp || !isCanAckByRole(e, t2)) {
                             return false;
                         }
 
@@ -2075,6 +2076,10 @@ namespace rvb.scripts {
         }
 
         public void update_role_anim(PetView e) {
+            e.animFrame = e.animFrame + 1;
+        }  
+        
+        public void update_boss_anim(Boss e) {
             e.animFrame = e.animFrame + 1;
         }
 
@@ -2318,18 +2323,19 @@ namespace rvb.scripts {
 
             var sheepRoleTypeInfo = SheepRoleTypeInfo.getById(roleType);
 
-            var petSkin = new PetView();
+            var pet = new PetView();
+            
+            pet.id = this.getNextPetId();
+            pet.isActive = true;
+            pet.isDie = false;
+            pet.conf = sheepRoleTypeInfo;
+            pet.camp = camp;
+            pet.roleId = roleType;
+            pet.isDie = false;
+            
+            pet.isBoom = s; //  这里不能写死
 
-            petSkin.conf = sheepRoleTypeInfo;
-            petSkin.camp = camp;
-            petSkin.petId = roleType;
-            petSkin.isDie = false;
-            petSkin.scale = petSkin.conf.scale;
-            petSkin.isBoom = s; //  这里不能写死
-
-            petSkin.attacher = new BuffTimeAttacher();
-
-            petSkin.skinId = petSkin.conf.animId;
+            pet.attacher = new BuffTimeAttacher();
 
             var ppppp = new Vector3();
 
@@ -2346,7 +2352,7 @@ namespace rvb.scripts {
                 var P = Math.Sin(T * Math.PI / 180) * A;
                 var M = sheepMode.loongX;
 
-                if (petSkin.camp == SheepCamp.Red) {
+                if (pet.camp == SheepCamp.Red) {
                     var x = new Vector3((float)(M - H), (float)P, 0);
                     ppppp = x;
                 }
@@ -2378,79 +2384,72 @@ namespace rvb.scripts {
             int x7 = Mathf.FloorToInt(p1.x);
             int y7 = Mathf.FloorToInt(p1.y);
 
-            int blockIndex = this.getBlockIndex(new Vector3(x7, y7, 0));
+            
 
-            petSkin.id = this.getNextPetId();
-
-            petSkin.isActive = true;
-            petSkin.isDie = false;
-            petSkin.roleId = petSkin.petId;
-
-            if (petSkin.petId != 0) {
+            
                 if (this.state == SheepRoomState.Start) {
-                    petSkin.state = SheepRoleState.Start;
-                    petSkin.subState = SheepRoleSubState.Start;
-                    petSkin.animType = SheepRoleAnimType.Idle;
-                    petSkin.animFrame = this.RandomInt(0, 10);
+                    pet.state = SheepRoleState.Start;
+                    pet.subState = SheepRoleSubState.Start;
+                    pet.animType = SheepRoleAnimType.Idle;
+                    pet.animFrame = this.RandomInt(0, 10);
                 }
-                else if (petSkin.conf.skillIn != 0) {
-                    petSkin.state = SheepRoleState.In;
-                    petSkin.subState = SheepRoleSubState.In;
-                    petSkin.animType = SheepRoleAnimType.In;
-                    petSkin.animFrame = 0;
+                else if (pet.conf.skillIn != 0) {
+                    pet.state = SheepRoleState.In;
+                    pet.subState = SheepRoleSubState.In;
+                    pet.animType = SheepRoleAnimType.In;
+                    pet.animFrame = 0;
                 }
-                else if (petSkin.conf.startState == SheepRoleState.In) {
-                    petSkin.state = petSkin.conf.startState;
-                    petSkin.subState = SheepRoleSubState.In;
-                    petSkin.animType = SheepRoleAnimType.In;
-                    petSkin.animFrame = 0;
+                else if (pet.conf.startState == SheepRoleState.In) {
+                    pet.state = pet.conf.startState;
+                    pet.subState = SheepRoleSubState.In;
+                    pet.animType = SheepRoleAnimType.In;
+                    pet.animFrame = 0;
                 }
-                else if (petSkin.conf.startState == SheepRoleState.SpinSpurt) {
-                    petSkin.state = petSkin.conf.startState;
-                    petSkin.animType = SheepRoleAnimType.Attack;
-                    petSkin.animFrame = 0;
+                else if (pet.conf.startState == SheepRoleState.SpinSpurt) {
+                    pet.state = pet.conf.startState;
+                    pet.animType = SheepRoleAnimType.Attack;
+                    pet.animFrame = 0;
                 }
                 else {
-                    petSkin.state = petSkin.conf.startState;
-                    petSkin.subState = SheepRoleSubState.Spurt;
+                    pet.state = pet.conf.startState;
+                    pet.subState = SheepRoleSubState.Spurt;
 
-                    if (petSkin.conf.isSpurtAnim) {
-                        petSkin.animType = SheepRoleAnimType.Spurt;
-                        petSkin.animFrame = this.RandomInt(0, 10);
+                    if (pet.conf.isSpurtAnim) {
+                        pet.animType = SheepRoleAnimType.Spurt;
+                        pet.animFrame = this.RandomInt(0, 10);
                     }
                     else {
-                        petSkin.animType = SheepRoleAnimType.Idle;
-                        petSkin.animFrame = this.RandomInt(0, 10);
+                        pet.animType = SheepRoleAnimType.Idle;
+                        pet.animFrame = this.RandomInt(0, 10);
                     }
                 }
+            
+
+            pet.frame = 0;
+            pet.posBefX = x7;
+            pet.posBefY = y7;
+            pet.animX = x7;
+            pet.animY = y7;
+            pet.posX = x7;
+            pet.posY = y7;
+
+            if (this.state == SheepRoomState.Start) {
+                var m = this.getPetStartEndPos(pet.roleId, pet.camp);
+
+                pet.tarPosX = m.x;
+                pet.tarPosY = m.y;
+                pet.animY = m.y;
+                pet.posBefY = m.y;
+                pet.posY = m.y;
             }
 
-            petSkin.frame = 0;
-            petSkin.posBefX = x7;
-            petSkin.posBefY = y7;
-            petSkin.animX = x7;
-            petSkin.animY = y7;
-            petSkin.posX = x7;
-            petSkin.posY = y7;
-            petSkin.blockIndex = blockIndex;
-
-            if (petSkin.petId != 0 && this.state == SheepRoomState.Start) {
-                var m = this.getPetStartEndPos(petSkin.petId, petSkin.camp);
-
-                petSkin.tarPosX = m.x;
-                petSkin.tarPosY = m.y;
-                petSkin.animY = m.y;
-                petSkin.posBefY = m.y;
-                petSkin.posY = m.y;
-            }
-
-            var roleFormation = SheepRoleFormation.getById(petSkin.conf.formationId);
-            float d7 = petSkin.camp == SheepCamp.Red ? 1 : -1;
+            var roleFormation = SheepRoleFormation.getById(pet.conf.formationId);
+            float d7 = pet.camp == SheepCamp.Red ? 1 : -1;
 
             if (roleFormation.formationType == SheepRoleFormationType.RectangleTidy ||
                 roleFormation.formationType == SheepRoleFormationType.RectangleRandom) {
-                petSkin.dirX = d7;
-                petSkin.dirY = 0;
+                pet.dirX = d7;
+                pet.dirY = 0;
             }
             else if (roleFormation.formationType == SheepRoleFormationType.AngleTidy ||
                      roleFormation.formationType == SheepRoleFormationType.AngleRandom) {
@@ -2460,26 +2459,26 @@ namespace rvb.scripts {
                     0
                 ).normalized;
 
-                petSkin.dirX = g.x;
-                petSkin.dirY = g.y;
+                pet.dirX = g.x;
+                pet.dirY = g.y;
             }
 
-            if (petSkin.petId != 0 && this.state == SheepRoomState.Start) {
-                petSkin.isNotConn = true;
+            if (this.state == SheepRoomState.Start) {
+                pet.isNotConn = true;
             }
             else {
-                petSkin.isNotConn = false;
+                pet.isNotConn = false;
             }
 
-            petSkin.curHp = petSkin.conf.hp;
-            petSkin.curAtkBuff = 0;
+            pet.curHp = pet.conf.hp;
+            pet.curAtkBuff = 0;
 
-            if (petSkin.isBoom) {
-                petSkin.isNotConn = true;
-                petSkin.isBoom = true;
+            if (pet.isBoom) {
+                pet.isNotConn = true;
+                pet.isBoom = true;
             }
             else {
-                petSkin.isBoom = false;
+                pet.isBoom = false;
             }
 
             foreach (var b1 in this.buffs) {
@@ -2488,15 +2487,15 @@ namespace rvb.scripts {
 
                     int r = b2.count;
 
-                    addGeneralOrderBuff(petSkin, petSkin, time, r);
+                    addGeneralOrderBuff(pet, pet, time, r);
                 }
             }
 
-            if (this.state == SheepRoomState.Start && petSkin.conf.roleType == SheepRoleType.YANG_SHEN) {
-                this.god_view_pets.Add(petSkin);
+            if (this.state == SheepRoomState.Start && pet.conf.roleType == SheepRoleType.YANG_SHEN) {
+                this.god_view_pets.Add(pet);
             }
 
-            this.addPrePet(petSkin);
+            this.addPrePet(pet);
         }
 
 
@@ -2950,7 +2949,7 @@ namespace rvb.scripts {
         }
 
         // 获取 BOSS
-        public PetView getBackBoss(SheepCamp camp) {
+        public Boss getBackBoss(SheepCamp camp) {
             var view_boss_red = boss[(int)SheepCamp.Red];
             var view_boss_blue = boss[(int)SheepCamp.Blue];
 
@@ -3272,7 +3271,7 @@ namespace rvb.scripts {
                 hurtByRole(e, t, i);
             }
 
-            if (e.roleId != 0 && t.roleId != 0) {
+            if (t.roleId != 0) {
                 (int xn, int yn) block = getXnYn(t.posX, t.posY);
 
                 forfeachBlocksByAckView(e.camp, block.xn, block.yn, e.conf.splitN, target => {
@@ -3420,7 +3419,7 @@ namespace rvb.scripts {
             }
 
             forNearBlocksByAckView(petSkin, xn, yn, findR, targetPetView => {
-                if (!targetPetView.isDie && targetPetView.camp != petSkin.camp && targetPetView.roleId != 0) {
+                if (!targetPetView.isDie && targetPetView.camp != petSkin.camp) {
                     if (isCanAckByRole(petSkin, targetPetView)) {
                         r = targetPetView;
                         return true;
@@ -3505,7 +3504,7 @@ namespace rvb.scripts {
             PetView l = null;
 
             findNearBlocksByAckView(petSkin, block.xn, block.yn, petSkin.conf.findR, target => {
-                if (!target.isDie && target.camp != petSkin.camp && target.roleId != 0 &&
+                if (!target.isDie && target.camp != petSkin.camp &&
                     isCanAckByRole(petSkin, target)) {
                     l = target;
                     return true;
@@ -3665,7 +3664,7 @@ namespace rvb.scripts {
             });
 
             if (n == null) {
-                PetView backBoss = getBackBoss(petSkin.camp);
+                Boss backBoss = getBackBoss(petSkin.camp);
                 if (isCanAckByRole(petSkin, backBoss)) {
                     n = backBoss;
                 }
@@ -3702,7 +3701,7 @@ namespace rvb.scripts {
             float d = float.PositiveInfinity;
 
             forNearBlocksByAckView(e, block.xn, block.yn, i, target => {
-                if (!target.isDie && target.camp != e.camp && target.roleId != 0 && isCanAckByRole(e, target)) {
+                if (!target.isDie && target.camp != e.camp && isCanAckByRole(e, target)) {
                     float targetX = target.posX - l;
                     float targetY = target.posY - n;
                     float distanceSqr = targetX * targetX + targetY * targetY;

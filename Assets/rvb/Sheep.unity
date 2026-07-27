@@ -290,7 +290,23 @@ MonoBehaviour:
     json: {fileID: 4900000, guid: 72923cb39d9c455e9b5e193ee42e1d20, type: 3}
     camp: 1
     animId: 106
-  bulletRenderConfigs: []
+  bulletRenderConfigs:
+  - texture: {fileID: 2800000, guid: 716dc8e71dbb47c9b821f8e2f87a2703, type: 3}
+    json: {fileID: 4900000, guid: ddd621b7b03c4cc08d1cd85526ad7ce3, type: 3}
+    camp: 0
+    animId: 18
+  - texture: {fileID: 2800000, guid: 0b1e656e749d4b08b64c6aba90de9364, type: 3}
+    json: {fileID: 4900000, guid: 05aad11d8e274ebc982169a016385f4a, type: 3}
+    camp: 0
+    animId: 19
+  - texture: {fileID: 2800000, guid: fca747a06bd24a88b4b520f1a3d3275c, type: 3}
+    json: {fileID: 4900000, guid: 163e71573b864be29d8353538330b4f8, type: 3}
+    camp: 0
+    animId: 3
+  - texture: {fileID: 2800000, guid: e3f97951f9874dd0afb05281ccd16ea9, type: 3}
+    json: {fileID: 4900000, guid: 86b8cec0af8943d887343150d95015de, type: 3}
+    camp: 0
+    animId: 8
   mainMaterial: {fileID: 2100000, guid: de552a8032c24a2b826d1da4ff7198d9, type: 2}
   logicFPS: 30
   maxLogicStepsPerUnityFrame: 6
