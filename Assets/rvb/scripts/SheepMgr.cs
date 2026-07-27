@@ -172,9 +172,6 @@ namespace rvb.scripts {
 
 
             // 绑定 system
-            Util.system = this;
-            UtilFind.system = this;
-            UtilAck.system = this;
             inc = this;
 
 
@@ -619,7 +616,7 @@ namespace rvb.scripts {
             view.posBefY = view.posY;
             view.animX = view.posX;
             view.animY = view.posY;
-            view.blockIndex = Util.getIndexByXY(view.posX, view.posY);
+            view.blockIndex = getIndexByXY(view.posX, view.posY);
             
             view.dirX = camp == SheepCamp.Red ? 1f : -1f;
             view.dirY = 0f;
@@ -805,7 +802,7 @@ namespace rvb.scripts {
 
                     for (var O = -z; O <= z; ++O) {
                         for (var Q = -z; Q <= z; ++Q) {
-                            var Z = Util.getIndexByXY(X.x + O, X.y + Q);
+                            var Z = getIndexByXY(X.x + O, X.y + Q);
                             sheepCtl.comImages.mesh_block.addFrameBlockCamp(Z, X.camp);
                         }
                     }
@@ -908,7 +905,7 @@ namespace rvb.scripts {
                     var e = t;
                 }
 
-                var xnyn = Util.getXnYn(t.x, t.y);
+                var xnyn = getXnYn(t.x, t.y);
                 var s = xnyn.xn;
                 var o = xnyn.yn;
                 var l = t.frame;
@@ -921,15 +918,15 @@ namespace rvb.scripts {
                             if (-1 == n1 || n1 == l) {
                                 if (boss[0] == t.tarRoleIndex || boss[1] == t.tarRoleIndex) {
                                     var o1 = t.tarRoleIndex;
-                                    if (UtilAck.isCanAckByBullet(t, o1, i1)) {
-                                        UtilAck.hurtByBullet(t, o1, t.atkVue);
+                                    if (isCanAckByBullet(t, o1, i1)) {
+                                        hurtByBullet(t, o1, t.atkVue);
                                     }
                                 }
                                 else
-                                    UtilFind.forfeachBlocksByAckView(t.camp, s, o, t.conf.findR,
+                                    forfeachBlocksByAckView(t.camp, s, o, t.conf.findR,
                                         (e => {
-                                            if (UtilAck.isCanAckByBullet(t, e, i1)) {
-                                                UtilAck.hurtByBullet(t, e, t.atkVue);
+                                            if (isCanAckByBullet(t, e, i1)) {
+                                                hurtByBullet(t, e, t.atkVue);
                                             }
                                         }));
 
@@ -1054,15 +1051,15 @@ namespace rvb.scripts {
                     var t = e.conf;
                     var i = e.curAckFrame;
                     if (0 == i) {
-                        var (i9, o) = Util.getXnYn(e.posX, e.posY);
+                        var (i9, o) = getXnYn(e.posX, e.posY);
                         var l = false;
-                        UtilFind.findNearBlocksByAckView(e, i9, o,
+                        findNearBlocksByAckView(e, i9, o,
                             (int)Math.Floor((double)(t.findR * sheepConfig.loongExaminationRangeBet)), (t8 => {
                                 if (!!l) {
                                     return true;
                                 }
                                 else {
-                                    if (!!Util.isCanAckByRole(e, t8)) {
+                                    if (!!isCanAckByRole(e, t8)) {
                                         l = true;
                                         return true;
                                     }
@@ -1079,10 +1076,10 @@ namespace rvb.scripts {
                     i += 1;
                     e.curAckFrame = i;
                     if (i == (int)Math.Floor(t.readyAtks[0] / 3f)) {
-                        var (i3, s) = Util.getXnYn(e.posX, e.posY);
-                        UtilFind.forfeachBlocksByAckView(e.camp, i3, s, t.findR, t5 => {
-                            if (Util.isCanAckByRole(e, t5)) {
-                                UtilAck.hurtByRole(e, t5, e.conf.atk);
+                        var (i3, s) = getXnYn(e.posX, e.posY);
+                        forfeachBlocksByAckView(e.camp, i3, s, t.findR, t5 => {
+                            if (isCanAckByRole(e, t5)) {
+                                hurtByRole(e, t5, e.conf.atk);
                             }
                         });
                     }
@@ -1102,11 +1099,11 @@ namespace rvb.scripts {
                     var i = SheepSkillSubBoom.getById(t.id);
                     if (1 == petSkin.animFrame) {
                         var t1 = petSkin.camp == SheepCamp.Red ? -1200 : 1200;
-                        var xnyn = Util.getXnYn(t1, 0);
+                        var xnyn = getXnYn(t1, 0);
                         var o = xnyn.xn;
                         var l = xnyn.yn;
                         PetView n = null;
-                        UtilFind.findNearBlocksByAckView(petSkin, o, l, 100, e => {
+                        findNearBlocksByAckView(petSkin, o, l, 100, e => {
                             n = e;
                             return true;
                         });
@@ -1139,7 +1136,7 @@ namespace rvb.scripts {
                 return;
             }
 
-            var fff = UtilFind.findTar(petSkin);
+            var fff = findTar(petSkin);
             var s = fff.atkTar;
             var o = fff.moveTar;
             var l = fff.moveBoss;
@@ -1152,13 +1149,13 @@ namespace rvb.scripts {
 
             if (o != null) {
                 petSkin.subState = SheepRoleSubState.MoveTar;
-                Util.moveTar(petSkin, o, i, t);
+                moveTar(petSkin, o, i, t);
                 return;
             }
 
             if (l != null) {
                 petSkin.subState = SheepRoleSubState.MoveBoss;
-                Util.moveTar(petSkin, l, i, t);
+                moveTar(petSkin, l, i, t);
                 return;
             }
 
@@ -1170,14 +1167,14 @@ namespace rvb.scripts {
             if (petSkin.conf.isLoongStopDistance != 0) {
                 var t3 = sheepMode;
                 var i1 = petSkin.conf.loongStopDistanceR;
-                if (Util.dis(petSkin.posX, petSkin.posY, petSkin.camp == SheepCamp.Red ? t3.loongX : -t3.loongX, 0) <=
+                if (dis(petSkin.posX, petSkin.posY, petSkin.camp == SheepCamp.Red ? t3.loongX : -t3.loongX, 0) <=
                     i1) {
                     o = (int)SheepRoleAtkMoveType.None;
                 }
             }
 
             if (petSkin.subState == SheepRoleSubState.AttackAwait) {
-                if (!Util.isAtkCd(petSkin)) {
+                if (!isAtkCd(petSkin)) {
                     petSkin.subState = SheepRoleSubState.AttackAnim;
                     petSkin.animType = SheepRoleAnimType.Attack;
                 }
@@ -1192,19 +1189,19 @@ namespace rvb.scripts {
                     if (l == i9) {
                         PetView i5 = null;
                         if (petSkin.conf.atkType == SheepRoleAtkType.Nearest) {
-                            i5 = UtilFind.findNearAck(petSkin);
+                            i5 = findNearAck(petSkin);
                         }
                         else if (petSkin.conf.atkType == SheepRoleAtkType.Throw) {
-                            i5 = UtilFind.findSortAck(petSkin, petSkin.conf.findR);
+                            i5 = findSortAck(petSkin, petSkin.conf.findR);
                             if (petSkin.conf.roleType == SheepRoleType.PAO_CHE) {
-                                var t6 = Util.getBackBoss(petSkin.camp);
-                                if (Util.isCanAckByRole(petSkin, t6)) {
+                                var t6 = getBackBoss(petSkin.camp);
+                                if (isCanAckByRole(petSkin, t6)) {
                                     i5 = t6;
                                 }
                             }
                         }
                         else {
-                            i5 = UtilFind.findNearAck(petSkin);
+                            i5 = findNearAck(petSkin);
                         }
 
                         if (t3.bullet != null && 0 != t3.bullet.Length) {
@@ -1224,7 +1221,7 @@ namespace rvb.scripts {
                         }
                         else {
                             if (i5 != null) {
-                                UtilAck.ackTar(petSkin, i5);
+                                ackTar(petSkin, i5);
                             }
                         }
 
@@ -1233,8 +1230,8 @@ namespace rvb.scripts {
                 }
 
                 if (l >= i7) {
-                    Util.resetAtkCd(petSkin, atkCd);
-                    var fff = UtilFind.findTar(petSkin);
+                    resetAtkCd(petSkin, atkCd);
+                    var fff = findTar(petSkin);
                     var t5 = fff.atkTar;
                     var i5 = fff.moveTar;
                     var s = fff.moveBoss;
@@ -1262,9 +1259,9 @@ namespace rvb.scripts {
 
             if (t && (o == (int)SheepRoleAtkMoveType.Move || o == (int)SheepRoleAtkMoveType.CdMove &&
                     petSkin.subState == SheepRoleSubState.AttackAwait)) {
-                var s = UtilFind.findNearAck(petSkin);
-                if (s != null && Util.disByRole(petSkin, s) > petSkin.conf.atkMinMoveR + s.conf.collideR) {
-                    Util.moveTar(petSkin, s, i, t);
+                var s = findNearAck(petSkin);
+                if (s != null && disByRole(petSkin, s) > petSkin.conf.atkMinMoveR + s.conf.collideR) {
+                    moveTar(petSkin, s, i, t);
                 }
             }
         }
@@ -1276,7 +1273,7 @@ namespace rvb.scripts {
                 var i3 = false;
                 var s = petSkin.conf;
                 if (petSkin.conf.roleType == SheepRoleType.CI_KE) {
-                    UtilFind.foreachFront(petSkin, (e => {
+                    foreachFront(petSkin, (e => {
                         if (e.conf.roleType != SheepRoleType.DUN_BING) {
                         }
                         else {
@@ -1293,7 +1290,7 @@ namespace rvb.scripts {
                     return;
                 }
 
-                var o = UtilFind.findFarAck(petSkin, t.findR);
+                var o = findFarAck(petSkin, t.findR);
                 if (o != null) {
                     petSkin.logicMove(o.posX, o.posY);
                 }
@@ -1305,7 +1302,7 @@ namespace rvb.scripts {
             }
 
             if (i == t.atkFrame) {
-                UtilAck.ackMe(petSkin, t.spiltRadiusBet, t.atkBet, t.atkFindR);
+                ackMe(petSkin, t.spiltRadiusBet, t.atkBet, t.atkFindR);
             }
 
             if (i >= t.endFrame) {
@@ -1335,7 +1332,7 @@ namespace rvb.scripts {
                     t1.Add(SheepRoleType.QI_LIN);
                 }
 
-                UtilAck.ackMe(petSkin, i.spiltRadiusBet, i.atkBet, i.atkFindR, i.hitBackDistance, t1);
+                ackMe(petSkin, i.spiltRadiusBet, i.atkBet, i.atkFindR, i.hitBackDistance, t1);
             }
 
             if (s >= i.endFrame) {
@@ -1376,7 +1373,7 @@ namespace rvb.scripts {
             foreach (var i1 in o) {
                 if (t == i1) {
                     var t3 = (float)Math.Floor((petSkin.conf.hp - petSkin.curHp) * (s.healHealthPercent / 100f));
-                    UtilAck.hurtByRole(petSkin, petSkin, -t3);
+                    hurtByRole(petSkin, petSkin, -t3);
                     break;
                 }
             }
@@ -1384,7 +1381,7 @@ namespace rvb.scripts {
             var l = s.atkFrames;
             foreach (var i2 in l) {
                 if (t == i2) {
-                    UtilAck.ackMe(petSkin, s.spiltRadiusBet, s.atkBet, s.atkFindR);
+                    ackMe(petSkin, s.spiltRadiusBet, s.atkBet, s.atkFindR);
                     break;
                 }
             }
@@ -1401,7 +1398,7 @@ namespace rvb.scripts {
             var o = SheepSkill.getById(petSkin.readySkillId);
             var l = SheepSkillSubBladestorm.getById(o.id);
             if (t) {
-                var fff = UtilFind.findTar(petSkin, l.findR);
+                var fff = findTar(petSkin, l.findR);
                 var t1 = fff.atkTar;
                 var s1 = fff.moveTar;
                 var o1 = fff.moveBoss;
@@ -1416,7 +1413,7 @@ namespace rvb.scripts {
                     n = o1;
                 }
 
-                Util.dirTar(petSkin, n);
+                dirTar(petSkin, n);
                 var r = l.speed;
                 var x = petSkin.posX + petSkin.dirX * r * i * 3f;
                 var y = petSkin.posY + petSkin.dirY * r * i * 3f;
@@ -1426,7 +1423,7 @@ namespace rvb.scripts {
             var n1 = l.atkFrames;
             foreach (var t3 in n1) {
                 if (s == t3) {
-                    UtilAck.ackMe(petSkin, l.spiltRadiusBet, l.atkBet, l.atkFindR);
+                    ackMe(petSkin, l.spiltRadiusBet, l.atkBet, l.atkFindR);
                     break;
                 }
             }
@@ -1446,7 +1443,7 @@ namespace rvb.scripts {
             foreach (var i in o1) {
                 if (t1 == i) {
                     var t = (float)Math.Floor((petSkin.conf.hp - petSkin.curHp) * (s.healHealthPercent / 100f));
-                    UtilAck.hurtByRole(petSkin, petSkin, -t);
+                    hurtByRole(petSkin, petSkin, -t);
                     break;
                 }
             }
@@ -1454,7 +1451,7 @@ namespace rvb.scripts {
             var l1 = s.atkFrames;
             foreach (var i in l1) {
                 if (t1 == i) {
-                    UtilAck.ackMe(petSkin, s.spiltRadiusBet, s.atkBet, s.atkFindR);
+                    ackMe(petSkin, s.spiltRadiusBet, s.atkBet, s.atkFindR);
                     break;
                 }
             }
@@ -1464,7 +1461,7 @@ namespace rvb.scripts {
                 var o = n[i];
                 var l = s.hitBackDistances[i];
                 if (t1 == o) {
-                    UtilAck.hitBackMe(petSkin, s.spiltRadiusBet, s.atkFindR, l);
+                    hitBackMe(petSkin, s.spiltRadiusBet, s.atkFindR, l);
                     break;
                 }
             }
@@ -1585,41 +1582,41 @@ namespace rvb.scripts {
         public void update_role_state_spinatk(PetView petSkin, bool t, float i) {
             var s = petSkin.posX;
             var o = petSkin.posY;
-            var xnyn = Util.getXnYn(s, o);
+            var xnyn = getXnYn(s, o);
             var l = xnyn.xn;
             var n = xnyn.yn;
             var r = petSkin.animFrame;
             var a = SheepSkill.getById(petSkin.readySkillId);
             var c = SheepSkillSubSpinAtk.getById(a.id);
             if (1 == r) {
-                var t1 = UtilFind.findSortAck1(petSkin, petSkin.conf.findR);
+                var t1 = findSortAck1(petSkin, petSkin.conf.findR);
 
                 if (t1 != null) {
-                    Util.dirTar(petSkin, t1);
+                    dirTar(petSkin, t1);
                 }
             }
 
             if (t) {
                 var s1 = true;
-                UtilFind.forNearBlocksByAckView(petSkin, l, n, petSkin.conf.findR,
+                forNearBlocksByAckView(petSkin, l, n, petSkin.conf.findR,
                     t1 => {
                         if (t1.isDie || t1.camp == petSkin.camp || 0 == t1.roleId) {
                             return false;
                         }
 
-                        if (s1 && t1.conf.roleType == SheepRoleType.DUN_BING && Util.isCanAckByRole(petSkin, t1)) {
+                        if (s1 && t1.conf.roleType == SheepRoleType.DUN_BING && isCanAckByRole(petSkin, t1)) {
                             s1 = false;
                         }
 
-                        if (!Util.isCanAckByRole(petSkin, t1)) {
+                        if (!isCanAckByRole(petSkin, t1)) {
                             return false;
                         }
 
-                        UtilAck.ackTar(petSkin, t1);
+                        ackTar(petSkin, t1);
                         return false;
                     });
                 if (s1) {
-                    Util.moveTar(petSkin, null, i, t);
+                    moveTar(petSkin, null, i, t);
                 }
             }
 
@@ -1631,7 +1628,7 @@ namespace rvb.scripts {
         }
 
         public void update_role_state(PetView petSkin, bool t, float i = 0.033f) {
-            Util.subAtkCd(petSkin, i);
+            subAtkCd(petSkin, i);
             switch (petSkin.state) {
                 case SheepRoleState.Start:
                     if (!t) {
@@ -1730,10 +1727,10 @@ namespace rvb.scripts {
                     var i = petSkin.posY;
                     var o = petSkin.tarPosX;
                     var l = petSkin.tarPosY;
-                    var n = Util.dis(t2, i, o, l);
+                    var n = dis(t2, i, o, l);
                     var r = 3 * petSkin.conf.runSpeed;
                     if (n > r * s) {
-                        var ddd = Util.dirTarByPos(petSkin, petSkin.tarPosX, petSkin.tarPosY);
+                        var ddd = dirTarByPos(petSkin, petSkin.tarPosX, petSkin.tarPosY);
                         var t3 = ddd[0];
                         var i3 = ddd[1];
                         var o3 = new Vector3() { x = petSkin.posX, y = petSkin.posY };
@@ -1783,11 +1780,11 @@ namespace rvb.scripts {
         public void update_role_state_charge(PetView e, bool t, float i) {
             var o = e.posX;
             var l = e.posY;
-            var (n, r) = Util.getXnYn(o, l);
+            var (n, r) = getXnYn(o, l);
             if (e.camp == SheepCamp.Red && e.posX > e.conf.runEndX ||
                 e.camp == SheepCamp.Blue && e.posX < -e.conf.runEndX) {
                 var t6 = false;
-                UtilFind.findNearBlocksByAckView(e, n, r, 5, i8 => {
+                findNearBlocksByAckView(e, n, r, 5, i8 => {
                     if (i8.isDie || i8.camp == e.camp || 0 == i8.roleId) {
                     }
                     else {
@@ -1818,11 +1815,11 @@ namespace rvb.scripts {
             }
             else {
                 var s = false;
-                UtilFind.findNearBlocksByAckView(e, n, r, 5, t8 => {
-                    if (!t8.isDie && t8.camp != e.camp && 0 != t8.roleId && Util.isCanAckByRole(e, t8)) {
+                findNearBlocksByAckView(e, n, r, 5, t8 => {
+                    if (!t8.isDie && t8.camp != e.camp && 0 != t8.roleId && isCanAckByRole(e, t8)) {
                         if (t8.conf.roleType == SheepRoleType.XIAO_BING) {
                             var i = t8;
-                            UtilAck.ackTar(e, i);
+                            ackTar(e, i);
                         }
                         else {
                             s = true;
@@ -1848,7 +1845,7 @@ namespace rvb.scripts {
                 }
 
                 PetView o3 = null;
-                UtilFind.findNearBlocksByAckView(e, n, r, e.conf.findR, t4 => {
+                findNearBlocksByAckView(e, n, r, e.conf.findR, t4 => {
                     // 跳过：死亡的、同阵营的、没有 roleId 的
                     if (t4.isDie || t4.camp == e.camp || t4.roleId == 0) {
                         return false;
@@ -1860,7 +1857,7 @@ namespace rvb.scripts {
                     }
 
                     // 必须可攻击
-                    if (!Util.isCanAckByRole(e, t4)) {
+                    if (!isCanAckByRole(e, t4)) {
                         return false;
                     }
 
@@ -1868,14 +1865,14 @@ namespace rvb.scripts {
                     o3 = t4;
                     return true;
                 });
-                Util.moveTar(e, o3, i, t);
+                moveTar(e, o3, i, t);
             }
         }
 
         public void update_role_state_charge_plus(PetView e, bool t, float i) {
             var o = e.posX;
             var l = e.posY;
-            var (n, r) = Util.getXnYn(o, l);
+            var (n, r) = getXnYn(o, l);
             if (e.camp == SheepCamp.Red && e.posX > e.conf.runEndX ||
                 e.camp == SheepCamp.Blue && e.posX < -e.conf.runEndX) {
                 e.state = SheepRoleState.Boom;
@@ -1886,8 +1883,8 @@ namespace rvb.scripts {
                 e.readySkillId = i3.id;
             }
             else {
-                UtilFind.findNearBlocksByAckView(e, n, r, 5, tt2 => {
-                    if (!tt2.isDie && tt2.camp != e.camp && 0 != tt2.roleId && Util.isCanAckByRole(e, tt2)) {
+                findNearBlocksByAckView(e, n, r, 5, tt2 => {
+                    if (!tt2.isDie && tt2.camp != e.camp && 0 != tt2.roleId && isCanAckByRole(e, tt2)) {
                         var i7 = sheepConfig.beheadLine;
                         if (tt2.curHp < i7) {
                             tt2.isDie = true;
@@ -1895,21 +1892,21 @@ namespace rvb.scripts {
                         }
                         else {
                             var t1 = e.conf;
-                            UtilAck.ackMe(e, t1.collideR, 0, t1.findR, t1.hitBackDistance);
+                            ackMe(e, t1.collideR, 0, t1.findR, t1.hitBackDistance);
                         }
                     }
 
                     return false;
                 });
 
-                Util.moveTar(e, null, i, t);
+                moveTar(e, null, i, t);
             }
         }
 
         public void update_role_state_spinspurt(PetView e, bool t, float i) {
             var o = e.posX;
             var l = e.posY;
-            (int n, int r) = Util.getXnYn(o, l);
+            (int n, int r) = getXnYn(o, l);
             if (e.camp == SheepCamp.Red && e.posX > e.conf.runEndX ||
                 e.camp == SheepCamp.Blue && e.posX < -e.conf.runEndX) {
                 e.state = SheepRoleState.Boom;
@@ -1926,14 +1923,14 @@ namespace rvb.scripts {
                 e.readySkillId = i1.id;
             }
             else {
-                Util.moveTar(e, null, i, t);
-                UtilFind.forNearBlocksByAckView(e, n, r, e.conf.findR,
+                moveTar(e, null, i, t);
+                forNearBlocksByAckView(e, n, r, e.conf.findR,
                     t2 => {
-                        if (t2.isDie || t2.camp == e.camp || 0 == t2.roleId || !Util.isCanAckByRole(e, t2)) {
+                        if (t2.isDie || t2.camp == e.camp || 0 == t2.roleId || !isCanAckByRole(e, t2)) {
                             return false;
                         }
 
-                        UtilAck.ackTar(e, t2);
+                        ackTar(e, t2);
                         return false;
                     });
             }
@@ -1944,7 +1941,7 @@ namespace rvb.scripts {
                 var s = SheepSkill.getById(e.conf.skillSpurt);
                 if (s.skillType == SheepSkillType.Boom) {
                     var o = SheepSkillSubBoom.getById(s.id);
-                    var fff = UtilFind.findTar(e);
+                    var fff = findTar(e);
                     var l = fff.atkTar;
                     var n = fff.moveTar;
                     var r = fff.moveBoss;
@@ -1963,11 +1960,11 @@ namespace rvb.scripts {
                         return;
                     }
 
-                    Util.moveTar(e, null, i, t);
+                    moveTar(e, null, i, t);
                 }
                 else if (s.skillType == SheepSkillType.Killer) {
                     var o = SheepSkillSubKiller.getById(s.id);
-                    var fff = UtilFind.findTar(e);
+                    var fff = findTar(e);
 
                     var l = fff.atkTar;
                     var n = fff.moveTar;
@@ -1986,15 +1983,15 @@ namespace rvb.scripts {
                         e.state = SheepRoleState.Move;
                         e.subState = SheepRoleSubState.MoveBoss;
                         e.animType = SheepRoleAnimType.Idle;
-                        Util.moveTar(e, r, i, t);
+                        moveTar(e, r, i, t);
                         return;
                     }
 
-                    Util.moveTar(e, null, i, t);
+                    moveTar(e, null, i, t);
                 }
                 else if (s.skillType == SheepSkillType.Bullet) {
                     var o = SheepSkillSubBullet.getById(s.id);
-                    var fff = UtilFind.findTar(e);
+                    var fff = findTar(e);
                     var l = fff.atkTar;
                     var n = fff.moveTar;
                     var r = fff.moveBoss;
@@ -2015,7 +2012,7 @@ namespace rvb.scripts {
                     if (n != null) {
                         e.state = SheepRoleState.Move;
                         e.subState = SheepRoleSubState.MoveTar;
-                        Util.moveTar(e, n, i, t);
+                        moveTar(e, n, i, t);
                         return;
                     }
 
@@ -2023,15 +2020,15 @@ namespace rvb.scripts {
                         e.state = SheepRoleState.Move;
                         e.subState = SheepRoleSubState.MoveBoss;
                         e.animType = SheepRoleAnimType.Idle;
-                        Util.moveTar(e, r, i, t);
+                        moveTar(e, r, i, t);
                         return;
                     }
 
-                    Util.moveTar(e, null, i, t);
+                    moveTar(e, null, i, t);
                 }
                 else if (s.skillType == SheepSkillType.CallBullets) {
                     var o = SheepSkillSubCallBullets.getById(s.id);
-                    var fff = UtilFind.findTar(e);
+                    var fff = findTar(e);
                     var l = fff.atkTar;
                     var n = fff.moveTar;
                     var r = fff.moveBoss;
@@ -2050,11 +2047,11 @@ namespace rvb.scripts {
                         return;
                     }
 
-                    Util.moveTar(e, null, i, t);
+                    moveTar(e, null, i, t);
                 }
             }
             else {
-                var fff = UtilFind.findTar(e);
+                var fff = findTar(e);
                 var s = fff.atkTar;
                 var o = fff.moveTar;
                 var l = fff.moveBoss;
@@ -2068,18 +2065,18 @@ namespace rvb.scripts {
                 if (o != null) {
                     e.state = SheepRoleState.Move;
                     e.subState = SheepRoleSubState.MoveTar;
-                    Util.moveTar(e, o, i, t);
+                    moveTar(e, o, i, t);
                     return;
                 }
 
                 if (l != null) {
                     e.state = SheepRoleState.Move;
                     e.subState = SheepRoleSubState.MoveBoss;
-                    Util.moveTar(e, l, i, t);
+                    moveTar(e, l, i, t);
                     return;
                 }
 
-                Util.moveTar(e, null, i, t);
+                moveTar(e, null, i, t);
             }
         }
 
@@ -2340,7 +2337,8 @@ namespace rvb.scripts {
 
             petSkin.skinId = petSkin.conf.animId;
 
-
+            var ppppp = new Vector3();
+            
             var formation = SheepRoleFormation.getById(sheepRoleTypeInfo.formationId);
 
             if (formation.formationType == SheepRoleFormationType.AngleRandom) {
@@ -2356,11 +2354,11 @@ namespace rvb.scripts {
 
                 if (petSkin.camp == SheepCamp.Red) {
                     var x = new Vector3((float)(M - H), (float)P, 0);
-                    petSkin.position = x;
+                    ppppp = x;
                 }
                 else {
                     var D = new Vector3((float)(H - M), (float)P, 0);
-                    petSkin.position = D;
+                    ppppp = D;
                 }
             }
             else if (formation.formationType == SheepRoleFormationType.RectangleRandom) {
@@ -2375,14 +2373,14 @@ namespace rvb.scripts {
                 var E = formation.startX + sheepMode.startAddX;
                 W = camp == SheepCamp.Red ? -Math.Abs(E) : Math.Abs(E);
                 var O = new Vector3(W, N, 0f);
-                petSkin.position = O;
+                ppppp = O;
             }
             else {
-                petSkin.position = f;
+                ppppp = f;
             }
 
 
-            Vector3 p1 = petSkin.position.Value;
+            Vector3 p1 = ppppp;
             int x7 = Mathf.FloorToInt(p1.x);
             int y7 = Mathf.FloorToInt(p1.y);
 
@@ -2659,7 +2657,7 @@ namespace rvb.scripts {
             }
 
             bool isDie = i.isDie;
-            int blockIndex = i.blockIndex;
+            int blockIndex = getIndexByXY(i.posX,i.posY);
             float curHp = i.curHp;
 
             if (isDie) {
@@ -2702,9 +2700,9 @@ namespace rvb.scripts {
                     }
                 }
 
-                Vector3 B = new Vector3(i.animX, i.animY, 0);
+                // Vector3 B = new Vector3(i.animX, i.animY, 0);
 
-                a.position = B;
+                // a.position = B;
             }
 
             if (!isDie) {
@@ -2781,5 +2779,1345 @@ namespace rvb.scripts {
         public T arrOn<T>(T[] r) {
             return r[RandomInt(0, r.Length)];
         }
+        
+        
+         public (int xn, int yn) getXnYnByIndex(int e) {
+            return (
+                e % sheepConfig.line_w,
+                Mathf.FloorToInt((float)e / sheepConfig.line_w)
+            );
+        }
+
+        // 根据 空间坐标 获取 格子坐标
+        public (int xn, int yn) getXnYn(float x, float y) {
+            return (
+                Mathf.FloorToInt(x / sheepConfig.d + sheepConfig.h / sheepConfig.d / 2f),
+                Mathf.FloorToInt(y / sheepConfig.d + sheepConfig.w / sheepConfig.d / 2f)
+            );
+        }
+
+        // 根据格子坐标 获取 index
+        // 具有边界保护
+        public int getIndexByXnYn(int xn, int yn) {
+            if (xn < 0) {
+                xn = 0;
+            }
+            else if (xn >= sheepConfig.line_w) {
+                xn = sheepConfig.line_w - 1;
+            }
+
+            if (yn < 0) {
+                yn = 0;
+            }
+            else if (yn >= sheepConfig.line_h) {
+                yn = sheepConfig.line_h - 1;
+            }
+
+            return xn * sheepConfig.line_w + yn;
+        }
+
+        // 根据 空间坐标 获取 索引 (只是组合方法)
+        public int getIndexByXY(float x, float y) {
+            (int xn, int yn) i = getXnYn(x, y);
+            return getIndexByXnYn(i.xn, i.yn);
+        }
+
+        public bool isCanAckByRole(PetView e, PetView t, float i = 1f) {
+            //判断单位是否死亡
+            bool o = !t.isDie;
+            if (!o) {
+                return o;
+            }
+
+            SheepRoleState l = t.state;
+            if (
+                t.roleId != 0 &&
+                (
+                    l == SheepRoleState.In ||
+                    l == SheepRoleState.Dead ||
+                    l == SheepRoleState.Merge ||
+                    l == SheepRoleState.Res ||
+                    l == SheepRoleState.Killer
+                )
+            ) {
+                return false;
+            }
+
+            // 阵营判断
+            SheepCamp r = e.camp;
+            SheepCamp a = t.camp;
+            if (a == r) {
+                return false;
+            }
+
+            // 越界判断
+            if (a == SheepCamp.Red && t.posX < -sheepConfig.limitSearchBorderX) {
+                return false;
+            }
+
+            if (a == SheepCamp.Blue && t.posX > sheepConfig.limitSearchBorderX) {
+                return false;
+            }
+
+            //距离判断
+            float f = e.posX;
+            float h = e.posY;
+            float p = t.posX - f;
+            float u = t.posY - h;
+            float d = p * p + u * u;
+            float g = Mathf.Sqrt(d);
+
+            //攻击范围判断
+            return g < e.conf.atkR * i + e.conf.collideR + t.conf.collideR;
+        }
+
+        // 是否可以移动?
+        public bool isCanMove(PetView petSkin, PetView targetPetSkin) {
+            SheepCamp o = targetPetSkin.camp;
+            return !(
+                o == SheepCamp.Red && targetPetSkin.posX < -sheepConfig.limitSearchBorderX ||
+                o == SheepCamp.Blue && targetPetSkin.posX > sheepConfig.limitSearchBorderX ||
+                targetPetSkin.isDie ||
+                targetPetSkin.camp == petSkin.camp
+            );
+        }
+
+        // 设置 e 到 t 的方向向量
+        public static void dirTar(PetView e, PetView t) {
+            float i = e.posX;
+            float s = e.posY;
+            float o = t.posX - i;
+            float l = t.posY - s;
+            float r = Mathf.Sqrt(o * o + l * l);
+            if (r == 0f) {
+                r = 1f;
+            }
+
+            float a = o / r;
+            float c = l / r;
+            e.dirX = a;
+            e.dirY = c;
+        }
+
+        // 设置 e 到指定 x,y 的方向向量
+        public static float[] dirTarByPos(PetView e, float x, float y) {
+            float s = x - e.posX;
+            float o = y - e.posY;
+            float l = Mathf.Sqrt(s * s + o * o);
+            if (l == 0f) {
+                l = 1f;
+            }
+
+            return new[] { s / l, o / l };
+        }
+
+        // 返回两点之间的距离
+        public static float dis(float x, float y, float x1, float y1) {
+            float o = x1 - x;
+            float l = y1 - y;
+            return Mathf.Sqrt(o * o + l * l);
+        }
+
+        // 返回两个单位之间的距离
+        public static float disByRole(PetView e, PetView t) {
+            float i = e.posX;
+            float s = e.posY;
+            float o = t.posX - i;
+            float l = t.posY - s;
+            return Mathf.Sqrt(o * o + l * l);
+        }
+
+        // 以 e / t 的概率返回 true
+        public bool numToBool(float e, float t = 1000f) {
+            return Random01() * t < e;
+        }
+
+        // 是否处于攻击 cd
+        public static bool isAtkCd(PetView e) {
+            return e.curAckCd > 0f;
+        }
+
+        public static float subAtkCd(PetView viewPet, float t) {
+            float i = viewPet.curAckCd;
+            if (i != 0f) {
+                i -= t;
+                if (i < 0f) {
+                    i = 0f;
+                }
+
+                viewPet.curAckCd = i;
+            }
+
+            return i;
+        }
+
+        // 重置 攻击 cd
+        public void resetAtkCd(PetView e, float t) {
+            e.curAckCd = t;
+        }
+
+        // 获取 BOSS
+        public PetView getBackBoss(SheepCamp camp) {
+            
+            var    view_boss_red = boss[(int)SheepCamp.Red];
+            var    view_boss_blue = boss[(int)SheepCamp.Blue];
+            
+
+            if (camp == SheepCamp.Red) {
+                return view_boss_blue;
+            }
+            else {
+                return view_boss_red;
+            }
+        }
+
+        public void moveTar(PetView e, PetView t, float i, bool o) {
+            
+            // todo 这个是什么意思 某种跳过开关吗?
+            if (!o) {
+                return;
+            }
+
+            // todo 当这两个任意不为 0 的时候 跳过 ? 什么作用?
+            if (e.impulseX != 0f || e.impulseY != 0f) {
+                return;
+            }
+
+            // 时间系数
+            i *= 3f;
+
+            // 当前位置
+            Vector2 l = new Vector2(e.posX, e.posY);
+
+            // 有目标
+            if (t != null) {
+                // 如果目标是 boss
+                if (t.conf.roleType == SheepRoleType.BOSS) {
+                    // 当红方在中线左侧的时候 逼着往中线推进 (不贴边)
+                    if (e.camp == SheepCamp.Red && e.posX < 0f) {
+                        e.dirX = 1f;
+                        e.dirY = 0.02f * Random01() - 0.01f;
+                    }
+                    // 同理当 蓝方在中线右侧的时候  (不贴边)
+                    else if (e.camp == SheepCamp.Blue && e.posX > 0f) {
+                        e.dirX = -1f;
+                        e.dirY = 0.02f * Random01() - 0.01f;
+                    }
+                    else {
+                        // 否则正常 移动
+                        dirTar(e, t);
+                    }
+                }
+                else {
+                    // 否则正常移动
+                    dirTar(e, t);
+                }
+            }
+            else {
+                // 冲锋类
+                if (
+                    e.state == SheepRoleState.Charge ||
+                    e.state == SheepRoleState.SpinSpurt ||
+                    e.state == SheepRoleState.ChargePlus
+                ) {
+                    // 根据阵营 左冲右冲
+                    if (e.camp == SheepCamp.Red) {
+                        e.dirX = 1f;
+                    }
+                    else {
+                        e.dirX = -1f;
+                    }
+
+                    // 纵向没有力
+                    e.dirY = 0f;
+                }
+            }
+
+            // 速度
+            float n;
+
+            // 根据状态不同 采取不用的速度
+            if (
+                e.state == SheepRoleState.Spurt ||
+                e.state == SheepRoleState.Charge ||
+                e.state == SheepRoleState.SpinSpurt ||
+                e.state == SheepRoleState.SpinAtk ||
+                e.state == SheepRoleState.ChargePlus
+            ) {
+                n = e.conf.runSpeed;
+            }
+            else {
+                n = e.conf.walkSpeed;
+            }
+
+            // 计算不考虑碰撞的情况下 应该移动的向量
+            Vector2 r = new Vector2((float)(e.dirX * n * i), (float)(e.dirY * n * i));
+
+            // 获取原始对应的格子
+            (int xn, int yn) block = getXnYn(l.x, l.y);
+            int xn = block.xn;
+            int yn = block.yn;
+
+            // 处于 ChargePlus 状态
+            if (e.state == SheepRoleState.ChargePlus) {
+                // 强制移动
+                Vector2 target = new Vector2(l.x + r.x, l.y + r.y);
+                e.logicMove(target.x, target.y);
+            }
+            else if (e.state == SheepRoleState.Charge || e.state == SheepRoleState.SpinSpurt) {
+                // 一样强制移动
+                Vector2 target = new Vector2(l.x + r.x, l.y + r.y);
+                e.logicMove(target.x, target.y);
+            }
+            else if (e.isBoom) {
+                // 一样强制移动
+                Vector2 target = new Vector2(l.x + r.x, l.y + r.y);
+                e.logicMove(target.x, target.y);
+            }
+            else if (e.state == SheepRoleState.SpinAtk) {
+                Vector2 target = new Vector2(l.x + r.x, l.y + r.y);
+
+                // 限制在某个区域内?
+                if (
+                    target.x < sheepConfig.w / 2f &&
+                    target.x > -sheepConfig.w / 2f &&
+                    target.y < sheepConfig.h / 2f &&
+                    target.y > -sheepConfig.h / 2f ||
+                    l.x > sheepConfig.w / 2f ||
+                    l.x < -sheepConfig.w / 2f ||
+                    l.y > sheepConfig.h / 2f ||
+                    l.y < -sheepConfig.h / 2f
+                ) {
+                    e.logicMove(target.x, target.y);
+                }
+            }
+            else {
+                Vector2 tCollide = Vector2.zero;
+
+                // 碰撞了多少单位的 计数器
+                int collideCount = 0;
+
+                // 碰撞了多少非冲刺单位的 计数器
+                int notSpurtCount = 0;
+
+                if (!e.isNotConn) {
+                    forfeachBlocksByCollView(e, xn, yn, e.conf.detectCollideR, s => {
+                        if (collideCount >= 20) {
+                            return;
+                        }
+
+                        if (s.isNotConn) {
+                            return;
+                        }
+
+                        float nX = l.x - s.posX;
+                        float rY = l.y - s.posY;
+
+                        // 计算 当前 单位 位置和目标的距离
+                        float a = Mathf.Sqrt(nX * nX + rY * rY);
+
+                        // 如果太近了 还不是同一个人 (需要推开? )
+                        if (a < e.conf.collideR + s.conf.collideR && e.id != s.id) {
+                            // 不是完全重合, 可以计算推开的距离
+                            if (a > 0f) {
+                                float push = e.conf.collideR + s.conf.collideR - a;
+                                tCollide.x += nX * push / (e.conf.collideR + s.conf.collideR);
+                                tCollide.y += rY * push / (e.conf.collideR + s.conf.collideR);
+                            }
+                            else {
+                                // 完全重合防止死锁 给予一个随机数
+                                tCollide.x += 0.1f * Random01();
+                                tCollide.y += 0.1f * Random01();
+                            }
+
+                            collideCount++;
+
+                            // 非 冲刺单位计数器
+                            if (s.state != SheepRoleState.Spurt) {
+                                notSpurtCount++;
+                            }
+                        }
+                    });
+                }
+
+                if (collideCount >= 1) {
+                    // 按照 碰撞算法 最终要移动到的位置
+                    Vector2 movePos = new Vector2(l.x, l.y);
+
+                    // 大体逻辑
+                    // 冲刺：
+                    //     人少 → 全速
+                    //     人多 → 慢挪
+                    //
+                    // 普通：
+                    //     人少 → 慢挪
+                    //     人多 → 不动
+                    if (e.state == SheepRoleState.Spurt) {
+                        // 前面有大于 3 个 "不在冲刺的普通单位" 堵着
+                        if (notSpurtCount > 3) {
+                            // 限制最大只能移动 碰撞半径的距离
+                            if (r.x > e.conf.collideR) {
+                                r.x = e.conf.collideR;
+                            }
+                            else if (r.x < -e.conf.collideR) {
+                                r.x = -e.conf.collideR;
+                            }
+
+                            if (r.y > e.conf.collideR) {
+                                r.y = e.conf.collideR;
+                            }
+                            else if (r.y < -e.conf.collideR) {
+                                r.y = -e.conf.collideR;
+                            }
+
+                            // 乘以 碰撞移动缩放系数
+                            movePos.x += e.conf.colliderMoveScale * r.x;
+                            movePos.y += e.conf.colliderMoveScale * r.y;
+                        }
+                        else {
+                            // 如果没有那么多人 直接无视阻挡.
+                            movePos.x += r.x;
+                            movePos.y += r.y;
+                        }
+                    }
+                    else {
+                        // 普通单位 , 如果小于 colliderNotMoveNum 的人阻挡 采用和上边相同的位移逻辑
+                        if (collideCount < e.conf.colliderNotMoveNum) {
+                            if (r.x > e.conf.collideR) {
+                                r.x = e.conf.collideR;
+                            }
+                            else if (r.x < -e.conf.collideR) {
+                                r.x = -e.conf.collideR;
+                            }
+
+                            if (r.y > e.conf.collideR) {
+                                r.y = e.conf.collideR;
+                            }
+                            else if (r.y < -e.conf.collideR) {
+                                r.y = -e.conf.collideR;
+                            }
+
+                            movePos.x += e.conf.colliderMoveScale * r.x;
+                            movePos.y += e.conf.colliderMoveScale * r.y;
+                        }
+                        else {
+                            // 否则 太多人挡着, 不做位移 (卡在原地不动)
+                            r.x = 0f;
+                            r.y = 0f;
+                        }
+                    }
+
+                    // todo  聚拢效果?
+                    if (e.camp == SheepCamp.Red && e.posX >= 0f) {
+                        float centerY = 0f;
+                        float targetX = 1200f - e.posX;
+                        float targetY = centerY - e.posY;
+                        float distance = Mathf.Sqrt(targetX * targetX + targetY * targetY);
+                        float dirY = targetY / distance;
+                        float dirX = targetX / distance;
+
+                        if (e.posY > 0f && tCollide.y > 0f) {
+                            movePos.x -= dirY;
+                            movePos.y += dirX;
+                        }
+                        else if (e.posY < 0f && tCollide.y < 0f) {
+                            movePos.x += dirY;
+                            movePos.y -= dirX;
+                        }
+                    }
+                    else if (e.camp == SheepCamp.Blue && e.posX <= 0f) {
+                        float centerY = 0f;
+                        float targetX = -1200f - e.posX;
+                        float targetY = centerY - e.posY;
+                        float distance = Mathf.Sqrt(targetX * targetX + targetY * targetY);
+                        float dirY = targetY / distance;
+                        float dirX = targetX / distance;
+
+                        if (e.posY > 0f && tCollide.y > 0f) {
+                            movePos.x += dirY;
+                            movePos.y -= dirX;
+                        }
+                        else if (e.posY < 0f && tCollide.y < 0f) {
+                            movePos.x -= dirY;
+                            movePos.y += dirX;
+                        }
+                    }
+
+                    // 修正碰撞
+                    if (tCollide.x > e.conf.collideR) {
+                        tCollide.x = e.conf.collideR;
+                    }
+                    else if (tCollide.x < -e.conf.collideR) {
+                        tCollide.x = -e.conf.collideR;
+                    }
+
+                    if (tCollide.y > e.conf.collideR) {
+                        tCollide.y = e.conf.collideR;
+                    }
+                    else if (tCollide.y < -e.conf.collideR) {
+                        tCollide.y = -e.conf.collideR;
+                    }
+
+                    movePos.x += e.conf.colliderElasticityScale * tCollide.x;
+                    movePos.y += e.conf.colliderElasticityScale * tCollide.y;
+                    e.logicMove(movePos.x, movePos.y);
+                }
+                else {
+                    // 没有任何碰撞, 直接移动
+                    Vector2 target = new Vector2(l.x + r.x, l.y + r.y);
+                    e.logicMove(target.x, target.y);
+                }
+            }
+        }
+        
+         public void ackTar(PetView e, PetView t) {
+            float i = e.conf.atk;
+
+            if (e.curAtkBuff != 0) {
+                i = Mathf.Floor(i * (1f + e.curAtkBuff / 100f));
+            }
+
+            if (isCanAckByRole(e, t)) {
+                hurtByRole(e, t, i);
+            }
+
+            if (e.roleId != 0 && t.roleId != 0) {
+                (int xn, int yn) block = getXnYn(t.posX, t.posY);
+
+                forfeachBlocksByAckView(e.camp, block.xn, block.yn, e.conf.splitN, target => {
+                    if (!target.isDie && target.roleId != 0 && target.camp == t.camp && target.id != t.id &&
+                        target.curHp > 0) {
+                        float o = t.posX - target.posX;
+                        float l = t.posY - target.posY;
+                        if (Mathf.Sqrt(o * o + l * l) <= t.conf.collideR + target.conf.collideR + e.conf.spiltR) {
+                            hurtByRole(e, target, i);
+                        }
+                    }
+                });
+            }
+        }
+
+        public void ackMe(
+            PetView e,
+            float t = 1f,
+            float i = 1f,
+            int s = 10,
+            float o = 0f,
+            IList<SheepRoleType> l = null
+        ) {
+            float n = i;
+            n *= e.conf.atk;
+
+            if (e.curAtkBuff != 0) {
+                n = Mathf.Floor(n * (1f + e.curAtkBuff / 100f));
+            }
+
+            if (l == null) {
+                l = new SheepRoleType[0];
+            }
+
+            (int xn, int yn) block = getXnYn(e.posX, e.posY);
+            forfeachBlocksByAckView(e.camp, block.xn, block.yn, s, target => {
+                if (!l.Contains(target.conf.roleType) && target.curHp > 0) {
+                    float targetX = e.posX - target.posX;
+                    float targetY = e.posY - target.posY;
+                    float distance = Mathf.Sqrt(targetX * targetX + targetY * targetY);
+                    if (distance <= e.conf.collideR + target.conf.collideR + e.conf.spiltR * t) {
+                        hurtByRole(e, target, n);
+                        if (o != 0f) {
+                            targetX /= distance;
+                            targetY /= distance;
+                            target.impulseX = -targetX * o;
+                            target.impulseY = -targetY * o;
+                        }
+                    }
+                }
+            });
+        }
+
+        public void hitBackMe(PetView e, float t = 1f, int i = 10, float s = 0f) {
+            (int xn, int yn) block = getXnYn(e.posX, e.posY);
+            forfeachBlocksByAckView(e.camp, block.xn, block.yn, i, target => {
+                if (target.curHp > 0) {
+                    float o = e.posX - target.posX;
+                    float l = e.posY - target.posY;
+                    float n = Mathf.Sqrt(o * o + l * l);
+                    if (n <= e.conf.collideR + target.conf.collideR + e.conf.spiltR * t && s != 0f) {
+                        o /= n;
+                        l /= n;
+                        target.impulseX = -o * s;
+                        target.impulseY = -l * s;
+                    }
+                }
+            });
+        }
+
+        public static void hurtByRole(PetView e, PetView t, float i) {
+            float s = SheepRoleRestraint.getById((int)t.conf.roleType).hitRate[(int)e.conf.roleType];
+            int damage = Mathf.Max(1, Mathf.FloorToInt(i * s));
+            float o = t.subCurHp(damage);
+            if (o > 0 && o <= damage) {
+            }
+        }
+
+        public static void hurtByBullet(BulletView e, PetView t, float i) {
+            float s = SheepRoleRestraint.getById((int)t.conf.roleType).hitRate[(int)e.conf.roleType];
+            int damage = Mathf.Max(1, Mathf.FloorToInt(i * s));
+            float o = t.subCurHp(damage);
+            if (o > 0 && o <= damage) {
+            }
+        }
+
+        public static bool isCanAckByBullet(BulletView e, PetView petSkin, int i) {
+            bool s = !petSkin.isDie;
+            if (!s) {
+                return s;
+            }
+
+            SheepRoleState o = petSkin.state;
+            if (
+                petSkin.roleId != 0 &&
+                (
+                    o == SheepRoleState.In ||
+                    o == SheepRoleState.Dead ||
+                    o == SheepRoleState.Merge ||
+                    o == SheepRoleState.Res ||
+                    o == SheepRoleState.Killer
+                )
+            ) {
+                return false;
+            }
+
+            bool l = petSkin.camp != e.camp;
+            if (!l) {
+                return l;
+            }
+
+            if (e.conf.atkShapeType == SheepBulletAtkShapeType.Ring) {
+                float bulletX = e.x;
+                float bulletY = e.y;
+                float targetX = petSkin.posX - bulletX;
+                float targetY = petSkin.posY - bulletY;
+                float distanceSqr = targetX * targetX + targetY * targetY;
+                float distance = Mathf.Sqrt(distanceSqr);
+                return distance < e.conf.maxRadiuses[i] && distance > e.conf.minRadiuses[i];
+            }
+
+            {
+                float bulletX = e.x;
+                float bulletY = e.y;
+                float targetX = petSkin.posX - bulletX;
+                float targetY = petSkin.posY - bulletY;
+                float distanceSqr = targetX * targetX + targetY * targetY;
+                return Mathf.Sqrt(distanceSqr) < e.conf.atkR;
+            }
+        }
+        
+        
+        public FindTarResult findTar(PetView petSkin, int findR = 0) {
+            float i = petSkin.posX;
+            float o = petSkin.posY;
+            (int xn, int yn) block = getXnYn(i, o);
+            int xn = block.xn;
+            int yn = block.yn;
+            PetView r = null;
+            PetView a = null;
+            float c = 0f;
+
+            if (findR == 0) {
+                findR = petSkin.conf.findR;
+            }
+
+            forNearBlocksByAckView(petSkin, xn, yn, findR, targetPetView => {
+                if (!targetPetView.isDie && targetPetView.camp != petSkin.camp && targetPetView.roleId != 0) {
+                    if (isCanAckByRole(petSkin, targetPetView)) {
+                        r = targetPetView;
+                        return true;
+                    }
+
+                    if (petSkin.conf.isFindMoveTar && a == null && isCanMove(petSkin, targetPetView)) {
+                        float tx = targetPetView.posX - petSkin.posX;
+                        float ty = targetPetView.posY - petSkin.posY;
+                        c = tx * tx + ty * ty;
+                        a = targetPetView;
+                    }
+                    else if (petSkin.conf.isFindMoveTar && a != null && isCanMove(petSkin, targetPetView)) {
+                        float tx = targetPetView.posX - petSkin.posX;
+                        float ty = targetPetView.posY - petSkin.posY;
+                        float distance = tx * tx + ty * ty;
+                        if (distance < c) {
+                            c = distance;
+                            a = targetPetView;
+                        }
+                    }
+
+                    return false;
+                }
+
+                return false;
+            });
+
+            if (r != null) {
+                petSkin.tarPosX = r.posX;
+                petSkin.tarPosY = r.posY;
+                return new FindTarResult() {  atkTar= r  };
+            }
+
+            PetView backBoss = getBackBoss(petSkin.camp);
+            if (isCanAckByRole(petSkin, backBoss)) {
+                petSkin.tarPosX = backBoss.posX;
+                petSkin.tarPosY = backBoss.posY;
+                return new FindTarResult() { atkTar= backBoss } ;
+            }
+
+            if (a != null) {
+                return new FindTarResult() {  moveTar= a };
+            }
+
+            if (petSkin.state == SheepRoleState.Spurt && petSkin.conf.skillSpurt == 0) {
+                PetView t = null;
+                findNearBlocksByCollisionView(petSkin, xn, yn, petSkin.conf.findR, target => {
+                    if (target.state == SheepRoleState.Move) {
+                        float s = target.posX - petSkin.posX;
+                        float targetY = target.posY - petSkin.posY;
+                        float distance = s * s + targetY * targetY;
+                        float radius = target.conf.collideR + petSkin.conf.collideR;
+                        if (distance < radius * radius * 0.25f) {
+                            t = target;
+                            return true;
+                        }
+                    }
+
+                    return false;
+                });
+
+                if (t != null) {
+                    return new FindTarResult() { moveTar= t };
+                }
+            }
+
+            if (
+                petSkin.state != SheepRoleState.Spurt ||
+                petSkin.camp == SheepCamp.Red && petSkin.posX > petSkin.conf.runEndX ||
+                petSkin.camp == SheepCamp.Blue && petSkin.posX < petSkin.conf.runEndX
+            ) {
+                return new FindTarResult() { moveBoss= backBoss } ;
+            }
+
+            return new FindTarResult();
+        }
+
+        public PetView findNearAck(PetView petSkin) {
+            float t = petSkin.posX;
+            float i = petSkin.posY;
+            (int xn, int yn) block = getXnYn(t, i);
+            PetView l = null;
+
+            findNearBlocksByAckView(petSkin, block.xn, block.yn, petSkin.conf.findR, target => {
+                if (!target.isDie && target.camp != petSkin.camp && target.roleId != 0 &&
+                    isCanAckByRole(petSkin, target)) {
+                    l = target;
+                    return true;
+                }
+
+                return false;
+            });
+
+            if (l != null) {
+                return l;
+            }
+
+            if (l == null) {
+                PetView target = getBackBoss(petSkin.camp);
+                if (isCanAckByRole(petSkin, target)) {
+                    l = target;
+                }
+            }
+
+            return l;
+        }
+
+        public PetView findFarAck(PetView e, int findR) {
+            float posX = e.posX;
+            float posY = e.posY;
+            (int xn, int yn) block = getXnYn(posX, posY);
+            PetView n = null;
+
+            findFarBlocksByAckView(e, block.xn, block.yn, findR, target => {
+                n = target;
+                return true;
+            });
+
+            if (n == null) {
+                PetView t = getBackBoss(e.camp);
+                if (isCanAckByRole(e, t)) {
+                    n = t;
+                }
+            }
+
+            return n;
+        }
+
+        public PetView findRandomAck(PetView e, int findR) {
+            float i = e.posX;
+            float s = e.posY;
+            (int xn, int yn) block = getXnYn(i, s);
+            PetView n = null;
+
+            findRandomBlocksByAckView(e, block.xn, block.yn, findR, target => {
+                n = target;
+                return true;
+            });
+
+            if (n == null) {
+                PetView t = getBackBoss(e.camp);
+                if (isCanAckByRole(e, t)) {
+                    n = t;
+                }
+            }
+
+            return n;
+        }
+
+        public static int getAtkRank(PetView petView, PetView targetPetView) {
+            if (petView.conf.findAtkSort != null) {
+                for (int i = 0; i < petView.conf.findAtkSort.Length; i++) {
+                    if (petView.conf.findAtkSort[i] == (int)targetPetView.conf.roleType) {
+                        return i;
+                    }
+                }
+            }
+
+            return 100;
+        }
+
+        public PetView findSortAck(PetView petView, int targetPetView) {
+            float posX = petView.posX;
+            float posY = petView.posY;
+            (int xn, int yn) block = getXnYn(posX, posY);
+            PetView n = null;
+            int r = 100;
+            int a = 0;
+
+            if (petView.conf.findAtkSort != null) {
+                a = petView.conf.findAtkSort[0];
+            }
+
+            findNearBlocksByAckView(petView, block.xn, block.yn, targetPetView, t => {
+                if (!isCanAckByRole(petView, t)) {
+                    return false;
+                }
+
+                if (n == null) {
+                    n = t;
+                    r = getAtkRank(petView, t);
+                    return false;
+                }
+
+                if (t.roleId == (int)a) {
+                    n = t;
+                    return true;
+                }
+
+                PetView target = t;
+                int s = getAtkRank(petView, t);
+                if (s < r) {
+                    n = target;
+                    r = s;
+                }
+
+                return false;
+            });
+
+            if (n == null) {
+                PetView t = getBackBoss(petView.camp);
+                if (isCanAckByRole(petView, t)) {
+                    n = t;
+                }
+            }
+
+            return n;
+        }
+
+        public PetView findSortAck1(PetView petSkin, int findR) {
+            float i = petSkin.posX;
+            float s = petSkin.posY;
+            (int xn, int yn) block = getXnYn(i, s);
+            PetView n = null;
+            int r = 100;
+            int a = 0;
+
+            if (petSkin.conf.findAtkSort != null) {
+                a = petSkin.conf.findAtkSort[0];
+            }
+
+            findNearBlocksByAckView(petSkin, block.xn, block.yn, findR, t => {
+                if (n == null) {
+                    n = t;
+                    r = getAtkRank(petSkin, t);
+                    return false;
+                }
+
+                if (t.roleId == (int)a) {
+                    n = t;
+                    return true;
+                }
+
+                PetView target = t;
+                int rank = getAtkRank(petSkin, t);
+                if (rank < r) {
+                    n = target;
+                    r = rank;
+                }
+
+                return false;
+            });
+
+            if (n == null) {
+                PetView backBoss = getBackBoss(petSkin.camp);
+                if (isCanAckByRole(petSkin, backBoss)) {
+                    n = backBoss;
+                }
+            }
+
+            return n;
+        }
+
+        public void foreachFront(PetView e, Action<PetView> t, int i = 0, float o = 30f) {
+            float l = e.posX;
+            float n = e.posY;
+            (int xn, int yn) block = getXnYn(l, n);
+            float c = e.tarPosX - l;
+            float f = e.tarPosY - n;
+            float h = Mathf.Sqrt(c * c + f * f);
+
+            if (h > 0f) {
+                c /= h;
+                f /= h;
+                if (i == 0) {
+                    i = e.conf.findR;
+                }
+            }
+            else {
+                c = e.camp == SheepCamp.Red ? 1f : -1f;
+                f = 0f;
+                if (i == 0) {
+                    i = e.conf.findR;
+                }
+            }
+
+            float p = Mathf.Cos(o * Mathf.PI / 180f);
+            PetView u = null;
+            float d = float.PositiveInfinity;
+
+            forNearBlocksByAckView(e, block.xn, block.yn, i, target => {
+                if (!target.isDie && target.camp != e.camp && target.roleId != 0 && isCanAckByRole(e, target)) {
+                    float targetX = target.posX - l;
+                    float targetY = target.posY - n;
+                    float distanceSqr = targetX * targetX + targetY * targetY;
+                    float distance = Mathf.Sqrt(targetX * targetX + targetY * targetY);
+                    if (distance != 0f) {
+                        if ((targetX * c + targetY * f) / distance > p && distanceSqr < d) {
+                            d = distanceSqr;
+                            u = target;
+                            t(u);
+                        }
+                    }
+
+                    return false;
+                }
+
+                return false;
+            });
+        }
+
+        public void forfeachBlocksByAckView(SheepCamp camp, int xn, int yn, int splitN, Action<PetView> callback) {
+            // 寻找敌方阵营
+            var enemyCamp = camp == SheepCamp.Red ? SheepCamp.Blue : SheepCamp.Red;
+            
+            for (int n = -splitN; n <= splitN; n++) {
+                for (int r = -splitN; r <= splitN; r++) {
+                    
+                    var sheepCell = gridMap.getCell(xn + n, yn + r);
+                    if (sheepCell==null) {
+                        continue;
+                    }
+                    sheepCell.forEachPet(enemyCamp, (p) => {
+                        callback(p);
+                        return false;
+                    });
+                    
+                }
+            }
+            
+        }
+
+        public void forfeachBlocksByCollView(PetView petSkin, int xn, int yn, int splitN, Action<PetView> callback) {
+            var camp = petSkin.camp;
+            var collideId = petSkin.conf.collideGroup;
+            
+            for (int n = -splitN; n <= splitN; n++) {
+                for (int r = -splitN; r <= splitN; r++) {
+                    
+                    var sheepCell = gridMap.getCell(xn + n, yn + r);
+                    if (sheepCell==null) {
+                        continue;
+                    }
+                    sheepCell.forEachPet(camp,collideId, (p) => {
+                        callback(p);
+                        return false;
+                    });
+                    
+                }
+            }
+        }
+
+        public bool forNearBlocksByAckView(PetView e, int t, int i, int o, Func<PetView, bool> callback) {
+            // 寻找敌方阵营
+            var enemyCamp = e.camp == SheepCamp.Red ? SheepCamp.Blue : SheepCamp.Red;
+             int n = 0;
+             
+             Func<int, int, bool> r = (blockX, blockY) => {
+                 var sheepCell = gridMap.getCellSafe(blockX, blockY);
+                  sheepCell.forEachPet(enemyCamp,callback);
+                  return false;
+             };
+
+            for (int ring = 0; ring <= o; ring++) {
+                if (ring != 0) {
+                    Vector2Int topLeft = new Vector2Int(t - n, i + n);
+                    Vector2Int topRight = new Vector2Int(t + n, i + n);
+                    Vector2Int bottomRight = new Vector2Int(t + n, i - n);
+                    Vector2Int bottomLeft = new Vector2Int(t - n, i - n);
+
+                    if (Random01() < 0.5f) {
+                        for (int x = topLeft.x; x < topRight.x; x++) {
+                            if (r(x, topLeft.y)) return true;
+                        }
+
+                        for (int y = topRight.y; y > bottomRight.y; y--) {
+                            if (r(topRight.x, y)) return true;
+                        }
+
+                        for (int x = bottomRight.x; x > bottomLeft.x; x--) {
+                            if (r(x, bottomRight.y)) return true;
+                        }
+
+                        for (int y = bottomLeft.y; y < topLeft.y; y++) {
+                            if (r(bottomLeft.x, y)) return true;
+                        }
+                    }
+                    else {
+                        for (int x = topRight.x; x > topLeft.x; x--) {
+                            if (r(x, topLeft.y)) return true;
+                        }
+
+                        for (int y = topLeft.y; y > bottomLeft.y; y--) {
+                            if (r(bottomLeft.x, y)) return true;
+                        }
+
+                        for (int x = bottomLeft.x; x < bottomRight.x; x++) {
+                            if (r(x, bottomRight.y)) return true;
+                        }
+
+                        for (int y = bottomRight.y; y < topRight.y; y++) {
+                            if (r(topRight.x, y)) return true;
+                        }
+                    }
+                }
+                else if (r(t, i)) {
+                    return true;
+                }
+
+                n += 1;
+            }
+
+            return false;
+        }
+
+        public bool findFarBlocksByAckView(PetView petSkin, int xn, int yn, int findR, Func<PetView, bool> callback) {
+            SheepCamp camp = petSkin.camp;
+            camp = camp == SheepCamp.Red ? SheepCamp.Blue : SheepCamp.Red;
+            
+               Func<int, int, bool> n = (blockX, blockY) => {
+                   
+               var sheepCell = gridMap.getCellSafe(blockX, blockY);
+                
+                return sheepCell.petCounts[(int)camp] != 0;
+            };
+
+            Func<int, int, bool> a = (blockX, blockY) => {
+
+                var sheepCell = gridMap.getCellSafe(blockX, blockY);
+                
+                return sheepCell.forEachPet(camp, callback);
+
+            };
+
+            for (int ring = findR; ring > 0; ring--) {
+                Vector2Int topLeft = new Vector2Int(xn - ring, yn + ring);
+                Vector2Int topRight = new Vector2Int(xn + ring, yn + ring);
+                Vector2Int bottomRight = new Vector2Int(xn + ring, yn - ring);
+                Vector2Int bottomLeft = new Vector2Int(xn - ring, yn - ring);
+                HashSet<Vector2Int> c = new HashSet<Vector2Int>();
+
+                for (int x = topLeft.x; x < topRight.x; x++) {
+                    if (n(x, topLeft.y)) c.Add(new Vector2Int(x, topLeft.y));
+                }
+
+                for (int y = topRight.y; y > bottomRight.y; y--) {
+                    if (n(topRight.x, y)) c.Add(new Vector2Int(topRight.x, y));
+                }
+
+                for (int x = bottomRight.x; x > bottomLeft.x; x--) {
+                    if (n(x, bottomRight.y)) c.Add(new Vector2Int(x, bottomRight.y));
+                }
+
+                for (int y = bottomLeft.y; y < topLeft.y; y++) {
+                    if (n(bottomLeft.x, y)) c.Add(new Vector2Int(bottomLeft.x, y));
+                }
+
+                while (c.Count != 0) {
+                    List<Vector2Int> points = new List<Vector2Int>();
+                    foreach (Vector2Int point in c) {
+                        points.Add(point);
+                    }
+
+                    int randomIndex = RandomInt(0, c.Count);
+                    Vector2Int pointToCheck = points[randomIndex];
+                    if (a(pointToCheck.x, pointToCheck.y)) {
+                        return true;
+                    }
+
+                    c.Remove(pointToCheck);
+                }
+            }
+
+            return n(xn, yn) && a(xn, yn);
+            
+        }
+
+        public bool findRandomBlocksByAckView(PetView e, int t, int i, int findR, Func<PetView, bool> callback) {
+            SheepCamp camp = e.camp;
+            camp = camp == SheepCamp.Red ? SheepCamp.Blue : SheepCamp.Red;
+            
+              Func<int, int, bool> n = (blockX, blockY) => {
+                   
+                  var sheepCell = gridMap.getCellSafe(blockX, blockY);
+                
+                  return sheepCell.petCounts[(int)camp] != 0;
+            };
+
+            Func<int, int, bool> a = (blockX, blockY) => {
+                var sheepCell = gridMap.getCellSafe(blockX, blockY);
+                
+                return sheepCell.forEachPet(camp, callback);
+            };
+
+            List<int> c = new List<int>();
+            for (int ring = 0; ring <= findR; ring++) {
+                c.Add(ring);
+            }
+
+            c.Sort((left, right) => Random01() < 0.5f ? -1 : 1);
+
+            for (int ringIndex = 0; ringIndex <= findR; ringIndex++) {
+                int ring = c[ringIndex];
+                Vector2Int topLeft = new Vector2Int(t - ring, i + ring);
+                Vector2Int topRight = new Vector2Int(t + ring, i + ring);
+                Vector2Int bottomRight = new Vector2Int(t + ring, i - ring);
+                Vector2Int bottomLeft = new Vector2Int(t - ring, i - ring);
+                List<Vector2Int> h = new List<Vector2Int>();
+
+                for (int x = topLeft.x; x < topRight.x; x++) {
+                    if (n(x, topLeft.y)) h.Add(new Vector2Int(x, topLeft.y));
+                }
+
+                for (int y = topRight.y; y > bottomRight.y; y--) {
+                    if (n(topRight.x, y)) h.Add(new Vector2Int(topRight.x, y));
+                }
+
+                for (int x = bottomRight.x; x > bottomLeft.x; x--) {
+                    if (n(x, bottomRight.y)) h.Add(new Vector2Int(x, bottomRight.y));
+                }
+
+                for (int y = bottomLeft.y; y < topLeft.y; y++) {
+                    if (n(bottomLeft.x, y)) h.Add(new Vector2Int(bottomLeft.x, y));
+                }
+
+                h.Sort((left, right) => Random01() < 0.5f ? -1 : 1);
+                while (h.Count != 0) {
+                    int lastIndex = h.Count - 1;
+                    Vector2Int point = h[lastIndex];
+                    h.RemoveAt(lastIndex);
+                    if (a(point.x, point.y)) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+        
+        public bool findNearBlocksByAckView(PetView e, int xn, int yn, int o, Func<PetView, bool> callback) {
+            // 寻找敌方阵营
+            var enemyCamp = e.camp == SheepCamp.Red ? SheepCamp.Blue : SheepCamp.Red;
+
+            Func<int, int, bool> forEachPetByCell = (blockX, blockY) => {
+                var sheepCell = gridMap.getCellSafe(blockX, blockY);
+                return sheepCell.forEachPet(enemyCamp,callback);
+            };
+            
+            int n = 0;
+
+            for (int ring = 0; ring <= o; ring++) {
+                if (ring != 0) {
+                    Vector2Int topLeft = new Vector2Int(xn - n, yn + n);
+                    Vector2Int topRight = new Vector2Int(xn + n, yn + n);
+                    Vector2Int bottomRight = new Vector2Int(xn + n, yn - n);
+                    Vector2Int bottomLeft = new Vector2Int(xn - n, yn - n);
+
+                    if (Random01() < 0.5f) {
+                        for (int x = topLeft.x; x < topRight.x; x++) {
+                            if (forEachPetByCell(x, topLeft.y)) {
+                                return true;
+                            }
+                        }
+
+                        for (int y = topRight.y; y > bottomRight.y; y--) {
+                            if (forEachPetByCell(topRight.x, y)) {
+                                return true;
+                            }
+                        }
+
+                        for (int x = bottomRight.x; x > bottomLeft.x; x--) {
+                            if (forEachPetByCell(x, bottomRight.y)) {
+                                return true;
+                            }
+                        }
+
+                        for (int y = bottomLeft.y; y < topLeft.y; y++) {
+                            if (forEachPetByCell(bottomLeft.x, y)) {
+                                return true;
+                            }
+                        }
+                    }
+                    else {
+                        for (int x = topRight.x; x > topLeft.x; x--) {
+                            if (forEachPetByCell(x, topLeft.y)) {
+                                return true;
+                            }
+                        }
+
+                        for (int y = topLeft.y; y > bottomLeft.y; y--) {
+                            if (forEachPetByCell(bottomLeft.x, y)) {
+                                return true;
+                            }
+                        }
+
+                        for (int x = bottomLeft.x; x < bottomRight.x; x++) {
+                            if (forEachPetByCell(x, bottomRight.y)) {
+                                return true;
+                            }
+                        }
+
+                        for (int y = bottomRight.y; y < topRight.y; y++) {
+                            if (forEachPetByCell(topRight.x, y)) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                else if (forEachPetByCell(xn, yn)) {
+                    return true;
+                }
+
+                n += 1;
+            }
+
+            return false;
+        }
+
+        public bool findNearBlocksByCollisionView(PetView e, int xn, int yn, int o, Func<PetView, bool> callback) {
+            // 寻找乙方阵营 和 碰撞 id 相同的 
+            var camp = e.camp;
+            var collideId = e.conf.collideGroup;
+
+            Func<int, int, bool> forEachPetByCell = (blockX, blockY) => {
+                var sheepCell = gridMap.getCellSafe(blockX, blockY);
+                return sheepCell.forEachPet(camp,collideId,callback);
+            };
+            
+            int n = 0;
+
+            for (int ring = 0; ring <= o; ring++) {
+                if (ring != 0) {
+                    Vector2Int topLeft = new Vector2Int(xn - n, yn + n);
+                    Vector2Int topRight = new Vector2Int(xn + n, yn + n);
+                    Vector2Int bottomRight = new Vector2Int(xn + n, yn - n);
+                    Vector2Int bottomLeft = new Vector2Int(xn - n, yn - n);
+
+                    if (Random01() < 0.5f) {
+                        for (int x = topLeft.x; x < topRight.x; x++) {
+                            if (forEachPetByCell(x, topLeft.y)) {
+                                return true;
+                            }
+                        }
+
+                        for (int y = topRight.y; y > bottomRight.y; y--) {
+                            if (forEachPetByCell(topRight.x, y)) {
+                                return true;
+                            }
+                        }
+
+                        for (int x = bottomRight.x; x > bottomLeft.x; x--) {
+                            if (forEachPetByCell(x, bottomRight.y)) {
+                                return true;
+                            }
+                        }
+
+                        for (int y = bottomLeft.y; y < topLeft.y; y++) {
+                            if (forEachPetByCell(bottomLeft.x, y)) {
+                                return true;
+                            }
+                        }
+                    }
+                    else {
+                        for (int x = topRight.x; x > topLeft.x; x--) {
+                            if (forEachPetByCell(x, topLeft.y)) {
+                                return true;
+                            }
+                        }
+
+                        for (int y = topLeft.y; y > bottomLeft.y; y--) {
+                            if (forEachPetByCell(bottomLeft.x, y)) {
+                                return true;
+                            }
+                        }
+
+                        for (int x = bottomLeft.x; x < bottomRight.x; x++) {
+                            if (forEachPetByCell(x, bottomRight.y)) {
+                                return true;
+                            }
+                        }
+
+                        for (int y = bottomRight.y; y < topRight.y; y++) {
+                            if (forEachPetByCell(topRight.x, y)) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                else if (forEachPetByCell(xn, yn)) {
+                    return true;
+                }
+
+                n += 1;
+            }
+
+            return false;
+        }
+        
+        
     }
 }

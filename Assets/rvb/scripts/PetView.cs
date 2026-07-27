@@ -1,7 +1,7 @@
 using scx.SpriteRenderer;
-using UnityEngine;
 
 namespace rvb.scripts {
+    
     public enum BuffID {
         GeneralOrder = 0,
         CardBuff = 1
@@ -53,8 +53,6 @@ namespace rvb.scripts {
         public BuffTimeAttacher attacher;
         public int petId;
 
-        public Vector3? position;
-
         public ScxSpriteRenderUnit renderUnit;
 
         public PetView() {
@@ -81,13 +79,6 @@ namespace rvb.scripts {
 
             posX = x;
             posY = y;
-
-            int _blockIndex = Util.getIndexByXY(
-                posX,
-                posY
-            );
-
-            this.blockIndex = _blockIndex;
         }
     }
 }
