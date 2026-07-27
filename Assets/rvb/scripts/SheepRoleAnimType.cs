@@ -19,6 +19,8 @@
         Dead3 = 16,
         Dead4 = 17,
         Dead5 = 18,
-        Dead6 = 19
+        Dead6 = 19,
+        
+        Count
     }
 }

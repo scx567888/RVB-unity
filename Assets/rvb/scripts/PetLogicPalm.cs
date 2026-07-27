@@ -1,0 +1,45 @@
+﻿using System;
+using UnityEngine;
+
+namespace rvb.scripts {
+    public class PetLogicPalm : PetLogic{
+        public static readonly PetLogicPalm  Instance = new ();
+        public void tick(PetView petSkin, SheepMgr sheepMgr, bool isLogicFrame) {
+            var t1 = petSkin.animFrame;
+            var i1 = SheepSkill.getById(petSkin.readySkillId);
+            var s = SheepSkillSubPalm.getById(i1.id);
+            var o1 = s.healFrames;
+            foreach (var i in o1) {
+                if (t1 == i) {
+                    var t = (float)Math.Floor((petSkin.conf.hp - petSkin.curHp) * (s.healHealthPercent / 100f));
+                    SheepMgr.hurtByRole(petSkin, petSkin, -t);
+                    break;
+                }
+            }
+
+            var l1 = s.atkFrames;
+            foreach (var i in l1) {
+                if (t1 == i) {
+                    sheepMgr.ackMe(petSkin, s.spiltRadiusBet, s.atkBet, s.atkFindR);
+                    break;
+                }
+            }
+
+            var n = s.hitBackFrames;
+            for (var i = 0; i < n.Length; i++) {
+                var o = n[i];
+                var l = s.hitBackDistances[i];
+                if (t1 == o) {
+                    sheepMgr.hitBackMe(petSkin, s.spiltRadiusBet, s.atkFindR, l);
+                    break;
+                }
+            }
+
+            if (t1 >= s.endFrame) {
+                petSkin.state = SheepRoleState.Move;
+                petSkin.subState = SheepRoleSubState.MoveBoss;
+                petSkin.animType = SheepRoleAnimType.Idle;
+            }
+        }
+    }
+}

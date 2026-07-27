@@ -7,6 +7,43 @@ namespace rvb.scripts {
         public string name = string.Empty;
         public int bullet;
 
+        public void tick(SheepMgr sheepMgr,PetView e,bool t) {
+            var fff = sheepMgr.findTar(e);
+            var l = fff.atkTar;
+            var n = fff.moveTar;
+            var r = fff.moveBoss;
+
+            if (l != null || n != null || r != null) {
+                sheepMgr.createBullet(new BullteCreate() {
+                    view_pet = e,
+                    bulletId = this.bullet
+                });
+            }
+
+            if (l != null) {
+                e.state = SheepRoleState.Attack;
+                e.subState = SheepRoleSubState.AttackAwait;
+                return;
+            }
+
+            if (n != null) {
+                e.state = SheepRoleState.Move;
+                e.subState = SheepRoleSubState.MoveTar;
+                sheepMgr.moveTar(e, n,  t);
+                return;
+            }
+
+            if (r != null) {
+                e.state = SheepRoleState.Move;
+                e.subState = SheepRoleSubState.MoveBoss;
+                e.animType = SheepRoleAnimType.Idle;
+                sheepMgr.moveTar(e, r,  t);
+                return;
+            }
+
+            sheepMgr.moveTar(e, null,  t);
+        }
+
         public static IReadOnlyList<SheepSkillSubBullet> List => SheepSkillSubBullets.All;
 
         public static SheepSkillSubBullet getById(int id) {

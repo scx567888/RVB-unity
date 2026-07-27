@@ -346,7 +346,7 @@ namespace rvb.scripts {
 
         public static SheepSkill GetById(int id) {
             if (!Map.TryGetValue(id, out SheepSkill skill)) {
-                throw new KeyNotFoundException($"不存在 SheepSkill 配置，ID: {id}");
+                return null;
             }
 
             return skill;

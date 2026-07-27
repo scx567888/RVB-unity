@@ -14,6 +14,34 @@ namespace rvb.scripts {
         public int endFrame;
         public int findR;
 
+
+        public void tick(SheepMgr sheepMgr, PetView e, bool t) {
+            var fff = sheepMgr.findTar(e);
+
+            var l = fff.atkTar;
+            var n = fff.moveTar;
+            var r = fff.moveBoss;
+
+            if (l != null) {
+                e.state = SheepRoleState.Killer;
+                e.subState = SheepRoleSubState.KillerStart;
+                e.animType = SheepRoleAnimType.Killer;
+                e.readySkillId = this.id;
+                return;
+            }
+
+
+            if (r != null) {
+                e.state = SheepRoleState.Move;
+                e.subState = SheepRoleSubState.MoveBoss;
+                e.animType = SheepRoleAnimType.Idle;
+                sheepMgr.moveTar(e, r,  t);
+                return;
+            }
+
+            sheepMgr.moveTar(e, null,  t);
+        }
+
         public static IReadOnlyList<SheepSkillSubKiller> List => SheepSkillSubKillers.All;
 
         public static SheepSkillSubKiller getById(int id) {

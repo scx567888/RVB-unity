@@ -13,16 +13,16 @@ namespace rvb.scripts {
         public SheepCell(int gridX, int gridY, float worldStartX, float worldStartY, float worldEndX, float worldEndY) :
             base(gridX, gridY, worldStartX, worldStartY, worldEndX, worldEndY) {
             this.pets = new[] {
-                new List<PetView>[SheepConfig.MaxGroupCount],
-                new List<PetView>[SheepConfig.MaxGroupCount]
+                new List<PetView>[(int)SheepCollideGroup.Count],
+                new List<PetView>[(int)SheepCollideGroup.Count]
             };
         }
 
         public void addPet(PetView pet) {
-            var p1 = this.pets[(int)pet.camp][pet.conf.collideId];
+            var p1 = this.pets[(int)pet.camp][(int)pet.conf.collideGroup];
             if (p1 == null) {
                 p1 = new List<PetView>();
-                this.pets[(int)pet.camp][pet.conf.collideId] = p1;
+                this.pets[(int)pet.camp][(int)pet.conf.collideGroup] = p1;
             }
 
             p1.Add(pet);
@@ -72,9 +72,9 @@ namespace rvb.scripts {
         // callback 返回 false: 继续
         // callback 返回 true: 停止
         // 返回值表示 是否 调用过 callback 并且 callback 提前终止
-        public bool forEachPet(SheepCamp camp, int collideId, Func<PetView, bool> callback) {
+        public bool forEachPet(SheepCamp camp, SheepCollideGroup collideId, Func<PetView, bool> callback) {
             var p1 = pets[(int)camp];
-            var p2 = p1[collideId];
+            var p2 = p1[(int)collideId];
 
             if (p2 != null) {
                 foreach (var pet in p2) {

@@ -2,28 +2,43 @@ using System;
 using System.Collections.Generic;
 
 namespace rvb.scripts {
-    /// <summary>
-    /// 兵种静态配置。这里只保存原始配置数据，不保存单个单位的运行时状态。
-    /// </summary>
+    // 兵种静态配置
     public class SheepRoleTypeInfo {
+        
+        // 配置 id
         public int id;
-        public string[] name = Array.Empty<string>();
-        public string pla = string.Empty;
+        
+        // 名称 [阵营]
+        public string[] name = new []{"未命名","未命名"};
+        
+        // 角色类型
         public SheepRoleType roleType;
-        public int collideId;
+        
+        // 碰撞 组
+        public SheepCollideGroup collideGroup;
+        
+        // 动画 ID
         public int animId;
-        public int skinId;
+        
+        // 缩放
         public float scale;
+        
+        
         public int detectCollideR;
         public float collideR;
         public SheepRoleState startState;
+        
+        // 阵营 ID
         public int formationId;
+        
+        
         public int runEndX;
         public int runSpeed;
         public int walkSpeed;
         public bool isSpurtAnim;
         public int skillSpurt;
         public int skillIn;
+        
         public int[] bullet = Array.Empty<int>();
 
         // 血量
@@ -73,11 +88,10 @@ namespace rvb.scripts {
     /// </summary>
     public static class SheepRoleTypeInfos {
         // 炮车 / 炮车
-        public static readonly SheepRoleTypeInfo pao_che = new() {
+        public static readonly SheepRoleTypeInfo PAO_CHE = new() {
             id = 23,
-            pla = "dy",
-            roleType = SheepRoleType.pao_che,
-            collideId = 3,
+            roleType = SheepRoleType.PAO_CHE,
+            collideGroup = SheepCollideGroup.GROUP3,
             animId = 106,
             scale = 9f,
             detectCollideR = 4,
@@ -135,11 +149,10 @@ namespace rvb.scripts {
         };
 
         // 黄金炮车 / 黄金炮车
-        public static readonly SheepRoleTypeInfo huang_jin_pao_che = new() {
+        public static readonly SheepRoleTypeInfo HUANG_JIN_PAO_CHE = new() {
             id = 29,
-            pla = "dy",
-            roleType = SheepRoleType.pao_che,
-            collideId = 3,
+            roleType = SheepRoleType.PAO_CHE,
+            collideGroup = SheepCollideGroup.GROUP3,
             animId = 116,
             scale = 9f,
             detectCollideR = 4,
@@ -197,11 +210,10 @@ namespace rvb.scripts {
         };
 
         // 旋风斩 / 旋风斩
-        public static readonly SheepRoleTypeInfo xuan_feng_zhan = new() {
+        public static readonly SheepRoleTypeInfo XUAN_FENG_ZHAN = new() {
             id = 19,
-            pla = "dy",
-            roleType = SheepRoleType.xuan_feng_zhan,
-            collideId = 5,
+            roleType = SheepRoleType.XUAN_FENG_ZHAN,
+            collideGroup = SheepCollideGroup.GROUP5,
             animId = 105,
             scale = 7f,
             detectCollideR = 2,
@@ -256,11 +268,10 @@ namespace rvb.scripts {
         };
 
         // 大旋风斩 / 大旋风斩
-        public static readonly SheepRoleTypeInfo da_xuan_feng_zhan = new() {
+        public static readonly SheepRoleTypeInfo DA_XUAN_FENG_ZHAN = new() {
             id = 26,
-            pla = "dy",
-            roleType = SheepRoleType.xuan_feng_zhan,
-            collideId = 5,
+            roleType = SheepRoleType.XUAN_FENG_ZHAN,
+            collideGroup = SheepCollideGroup.GROUP5,
             animId = 115,
             scale = 7f,
             detectCollideR = 2,
@@ -315,11 +326,10 @@ namespace rvb.scripts {
         };
 
         // 先锋兵 / 先锋兵
-        public static readonly SheepRoleTypeInfo xian_feng_bing = new() {
+        public static readonly SheepRoleTypeInfo XIAN_FENG_BING = new() {
             id = 7,
-            pla = "dy",
-            roleType = SheepRoleType.xuan_feng_zhan,
-            collideId = 7,
+            roleType = SheepRoleType.XUAN_FENG_ZHAN,
+            collideGroup = SheepCollideGroup.GROUP7,
             animId = 8,
             scale = 7.5f,
             detectCollideR = 3,
@@ -365,11 +375,10 @@ namespace rvb.scripts {
         };
 
         // 小兵 / 小兵
-        public static readonly SheepRoleTypeInfo xiao_bing = new() {
+        public static readonly SheepRoleTypeInfo XIAO_BING = new() {
             id = 22,
-            pla = "dy",
-            roleType = SheepRoleType.xiao_bing,
-            collideId = 0,
+            roleType = SheepRoleType.XIAO_BING,
+            collideGroup = SheepCollideGroup.GROUP0,
             animId = 100,
             scale = 3f,
             detectCollideR = 2,
@@ -419,11 +428,10 @@ namespace rvb.scripts {
         };
 
         // 刺客 / 刺客
-        public static readonly SheepRoleTypeInfo ci_ke = new() {
+        public static readonly SheepRoleTypeInfo CI_KE = new() {
             id = 16,
-            pla = "dy",
-            roleType = SheepRoleType.ci_ke,
-            collideId = 1,
+            roleType = SheepRoleType.CI_KE,
+            collideGroup = SheepCollideGroup.GROUP1,
             animId = 101,
             scale = 6f,
             detectCollideR = 2,
@@ -469,11 +477,10 @@ namespace rvb.scripts {
         };
 
         // 大刺客 / 大刺客
-        public static readonly SheepRoleTypeInfo da_ci_ke = new() {
+        public static readonly SheepRoleTypeInfo DA_CI_KE = new() {
             id = 17,
-            pla = "dy",
-            roleType = SheepRoleType.ci_ke,
-            collideId = 1,
+            roleType = SheepRoleType.CI_KE,
+            collideGroup = SheepCollideGroup.GROUP1,
             animId = 111,
             scale = 5f,
             detectCollideR = 2,
@@ -519,11 +526,10 @@ namespace rvb.scripts {
         };
 
         // 刺客 / 刺客
-        public static readonly SheepRoleTypeInfo ci_ke_1 = new() {
+        public static readonly SheepRoleTypeInfo CI_KE_1 = new() {
             id = 102,
-            pla = "dy",
-            roleType = SheepRoleType.ci_ke,
-            collideId = 1,
+            roleType = SheepRoleType.CI_KE,
+            collideGroup = SheepCollideGroup.GROUP1,
             animId = 101,
             scale = 6f,
             detectCollideR = 2,
@@ -569,11 +575,10 @@ namespace rvb.scripts {
         };
 
         // 盾兵 / 盾兵
-        public static readonly SheepRoleTypeInfo dun_bing = new() {
+        public static readonly SheepRoleTypeInfo DUN_BING = new() {
             id = 18,
-            pla = "dy",
-            roleType = SheepRoleType.dun_bing,
-            collideId = 5,
+            roleType = SheepRoleType.DUN_BING,
+            collideGroup = SheepCollideGroup.GROUP5,
             animId = 103,
             scale = 5f,
             detectCollideR = 2,
@@ -627,11 +632,10 @@ namespace rvb.scripts {
         };
 
         // 重甲盾兵 / 重甲盾兵
-        public static readonly SheepRoleTypeInfo zhong_jia_dun_bing = new() {
+        public static readonly SheepRoleTypeInfo ZHONG_JIA_DUN_BING = new() {
             id = 25,
-            pla = "dy",
-            roleType = SheepRoleType.dun_bing,
-            collideId = 5,
+            roleType = SheepRoleType.DUN_BING,
+            collideGroup = SheepCollideGroup.GROUP5,
             animId = 113,
             scale = 5f,
             detectCollideR = 2,
@@ -685,11 +689,10 @@ namespace rvb.scripts {
         };
 
         // 重甲盾兵 / 重甲盾兵
-        public static readonly SheepRoleTypeInfo zhong_jia_dun_bing_1 = new() {
+        public static readonly SheepRoleTypeInfo ZHONG_JIA_DUN_BING_1 = new() {
             id = 104,
-            pla = "dy",
-            roleType = SheepRoleType.dun_bing,
-            collideId = 5,
+            roleType = SheepRoleType.DUN_BING,
+            collideGroup = SheepCollideGroup.GROUP5,
             animId = 113,
             scale = 5f,
             detectCollideR = 2,
@@ -743,11 +746,10 @@ namespace rvb.scripts {
         };
 
         // 弓箭手 / 弓箭手
-        public static readonly SheepRoleTypeInfo gong_jian_shou = new() {
+        public static readonly SheepRoleTypeInfo GONG_JIAN_SHOU = new() {
             id = 21,
-            pla = "dy",
-            roleType = SheepRoleType.gong_jian_shou,
-            collideId = 2,
+            roleType = SheepRoleType.GONG_JIAN_SHOU,
+            collideGroup = SheepCollideGroup.GROUP2,
             animId = 102,
             scale = 5f,
             detectCollideR = 3,
@@ -804,11 +806,10 @@ namespace rvb.scripts {
         };
 
         // 游侠 / 游侠
-        public static readonly SheepRoleTypeInfo you_xia = new() {
+        public static readonly SheepRoleTypeInfo YOU_XIA = new() {
             id = 28,
-            pla = "dy",
-            roleType = SheepRoleType.gong_jian_shou,
-            collideId = 2,
+            roleType = SheepRoleType.GONG_JIAN_SHOU,
+            collideGroup = SheepCollideGroup.GROUP2,
             animId = 112,
             scale = 5f,
             detectCollideR = 3,
@@ -865,11 +866,10 @@ namespace rvb.scripts {
         };
 
         // 游侠 / 游侠
-        public static readonly SheepRoleTypeInfo you_xia_1 = new() {
+        public static readonly SheepRoleTypeInfo YOU_XIA_1 = new() {
             id = 103,
-            pla = "dy",
-            roleType = SheepRoleType.gong_jian_shou,
-            collideId = 2,
+            roleType = SheepRoleType.GONG_JIAN_SHOU,
+            collideGroup = SheepCollideGroup.GROUP2,
             animId = 112,
             scale = 5f,
             detectCollideR = 3,
@@ -926,11 +926,10 @@ namespace rvb.scripts {
         };
 
         // 冲锋兵 / 冲锋兵
-        public static readonly SheepRoleTypeInfo chong_feng_bing = new() {
+        public static readonly SheepRoleTypeInfo CHONG_FENG_BING = new() {
             id = 20,
-            pla = "dy",
-            roleType = SheepRoleType.chong_feng_bing,
-            collideId = 4,
+            roleType = SheepRoleType.CHONG_FENG_BING,
+            collideGroup = SheepCollideGroup.GROUP4,
             animId = 104,
             scale = 7f,
             detectCollideR = 5,
@@ -976,11 +975,10 @@ namespace rvb.scripts {
         };
 
         // 大冲锋兵 / 大冲锋兵
-        public static readonly SheepRoleTypeInfo da_chong_feng_bing = new() {
+        public static readonly SheepRoleTypeInfo DA_CHONG_FENG_BING = new() {
             id = 27,
-            pla = "dy",
-            roleType = SheepRoleType.chong_feng_bing,
-            collideId = 4,
+            roleType = SheepRoleType.CHONG_FENG_BING,
+            collideGroup = SheepCollideGroup.GROUP4,
             animId = 114,
             scale = 7f,
             detectCollideR = 5,
@@ -1026,11 +1024,10 @@ namespace rvb.scripts {
         };
 
         // 大冲锋兵 / 大冲锋兵
-        public static readonly SheepRoleTypeInfo da_chong_feng_bing_1 = new() {
+        public static readonly SheepRoleTypeInfo DA_CHONG_FENG_BING_1 = new() {
             id = 106,
-            pla = "dy",
-            roleType = SheepRoleType.chong_feng_bing,
-            collideId = 4,
+            roleType = SheepRoleType.CHONG_FENG_BING,
+            collideGroup = SheepCollideGroup.GROUP4,
             animId = 114,
             scale = 7f,
             detectCollideR = 5,
@@ -1076,11 +1073,10 @@ namespace rvb.scripts {
         };
 
         // 羊神 / 狼神
-        public static readonly SheepRoleTypeInfo yang_shen = new() {
+        public static readonly SheepRoleTypeInfo YANG_SHEN = new() {
             id = 24,
-            pla = "dy",
-            roleType = SheepRoleType.yang_shen,
-            collideId = 8,
+            roleType = SheepRoleType.YANG_SHEN,
+            collideGroup = SheepCollideGroup.GROUP8,
             animId = 107,
             scale = 20f,
             detectCollideR = 6,
@@ -1135,11 +1131,10 @@ namespace rvb.scripts {
         };
 
         // 麒麟 / 麒麟
-        public static readonly SheepRoleTypeInfo qi_lin = new() {
+        public static readonly SheepRoleTypeInfo QI_LIN = new() {
             id = 30,
-            pla = "dy",
-            roleType = SheepRoleType.qi_lin,
-            collideId = 6,
+            roleType = SheepRoleType.QI_LIN,
+            collideGroup = SheepCollideGroup.GROUP6,
             animId = 108,
             scale = 12f,
             detectCollideR = 10,
@@ -1185,11 +1180,10 @@ namespace rvb.scripts {
         };
 
         // Boss
-        public static readonly SheepRoleTypeInfo boss = new() {
+        public static readonly SheepRoleTypeInfo BOSS = new() {
             id = 0,
-            pla = "all",
-            roleType = SheepRoleType.boss,
-            collideId = 0,
+            roleType = SheepRoleType.BOSS,
+            collideGroup = SheepCollideGroup.GROUP0,
             animId = 0,
             scale = 1f,
             detectCollideR = 5,
@@ -1232,27 +1226,27 @@ namespace rvb.scripts {
         };
 
         private static readonly SheepRoleTypeInfo[] _data = {
-            boss,
-            xian_feng_bing,
-            ci_ke,
-            da_ci_ke,
-            dun_bing,
-            xuan_feng_zhan,
-            chong_feng_bing,
-            gong_jian_shou,
-            xiao_bing,
-            pao_che,
-            yang_shen,
-            zhong_jia_dun_bing,
-            da_xuan_feng_zhan,
-            da_chong_feng_bing,
-            you_xia,
-            huang_jin_pao_che,
-            qi_lin,
-            ci_ke_1,
-            you_xia_1,
-            zhong_jia_dun_bing_1,
-            da_chong_feng_bing_1,
+            BOSS,
+            XIAN_FENG_BING,
+            CI_KE,
+            DA_CI_KE,
+            DUN_BING,
+            XUAN_FENG_ZHAN,
+            CHONG_FENG_BING,
+            GONG_JIAN_SHOU,
+            XIAO_BING,
+            PAO_CHE,
+            YANG_SHEN,
+            ZHONG_JIA_DUN_BING,
+            DA_XUAN_FENG_ZHAN,
+            DA_CHONG_FENG_BING,
+            YOU_XIA,
+            HUANG_JIN_PAO_CHE,
+            QI_LIN,
+            CI_KE_1,
+            YOU_XIA_1,
+            ZHONG_JIA_DUN_BING_1,
+            DA_CHONG_FENG_BING_1,
         };
 
         private static readonly Dictionary<int, SheepRoleTypeInfo> _map = CreateMap();

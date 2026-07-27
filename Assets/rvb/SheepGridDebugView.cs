@@ -327,20 +327,14 @@ namespace rvb.scripts
                 return null;
             }
 
-            foreach (var campPets in mgr.pets)
+            foreach (var pet in mgr.pets)
             {
-                if (campPets == null)
-                {
-                    continue;
-                }
-
-                foreach (var pet in campPets)
-                {
+                
                     if (pet != null && pet.id == petId)
                     {
                         return pet;
                     }
-                }
+                
             }
 
             return null;
