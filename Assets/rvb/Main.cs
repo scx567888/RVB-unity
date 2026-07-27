@@ -21,7 +21,7 @@ namespace rvb {
         public Texture2D texture;
         public TextAsset json;
         public SheepCamp camp;
-        public SheepRoleType roleType;
+        public int animId;
     }
 
     public class Main : MonoBehaviour {
@@ -36,6 +36,8 @@ namespace rvb {
 
         // 动画帧数解析器
         private SheepAnimFrameCountResolver animFrameCountResolver = new();
+        
+        private Dictionary<int,int> animFrameCountResolver1 = new();
 
         [Header("Logic")] 
         [SerializeField] private float logicFPS = 30f;
@@ -48,7 +50,7 @@ namespace rvb {
         private Dictionary<int, ScxSpriteRenderer>[] petSpriteRenderers;
 
         // 按照 [子弹类型] 存储
-        private ScxSpriteRenderer[] bulletSpriteRenderers;
+        private Dictionary<int,ScxSpriteRenderer> bulletSpriteRenderers;
 
         private string[] spriteNames;
         private SheepMgr sheepMgr;
@@ -63,7 +65,7 @@ namespace rvb {
                 new Dictionary<int, ScxSpriteRenderer>()
             };
 
-            this.bulletSpriteRenderers = new ScxSpriteRenderer[0];
+            this.bulletSpriteRenderers = new Dictionary<int, ScxSpriteRenderer>();
 
 
             foreach (var petRenderConfig in petRenderConfigs) {
@@ -85,6 +87,24 @@ namespace rvb {
 
                 scxSpriteRenderer.setParent(gameObject);
                 this.petSpriteRenderers[(int)petRenderConfig.camp][(int)petRenderConfig.animId] = scxSpriteRenderer;
+            }
+            
+            foreach (var bulletRenderConfig in bulletRenderConfigs) {
+                var spriteAtlas =
+                    SheepSpriteAtlasLoader.loadBullet(bulletRenderConfig.texture, bulletRenderConfig.json.text);
+                
+                var scxSpriteRenderer = new ScxSpriteRenderer(
+                    spriteAtlas,
+                    100,
+                    mainMaterial,
+                    2000
+                );
+
+                animFrameCountResolver1[bulletRenderConfig.animId] = scxSpriteRenderer.getSpriteNames().Length;
+                
+                scxSpriteRenderer.setParent(gameObject);
+
+                this.bulletSpriteRenderers[bulletRenderConfig.animId] = scxSpriteRenderer;
             }
 
 
@@ -117,6 +137,10 @@ namespace rvb {
                 foreach (var scxSpriteRenderer in p1) {
                     scxSpriteRenderer.Value.update();
                 }
+            }
+            
+            foreach (var bulletSpriteRenderer in bulletSpriteRenderers) {
+                bulletSpriteRenderer.Value.update();
             }
         }
 
@@ -151,12 +175,16 @@ namespace rvb {
                 }
 
                 foreach (var valueTupleDelBullet in valueTuple.del_bullets) {
-                    // valueTupleDelBullet.renderUnit?.destroy();
+                    valueTupleDelBullet.renderUnit?.destroy();
                 }
             }
 
             foreach (var sheepMgrPet in sheepMgr.pets) {
                 SyncRoleView(sheepMgrPet);
+            }
+            
+            foreach (var sheepMgrPet in sheepMgr.bullets) {
+                SyncBulletView(sheepMgrPet);
             }
 
             RecycleMissingRoleRenderers();
@@ -196,12 +224,29 @@ namespace rvb {
             renderUnit.setFrame(frameIndex);
         }
 
-        // 直接替换 Main/RVB 中原来的 HandleBulletRender。
-// 前提：
-// 1. loadBullet 生成的帧名是 "animId-frame"，例如 "3-12"。
-// 2. ScxSpriteRenderer 构造时 pixelsPerUnit = 100。
-// 3. logicToWorldScale 与 logicHeightToWorldScale 最好相同；相同时与原版完全等价。
-        private void HandleBulletRender(BulletView bullet) {
+        
+        private void SyncBulletView(BulletView view) {
+            var renderUnit = view.renderUnit;
+            if (renderUnit == null) {
+                renderUnit = bulletSpriteRenderers[(int)view.conf.animId].createUnit();
+                view.renderUnit = renderUnit;
+                renderUnit.setScale(view.conf.scale, view.conf.scale, 1f);
+                renderUnit.setRotationFromEuler(45, 0, 0);
+
+                var initialFrame = ResolveBulletSpriteFrame(view);
+                renderUnit.setFrame(initialFrame);
+                renderUnit.setVisible(true);
+            }
+
+            float worldX = view.x * logicToWorldScale;
+            float worldY = view.z * logicHeightToWorldScale;
+            float worldZ = view.y * logicToWorldScale;
+
+            renderUnit.setVisible(true);
+            renderUnit.setPosition(worldX, worldY, worldZ);
+
+            var frameIndex = ResolveBulletSpriteFrame(view);
+            renderUnit.setFrame(frameIndex);
             // if (
             //     bullet == null ||
             //     bullet.id == 0 ||
@@ -452,10 +497,18 @@ namespace rvb {
         }
 
         private string ResolveRoleSpriteFrame(PetView view) {
-            var i = animFrameCountResolver.resolve(view.camp, view.skinId, view.animType);
+            var i = animFrameCountResolver.resolve(view.camp, view.conf.animId, view.animType);
 
             int localFrame = PositiveModulo(view.animFrame, i);
             return ((int)(view.animType)) + "-" + localFrame;
+        }
+        
+        private string ResolveBulletSpriteFrame(BulletView view) {
+            
+            var i = animFrameCountResolver1[view.conf.animId];
+
+            int localFrame = PositiveModulo(view.frame, i);
+            return ""+localFrame;
         }
 
         private int ResolveLogicalAnimationFrameCount(PetView view) {
