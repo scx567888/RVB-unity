@@ -11,8 +11,8 @@ using static rvb.scripts.EventBus;
 namespace rvb.scripts {
     public class SheepMgr {
         public static SheepMgr inc;
-        
-        
+
+
         // 固定 30 fps 
         public static readonly float FixedDeltaTime = 1f / 30f;
 
@@ -567,7 +567,7 @@ namespace rvb.scripts {
             view.isDie = false;
             view.camp = camp;
             view.roleId = 0;
-            
+
             view.conf = SheepRoleTypeInfo.getById(0);
             view.state = (SheepRoleState)(int)SheepBossState.Ready;
             view.subState = SheepRoleSubState.None;
@@ -787,15 +787,14 @@ namespace rvb.scripts {
                 }
 
                 var t = viewPet.isDie;
-                
-                    var i1 = this.update_boss_frame(viewPet);
-                    if (!t && i1) {
-                        this.update_boss_state(viewPet);
-                    }
 
-                    this.update_boss_anim(viewPet);
-                
-              
+                var i1 = this.update_boss_frame(viewPet);
+                if (!t && i1) {
+                    this.update_boss_state(viewPet);
+                }
+
+                this.update_boss_anim(viewPet);
+
 
                 viewPet = null;
             }
@@ -809,21 +808,21 @@ namespace rvb.scripts {
                 }
 
                 var t = viewPet.isDie;
-              
-                
-                    var i1 = (int)viewPet.camp;
-                    var s = this.logic_counts[i1];
-                    for (var i2 = 0; i2 < s; i2++) {
-                        var i3 = this.update_frame(viewPet);
-                        if (!t) {
-                            this.update_role_state(viewPet, i3);
-                        }
 
-                        this.update_role_anim(viewPet);
+
+                var i1 = (int)viewPet.camp;
+                var s = this.logic_counts[i1];
+                for (var i2 = 0; i2 < s; i2++) {
+                    var i3 = this.update_frame(viewPet);
+                    if (!t) {
+                        this.update_role_state(viewPet, i3);
                     }
 
-                    var o = viewPet;
-                
+                    this.update_role_anim(viewPet);
+                }
+
+                var o = viewPet;
+
 
                 viewPet = null;
             }
@@ -976,7 +975,7 @@ namespace rvb.scripts {
 
             return i;
         }
-        
+
         public bool update_boss_frame(Boss viewPet) {
             var frame = viewPet.frame;
             var loopFrame = sheepConfig.loopFrame;
@@ -1092,6 +1091,7 @@ namespace rvb.scripts {
             if (!t) {
                 return;
             }
+
             if (petSkin.isLock) {
                 return;
             }
@@ -1109,13 +1109,13 @@ namespace rvb.scripts {
 
             if (o != null) {
                 petSkin.subState = SheepRoleSubState.MoveTar;
-                moveTar(petSkin, o,  t);
+                moveTar(petSkin, o, t);
                 return;
             }
 
             if (l != null) {
                 petSkin.subState = SheepRoleSubState.MoveBoss;
-                moveTar(petSkin, l,  t);
+                moveTar(petSkin, l, t);
                 return;
             }
 
@@ -1221,7 +1221,7 @@ namespace rvb.scripts {
                     petSkin.subState == SheepRoleSubState.AttackAwait)) {
                 var s = findNearAck(petSkin);
                 if (s != null && disByRole(petSkin, s) > petSkin.conf.atkMinMoveR + s.conf.collideR) {
-                    moveTar(petSkin, s,  t);
+                    moveTar(petSkin, s, t);
                 }
             }
         }
@@ -1577,7 +1577,7 @@ namespace rvb.scripts {
                         return false;
                     });
                 if (s1) {
-                    moveTar(petSkin, null,  t);
+                    moveTar(petSkin, null, t);
                 }
             }
 
@@ -1660,6 +1660,7 @@ namespace rvb.scripts {
             if (!t) {
                 return;
             }
+
             if (this.state == SheepRoomState.Start) {
                 if (t) {
                     var t2 = petSkin.posX;
@@ -1720,6 +1721,7 @@ namespace rvb.scripts {
             if (!t) {
                 return;
             }
+
             var o = e.posX;
             var l = e.posY;
             var (n, r) = getXnYn(o, l);
@@ -1807,7 +1809,7 @@ namespace rvb.scripts {
                     o3 = t4;
                     return true;
                 });
-                moveTar(e, o3,  t);
+                moveTar(e, o3, t);
             }
         }
 
@@ -1815,6 +1817,7 @@ namespace rvb.scripts {
             if (!t) {
                 return;
             }
+
             var o = e.posX;
             var l = e.posY;
             var (n, r) = getXnYn(o, l);
@@ -1844,7 +1847,7 @@ namespace rvb.scripts {
                     return false;
                 });
 
-                moveTar(e, null,  t);
+                moveTar(e, null, t);
             }
         }
 
@@ -1852,6 +1855,7 @@ namespace rvb.scripts {
             if (!t) {
                 return;
             }
+
             var o = e.posX;
             var l = e.posY;
             (int n, int r) = getXnYn(o, l);
@@ -1871,7 +1875,7 @@ namespace rvb.scripts {
                 e.readySkillId = i1.id;
             }
             else {
-                moveTar(e, null,  t);
+                moveTar(e, null, t);
                 forNearBlocksByAckView(e, n, r, e.conf.findR,
                     t2 => {
                         if (t2.isDie || t2.camp == e.camp || !isCanAckByRole(e, t2)) {
@@ -1888,11 +1892,12 @@ namespace rvb.scripts {
             if (!t) {
                 return;
             }
+
             if (e.conf.skillSpurt != 0) {
                 var s = SheepSkill.getById(e.conf.skillSpurt);
                 if (s.skillType == SheepSkillType.Boom) {
                     var o = SheepSkillSubBoom.getById(s.id);
-                    o.tick(this,e,t);
+                    o.tick(this, e, t);
                 }
                 else if (s.skillType == SheepSkillType.Killer) {
                     var o = SheepSkillSubKiller.getById(s.id);
@@ -1900,11 +1905,11 @@ namespace rvb.scripts {
                 }
                 else if (s.skillType == SheepSkillType.Bullet) {
                     var o = SheepSkillSubBullet.getById(s.id);
-                    o.tick(this,e,t);
+                    o.tick(this, e, t);
                 }
                 else if (s.skillType == SheepSkillType.CallBullets) {
                     var o = SheepSkillSubCallBullets.getById(s.id);
-                    o.tick(this,e,t);
+                    o.tick(this, e, t);
                 }
             }
             else {
@@ -1922,25 +1927,25 @@ namespace rvb.scripts {
                 if (o != null) {
                     e.state = SheepRoleState.Move;
                     e.subState = SheepRoleSubState.MoveTar;
-                    moveTar(e, o,  t);
+                    moveTar(e, o, t);
                     return;
                 }
 
                 if (l != null) {
                     e.state = SheepRoleState.Move;
                     e.subState = SheepRoleSubState.MoveBoss;
-                    moveTar(e, l,  t);
+                    moveTar(e, l, t);
                     return;
                 }
 
-                moveTar(e, null,  t);
+                moveTar(e, null, t);
             }
         }
 
         public void update_role_anim(PetView e) {
             e.animFrame = e.animFrame + 1;
-        }  
-        
+        }
+
         public void update_boss_anim(Boss e) {
             e.animFrame = e.animFrame + 1;
         }
@@ -2186,7 +2191,7 @@ namespace rvb.scripts {
             var sheepRoleTypeInfo = SheepRoleTypeInfo.getById(roleType);
 
             var pet = new PetView();
-            
+
             pet.id = this.getNextPetId();
             pet.isActive = true;
             pet.isDie = false;
@@ -2194,7 +2199,7 @@ namespace rvb.scripts {
             pet.camp = camp;
             pet.roleId = roleType;
             pet.isDie = false;
-            
+
             pet.isBoom = s; //  这里不能写死
 
             pet.attacher = new BuffTimeAttacher();
@@ -2246,46 +2251,44 @@ namespace rvb.scripts {
             int x7 = Mathf.FloorToInt(p1.x);
             int y7 = Mathf.FloorToInt(p1.y);
 
-            
 
-            
-                if (this.state == SheepRoomState.Start) {
-                    pet.state = SheepRoleState.Start;
-                    pet.subState = SheepRoleSubState.Start;
+            if (this.state == SheepRoomState.Start) {
+                pet.state = SheepRoleState.Start;
+                pet.subState = SheepRoleSubState.Start;
+                pet.animType = SheepRoleAnimType.Idle;
+                pet.animFrame = this.RandomInt(0, 10);
+            }
+            else if (pet.conf.skillIn != 0) {
+                pet.state = SheepRoleState.In;
+                pet.subState = SheepRoleSubState.In;
+                pet.animType = SheepRoleAnimType.In;
+                pet.animFrame = 0;
+            }
+            else if (pet.conf.startState == SheepRoleState.In) {
+                pet.state = pet.conf.startState;
+                pet.subState = SheepRoleSubState.In;
+                pet.animType = SheepRoleAnimType.In;
+                pet.animFrame = 0;
+            }
+            else if (pet.conf.startState == SheepRoleState.SpinSpurt) {
+                pet.state = pet.conf.startState;
+                pet.animType = SheepRoleAnimType.Attack;
+                pet.animFrame = 0;
+            }
+            else {
+                pet.state = pet.conf.startState;
+                pet.subState = SheepRoleSubState.Spurt;
+
+                if (pet.conf.isSpurtAnim) {
+                    pet.animType = SheepRoleAnimType.Spurt;
+                    pet.animFrame = this.RandomInt(0, 10);
+                }
+                else {
                     pet.animType = SheepRoleAnimType.Idle;
                     pet.animFrame = this.RandomInt(0, 10);
                 }
-                else if (pet.conf.skillIn != 0) {
-                    pet.state = SheepRoleState.In;
-                    pet.subState = SheepRoleSubState.In;
-                    pet.animType = SheepRoleAnimType.In;
-                    pet.animFrame = 0;
-                }
-                else if (pet.conf.startState == SheepRoleState.In) {
-                    pet.state = pet.conf.startState;
-                    pet.subState = SheepRoleSubState.In;
-                    pet.animType = SheepRoleAnimType.In;
-                    pet.animFrame = 0;
-                }
-                else if (pet.conf.startState == SheepRoleState.SpinSpurt) {
-                    pet.state = pet.conf.startState;
-                    pet.animType = SheepRoleAnimType.Attack;
-                    pet.animFrame = 0;
-                }
-                else {
-                    pet.state = pet.conf.startState;
-                    pet.subState = SheepRoleSubState.Spurt;
+            }
 
-                    if (pet.conf.isSpurtAnim) {
-                        pet.animType = SheepRoleAnimType.Spurt;
-                        pet.animFrame = this.RandomInt(0, 10);
-                    }
-                    else {
-                        pet.animType = SheepRoleAnimType.Idle;
-                        pet.animFrame = this.RandomInt(0, 10);
-                    }
-                }
-            
 
             pet.frame = 0;
             pet.posBefX = x7;
@@ -2800,7 +2803,7 @@ namespace rvb.scripts {
             }
         }
 
-        public void moveTar(PetView e, PetView t,  bool o) {
+        public void moveTar(PetView e, PetView t, bool o) {
             var i = FixedDeltaTime;
             // todo 这个是什么意思 某种跳过开关吗?
             if (!o) {
