@@ -1048,112 +1048,8 @@ namespace rvb.scripts {
             }
         }
 
-        // 移动
-        public void update_role_state_move(PetView petSkin, bool t) {
-            
-        }
-
-        public void update_role_state_attack(PetView petSkin, bool t) {
-          
-        }
-
         public void update_role_state_killer(PetView petSkin) {
-            var t = SheepSkillSubKiller.getById(petSkin.readySkillId);
-            var i = petSkin.animFrame;
-            if (i == t.findMoveFrame) {
-                var i3 = false;
-                var s = petSkin.conf;
-                if (petSkin.conf.roleType == SheepRoleType.CI_KE) {
-                    foreachFront(petSkin, (e => {
-                        if (e.conf.roleType != SheepRoleType.DUN_BING) {
-                        }
-                        else {
-                            i3 = true;
-                        }
-                    }), s.findR, 60);
-                }
-
-                if (i3) {
-                    Debug.LogWarning("刺客被中断，直接回到移动状态");
-                    petSkin.state = SheepRoleState.Move;
-                    petSkin.subState = SheepRoleSubState.MoveBoss;
-                    petSkin.animType = SheepRoleAnimType.Idle;
-                    return;
-                }
-
-                var o = findFarAck(petSkin, t.findR);
-                if (o != null) {
-                    petSkin.logicMove(o.posX, o.posY);
-                }
-                else {
-                    petSkin.state = SheepRoleState.Move;
-                    petSkin.subState = SheepRoleSubState.MoveBoss;
-                    petSkin.animType = SheepRoleAnimType.Idle;
-                }
-            }
-
-            if (i == t.atkFrame) {
-                ackMe(petSkin, t.spiltRadiusBet, t.atkBet, t.atkFindR);
-            }
-
-            if (i >= t.endFrame) {
-                var i1 = (int)petSkin.subState;
-                if (i1 == (int)SheepRoleSubState.KillerEnd || i1 - (int)SheepRoleSubState.KillerStart >= t.cnt) {
-                    petSkin.state = SheepRoleState.Move;
-                    petSkin.subState = SheepRoleSubState.MoveBoss;
-                    petSkin.animType = SheepRoleAnimType.Idle;
-                    return;
-                }
-
-                petSkin.subState = (SheepRoleSubState)((int)i1 + 1);
-                petSkin.animType = SheepRoleAnimType.Killer;
-            }
-        }
-
-        public void update_role_state_boom(PetView petSkin) {
-            var t = SheepSkill.getById(petSkin.readySkillId);
-            var i = SheepSkillSubBoom.getById(t.id);
-            var s = petSkin.animFrame;
-            if (s == i.atkFrame) {
-                var t1 = new List<SheepRoleType>();
-                if (petSkin.conf.roleType != SheepRoleType.CHONG_FENG_BING &&
-                    petSkin.conf.roleType != SheepRoleType.QI_LIN) {
-                }
-                else {
-                    t1.Add(SheepRoleType.QI_LIN);
-                }
-
-                ackMe(petSkin, i.spiltRadiusBet, i.atkBet, i.atkFindR, i.hitBackDistance, t1);
-            }
-
-            if (s >= i.endFrame) {
-                petSkin.isLock = false;
-                if (i.endState == (int)SheepRoleState.Move) {
-                    petSkin.state = SheepRoleState.Move;
-                    petSkin.subState = SheepRoleSubState.MoveBoss;
-                    petSkin.animType = SheepRoleAnimType.Idle;
-                }
-                else if (i.endState == (int)SheepRoleState.Rigidity) {
-                    petSkin.state = SheepRoleState.Rigidity;
-                    petSkin.animType = SheepRoleAnimType.Idle;
-                    petSkin.readySkillId = i.endSkill;
-                }
-                else {
-                    if (i.endState == (int)SheepRoleState.Dead) {
-                        petSkin.isDie = true;
-                        petSkin.state = SheepRoleState.Dead;
-                    }
-                    else if (i.endState == (int)SheepRoleState.Palm) {
-                        petSkin.state = SheepRoleState.Palm;
-                        petSkin.subState = SheepRoleSubState.Palm;
-                        petSkin.animType = SheepRoleAnimType.Palm;
-                        petSkin.readySkillId = i.endSkill;
-                    }
-                    else {
-                        Debug.LogError("endState错误");
-                    }
-                }
-            }
+            
         }
 
         public void update_role_state_invincible(PetView petSkin) {
@@ -1361,69 +1257,6 @@ namespace rvb.scripts {
             }
         }
 
-        public void update_role_state_rigidity(PetView petSkin) {
-            var t = SheepSkill.getById(petSkin.readySkillId);
-            var i = SheepSkillSubRigidity.getById(t.id);
-            if (petSkin.animFrame >= i.endFrame) {
-                petSkin.state = SheepRoleState.SpinAtk;
-                petSkin.animType = SheepRoleAnimType.Attack;
-                petSkin.readySkillId = i.endSkill;
-            }
-        }
-
-        public void update_role_state_spinatk(PetView petSkin, bool t) {
-            var s = petSkin.posX;
-            var o = petSkin.posY;
-            var xnyn = getXnYn(s, o);
-            var l = xnyn.xn;
-            var n = xnyn.yn;
-            var r = petSkin.animFrame;
-            var a = SheepSkill.getById(petSkin.readySkillId);
-            var c = SheepSkillSubSpinAtk.getById(a.id);
-            if (1 == r) {
-                var t1 = findSortAck1(petSkin, petSkin.conf.findR);
-
-                if (t1 != null) {
-                    dirTar(petSkin, t1);
-                }
-            }
-
-            if (t) {
-                var s1 = true;
-                forNearBlocksByAckView(petSkin, l, n, petSkin.conf.findR,
-                    t1 => {
-                        if (t1.isDie || t1.camp == petSkin.camp) {
-                            return false;
-                        }
-
-                        if (s1 && t1.conf.roleType == SheepRoleType.DUN_BING && isCanAckByRole(petSkin, t1)) {
-                            s1 = false;
-                        }
-
-                        if (!isCanAckByRole(petSkin, t1)) {
-                            return false;
-                        }
-
-                        ackTar(petSkin, t1);
-                        return false;
-                    });
-                if (s1) {
-                    moveTar(petSkin, null, t);
-                }
-            }
-
-            if (r >= c.endFrame) {
-                petSkin.state = (SheepRoleState)c.endState;
-                petSkin.animType = SheepRoleAnimType.Boom;
-                petSkin.readySkillId = c.endSkill;
-            }
-        }
-
-        
-
-        public void update_role_state_start(PetView petSkin, bool t) {
-            
-        }
 
         public void update_role_state_charge(PetView e, bool t) {
             if (!t) {
@@ -1559,13 +1392,6 @@ namespace rvb.scripts {
             }
         }
 
-        public void update_role_state_spinspurt(PetView e, bool t) {
-           
-        }
-
-        public void update_role_state_spurt(PetView e, bool t) {
-            
-        }
 
         public void update_role_anim(PetView e) {
             e.animFrame = e.animFrame + 1;
