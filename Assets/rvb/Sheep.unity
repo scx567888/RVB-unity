@@ -338,6 +338,46 @@ MonoBehaviour:
     json: {fileID: 4900000, guid: bc17100efc1940588ca1cd3e1a1d1478, type: 3}
     camp: 1
     animId: 111
+  - texture: {fileID: 2800000, guid: 96bd0466d8ed4380a11f3c90fa0ba723, type: 3}
+    json: {fileID: 4900000, guid: fb1270a142324cc995990f45815a375d, type: 3}
+    camp: 0
+    animId: 103
+  - texture: {fileID: 2800000, guid: bb2906625193486d8ab473c0c5fcb29a, type: 3}
+    json: {fileID: 4900000, guid: 5decac81b6754704801f74c31ec32c5f, type: 3}
+    camp: 1
+    animId: 103
+  - texture: {fileID: 2800000, guid: 2ba4989f292a4446ae13c97911e85c6d, type: 3}
+    json: {fileID: 4900000, guid: b77aff0f20ce447d87e792e84d089fe8, type: 3}
+    camp: 0
+    animId: 113
+  - texture: {fileID: 2800000, guid: 5ab488738fc24f55a2d6e016a883a8c1, type: 3}
+    json: {fileID: 4900000, guid: 7bfbbf3f65a04a528ca5b265b91211b9, type: 3}
+    camp: 1
+    animId: 113
+  - texture: {fileID: 2800000, guid: 1ae2cac863184942a3a6c5bdad498d45, type: 3}
+    json: {fileID: 4900000, guid: fd349fff99d4460ba0ef9fbbe799f37c, type: 3}
+    camp: 0
+    animId: 102
+  - texture: {fileID: 2800000, guid: 7e0e438ea89a47de9f0129ce305c43ab, type: 3}
+    json: {fileID: 4900000, guid: 2be35679b4dd4fbc891998f77881dec2, type: 3}
+    camp: 1
+    animId: 102
+  - texture: {fileID: 2800000, guid: 7653326560e74b2b9deb1a1fdad2966e, type: 3}
+    json: {fileID: 4900000, guid: 77bf956b9aec4abcbd8154cc61dd9d91, type: 3}
+    camp: 0
+    animId: 112
+  - texture: {fileID: 2800000, guid: fe2c1bbe1c71401ea48ac1a52e684131, type: 3}
+    json: {fileID: 4900000, guid: 5b7f2deec3c643349ff49f21ff6d7606, type: 3}
+    camp: 1
+    animId: 112
+  - texture: {fileID: 2800000, guid: e31b86b4431a40a7b683caea4d0d0e3c, type: 3}
+    json: {fileID: 4900000, guid: d4453dcccf1442c8bb3981ab1149db8f, type: 3}
+    camp: 0
+    animId: 104
+  - texture: {fileID: 2800000, guid: f7bb9a780fcd4ac69848b35e0730f1e3, type: 3}
+    json: {fileID: 4900000, guid: abf40b9cd81d414dae51d6a4685dbc8f, type: 3}
+    camp: 1
+    animId: 104
   bulletRenderConfigs:
   - texture: {fileID: 2800000, guid: 716dc8e71dbb47c9b821f8e2f87a2703, type: 3}
     json: {fileID: 4900000, guid: ddd621b7b03c4cc08d1cd85526ad7ce3, type: 3}
@@ -355,6 +395,18 @@ MonoBehaviour:
     json: {fileID: 4900000, guid: 86b8cec0af8943d887343150d95015de, type: 3}
     camp: 0
     animId: 8
+  - texture: {fileID: 2800000, guid: a650fb5786f447b3b04c74e04ad05d40, type: 3}
+    json: {fileID: 4900000, guid: ef7f6c15fa334d328d1c870296235362, type: 3}
+    camp: 0
+    animId: 2
+  - texture: {fileID: 2800000, guid: c913055ddd5043afa44adfc445dea4e3, type: 3}
+    json: {fileID: 4900000, guid: beb87ffcfd7e4f938688b7290e524651, type: 3}
+    camp: 0
+    animId: 1
+  - texture: {fileID: 2800000, guid: b826691dc5db4fa391079b31e91ee7a6, type: 3}
+    json: {fileID: 4900000, guid: ed7ec6efcfe4482dbca66fcd817ce213, type: 3}
+    camp: 0
+    animId: 10
   mainMaterial: {fileID: 2100000, guid: de552a8032c24a2b826d1da4ff7198d9, type: 2}
   logicFPS: 30
   maxLogicStepsPerUnityFrame: 6
