@@ -6,47 +6,50 @@ using scx.SpriteRenderer;
 using UnityEngine;
 
 namespace rvb {
-    
     // 小兵渲染配置
     [Serializable]
-    public class PetRenderConfig{
+    public class PetRenderConfig {
         public Texture2D texture;
         public TextAsset json;
         public SheepCamp camp;
         public int animId;
     }
-    
+
     // 字段渲染配置
     [Serializable]
-    public class BulletRenderConfig{
+    public class BulletRenderConfig {
         public Texture2D texture;
         public TextAsset json;
         public SheepCamp camp;
         public SheepRoleType roleType;
     }
-   
-    public class Main : MonoBehaviour {
 
+    public class Main : MonoBehaviour {
         // 小兵渲染数据
         public List<PetRenderConfig> petRenderConfigs;
+
         // 子弹渲染数据
         public List<BulletRenderConfig> bulletRenderConfigs;
+
         // 主材质
         public Material mainMaterial;
 
-        private SheepAnimFrameCountResolver animFrameCountResolver=new();
+        // 动画帧数解析器
+        private SheepAnimFrameCountResolver animFrameCountResolver = new();
 
-        [Header("Logic")] [SerializeField] private float logicFPS = 30f;
+        [Header("Logic")] 
+        [SerializeField] private float logicFPS = 30f;
         [SerializeField] private int maxLogicStepsPerUnityFrame = 4;
         [SerializeField] private float logicToWorldScale = 0.01f;
         [SerializeField] private float logicHeightToWorldScale = 0.01f;
         [SerializeField] private int fallbackLogicalAnimationFrames = 30;
 
         // 按照 [阵营][角色类型] 存储
-        private Dictionary<int,ScxSpriteRenderer>[] petSpriteRenderers;
+        private Dictionary<int, ScxSpriteRenderer>[] petSpriteRenderers;
+
         // 按照 [子弹类型] 存储
         private ScxSpriteRenderer[] bulletSpriteRenderers;
-        
+
         private string[] spriteNames;
         private SheepMgr sheepMgr;
         private SheepCtl sheepCtl = new SheepCtl();
@@ -55,37 +58,38 @@ namespace rvb {
         private LoadRoleResult loadRoleResult;
 
         private void Start() {
-
             this.petSpriteRenderers = new[] {
                 new Dictionary<int, ScxSpriteRenderer>(),
                 new Dictionary<int, ScxSpriteRenderer>()
             };
 
             this.bulletSpriteRenderers = new ScxSpriteRenderer[0];
-            
-            
+
+
             foreach (var petRenderConfig in petRenderConfigs) {
-               var loadRoleResult = SheepSpriteAtlasLoader.loadRole(petRenderConfig.texture, petRenderConfig.json.text);
-               var scxSpriteRenderer = new ScxSpriteRenderer(
+                var loadRoleResult =
+                    SheepSpriteAtlasLoader.loadRole(petRenderConfig.texture, petRenderConfig.json.text);
+                var scxSpriteRenderer = new ScxSpriteRenderer(
                     loadRoleResult.spriteAtlas,
                     100,
                     mainMaterial,
                     2000
                 );
-               
+
                 foreach (var keyValuePair in loadRoleResult.animFrame) {
                     var k = keyValuePair.Key;
                     var v = keyValuePair.Value;
-                    animFrameCountResolver.setAnimationFrameCount(petRenderConfig.camp,petRenderConfig.animId,(SheepRoleAnimType)k,v);
+                    animFrameCountResolver.setAnimationFrameCount(petRenderConfig.camp, petRenderConfig.animId,
+                        (SheepRoleAnimType)k, v);
                 }
 
                 scxSpriteRenderer.setParent(gameObject);
                 this.petSpriteRenderers[(int)petRenderConfig.camp][(int)petRenderConfig.animId] = scxSpriteRenderer;
             }
-            
 
-            sheepMgr = new SheepMgr(SheepConfigs.sheepConfig,animFrameCountResolver,sheepCtl);
-            
+
+            sheepMgr = new SheepMgr(SheepConfigs.sheepConfig, animFrameCountResolver, sheepCtl);
+
             logicAccumulator = 0f;
 
             sheepMgr.gameIndex++;
@@ -107,14 +111,13 @@ namespace rvb {
             if (sheepMgr.state == SheepRoomState.Start || sheepMgr.state == SheepRoomState.Run) {
                 RunLogicFrames();
             }
-            
+
             // Unity 每个显示帧提交一次渲染。
             foreach (var p1 in petSpriteRenderers) {
                 foreach (var scxSpriteRenderer in p1) {
                     scxSpriteRenderer.Value.update();
                 }
             }
-            
         }
 
         private void RunLogicFrames() {
@@ -125,7 +128,7 @@ namespace rvb {
             logicAccumulator += Time.deltaTime;
 
             var list = new List<(HashSet<PetView> del_pets, HashSet<BulletView> del_bullets)>();
-            
+
             int stepCount = 0;
             while (logicAccumulator >= logicStepSeconds && stepCount < maxLogicStepsPerUnityFrame) {
                 var gameUpdate = sheepMgr.game_update(sheepCtl, logicStepMilliseconds);
@@ -141,7 +144,7 @@ namespace rvb {
             if (stepCount == 0) {
                 return;
             }
-            
+
             foreach (var valueTuple in list) {
                 foreach (var valueTupleDelPet in valueTuple.del_pets) {
                     valueTupleDelPet.renderUnit?.destroy();
@@ -151,7 +154,7 @@ namespace rvb {
                     // valueTupleDelBullet.renderUnit?.destroy();
                 }
             }
-            
+
             foreach (var sheepMgrPet in sheepMgr.pets) {
                 SyncRoleView(sheepMgrPet);
             }
@@ -171,7 +174,7 @@ namespace rvb {
 
         private void SyncRoleView(PetView view) {
             var renderUnit = view.renderUnit;
-            if (renderUnit==null) {
+            if (renderUnit == null) {
                 renderUnit = petSpriteRenderers[(int)view.camp][(int)view.conf.animId].createUnit();
                 view.renderUnit = renderUnit;
                 renderUnit.setScale(view.conf.scale, view.conf.scale, 1f);
@@ -449,7 +452,7 @@ namespace rvb {
         }
 
         private string ResolveRoleSpriteFrame(PetView view) {
-            var i=animFrameCountResolver.resolve(view.camp, view.skinId, view.animType);
+            var i = animFrameCountResolver.resolve(view.camp, view.skinId, view.animType);
 
             int localFrame = PositiveModulo(view.animFrame, i);
             return ((int)(view.animType)) + "-" + localFrame;
@@ -481,15 +484,15 @@ namespace rvb {
             // staleRoleSlots.Clear();
 
             // foreach (KeyValuePair<string, ScxSpriteRenderUnit> pair in roleRenderers) {
-                // if (!seenRoleSlots.Contains(pair.Key)) {
-                    // staleRoleSlots.Add(pair.Key);
-                // }
+            // if (!seenRoleSlots.Contains(pair.Key)) {
+            // staleRoleSlots.Add(pair.Key);
+            // }
             // }
 
             // foreach (var slot in staleRoleSlots) {
-                // var renderPet = roleRenderers[slot];
-                // roleRenderers.Remove(slot);
-                // renderPet.destroy();
+            // var renderPet = roleRenderers[slot];
+            // roleRenderers.Remove(slot);
+            // renderPet.destroy();
             // }
         }
 
@@ -523,11 +526,11 @@ namespace rvb {
             }
 
             // if (Input.GetKeyDown(KeyCode.H) && highlightMaterial != null) {
-                // scxSpriteRenderer.setMaterialTemplate(highlightMaterial);
+            // scxSpriteRenderer.setMaterialTemplate(highlightMaterial);
             // }
 
             // if (Input.GetKeyDown(KeyCode.M) && mainMaterial != null) {
-                // scxSpriteRenderer.setMaterialTemplate(mainMaterial);
+            // scxSpriteRenderer.setMaterialTemplate(mainMaterial);
             // }
         }
 
@@ -537,17 +540,6 @@ namespace rvb {
             }
 
             sheepMgr.produce_pets(roleId, count, camp);
-        }
-
-        private void OnDestroy() {
-            if (sheepMgr != null) {
-
-                if (sheepMgr.AnimationFrameCountResolver == ResolveLogicalAnimationFrameCount) {
-                    sheepMgr.AnimationFrameCountResolver = null;
-                }
-            }
-
-            // ClearAllRenderUnits();
         }
     }
 }
