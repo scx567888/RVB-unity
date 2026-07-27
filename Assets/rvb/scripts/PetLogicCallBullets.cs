@@ -1,7 +1,7 @@
 ﻿namespace rvb.scripts {
     public class PetLogicCallBullets : PetLogic{
         public static readonly PetLogicCallBullets  Instance = new ();
-        public void tick() {
+        public void tick(PetView petView, SheepMgr sheepMgr) {
             
         }
     }

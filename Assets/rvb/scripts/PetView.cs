@@ -145,8 +145,8 @@ namespace rvb.scripts {
             posY = y;
         }
         
-        public void update_role_state(bool isLogicFrame) {
-            petLogic.tick();
+        public void update_role_state(bool isLogicFrame,SheepMgr sheepMgr) {
+            petLogic.tick(this, sheepMgr);
 
             if (impulseX != 0 || impulseY != 0) {
                 if (!isDie && curHp > 0) {

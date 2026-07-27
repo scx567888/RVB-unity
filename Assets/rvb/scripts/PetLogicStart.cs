@@ -3,7 +3,7 @@
         
         public static readonly PetLogicStart  Instance = new PetLogicStart();
         
-        public void tick() {
+        public void tick(PetView petView, SheepMgr sheepMgr) {
             
         }
     }
