@@ -77,7 +77,7 @@ namespace rvb.scripts {
         public List<PetView> pets = new();
 
         // 准备添加到下一帧的 角色
-        public List<PetView> pre_pets =  new();
+        public List<PetView> pre_pets = new();
 
         // 准备删除的 角色, 这里用 Set 保证查询速度
         public HashSet<PetView> del_pets = new();
@@ -158,7 +158,7 @@ namespace rvb.scripts {
 
 
             this.updateTime = 0;
-        
+
             this.redCallInfos = new Dictionary<int, SheepCallInfo>();
 
             this.blueCallInfos = new Dictionary<int, SheepCallInfo>();
@@ -210,13 +210,11 @@ namespace rvb.scripts {
 
         // 将 pre_pets 应用到 pets 中
         public void applyPrePets() {
-            
-                foreach (var pet in pre_pets) {
-                    addPet(pet);
-                }
+            foreach (var pet in pre_pets) {
+                addPet(pet);
+            }
 
-                pre_pets.Clear();
-            
+            pre_pets.Clear();
         }
 
         // 将 pre_bullets 应用到 bullets 中
@@ -246,14 +244,14 @@ namespace rvb.scripts {
             var copy = new HashSet<PetView>(del_pets);
 
             // 应用移除
-            
-                foreach (var pet in del_pets) {
-                    delPet(pet);
-                }
 
-                // 清空
-                del_pets.Clear();
-            
+            foreach (var pet in del_pets) {
+                delPet(pet);
+            }
+
+            // 清空
+            del_pets.Clear();
+
 
             return copy;
         }
@@ -310,11 +308,11 @@ namespace rvb.scripts {
 
             // 重建格子
             foreach (var pet in pets) {
-                    var cell = gridMap.getCellByWorldPositionSafe(
-                        pet.posX,
-                        pet.posY
-                    );
-                    cell.addPet(pet);
+                var cell = gridMap.getCellByWorldPositionSafe(
+                    pet.posX,
+                    pet.posY
+                );
+                cell.addPet(pet);
             }
         }
 
@@ -325,6 +323,7 @@ namespace rvb.scripts {
             foreach (var i in p1) {
                 count += i;
             }
+
             return count;
         }
 
@@ -588,7 +587,6 @@ namespace rvb.scripts {
 
 // todo
         public void game_clear() {
-            
             this.clearPetViews();
 
             this.clearViewBullets();
@@ -637,7 +635,6 @@ namespace rvb.scripts {
 
             applyPreBullets();
 
-            
 
             // 更新 pet
             this.update_role();
@@ -730,68 +727,67 @@ namespace rvb.scripts {
             var _redBuffCount = 0;
             var _blueBuffCount = 0;
 
-            
-                foreach (var y in this.pets) {
-                    updateSkinPet(y, sheepCtl, this, this, dt);
 
-                    int[] M;
-                    var D = y;
-                    var A = D.state;
-                    var P = D.animType;
-                    var W = D.animFrame;
+            foreach (var y in this.pets) {
+                updateSkinPet(y, sheepCtl, this, this, dt);
 
-                    var fgs = sheepCtl.comImages.roles_framess[(int)y.camp];
+                int[] M;
+                var D = y;
+                var A = D.state;
+                var P = D.animType;
+                var W = D.animFrame;
 
-                    var ghg = fgs[(int)y.skinId];
+                var fgs = sheepCtl.comImages.roles_framess[(int)y.camp];
 
-                    M = ghg[(int)P];
+                var ghg = fgs[(int)y.skinId];
 
-                    if (null == M) {
-                        Debug.LogError("找不到动画 " + y.camp + " " + y.skinId + " " + P);
-                    }
+                M = ghg[(int)P];
 
-                    if (A == SheepRoleState.In && W >= M.Length - 1) {
-                        var E = SheepSkill.getById(D.readySkillId);
-                        if (E != null) {
-                            if (E.skillType == SheepSkillType.Boom) {
-                                var F = SheepSkillSubBoom.getById(E.id);
-                                D.state = SheepRoleState.Boom;
-                                if (F.isAnim != 0) {
-                                    D.animType = SheepRoleAnimType.Boom;
-                                }
-                                else {
-                                    D.animType = SheepRoleAnimType.Idle;
-                                }
-                            }
-                        }
-                        else {
-                            D.state = SheepRoleState.Move;
-                            D.animType = SheepRoleAnimType.Idle;
-                        }
-                    }
-                    else if (A == SheepRoleState.Dead && W >= M.Length - 1) {
-                        D.state = SheepRoleState.Res;
-                        D.animType = SheepRoleAnimType.None;
-                        del_pet(D);
-                    }
-                    else if (A == SheepRoleState.Up && W >= M.Length - 1) {
-                        D.state = SheepRoleState.In;
-                        D.animType = SheepRoleAnimType.In;
-                    }
-                    else if (A == SheepRoleState.Buff) {
-                        var V = SheepSkillSubBuff.getById(D.readySkillId);
-                        var U = D.animFrame;
-                        if (U > V.buffStratFrame && U < V.buffEndFrame) {
-                            if (y.camp == SheepCamp.Blue) {
-                                _blueBuffCount += 1;
+                if (null == M) {
+                    Debug.LogError("找不到动画 " + y.camp + " " + y.skinId + " " + P);
+                }
+
+                if (A == SheepRoleState.In && W >= M.Length - 1) {
+                    var E = SheepSkill.getById(D.readySkillId);
+                    if (E != null) {
+                        if (E.skillType == SheepSkillType.Boom) {
+                            var F = SheepSkillSubBoom.getById(E.id);
+                            D.state = SheepRoleState.Boom;
+                            if (F.isAnim != 0) {
+                                D.animType = SheepRoleAnimType.Boom;
                             }
                             else {
-                                _redBuffCount += 1;
+                                D.animType = SheepRoleAnimType.Idle;
                             }
+                        }
+                    }
+                    else {
+                        D.state = SheepRoleState.Move;
+                        D.animType = SheepRoleAnimType.Idle;
+                    }
+                }
+                else if (A == SheepRoleState.Dead && W >= M.Length - 1) {
+                    D.state = SheepRoleState.Res;
+                    D.animType = SheepRoleAnimType.None;
+                    del_pet(D);
+                }
+                else if (A == SheepRoleState.Up && W >= M.Length - 1) {
+                    D.state = SheepRoleState.In;
+                    D.animType = SheepRoleAnimType.In;
+                }
+                else if (A == SheepRoleState.Buff) {
+                    var V = SheepSkillSubBuff.getById(D.readySkillId);
+                    var U = D.animFrame;
+                    if (U > V.buffStratFrame && U < V.buffEndFrame) {
+                        if (y.camp == SheepCamp.Blue) {
+                            _blueBuffCount += 1;
+                        }
+                        else {
+                            _redBuffCount += 1;
                         }
                     }
                 }
-            
+            }
 
 
             foreach (var X in bullets) {
@@ -865,41 +861,40 @@ namespace rvb.scripts {
                 viewPet = null;
             }
 
-            
-                foreach (var dddd in pets) {
-                    var viewPet = dddd;
-                    if (!viewPet.isActive) {
-                        viewPet = null;
-                        continue;
+
+            foreach (var dddd in pets) {
+                var viewPet = dddd;
+                if (!viewPet.isActive) {
+                    viewPet = null;
+                    continue;
+                }
+
+                var t = viewPet.isDie;
+                if (0 == viewPet.roleId) {
+                    var i1 = this.update_frame(viewPet);
+                    if (!t && i1) {
+                        this.update_boss_state(viewPet);
                     }
 
-                    var t = viewPet.isDie;
-                    if (0 == viewPet.roleId) {
-                        var i1 = this.update_frame(viewPet);
-                        if (!t && i1) {
-                            this.update_boss_state(viewPet);
+                    this.update_role_anim(viewPet);
+                }
+                else {
+                    var i1 = (int)viewPet.camp;
+                    var s = this.logic_counts[i1];
+                    for (var i2 = 0; i2 < s; i2++) {
+                        var i3 = this.update_frame(viewPet);
+                        if (!t) {
+                            this.update_role_state(viewPet, i3);
                         }
 
                         this.update_role_anim(viewPet);
                     }
-                    else {
-                        var i1 = (int)viewPet.camp;
-                        var s = this.logic_counts[i1];
-                        for (var i2 = 0; i2 < s; i2++) {
-                            var i3 = this.update_frame(viewPet);
-                            if (!t) {
-                                this.update_role_state(viewPet, i3);
-                            }
 
-                            this.update_role_anim(viewPet);
-                        }
-
-                        var o = viewPet;
-                    }
-
-                    viewPet = null;
+                    var o = viewPet;
                 }
-            
+
+                viewPet = null;
+            }
         }
 
         public void update_bullet() {
@@ -2123,7 +2118,7 @@ namespace rvb.scripts {
 
             if (this.isAutoCall && this.autoTime > SheepConfig.systemAutomaticTroopsIntervalTime) {
                 this.autoTime = 0;
-                if (this.pets.Count  < SheepConfig.systemLongerAutomaticallyDispatch) {
+                if (this.pets.Count < SheepConfig.systemLongerAutomaticallyDispatch) {
                     foreach (var e in new SheepCamp[] { SheepCamp.Red, SheepCamp.Blue }) {
                         if (getPetCount(e) < SheepConfig.systemAutomaticallyMaxTroops) {
                             o.produce_pets(SheepConfig.WarmUpID, SheepConfig.systemAutomaticallyTroopsOneNumber, e);
@@ -2160,7 +2155,7 @@ namespace rvb.scripts {
                     o1.frame += 1;
 
                     // 限制每帧生成的单位
-                    if (o1.frame <= formation.frameItemX&&false) {
+                    if (o1.frame <= formation.frameItemX && false) {
                         continue;
                     }
 
@@ -2704,7 +2699,6 @@ namespace rvb.scripts {
             }
 
             if (!isDie) {
-
                 int S = i.conf.detectCollideR;
 
                 for (int y = -S; y <= S; ++y) {
