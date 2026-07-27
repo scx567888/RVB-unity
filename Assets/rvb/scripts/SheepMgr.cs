@@ -372,13 +372,6 @@ namespace rvb.scripts {
             this.pets.Clear();
         }
 
-        public int getBlockIndex(Vector3 e) {
-            var t = Math.Floor(e.x / sheepConfig.d + sheepConfig.w / sheepConfig.d / 2);
-            var o = Math.Floor(e.y / sheepConfig.d + sheepConfig.h / sheepConfig.d / 2);
-            return (int)(t * sheepConfig.line_w + o);
-        }
-
-
         public void clearPetViews() {
             pets.Clear();
         }
@@ -394,42 +387,6 @@ namespace rvb.scripts {
             foreach (var viewElement in this.pre_bullets) {
                 if (viewElement != null) {
                     viewElement.clear();
-                }
-            }
-        }
-
-
-        public void game_run(SheepCtl sheepCtl) {
-            // 清理游戏数据
-            this.game_clear();
-
-            var i = this.gameIndex;
-
-            this.updateTime = NowMs();
-
-            //只有 游戏处于运行中 或者 局数未改变
-            while (i == this.gameIndex && (this.state == SheepRoomState.Run || this.state == SheepRoomState.Start)) {
-                try {
-                    var lastUpdateTime = this.updateTime;
-                    this.updateTime = NowMs();
-
-                    var diff = this.updateTime - lastUpdateTime;
-
-                    if (diff >= 100) {
-                        Debug.LogWarning("主线程更新逻辑耗时过长: " + diff + "ms");
-                    }
-
-                    if (diff < 33) {
-                        Thread.Sleep((int)(33 - diff));
-                    }
-
-
-                    var o = NowMs() - lastUpdateTime;
-                    this.game_update(sheepCtl, o);
-                }
-                catch (Exception e) {
-                    Debug.LogWarning("主线程更新逻辑错误:" + e);
-                    return;
                 }
             }
         }
