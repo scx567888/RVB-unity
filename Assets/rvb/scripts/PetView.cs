@@ -18,7 +18,7 @@ namespace rvb.scripts {
         // 
         public int roleId = 0;
         // 主状态
-        public SheepRoleState _state = SheepRoleState.In;
+        private  SheepRoleState _state = SheepRoleState.In;
         // 子状态
         public SheepRoleSubState subState = SheepRoleSubState.None;
         
@@ -39,7 +39,7 @@ namespace rvb.scripts {
         public float animX = 0;
         public float animY = 0;
         public float animZ = 0;
-        public SheepRoleAnimType _animType = 0;
+        private SheepRoleAnimType _animType = 0;
         public int animFrame = 0;
 
         // 当前 血量
@@ -55,7 +55,7 @@ namespace rvb.scripts {
         
         public int readySkillId = 0;
         public int energy = 0;
-        public PetLogic petLogic ;
+        private  PetLogic petLogic ;
 
         public BuffTimeAttacher attacher;
 
