@@ -60,8 +60,6 @@ namespace rvb.scripts {
         //********************************** 以下字段 待处理 **********************************************
 
         // -------------------- 可选桥接回调 --------------------
-        public Action<PetView> OnRoleRender;
-        public Action<BulletView> OnBulletRender;
         public Func<PetView, int> AnimationFrameCountResolver;
 
 
@@ -731,7 +729,7 @@ namespace rvb.scripts {
             foreach (var y in this.pets) {
                 updateSkinPet(y, sheepCtl, this, this, dt);
 
-                int[] M;
+                
                 var D = y;
                 var A = D.state;
                 var P = D.animType;
@@ -741,13 +739,13 @@ namespace rvb.scripts {
 
                 var ghg = fgs[(int)y.skinId];
 
-                M = ghg[(int)P];
+                int  M = ghg[(int)P];
 
                 if (null == M) {
                     Debug.LogError("找不到动画 " + y.camp + " " + y.skinId + " " + P);
                 }
 
-                if (A == SheepRoleState.In && W >= M.Length - 1) {
+                if (A == SheepRoleState.In && W >= M - 1) {
                     var E = SheepSkill.getById(D.readySkillId);
                     if (E != null) {
                         if (E.skillType == SheepSkillType.Boom) {
@@ -766,12 +764,12 @@ namespace rvb.scripts {
                         D.animType = SheepRoleAnimType.Idle;
                     }
                 }
-                else if (A == SheepRoleState.Dead && W >= M.Length - 1) {
+                else if (A == SheepRoleState.Dead && W >= M - 1) {
                     D.state = SheepRoleState.Res;
                     D.animType = SheepRoleAnimType.None;
                     del_pet(D);
                 }
-                else if (A == SheepRoleState.Up && W >= M.Length - 1) {
+                else if (A == SheepRoleState.Up && W >= M - 1) {
                     D.state = SheepRoleState.In;
                     D.animType = SheepRoleAnimType.In;
                 }
@@ -905,7 +903,6 @@ namespace rvb.scripts {
 
                 if (t.id != 0 && t.conf.animId != 0) {
                     var e = t;
-                    OnBulletRender?.Invoke(e);
                 }
 
                 var xnyn = Util.getXnYn(t.x, t.y);
@@ -2085,7 +2082,6 @@ namespace rvb.scripts {
 
         public void update_role_anim(PetView e) {
             e.animFrame = e.animFrame + 1;
-            OnRoleRender?.Invoke(e);
         }
 
         public void produce_pets(int typeID, int count, SheepCamp camp) {
