@@ -1,7 +1,6 @@
 ﻿namespace rvb.scripts {
     public class Boss : PetView{
         public long backStateTime;
-        public float curHp;
         public ComProgress comProgress=new ComProgress();
 
         public Boss(int t) : base() {
