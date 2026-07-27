@@ -59,10 +59,6 @@ namespace rvb.scripts {
 
         //********************************** 以下字段 待处理 **********************************************
 
-        // -------------------- 可选桥接回调 --------------------
-        public Func<PetView, int> AnimationFrameCountResolver;
-
-
         public int plotRatioIndex;
 
 
@@ -115,11 +111,15 @@ namespace rvb.scripts {
 
         // 是否自动出兵
         public bool isAutoCall = true;
-        
+
         public SheepConfig sheepConfig;
         private SheepAnimFrameCountResolver animFrameCountResolver;
 
-        public SheepMgr(SheepConfig sheepConfig,SheepAnimFrameCountResolver animFrameCountResolver, SheepCtl sheepCtl) {
+        public SheepMgr(
+            SheepConfig sheepConfig,
+            SheepAnimFrameCountResolver animFrameCountResolver,
+            SheepCtl sheepCtl
+        ) {
             this.sheepConfig = sheepConfig;
             this.animFrameCountResolver = animFrameCountResolver;
             // 自动出兵计时器
@@ -619,7 +619,7 @@ namespace rvb.scripts {
             view.animX = view.posX;
             view.animY = view.posY;
             view.blockIndex = getIndexByXY(view.posX, view.posY);
-            
+
             view.dirX = camp == SheepCamp.Red ? 1f : -1f;
             view.dirY = 0f;
 
@@ -731,13 +731,13 @@ namespace rvb.scripts {
             foreach (var y in this.pets) {
                 updateSkinPet(y, sheepCtl, this, this, dt);
 
-                
+
                 var D = y;
                 var A = D.state;
                 var P = D.animType;
                 var W = D.animFrame;
 
-                int M =animFrameCountResolver.resolve(y.camp, y.skinId, P);
+                int M = animFrameCountResolver.resolve(y.camp, y.skinId, P);
 
                 if (A == SheepRoleState.In && W >= M - 1) {
                     var E = SheepSkill.getById(D.readySkillId);
@@ -2332,7 +2332,7 @@ namespace rvb.scripts {
             petSkin.skinId = petSkin.conf.animId;
 
             var ppppp = new Vector3();
-            
+
             var formation = SheepRoleFormation.getById(sheepRoleTypeInfo.formationId);
 
             if (formation.formationType == SheepRoleFormationType.AngleRandom) {
@@ -2470,7 +2470,7 @@ namespace rvb.scripts {
             else {
                 petSkin.isNotConn = false;
             }
-            
+
             petSkin.curHp = petSkin.conf.hp;
             petSkin.curAtkBuff = 0;
 
@@ -2497,7 +2497,6 @@ namespace rvb.scripts {
             }
 
             this.addPrePet(petSkin);
-            
         }
 
 
@@ -2651,7 +2650,7 @@ namespace rvb.scripts {
             }
 
             bool isDie = i.isDie;
-            int blockIndex = getIndexByXY(i.posX,i.posY);
+            int blockIndex = getIndexByXY(i.posX, i.posY);
             float curHp = i.curHp;
 
             if (isDie) {
@@ -2773,9 +2772,9 @@ namespace rvb.scripts {
         public T arrOn<T>(T[] r) {
             return r[RandomInt(0, r.Length)];
         }
-        
-        
-         public (int xn, int yn) getXnYnByIndex(int e) {
+
+
+        public (int xn, int yn) getXnYnByIndex(int e) {
             return (
                 e % sheepConfig.line_w,
                 Mathf.FloorToInt((float)e / sheepConfig.line_w)
@@ -2952,10 +2951,9 @@ namespace rvb.scripts {
 
         // 获取 BOSS
         public PetView getBackBoss(SheepCamp camp) {
-            
-            var    view_boss_red = boss[(int)SheepCamp.Red];
-            var    view_boss_blue = boss[(int)SheepCamp.Blue];
-            
+            var view_boss_red = boss[(int)SheepCamp.Red];
+            var view_boss_blue = boss[(int)SheepCamp.Blue];
+
 
             if (camp == SheepCamp.Red) {
                 return view_boss_blue;
@@ -2966,7 +2964,6 @@ namespace rvb.scripts {
         }
 
         public void moveTar(PetView e, PetView t, float i, bool o) {
-            
             // todo 这个是什么意思 某种跳过开关吗?
             if (!o) {
                 return;
@@ -3263,8 +3260,8 @@ namespace rvb.scripts {
                 }
             }
         }
-        
-         public void ackTar(PetView e, PetView t) {
+
+        public void ackTar(PetView e, PetView t) {
             float i = e.conf.atk;
 
             if (e.curAtkBuff != 0) {
@@ -3406,8 +3403,8 @@ namespace rvb.scripts {
                 return Mathf.Sqrt(distanceSqr) < e.conf.atkR;
             }
         }
-        
-        
+
+
         public FindTarResult findTar(PetView petSkin, int findR = 0) {
             float i = petSkin.posX;
             float o = petSkin.posY;
@@ -3454,18 +3451,18 @@ namespace rvb.scripts {
             if (r != null) {
                 petSkin.tarPosX = r.posX;
                 petSkin.tarPosY = r.posY;
-                return new FindTarResult() {  atkTar= r  };
+                return new FindTarResult() { atkTar = r };
             }
 
             PetView backBoss = getBackBoss(petSkin.camp);
             if (isCanAckByRole(petSkin, backBoss)) {
                 petSkin.tarPosX = backBoss.posX;
                 petSkin.tarPosY = backBoss.posY;
-                return new FindTarResult() { atkTar= backBoss } ;
+                return new FindTarResult() { atkTar = backBoss };
             }
 
             if (a != null) {
-                return new FindTarResult() {  moveTar= a };
+                return new FindTarResult() { moveTar = a };
             }
 
             if (petSkin.state == SheepRoleState.Spurt && petSkin.conf.skillSpurt == 0) {
@@ -3486,7 +3483,7 @@ namespace rvb.scripts {
                 });
 
                 if (t != null) {
-                    return new FindTarResult() { moveTar= t };
+                    return new FindTarResult() { moveTar = t };
                 }
             }
 
@@ -3495,7 +3492,7 @@ namespace rvb.scripts {
                 petSkin.camp == SheepCamp.Red && petSkin.posX > petSkin.conf.runEndX ||
                 petSkin.camp == SheepCamp.Blue && petSkin.posX < petSkin.conf.runEndX
             ) {
-                return new FindTarResult() { moveBoss= backBoss } ;
+                return new FindTarResult() { moveBoss = backBoss };
             }
 
             return new FindTarResult();
@@ -3728,40 +3725,37 @@ namespace rvb.scripts {
         public void forfeachBlocksByAckView(SheepCamp camp, int xn, int yn, int splitN, Action<PetView> callback) {
             // 寻找敌方阵营
             var enemyCamp = camp == SheepCamp.Red ? SheepCamp.Blue : SheepCamp.Red;
-            
+
             for (int n = -splitN; n <= splitN; n++) {
                 for (int r = -splitN; r <= splitN; r++) {
-                    
                     var sheepCell = gridMap.getCell(xn + n, yn + r);
-                    if (sheepCell==null) {
+                    if (sheepCell == null) {
                         continue;
                     }
+
                     sheepCell.forEachPet(enemyCamp, (p) => {
                         callback(p);
                         return false;
                     });
-                    
                 }
             }
-            
         }
 
         public void forfeachBlocksByCollView(PetView petSkin, int xn, int yn, int splitN, Action<PetView> callback) {
             var camp = petSkin.camp;
             var collideId = petSkin.conf.collideGroup;
-            
+
             for (int n = -splitN; n <= splitN; n++) {
                 for (int r = -splitN; r <= splitN; r++) {
-                    
                     var sheepCell = gridMap.getCell(xn + n, yn + r);
-                    if (sheepCell==null) {
+                    if (sheepCell == null) {
                         continue;
                     }
-                    sheepCell.forEachPet(camp,collideId, (p) => {
+
+                    sheepCell.forEachPet(camp, collideId, (p) => {
                         callback(p);
                         return false;
                     });
-                    
                 }
             }
         }
@@ -3769,13 +3763,13 @@ namespace rvb.scripts {
         public bool forNearBlocksByAckView(PetView e, int t, int i, int o, Func<PetView, bool> callback) {
             // 寻找敌方阵营
             var enemyCamp = e.camp == SheepCamp.Red ? SheepCamp.Blue : SheepCamp.Red;
-             int n = 0;
-             
-             Func<int, int, bool> r = (blockX, blockY) => {
-                 var sheepCell = gridMap.getCellSafe(blockX, blockY);
-                  sheepCell.forEachPet(enemyCamp,callback);
-                  return false;
-             };
+            int n = 0;
+
+            Func<int, int, bool> r = (blockX, blockY) => {
+                var sheepCell = gridMap.getCellSafe(blockX, blockY);
+                sheepCell.forEachPet(enemyCamp, callback);
+                return false;
+            };
 
             for (int ring = 0; ring <= o; ring++) {
                 if (ring != 0) {
@@ -3832,20 +3826,17 @@ namespace rvb.scripts {
         public bool findFarBlocksByAckView(PetView petSkin, int xn, int yn, int findR, Func<PetView, bool> callback) {
             SheepCamp camp = petSkin.camp;
             camp = camp == SheepCamp.Red ? SheepCamp.Blue : SheepCamp.Red;
-            
-               Func<int, int, bool> n = (blockX, blockY) => {
-                   
-               var sheepCell = gridMap.getCellSafe(blockX, blockY);
-                
+
+            Func<int, int, bool> n = (blockX, blockY) => {
+                var sheepCell = gridMap.getCellSafe(blockX, blockY);
+
                 return sheepCell.petCounts[(int)camp] != 0;
             };
 
             Func<int, int, bool> a = (blockX, blockY) => {
-
                 var sheepCell = gridMap.getCellSafe(blockX, blockY);
-                
-                return sheepCell.forEachPet(camp, callback);
 
+                return sheepCell.forEachPet(camp, callback);
             };
 
             for (int ring = findR; ring > 0; ring--) {
@@ -3888,23 +3879,21 @@ namespace rvb.scripts {
             }
 
             return n(xn, yn) && a(xn, yn);
-            
         }
 
         public bool findRandomBlocksByAckView(PetView e, int t, int i, int findR, Func<PetView, bool> callback) {
             SheepCamp camp = e.camp;
             camp = camp == SheepCamp.Red ? SheepCamp.Blue : SheepCamp.Red;
-            
-              Func<int, int, bool> n = (blockX, blockY) => {
-                   
-                  var sheepCell = gridMap.getCellSafe(blockX, blockY);
-                
-                  return sheepCell.petCounts[(int)camp] != 0;
+
+            Func<int, int, bool> n = (blockX, blockY) => {
+                var sheepCell = gridMap.getCellSafe(blockX, blockY);
+
+                return sheepCell.petCounts[(int)camp] != 0;
             };
 
             Func<int, int, bool> a = (blockX, blockY) => {
                 var sheepCell = gridMap.getCellSafe(blockX, blockY);
-                
+
                 return sheepCell.forEachPet(camp, callback);
             };
 
@@ -3952,16 +3941,16 @@ namespace rvb.scripts {
 
             return false;
         }
-        
+
         public bool findNearBlocksByAckView(PetView e, int xn, int yn, int o, Func<PetView, bool> callback) {
             // 寻找敌方阵营
             var enemyCamp = e.camp == SheepCamp.Red ? SheepCamp.Blue : SheepCamp.Red;
 
             Func<int, int, bool> forEachPetByCell = (blockX, blockY) => {
                 var sheepCell = gridMap.getCellSafe(blockX, blockY);
-                return sheepCell.forEachPet(enemyCamp,callback);
+                return sheepCell.forEachPet(enemyCamp, callback);
             };
-            
+
             int n = 0;
 
             for (int ring = 0; ring <= o; ring++) {
@@ -4039,9 +4028,9 @@ namespace rvb.scripts {
 
             Func<int, int, bool> forEachPetByCell = (blockX, blockY) => {
                 var sheepCell = gridMap.getCellSafe(blockX, blockY);
-                return sheepCell.forEachPet(camp,collideId,callback);
+                return sheepCell.forEachPet(camp, collideId, callback);
             };
-            
+
             int n = 0;
 
             for (int ring = 0; ring <= o; ring++) {
@@ -4111,7 +4100,5 @@ namespace rvb.scripts {
 
             return false;
         }
-        
-        
     }
 }
