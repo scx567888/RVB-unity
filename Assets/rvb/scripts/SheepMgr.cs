@@ -1893,113 +1893,19 @@ namespace rvb.scripts {
                 var s = SheepSkill.getById(e.conf.skillSpurt);
                 if (s.skillType == SheepSkillType.Boom) {
                     var o = SheepSkillSubBoom.getById(s.id);
-                    var fff = findTar(e);
-                    var l = fff.atkTar;
-                    var n = fff.moveTar;
-                    var r = fff.moveBoss;
-
-                    if (l != null || r != null) {
-                        e.state = SheepRoleState.Boom;
-                        e.subState = SheepRoleSubState.Boom;
-                        if (o.isAnim != 0) {
-                            e.animType = SheepRoleAnimType.Boom;
-                        }
-                        else {
-                            e.animType = SheepRoleAnimType.Idle;
-                        }
-
-                        e.readySkillId = o.id;
-                        return;
-                    }
-
-                    moveTar(e, null, i, t);
+                    o.tick(this,e,t,i);
                 }
                 else if (s.skillType == SheepSkillType.Killer) {
                     var o = SheepSkillSubKiller.getById(s.id);
-                    var fff = findTar(e);
-
-                    var l = fff.atkTar;
-                    var n = fff.moveTar;
-                    var r = fff.moveBoss;
-
-                    if (l != null) {
-                        e.state = SheepRoleState.Killer;
-                        e.subState = SheepRoleSubState.KillerStart;
-                        e.animType = SheepRoleAnimType.Killer;
-                        e.readySkillId = o.id;
-                        return;
-                    }
-
-
-                    if (r != null) {
-                        e.state = SheepRoleState.Move;
-                        e.subState = SheepRoleSubState.MoveBoss;
-                        e.animType = SheepRoleAnimType.Idle;
-                        moveTar(e, r, i, t);
-                        return;
-                    }
-
-                    moveTar(e, null, i, t);
+                    o.tick(this, e, t, i);
                 }
                 else if (s.skillType == SheepSkillType.Bullet) {
                     var o = SheepSkillSubBullet.getById(s.id);
-                    var fff = findTar(e);
-                    var l = fff.atkTar;
-                    var n = fff.moveTar;
-                    var r = fff.moveBoss;
-
-                    if (l != null || n != null || r != null) {
-                        createBullet(new BullteCreate() {
-                            view_pet = e,
-                            bulletId = o.bullet
-                        });
-                    }
-
-                    if (l != null) {
-                        e.state = SheepRoleState.Attack;
-                        e.subState = SheepRoleSubState.AttackAwait;
-                        return;
-                    }
-
-                    if (n != null) {
-                        e.state = SheepRoleState.Move;
-                        e.subState = SheepRoleSubState.MoveTar;
-                        moveTar(e, n, i, t);
-                        return;
-                    }
-
-                    if (r != null) {
-                        e.state = SheepRoleState.Move;
-                        e.subState = SheepRoleSubState.MoveBoss;
-                        e.animType = SheepRoleAnimType.Idle;
-                        moveTar(e, r, i, t);
-                        return;
-                    }
-
-                    moveTar(e, null, i, t);
+                    o.tick(this,e,t,i);
                 }
                 else if (s.skillType == SheepSkillType.CallBullets) {
                     var o = SheepSkillSubCallBullets.getById(s.id);
-                    var fff = findTar(e);
-                    var l = fff.atkTar;
-                    var n = fff.moveTar;
-                    var r = fff.moveBoss;
-
-                    if (l != null || r != null) {
-                        e.state = SheepRoleState.CallBullets;
-                        e.subState = SheepRoleSubState.CallBullets;
-                        if (o.isAnim != 0) {
-                            e.animType = SheepRoleAnimType.CallBullets;
-                        }
-                        else {
-                            e.animType = SheepRoleAnimType.Idle;
-                        }
-
-                        e.readySkillId = o.id;
-                        return;
-                    }
-
-                    moveTar(e, null, i, t);
+                    o.tick(this,e,t,i);
                 }
             }
             else {

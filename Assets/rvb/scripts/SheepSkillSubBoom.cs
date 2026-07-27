@@ -17,6 +17,30 @@ namespace rvb.scripts {
         public int endState;
         public int endSkill;
 
+        public void tick(SheepMgr sheepMgr, PetView e, bool t, float i) {
+            
+            var fff = sheepMgr.findTar(e);
+            var l = fff.atkTar;
+            var n = fff.moveTar;
+            var r = fff.moveBoss;
+
+            if (l != null || r != null) {
+                e.state = SheepRoleState.Boom;
+                e.subState = SheepRoleSubState.Boom;
+                if (this.isAnim != 0) {
+                    e.animType = SheepRoleAnimType.Boom;
+                }
+                else {
+                    e.animType = SheepRoleAnimType.Idle;
+                }
+
+                e.readySkillId = this.id;
+                return;
+            }
+
+            sheepMgr.moveTar(e, null, i, t);
+        }
+
         public static IReadOnlyList<SheepSkillSubBoom> List => SheepSkillSubBooms.All;
 
         public static SheepSkillSubBoom getById(int id) {

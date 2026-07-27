@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 
 namespace rvb.scripts {
-    public class SheepSkillSubCallBullets {
+    public class SheepSkillSubCallBullets :Skill{
         public int id;
         public string name = string.Empty;
         public int isAnim;
@@ -17,6 +17,33 @@ namespace rvb.scripts {
         public int startRadius;
         public int endRadius;
         public int len;
+
+
+
+        public void tick(SheepMgr sheepMgr,PetView e,bool t, float i) {
+            var fff = sheepMgr.findTar(e);
+            var l = fff.atkTar;
+            var n = fff.moveTar;
+            var r = fff.moveBoss;
+
+            if (l != null || r != null) {
+                e.state = SheepRoleState.CallBullets;
+                e.subState = SheepRoleSubState.CallBullets;
+                if (this.isAnim != 0) {
+                    e.animType = SheepRoleAnimType.CallBullets;
+                }
+                else {
+                    e.animType = SheepRoleAnimType.Idle;
+                }
+
+                e.readySkillId = this.id;
+                return;
+            }
+
+            sheepMgr.moveTar(e, null, i, t);
+        }
+        
+        
 
         public static IReadOnlyList<SheepSkillSubCallBullets> List => SheepSkillSubCallBulletsConfigs.All;
 
