@@ -1,4 +1,5 @@
 ﻿namespace rvb.scripts {
+    // 角色子状态
     public enum SheepRoleSubState {
         None = 0,
         In = 1,

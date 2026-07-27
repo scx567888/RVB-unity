@@ -284,6 +284,16 @@ MonoBehaviour:
     camp: 1
     roleType: 1
     skinID: 100
+  - texture: {fileID: 2800000, guid: 575a93a600b640bd8c566ea188957696, type: 3}
+    json: {fileID: 4900000, guid: 62ac99ddefc04cdf9ce5e2a9c386dc43, type: 3}
+    camp: 0
+    roleType: 7
+    skinID: 106
+  - texture: {fileID: 2800000, guid: ec079d659f8d474aa66dc878546f2435, type: 3}
+    json: {fileID: 4900000, guid: 72923cb39d9c455e9b5e193ee42e1d20, type: 3}
+    camp: 1
+    roleType: 7
+    skinID: 106
   bulletRenderConfigs: []
   mainMaterial: {fileID: 2100000, guid: de552a8032c24a2b826d1da4ff7198d9, type: 2}
   logicFPS: 30
@@ -291,11 +301,6 @@ MonoBehaviour:
   logicToWorldScale: 0.01
   logicHeightToWorldScale: 0.01
   fallbackLogicalAnimationFrames: 30
-  redRoleId: 22
-  blueRoleId: 22
-  initialCountPerCamp: 1000
-  hotkeySpawnCount: 10
-  enableAutomaticTroops: 1
 --- !u!114 &841530571
 MonoBehaviour:
   m_ObjectHideFlags: 0

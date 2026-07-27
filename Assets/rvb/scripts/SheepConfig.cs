@@ -142,8 +142,8 @@
             counterBuffNumber = 3,
             counterHpRatio = 0.3f,
             counterTime = 120,
-            WarmUpID = 22,
-            // WarmUpID = 23,
+            // WarmUpID = 22,
+            WarmUpID = 23,
             beheadLine = 8000,
             startMaxTime = 300,
 

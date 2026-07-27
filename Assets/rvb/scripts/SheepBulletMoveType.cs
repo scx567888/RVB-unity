@@ -1,4 +1,5 @@
 ﻿namespace rvb.scripts {
+    // 子弹移动方式
     public enum SheepBulletMoveType {
         Fixed = 1,
         LineDir = 2,
