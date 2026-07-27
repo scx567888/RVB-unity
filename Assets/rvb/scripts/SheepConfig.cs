@@ -143,7 +143,7 @@
             counterHpRatio = 0.3f,
             counterTime = 120,
             // WarmUpID = 22,
-            WarmUpID = 20,
+            WarmUpID = 30,
             beheadLine = 8000,
             startMaxTime = 300,
 
