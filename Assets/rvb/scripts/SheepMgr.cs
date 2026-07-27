@@ -815,7 +815,8 @@ namespace rvb.scripts {
                 for (var i2 = 0; i2 < s; i2++) {
                     var i3 = this.update_frame(viewPet);
                     if (!t) {
-                        this.update_role_state(viewPet, i3);
+                        viewPet.subAtkCd(FixedDeltaTime);
+                        viewPet.update_role_state(i3);
                     }
 
                     this.update_role_anim(viewPet);
@@ -1588,73 +1589,7 @@ namespace rvb.scripts {
             }
         }
 
-        public void update_role_state(PetView pet, bool isLogicFrame) {
-            pet.subAtkCd(FixedDeltaTime);
-            switch (pet.state) {
-                case SheepRoleState.Start:
-                    this.update_role_state_start(pet, isLogicFrame);
-                    break;
-                case SheepRoleState.In:
-                    this.update_role_state_in(pet);
-                    break;
-                case SheepRoleState.Spurt:
-                    this.update_role_state_spurt(pet, isLogicFrame);
-                    break;
-                case SheepRoleState.Charge:
-                    this.update_role_state_charge(pet, isLogicFrame);
-                    break;
-                case SheepRoleState.ChargePlus:
-                    this.update_role_state_charge_plus(pet, isLogicFrame);
-                    break;
-                case SheepRoleState.SpinSpurt:
-                    this.update_role_state_spinspurt(pet, isLogicFrame);
-                    break;
-                case SheepRoleState.Move:
-                    this.update_role_state_move(pet, isLogicFrame);
-                    break;
-                case SheepRoleState.Attack:
-                    this.update_role_state_attack(pet, isLogicFrame);
-                    break;
-                case SheepRoleState.Killer:
-                    this.update_role_state_killer(pet);
-                    break;
-                case SheepRoleState.Boom:
-                    this.update_role_state_boom(pet);
-                    break;
-                case SheepRoleState.Invincible:
-                    this.update_role_state_invincible(pet);
-                    break;
-                case SheepRoleState.Bladestorm:
-                    this.update_role_state_bladestorm(pet, isLogicFrame);
-                    break;
-                case SheepRoleState.Palm:
-                    this.update_role_state_palm(pet);
-                    break;
-                case SheepRoleState.CallBullets:
-                    this.update_role_state_callbullets(pet);
-                    break;
-                case SheepRoleState.Buff:
-                    this.update_role_state_buff(pet);
-                    break;
-                case SheepRoleState.Rigidity:
-                    this.update_role_state_rigidity(pet);
-                    break;
-                case SheepRoleState.SpinAtk:
-                    this.update_role_state_spinatk(pet, isLogicFrame);
-                    break;
-            }
-
-            if (pet.impulseX != 0 || pet.impulseY != 0) {
-                if (!pet.isDie && pet.curHp > 0) {
-                    var t1 = pet.impulseX;
-                    var i1 = pet.impulseY;
-                    pet.logicMove(pet.animX + t1, pet.posY + i1);
-                }
-
-                pet.impulseX = 0;
-                pet.impulseY = 0;
-            }
-        }
+        
 
         public void update_role_state_start(PetView petSkin, bool t) {
             if (!t) {

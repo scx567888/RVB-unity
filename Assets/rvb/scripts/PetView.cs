@@ -1,3 +1,4 @@
+using System;
 using scx.SpriteRenderer;
 
 namespace rvb.scripts {
@@ -17,7 +18,7 @@ namespace rvb.scripts {
         // 
         public int roleId = 0;
         // 主状态
-        public SheepRoleState state = SheepRoleState.In;
+        public SheepRoleState _state = SheepRoleState.In;
         // 子状态
         public SheepRoleSubState subState = SheepRoleSubState.None;
         
@@ -54,6 +55,7 @@ namespace rvb.scripts {
         
         public int readySkillId = 0;
         public int energy = 0;
+        public PetLogic petLogic ;
 
         public BuffTimeAttacher attacher;
 
@@ -70,6 +72,39 @@ namespace rvb.scripts {
             set {
                 _animType = value;
                 animFrame = 0;
+            }
+        }
+        
+        public SheepRoleState state {
+            get { return _state; }
+
+            set {
+                _state = value;
+                this.petLogic = _state switch {
+                    SheepRoleState.Start => PetLogicStart.Instance,
+                    SheepRoleState.In => PetLogicIn.Instance,
+                    SheepRoleState.Spurt => PetLogicSpurt.Instance,
+                    SheepRoleState.Charge => PetLogicCharge.Instance,
+                    SheepRoleState.ChargePlus => PetLogicChargePlus.Instance,
+                    SheepRoleState.SpinSpurt => PetLogicSpinSpurt.Instance,
+                    SheepRoleState.Move => PetLogicMove.Instance,
+                    SheepRoleState.Attack => PetLogicAttack.Instance,
+                    SheepRoleState.Killer => PetLogicKiller.Instance,
+                    SheepRoleState.Boom => PetLogicBoom.Instance,
+                    SheepRoleState.Invincible => PetLogicInvincible.Instance,
+                    SheepRoleState.Bladestorm => PetLogicBladestorm.Instance,
+                    SheepRoleState.Palm => PetLogicPalm.Instance,
+                    SheepRoleState.CallBullets => PetLogicCallBullets.Instance,
+                    SheepRoleState.Buff => PetLogicBuff.Instance,
+                    SheepRoleState.Rigidity => PetLogicRigidity.Instance,
+                    SheepRoleState.SpinAtk => PetLogicSpinAtk.Instance,
+                    SheepRoleState.Dead => PetLogicDead.Instance,
+                    SheepRoleState.Merge => PetLogicMerge.Instance,
+                    SheepRoleState.Res => PetLogicRes.Instance,
+                    SheepRoleState.SkillBullet => PetLogicSkillBullet.Instance,
+                    SheepRoleState.Up => PetLogicUp.Instance,
+                    _ => throw new ArgumentOutOfRangeException()
+                };
             }
         }
 
@@ -109,5 +144,21 @@ namespace rvb.scripts {
             posX = x;
             posY = y;
         }
+        
+        public void update_role_state(bool isLogicFrame) {
+            petLogic.tick();
+
+            if (impulseX != 0 || impulseY != 0) {
+                if (!isDie && curHp > 0) {
+                    var t1 = impulseX;
+                    var i1 = impulseY;
+                    logicMove(animX + t1, posY + i1);
+                }
+
+                impulseX = 0;
+                impulseY = 0;
+            }
+        }    
+        
     }
 }
