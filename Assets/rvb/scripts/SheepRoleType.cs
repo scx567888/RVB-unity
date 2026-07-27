@@ -1,37 +1,35 @@
 ﻿namespace rvb.scripts {
+    // 此处是攻击模式 不代表真正的单位
     public enum SheepRoleType {
-        // 此处是攻击模式 不代表真正的单位
-        boss = 0,
+        // BOSS
+        BOSS = 0,
 
         // 小兵
-        xiao_bing = 1,
+        XIAO_BING = 1,
 
         // 刺客
-        ci_ke = 2,
+        CI_KE = 2,
 
         // 弓箭手
-        gong_jian_shou = 3,
+        GONG_JIAN_SHOU = 3,
 
         // 盾兵
-        dun_bing = 4,
+        DUN_BING = 4,
 
         // 冲锋兵
-        chong_feng_bing = 5,
+        CHONG_FENG_BING = 5,
 
         // 旋风斩
-        xuan_feng_zhan = 6,
+        XUAN_FENG_ZHAN = 6,
 
         // 炮车
-        pao_che = 7,
+        PAO_CHE = 7,
 
         // 羊神
-        yang_shen = 8,
+        YANG_SHEN = 8,
 
         // 麒麟
-        qi_lin = 9,
-        buff = 10,
-        tower = 11,
-        loongMiao = 12,
+        QI_LIN = 9,
         
         Count
     }
