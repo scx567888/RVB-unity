@@ -74,13 +74,13 @@ namespace rvb.scripts {
         public Boss[] boss = { null, null };
 
         // 当前在场上的角色
-        public HashSet<PetView>[] pets = { new(), new() };
+        public List<PetView> pets = new();
 
         // 准备添加到下一帧的 角色
-        public HashSet<PetView>[] pre_pets = { new(), new() };
+        public List<PetView> pre_pets =  new();
 
-        // 准备删除的 角色
-        public HashSet<PetView>[] del_pets = { new(), new() };
+        // 准备删除的 角色, 这里用 Set 保证查询速度
+        public HashSet<PetView> del_pets = new();
 
         // 当前在场上的子弹
         public List<BulletView> bullets = new();
@@ -88,8 +88,8 @@ namespace rvb.scripts {
         // 准备添加到下一帧的 子弹
         public List<BulletView> pre_bullets = new();
 
-        // 准备删除的 子弹
-        public List<BulletView> del_bullets = new();
+        // 准备删除的 子弹, 这里用 Set 保证查询速度
+        public HashSet<BulletView> del_bullets = new();
 
         // 角色自增 id 
         public int petId = 0;
@@ -200,7 +200,7 @@ namespace rvb.scripts {
 
         // 添加单位 下一帧才会使用
         public void addPrePet(PetView pet) {
-            pre_pets[(int)pet.camp].Add(pet);
+            pre_pets.Add(pet);
         }
 
         // 添加子弹 下一帧才会使用
@@ -210,14 +210,13 @@ namespace rvb.scripts {
 
         // 将 pre_pets 应用到 pets 中
         public void applyPrePets() {
-            for (var i = 0; i < pre_pets.Length; i++) {
-                var p1 = pre_pets[i];
-                foreach (var pet in p1) {
+            
+                foreach (var pet in pre_pets) {
                     addPet(pet);
                 }
 
-                p1.Clear();
-            }
+                pre_pets.Clear();
+            
         }
 
         // 将 pre_bullets 应用到 bullets 中
@@ -233,7 +232,7 @@ namespace rvb.scripts {
 
         // 添加 删除单位.
         public void addDelPet(PetView pet) {
-            del_pets[(int)pet.camp].Add(pet);
+            del_pets.Add(pet);
         }
 
         // 添加 删除子弹.
@@ -242,31 +241,27 @@ namespace rvb.scripts {
         }
 
         // 从 pets 中 删除 del_pets 中的 单位
-        public HashSet<PetView>[] applyDelPets() {
+        public HashSet<PetView> applyDelPets() {
             // 复制一份方便 渲染层处理
-            var copy = new HashSet<PetView>[del_pets.Length];
-            for (var i = 0; i < del_pets.Length; i++) {
-                copy[i] = new HashSet<PetView>(del_pets[i]);
-            }
+            var copy = new HashSet<PetView>(del_pets);
 
             // 应用移除
-            for (var i = 0; i < del_pets.Length; i++) {
-                var p1 = del_pets[i];
-                foreach (var pet in p1) {
+            
+                foreach (var pet in del_pets) {
                     delPet(pet);
                 }
 
                 // 清空
-                p1.Clear();
-            }
+                del_pets.Clear();
+            
 
             return copy;
         }
 
         // 从 bullets 中 删除 del_bullets 中的 对象
-        public List<BulletView> applyDelBullets() {
+        public HashSet<BulletView> applyDelBullets() {
             // 复制一份方便 渲染层处理
-            var copy = new List<BulletView>(del_bullets);
+            var copy = new HashSet<BulletView>(del_bullets);
             // 应用移除
             foreach (var bullet in del_bullets) {
                 delBullet(bullet);
@@ -282,7 +277,7 @@ namespace rvb.scripts {
 
         // 添加单位, 不要在逻辑帧循环中调用
         public void addPet(PetView pet) {
-            pets[(int)pet.camp].Add(pet);
+            pets.Add(pet);
             petCounts[(int)pet.camp][(int)pet.conf.roleType] += 1;
         }
 
@@ -293,7 +288,7 @@ namespace rvb.scripts {
 
         // 删除单位, 不要在逻辑帧循环中调用
         public void delPet(PetView pet) {
-            pets[(int)pet.camp].Remove(pet);
+            pets.Remove(pet);
             petCounts[(int)pet.camp][(int)pet.conf.roleType] -= 1;
         }
 
@@ -314,15 +309,23 @@ namespace rvb.scripts {
             });
 
             // 重建格子
-            foreach (var p1 in pets) {
-                foreach (var pet in p1) {
+            foreach (var pet in pets) {
                     var cell = gridMap.getCellByWorldPositionSafe(
                         pet.posX,
                         pet.posY
                     );
                     cell.addPet(pet);
-                }
             }
+        }
+
+        // 根据阵营获取 pet 总数
+        public long getPetCount(SheepCamp camp) {
+            var count = 0;
+            var p1 = petCounts[(int)camp];
+            foreach (var i in p1) {
+                count += i;
+            }
+            return count;
         }
 
 
@@ -367,8 +370,7 @@ namespace rvb.scripts {
         }
 
         public void clearPets() {
-            this.pets[(int)SheepCamp.Red].Clear();
-            this.pets[(int)SheepCamp.Blue].Clear();
+            this.pets.Clear();
         }
 
         public int getBlockIndex(Vector3 e) {
@@ -379,8 +381,7 @@ namespace rvb.scripts {
 
 
         public void clearPetViews() {
-            pets[(int)SheepCamp.Red].Clear();
-            pets[(int)SheepCamp.Blue].Clear();
+            pets.Clear();
         }
 
 
@@ -434,7 +435,7 @@ namespace rvb.scripts {
             }
         }
 
-        public (HashSet<PetView>[] del_pets, List<BulletView> del_bullets) game_update(SheepCtl sheepCtl, float i) {
+        public (HashSet<PetView> del_pets, HashSet<BulletView> del_bullets) game_update(SheepCtl sheepCtl, float i) {
             // 处理召唤兵
             this.consume(i);
 
@@ -628,7 +629,7 @@ namespace rvb.scripts {
             boss[(int)camp] = view;
         }
 
-        public (HashSet<PetView>[] del_pets, List<BulletView> del_bullets) role_logic(SheepCtl sheepCtl, float dt) {
+        public (HashSet<PetView> del_pets, HashSet<BulletView> del_bullets) role_logic(SheepCtl sheepCtl, float dt) {
             this.logic_counts[(int)SheepCamp.Red] = this.redBuffCount > 0 ? 2 : 1;
             this.logic_counts[(int)SheepCamp.Blue] = this.blueBuffCount > 0 ? 2 : 1;
 
@@ -654,7 +655,7 @@ namespace rvb.scripts {
                 eventBus.emit(EventType.RoomStateEnd);
                 isEnd = true;
                 this.endTime = 0;
-                return (Array.Empty<HashSet<PetView>>(), new List<BulletView>());
+                return (new HashSet<PetView>(), new HashSet<BulletView>());
             }
 
 
@@ -723,14 +724,14 @@ namespace rvb.scripts {
             isEnd = this.updateBoss(sheepCtl, dt, now);
 
             if (isEnd) {
-                return (Array.Empty<HashSet<PetView>>(), new List<BulletView>());
+                return (new HashSet<PetView>(), new HashSet<BulletView>());
             }
 
             var _redBuffCount = 0;
             var _blueBuffCount = 0;
 
-            foreach (var e in this.pets) {
-                foreach (var y in e) {
+            
+                foreach (var y in this.pets) {
                     updateSkinPet(y, sheepCtl, this, this, dt);
 
                     int[] M;
@@ -790,7 +791,7 @@ namespace rvb.scripts {
                         }
                     }
                 }
-            }
+            
 
 
             foreach (var X in bullets) {
@@ -864,8 +865,8 @@ namespace rvb.scripts {
                 viewPet = null;
             }
 
-            foreach (var ppp in pets) {
-                foreach (var dddd in ppp) {
+            
+                foreach (var dddd in pets) {
                     var viewPet = dddd;
                     if (!viewPet.isActive) {
                         viewPet = null;
@@ -898,7 +899,7 @@ namespace rvb.scripts {
 
                     viewPet = null;
                 }
-            }
+            
         }
 
         public void update_bullet() {
@@ -2122,9 +2123,9 @@ namespace rvb.scripts {
 
             if (this.isAutoCall && this.autoTime > SheepConfig.systemAutomaticTroopsIntervalTime) {
                 this.autoTime = 0;
-                if (this.pets[0].Count + this.pets[1].Count < SheepConfig.systemLongerAutomaticallyDispatch) {
+                if (this.pets.Count  < SheepConfig.systemLongerAutomaticallyDispatch) {
                     foreach (var e in new SheepCamp[] { SheepCamp.Red, SheepCamp.Blue }) {
-                        if (this.pets[(int)e].Count < SheepConfig.systemAutomaticallyMaxTroops) {
+                        if (getPetCount(e) < SheepConfig.systemAutomaticallyMaxTroops) {
                             o.produce_pets(SheepConfig.WarmUpID, SheepConfig.systemAutomaticallyTroopsOneNumber, e);
                         }
                     }
@@ -2159,7 +2160,7 @@ namespace rvb.scripts {
                     o1.frame += 1;
 
                     // 限制每帧生成的单位
-                    if (o1.frame <= formation.frameItemX) {
+                    if (o1.frame <= formation.frameItemX&&false) {
                         continue;
                     }
 
