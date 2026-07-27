@@ -7,38 +7,41 @@ namespace rvb.scripts {
 
 
         public static (int xn, int yn) getXnYnByIndex(int e) {
+            var sheepConfig = system.sheepConfig;
             return (
-                e % SheepConfig.line_w,
-                Mathf.FloorToInt((float)e / SheepConfig.line_w)
+                e % sheepConfig.line_w,
+                Mathf.FloorToInt((float)e / sheepConfig.line_w)
             );
         }
 
         // 根据 空间坐标 获取 格子坐标
         public static (int xn, int yn) getXnYn(float x, float y) {
+            var sheepConfig= system.sheepConfig;
             return (
-                Mathf.FloorToInt(x / SheepConfig.d + SheepConfig.h / SheepConfig.d / 2f),
-                Mathf.FloorToInt(y / SheepConfig.d + SheepConfig.w / SheepConfig.d / 2f)
+                Mathf.FloorToInt(x / sheepConfig.d + sheepConfig.h / sheepConfig.d / 2f),
+                Mathf.FloorToInt(y / sheepConfig.d + sheepConfig.w / sheepConfig.d / 2f)
             );
         }
 
         // 根据格子坐标 获取 index
         // 具有边界保护
         public static int getIndexByXnYn(int xn, int yn) {
+            var sheepConfig = system.sheepConfig;
             if (xn < 0) {
                 xn = 0;
             }
-            else if (xn >= SheepConfig.line_w) {
-                xn = SheepConfig.line_w - 1;
+            else if (xn >= sheepConfig.line_w) {
+                xn = sheepConfig.line_w - 1;
             }
 
             if (yn < 0) {
                 yn = 0;
             }
-            else if (yn >= SheepConfig.line_h) {
-                yn = SheepConfig.line_h - 1;
+            else if (yn >= sheepConfig.line_h) {
+                yn = sheepConfig.line_h - 1;
             }
 
-            return xn * SheepConfig.line_w + yn;
+            return xn * sheepConfig.line_w + yn;
         }
 
         // 根据 空间坐标 获取 索引 (只是组合方法)
@@ -48,6 +51,7 @@ namespace rvb.scripts {
         }
 
         public static bool isCanAckByRole(PetView e, PetView t, float i = 1f) {
+            var sheepConfig = system.sheepConfig;
             //判断单位是否死亡
             bool o = !t.isDie;
             if (!o) {
@@ -76,11 +80,11 @@ namespace rvb.scripts {
             }
 
             // 越界判断
-            if (a == SheepCamp.Red && t.posX < -SheepConfig.limitSearchBorderX) {
+            if (a == SheepCamp.Red && t.posX < -sheepConfig.limitSearchBorderX) {
                 return false;
             }
 
-            if (a == SheepCamp.Blue && t.posX > SheepConfig.limitSearchBorderX) {
+            if (a == SheepCamp.Blue && t.posX > sheepConfig.limitSearchBorderX) {
                 return false;
             }
 
@@ -98,10 +102,11 @@ namespace rvb.scripts {
 
         // 是否可以移动?
         public static bool isCanMove(PetView petSkin, PetView targetPetSkin) {
+            var sheepConfig = system.sheepConfig;
             SheepCamp o = targetPetSkin.camp;
             return !(
-                o == SheepCamp.Red && targetPetSkin.posX < -SheepConfig.limitSearchBorderX ||
-                o == SheepCamp.Blue && targetPetSkin.posX > SheepConfig.limitSearchBorderX ||
+                o == SheepCamp.Red && targetPetSkin.posX < -sheepConfig.limitSearchBorderX ||
+                o == SheepCamp.Blue && targetPetSkin.posX > sheepConfig.limitSearchBorderX ||
                 targetPetSkin.isDie ||
                 targetPetSkin.camp == petSkin.camp
             );
@@ -197,6 +202,7 @@ namespace rvb.scripts {
         }
 
         public static void moveTar(PetView e, PetView t, float i, bool o) {
+            var sheepConfig = system.sheepConfig;
             // todo 这个是什么意思 某种跳过开关吗?
             if (!o) {
                 return;
@@ -303,14 +309,14 @@ namespace rvb.scripts {
 
                 // 限制在某个区域内?
                 if (
-                    target.x < SheepConfig.w / 2f &&
-                    target.x > -SheepConfig.w / 2f &&
-                    target.y < SheepConfig.h / 2f &&
-                    target.y > -SheepConfig.h / 2f ||
-                    l.x > SheepConfig.w / 2f ||
-                    l.x < -SheepConfig.w / 2f ||
-                    l.y > SheepConfig.h / 2f ||
-                    l.y < -SheepConfig.h / 2f
+                    target.x < sheepConfig.w / 2f &&
+                    target.x > -sheepConfig.w / 2f &&
+                    target.y < sheepConfig.h / 2f &&
+                    target.y > -sheepConfig.h / 2f ||
+                    l.x > sheepConfig.w / 2f ||
+                    l.x < -sheepConfig.w / 2f ||
+                    l.y > sheepConfig.h / 2f ||
+                    l.y < -sheepConfig.h / 2f
                 ) {
                     e.logicMove(target.x, target.y);
                 }
