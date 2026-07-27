@@ -115,8 +115,11 @@ namespace rvb.scripts {
 
         // 是否自动出兵
         public bool isAutoCall = true;
+        
+        public SheepConfig sheepConfig;
 
-        public SheepMgr(SheepCtl sheepCtl) {
+        public SheepMgr(SheepConfig sheepConfig, SheepCtl sheepCtl) {
+            this.sheepConfig = sheepConfig;
             // 自动出兵计时器
             this.autoTime = 0;
 
@@ -176,9 +179,9 @@ namespace rvb.scripts {
 
 
             gridMap = new GridMap<SheepCell>(
-                -SheepConfig.w / 2f, -SheepConfig.h / 2f,
-                SheepConfig.w, SheepConfig.h,
-                SheepConfig.d,
+                -sheepConfig.w / 2f, -sheepConfig.h / 2f,
+                sheepConfig.w, sheepConfig.h,
+                sheepConfig.d,
                 (gridX, gridY, worldStartX, worldStartY, worldEndX, worldEndY) =>
                     new SheepCell(gridX, gridY, worldStartX, worldStartY, worldEndX, worldEndY)
             );
@@ -371,9 +374,9 @@ namespace rvb.scripts {
         }
 
         public int getBlockIndex(Vector3 e) {
-            var t = Math.Floor(e.x / SheepConfig.d + SheepConfig.w / SheepConfig.d / 2);
-            var o = Math.Floor(e.y / SheepConfig.d + SheepConfig.h / SheepConfig.d / 2);
-            return (int)(t * SheepConfig.line_w + o);
+            var t = Math.Floor(e.x / sheepConfig.d + sheepConfig.w / sheepConfig.d / 2);
+            var o = Math.Floor(e.y / sheepConfig.d + sheepConfig.h / sheepConfig.d / 2);
+            return (int)(t * sheepConfig.line_w + o);
         }
 
 
@@ -473,7 +476,7 @@ namespace rvb.scripts {
                     if (_ != 0 && curHp != 0) {
                         var S = this.countBuffs[1 - (int)camp];
                         if (S > 0) {
-                            var b = 1 + SheepConfig.buffDragonDamageIncreseRate * S;
+                            var b = 1 + sheepConfig.buffDragonDamageIncreseRate * S;
                             b += 0;
                             _ = (float)Math.Floor(_ * b);
                             curHp = d - _;
@@ -482,10 +485,10 @@ namespace rvb.scripts {
 
                         var I = this.countBuffs[(int)camp];
                         if (I > 0) {
-                            var B = Math.Pow(1 - SheepConfig.buffDragonReduceRate, I);
+                            var B = Math.Pow(1 - sheepConfig.buffDragonReduceRate, I);
                             B -= 0;
-                            if (B < 1 - SheepConfig.buffDragonMaxReduceRate) {
-                                B = 1 - SheepConfig.buffDragonMaxReduceRate;
+                            if (B < 1 - sheepConfig.buffDragonMaxReduceRate) {
+                                B = 1 - sheepConfig.buffDragonMaxReduceRate;
                             }
 
                             _ = (float)Math.Floor(_ * B);
@@ -514,19 +517,19 @@ namespace rvb.scripts {
                     var R = this.countShowBuffs[(int)camp];
                     var M = this.countBuffs[(int)camp];
 
-                    if (!this.flagLongBuffs[(int)camp] && curHp < this.loongHp * SheepConfig.counterHpRatio) {
+                    if (!this.flagLongBuffs[(int)camp] && curHp < this.loongHp * sheepConfig.counterHpRatio) {
                         this.flagLongBuffs[(int)camp] = true;
                         t.backStateTime = c;
                         this.preBuffs[(int)camp].Add(0);
                         sheepCtl.comMatch.showDoubleAnim(camp);
                         sheepCtl.comUIAnim.backAnim(camp);
-                        sheepCtl.cameraCtl.onShake(SheepConfig.shockBeginNumber);
+                        sheepCtl.cameraCtl.onShake(sheepConfig.shockBeginNumber);
                     }
                     else if (t.backStateTime != 0 && c - t.backStateTime > 12e4 && M - R == 0) {
                         t.backStateTime = 0;
                         sheepCtl.comMatch.hideDoubleAnim(camp);
                         sheepCtl.comUIAnim.backSuccessAnim(camp);
-                        sheepCtl.cameraCtl.onShake(SheepConfig.shockEndNumber);
+                        sheepCtl.cameraCtl.onShake(sheepConfig.shockEndNumber);
                     }
 
                     if (curHp <= 0) {
@@ -543,8 +546,8 @@ namespace rvb.scripts {
                     var T = 0;
                     var D = this.plotRatio;
 
-                    for (var A = 0; A < SheepConfig.loongStateSwitching.Length; A++) {
-                        if (D <= SheepConfig.loongStateSwitching[A]) {
+                    for (var A = 0; A < sheepConfig.loongStateSwitching.Length; A++) {
+                        if (D <= sheepConfig.loongStateSwitching[A]) {
                             T = A;
                             break;
                         }
@@ -668,7 +671,7 @@ namespace rvb.scripts {
                 }
 
                 foreach (var o in r) {
-                    this.countBuffs[s] += o.count != 0 ? o.count : SheepConfig.counterBuffNumber;
+                    this.countBuffs[s] += o.count != 0 ? o.count : sheepConfig.counterBuffNumber;
                     this.countShowBuffs[s] += o.count;
                 }
             }
@@ -694,20 +697,20 @@ namespace rvb.scripts {
 
                 if (hasZero) {
                     this.buffs[s].Add(new Buff() {
-                        time = (int)(this.gameStartTimerForBuff + 1000 * SheepConfig.counterTime),
+                        time = (int)(this.gameStartTimerForBuff + 1000 * sheepConfig.counterTime),
                         count = 0
                     });
 
                     if (r.Count > 1) {
                         this.buffs[s].Add(new Buff() {
-                            time = (int)(this.gameStartTimerForBuff + 1000 * SheepConfig.buffLastTime),
+                            time = (int)(this.gameStartTimerForBuff + 1000 * sheepConfig.buffLastTime),
                             count = sum
                         });
                     }
                 }
                 else {
                     this.buffs[s].Add(new Buff() {
-                        time = (int)(this.gameStartTimerForBuff + 1000 * SheepConfig.buffLastTime),
+                        time = (int)(this.gameStartTimerForBuff + 1000 * sheepConfig.buffLastTime),
                         count = sum
                     });
                 }
@@ -1023,7 +1026,7 @@ namespace rvb.scripts {
 
         public bool update_frame(PetView viewPet) {
             var frame = viewPet.frame;
-            var loopFrame = SheepConfig.loopFrame;
+            var loopFrame = sheepConfig.loopFrame;
             var i = frame % loopFrame == loopFrame - 1;
             var posBefX = viewPet.posBefX;
             var posBefY = viewPet.posBefY;
@@ -1054,7 +1057,7 @@ namespace rvb.scripts {
                         var (i9, o) = Util.getXnYn(e.posX, e.posY);
                         var l = false;
                         UtilFind.findNearBlocksByAckView(e, i9, o,
-                            (int)Math.Floor((double)(t.findR * SheepConfig.loongExaminationRangeBet)), (t8 => {
+                            (int)Math.Floor((double)(t.findR * sheepConfig.loongExaminationRangeBet)), (t8 => {
                                 if (!!l) {
                                     return true;
                                 }
@@ -1885,7 +1888,7 @@ namespace rvb.scripts {
             else {
                 UtilFind.findNearBlocksByAckView(e, n, r, 5, tt2 => {
                     if (!tt2.isDie && tt2.camp != e.camp && 0 != tt2.roleId && Util.isCanAckByRole(e, tt2)) {
-                        var i7 = SheepConfig.beheadLine;
+                        var i7 = sheepConfig.beheadLine;
                         if (tt2.curHp < i7) {
                             tt2.isDie = true;
                             tt2.state = SheepRoleState.Dead;
@@ -2112,12 +2115,12 @@ namespace rvb.scripts {
 
             this.autoTime += t;
 
-            if (this.isAutoCall && this.autoTime > SheepConfig.systemAutomaticTroopsIntervalTime) {
+            if (this.isAutoCall && this.autoTime > sheepConfig.systemAutomaticTroopsIntervalTime) {
                 this.autoTime = 0;
-                if (this.pets.Count < SheepConfig.systemLongerAutomaticallyDispatch) {
+                if (this.pets.Count < sheepConfig.systemLongerAutomaticallyDispatch) {
                     foreach (var e in new SheepCamp[] { SheepCamp.Red, SheepCamp.Blue }) {
-                        if (getPetCount(e) < SheepConfig.systemAutomaticallyMaxTroops) {
-                            o.produce_pets(SheepConfig.WarmUpID, SheepConfig.systemAutomaticallyTroopsOneNumber, e);
+                        if (getPetCount(e) < sheepConfig.systemAutomaticallyMaxTroops) {
+                            o.produce_pets(sheepConfig.WarmUpID, sheepConfig.systemAutomaticallyTroopsOneNumber, e);
                         }
                     }
                 }
@@ -2712,7 +2715,7 @@ namespace rvb.scripts {
                 int countNewBuff = n.countNewBuffs[(int)ppp.camp];
 
                 if (countNewBuff != 0) {
-                    addGeneralOrderBuff(ppp, i, SheepConfig.buffLastTime, countNewBuff);
+                    addGeneralOrderBuff(ppp, i, sheepConfig.buffLastTime, countNewBuff);
                 }
             }
 
@@ -2728,13 +2731,13 @@ namespace rvb.scripts {
                 buff => {
                     int addHp = (int)Math.Floor(
                         o.conf.hp *
-                        SheepConfig.buffHpIncreaseRate *
+                        sheepConfig.buffHpIncreaseRate *
                         n
                     );
 
                     float addAtk =
                         n *
-                        SheepConfig.buffAtkIncreaseRate *
+                        sheepConfig.buffAtkIncreaseRate *
                         100;
 
                     buff.arg = (
