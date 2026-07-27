@@ -290,6 +290,14 @@ MonoBehaviour:
     json: {fileID: 4900000, guid: 72923cb39d9c455e9b5e193ee42e1d20, type: 3}
     camp: 1
     animId: 106
+  - texture: {fileID: 2800000, guid: 915086afb059428fbfa92b07c0c65ecf, type: 3}
+    json: {fileID: 4900000, guid: ec88306dda33443e9966792dd9404230, type: 3}
+    camp: 0
+    animId: 101
+  - texture: {fileID: 2800000, guid: c6ad740197354fcbaeaced62842f552c, type: 3}
+    json: {fileID: 4900000, guid: c83ed9cc5a254ff990b53b24ad8907fd, type: 3}
+    camp: 1
+    animId: 101
   bulletRenderConfigs:
   - texture: {fileID: 2800000, guid: 716dc8e71dbb47c9b821f8e2f87a2703, type: 3}
     json: {fileID: 4900000, guid: ddd621b7b03c4cc08d1cd85526ad7ce3, type: 3}
