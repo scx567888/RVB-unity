@@ -63,8 +63,6 @@ namespace rvb {
 
             this.bulletSpriteRenderers = new ScxSpriteRenderer[0];
             
-            sheepCtl.comImages.roles_framess[0] = new Dictionary<int, Dictionary<int, int>>();
-            sheepCtl.comImages.roles_framess[1] = new Dictionary<int, Dictionary<int, int>>();
             
             foreach (var petRenderConfig in petRenderConfigs) {
                var loadRoleResult = SheepSpriteAtlasLoader.loadRole(petRenderConfig.texture, petRenderConfig.json.text);
