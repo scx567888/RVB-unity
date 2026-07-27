@@ -1,7 +1,5 @@
-using System;
-using System.Collections.Generic;
+using scx.SpriteRenderer;
 using UnityEngine;
-using static rvb.scripts.SheepModes;
 
 namespace rvb.scripts {
     public enum BuffID {
@@ -18,7 +16,7 @@ namespace rvb.scripts {
         public bool isDie;
         public SheepCamp camp = (SheepCamp)0;
         public int roleId = 0;
-        public int? skinId = 0;
+        public int skinId = 0;
         public SheepRoleState state = (SheepRoleState)0;
         public SheepRoleSubState subState = (SheepRoleSubState)0;
         public bool isLock = false;
@@ -59,6 +57,8 @@ namespace rvb.scripts {
         public int petId;
         public Vector3? pos;
         public Vector3? position;
+        
+        public ScxSpriteRenderUnit renderUnit;
 
         public PetView() {
 
