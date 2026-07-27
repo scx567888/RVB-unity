@@ -1,7 +1,7 @@
 ﻿namespace rvb.scripts {
     public class PetLogicDead : PetLogic{
         public static readonly PetLogicDead  Instance = new ();
-        public void tick(PetView petView, SheepMgr sheepMgr) {
+        public void tick(PetView petView, SheepMgr sheepMgr, bool isLogicFrame) {
             
         }
     }

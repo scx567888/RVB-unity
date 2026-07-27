@@ -1,5 +1,6 @@
 using System;
 using scx.SpriteRenderer;
+using UnityEngine;
 
 namespace rvb.scripts {
     
@@ -146,8 +147,8 @@ namespace rvb.scripts {
         }
         
         public void update_role_state(bool isLogicFrame,SheepMgr sheepMgr) {
-            petLogic.tick(this, sheepMgr);
-
+            petLogic.tick(this, sheepMgr, isLogicFrame);
+            
             if (impulseX != 0 || impulseY != 0) {
                 if (!isDie && curHp > 0) {
                     var t1 = impulseX;

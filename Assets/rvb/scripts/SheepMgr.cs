@@ -1048,10 +1048,6 @@ namespace rvb.scripts {
             }
         }
 
-        public void update_role_state_in(PetView petSkin) {
-           
-        }
-
         // 移动
         public void update_role_state_move(PetView petSkin, bool t) {
             if (!t) {
@@ -1557,64 +1553,7 @@ namespace rvb.scripts {
         
 
         public void update_role_state_start(PetView petSkin, bool t) {
-            if (!t) {
-                return;
-            }
-
-            if (this.state == SheepRoomState.Start) {
-                if (t) {
-                    var t2 = petSkin.posX;
-                    var i = petSkin.posY;
-                    var o = petSkin.tarPosX;
-                    var l = petSkin.tarPosY;
-                    var n = dis(t2, i, o, l);
-                    var r = 3 * petSkin.conf.runSpeed;
-                    if (n > r * FixedDeltaTime) {
-                        var ddd = dirTarByPos(petSkin, petSkin.tarPosX, petSkin.tarPosY);
-                        var t3 = ddd[0];
-                        var i3 = ddd[1];
-                        var o3 = new Vector3() { x = petSkin.posX, y = petSkin.posY };
-                        var l3 = new Vector3() { x = t3 * r * FixedDeltaTime, y = i3 * r * FixedDeltaTime };
-                        var n3 = new Vector3() { x = o3.x + l3.x, y = o3.y + l3.y };
-                        petSkin.logicMove(n3.x, n3.y);
-                    }
-                    else {
-                        petSkin.logicMove(o, l);
-                    }
-                }
-            }
-            else if (petSkin.conf.skillSpurt != 0) {
-                var t1 = SheepSkill.getById(petSkin.conf.skillSpurt);
-                if (t1.skillType == SheepSkillType.Charge) {
-                    petSkin.state = SheepRoleState.Charge;
-                    petSkin.subState = SheepRoleSubState.Spurt;
-                    petSkin.animType = SheepRoleAnimType.Spurt;
-                }
-                else if (t1.skillType == SheepSkillType.SpinSpurt) {
-                    petSkin.state = SheepRoleState.SpinSpurt;
-                    petSkin.animType = SheepRoleAnimType.Attack;
-                }
-                else {
-                    petSkin.state = SheepRoleState.Spurt;
-                    petSkin.subState = SheepRoleSubState.Spurt;
-                    if (petSkin.conf.isSpurtAnim) {
-                        petSkin.animType = SheepRoleAnimType.Spurt;
-                    }
-                    else {
-                        petSkin.animType = SheepRoleAnimType.Idle;
-                    }
-                }
-            }
-            else {
-                petSkin.state = SheepRoleState.Spurt;
-                petSkin.subState = SheepRoleSubState.Spurt;
-                if (petSkin.conf.isSpurtAnim) {
-                    petSkin.animType = SheepRoleAnimType.Spurt;
-                }
-                else {
-                    petSkin.animType = SheepRoleAnimType.Idle;
-                }
-            }
+            
         }
 
         public void update_role_state_charge(PetView e, bool t) {
@@ -1789,57 +1728,7 @@ namespace rvb.scripts {
         }
 
         public void update_role_state_spurt(PetView e, bool t) {
-            if (!t) {
-                return;
-            }
-
-            if (e.conf.skillSpurt != 0) {
-                var s = SheepSkill.getById(e.conf.skillSpurt);
-                if (s.skillType == SheepSkillType.Boom) {
-                    var o = SheepSkillSubBoom.getById(s.id);
-                    o.tick(this, e, t);
-                }
-                else if (s.skillType == SheepSkillType.Killer) {
-                    var o = SheepSkillSubKiller.getById(s.id);
-                    o.tick(this, e, t);
-                }
-                else if (s.skillType == SheepSkillType.Bullet) {
-                    var o = SheepSkillSubBullet.getById(s.id);
-                    o.tick(this, e, t);
-                }
-                else if (s.skillType == SheepSkillType.CallBullets) {
-                    var o = SheepSkillSubCallBullets.getById(s.id);
-                    o.tick(this, e, t);
-                }
-            }
-            else {
-                var fff = findTar(e);
-                var s = fff.atkTar;
-                var o = fff.moveTar;
-                var l = fff.moveBoss;
-
-                if (s != null) {
-                    e.state = SheepRoleState.Attack;
-                    e.subState = SheepRoleSubState.AttackAwait;
-                    return;
-                }
-
-                if (o != null) {
-                    e.state = SheepRoleState.Move;
-                    e.subState = SheepRoleSubState.MoveTar;
-                    moveTar(e, o, t);
-                    return;
-                }
-
-                if (l != null) {
-                    e.state = SheepRoleState.Move;
-                    e.subState = SheepRoleSubState.MoveBoss;
-                    moveTar(e, l, t);
-                    return;
-                }
-
-                moveTar(e, null, t);
-            }
+            
         }
 
         public void update_role_anim(PetView e) {

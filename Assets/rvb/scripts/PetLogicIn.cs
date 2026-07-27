@@ -2,7 +2,7 @@
     public class PetLogicIn : PetLogic {
         public static readonly PetLogicIn Instance = new();
 
-        public void tick(PetView petSkin, SheepMgr sheepMgr) {
+        public void tick(PetView petSkin, SheepMgr sheepMgr, bool isLogicFrame) {
             if (petSkin.conf.skillIn != 0) {
                 var t = SheepSkill.getById(petSkin.conf.skillIn);
                 if (t.skillType == SheepSkillType.Boom) {

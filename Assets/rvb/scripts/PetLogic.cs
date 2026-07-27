@@ -2,7 +2,7 @@
     
     public interface PetLogic {
 
-        public void tick(PetView petView,SheepMgr sheepMgr);
+        public void tick(PetView petView,SheepMgr sheepMgr,bool isLogicFrame);
 
     }
     
