@@ -3,6 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace rvb.scripts {
+    
+      
+    public enum BuffID {
+        GeneralOrder = 0,
+        CardBuff = 1
+    }
+    
     public enum t {
         Single_Refresh = 0,
         Single_Extend = 1,
