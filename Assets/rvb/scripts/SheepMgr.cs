@@ -1602,13 +1602,6 @@ namespace rvb.scripts {
                 pet.dirY = g.y;
             }
 
-            if (this.state == SheepRoomState.Start) {
-                pet.isNotConn = true;
-            }
-            else {
-                pet.isNotConn = false;
-            }
-
             pet.curHp = pet.conf.hp;
             pet.curAtkBuff = 0;
 
