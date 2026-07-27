@@ -34,6 +34,8 @@ namespace rvb {
         // 主材质
         public Material mainMaterial;
 
+        private SheepAnimFrameCountResolver animFrameCountResolver=new();
+
         [Header("Logic")] [SerializeField] private float logicFPS = 30f;
         [SerializeField] private int maxLogicStepsPerUnityFrame = 4;
         [SerializeField] private float logicToWorldScale = 0.01f;
@@ -65,18 +67,18 @@ namespace rvb {
             sheepCtl.comImages.roles_framess[1] = new Dictionary<int, Dictionary<int, int>>();
             
             foreach (var petRenderConfig in petRenderConfigs) {
-                var loadRoleResult = SheepSpriteAtlasLoader.loadRole(petRenderConfig.texture, petRenderConfig.json.text);
+               var loadRoleResult = SheepSpriteAtlasLoader.loadRole(petRenderConfig.texture, petRenderConfig.json.text);
                var scxSpriteRenderer = new ScxSpriteRenderer(
                     loadRoleResult.spriteAtlas,
                     100,
                     mainMaterial,
                     2000
                 );
-                sheepCtl.comImages.roles_framess[(int)petRenderConfig.camp][petRenderConfig.animId] = new Dictionary<int, int>();
+               
                 foreach (var keyValuePair in loadRoleResult.animFrame) {
                     var k = keyValuePair.Key;
                     var v = keyValuePair.Value;
-                    sheepCtl.comImages.roles_framess[(int)petRenderConfig.camp][petRenderConfig.animId][k] = v;
+                    animFrameCountResolver.setAnimationFrameCount(petRenderConfig.camp,petRenderConfig.animId,(SheepRoleAnimType)k,v);
                 }
 
                 scxSpriteRenderer.setParent(gameObject);
@@ -84,7 +86,7 @@ namespace rvb {
             }
             
 
-            sheepMgr = new SheepMgr(SheepConfigs.sheepConfig,sheepCtl);
+            sheepMgr = new SheepMgr(SheepConfigs.sheepConfig,animFrameCountResolver,sheepCtl);
             
             logicAccumulator = 0f;
 
@@ -449,8 +451,7 @@ namespace rvb {
         }
 
         private string ResolveRoleSpriteFrame(PetView view) {
-            var ints = sheepCtl.comImages.roles_framess[(int)view.camp][view.skinId][(int)view.animType];
-            var i = ints;
+            var i=animFrameCountResolver.resolve(view.camp, view.skinId, view.animType);
 
             int localFrame = PositiveModulo(view.animFrame, i);
             return ((int)(view.animType)) + "-" + localFrame;

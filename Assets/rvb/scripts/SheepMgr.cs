@@ -117,9 +117,11 @@ namespace rvb.scripts {
         public bool isAutoCall = true;
         
         public SheepConfig sheepConfig;
+        private SheepAnimFrameCountResolver animFrameCountResolver;
 
-        public SheepMgr(SheepConfig sheepConfig, SheepCtl sheepCtl) {
+        public SheepMgr(SheepConfig sheepConfig,SheepAnimFrameCountResolver animFrameCountResolver, SheepCtl sheepCtl) {
             this.sheepConfig = sheepConfig;
+            this.animFrameCountResolver = animFrameCountResolver;
             // 自动出兵计时器
             this.autoTime = 0;
 
@@ -735,15 +737,7 @@ namespace rvb.scripts {
                 var P = D.animType;
                 var W = D.animFrame;
 
-                var fgs = sheepCtl.comImages.roles_framess[(int)y.camp];
-
-                var ghg = fgs[(int)y.skinId];
-
-                int  M = ghg[(int)P];
-
-                if (null == M) {
-                    Debug.LogError("找不到动画 " + y.camp + " " + y.skinId + " " + P);
-                }
+                int M =animFrameCountResolver.resolve(y.camp, y.skinId, P);
 
                 if (A == SheepRoleState.In && W >= M - 1) {
                     var E = SheepSkill.getById(D.readySkillId);
