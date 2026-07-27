@@ -20,7 +20,7 @@ namespace rvb.scripts {
 
 
 
-        public void tick(SheepMgr sheepMgr,PetView e,bool t, float i) {
+        public void tick(SheepMgr sheepMgr,PetView e,bool t) {
             var fff = sheepMgr.findTar(e);
             var l = fff.atkTar;
             var n = fff.moveTar;
@@ -40,7 +40,7 @@ namespace rvb.scripts {
                 return;
             }
 
-            sheepMgr.moveTar(e, null, i, t);
+            sheepMgr.moveTar(e, null,  t);
         }
         
         
