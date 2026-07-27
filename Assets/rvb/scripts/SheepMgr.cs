@@ -1048,10 +1048,6 @@ namespace rvb.scripts {
             }
         }
 
-        public void update_role_state_killer(PetView petSkin) {
-            
-        }
-
         public void update_role_state_invincible(PetView petSkin) {
             var t = petSkin.animFrame;
             var i = SheepSkill.getById(petSkin.readySkillId);
