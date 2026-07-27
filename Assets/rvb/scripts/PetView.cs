@@ -13,12 +13,12 @@ namespace rvb.scripts {
     public class PetView {
         public int id = 0;
         public bool isActive = false;
-        public bool isDie;
-        public SheepCamp camp = (SheepCamp)0;
+        public bool isDie = false;
+        public SheepCamp camp = SheepCamp.Red;
         public int roleId = 0;
         public int skinId = 0;
-        public SheepRoleState state = (SheepRoleState)0;
-        public SheepRoleSubState subState = (SheepRoleSubState)0;
+        public SheepRoleState state = SheepRoleState.In;
+        public SheepRoleSubState subState = SheepRoleSubState.None;
         public bool isLock = false;
         public int frame = 0;
         public float posBefX = 0;
@@ -28,12 +28,9 @@ namespace rvb.scripts {
         public float animZ = 0;
         public float posX = 0;
         public float posY = 0;
-        public int befBlockIndex = 0;
         public int blockIndex = 0;
         public float dirX = 0;
         public float dirY = 0;
-        public int tarIndex = 0;
-        public int tarId = 0;
         public float curHp = 0;
         public float curAtkBuff = 0;
         public int curAckFrame = 0;
@@ -51,21 +48,16 @@ namespace rvb.scripts {
         public int energy = 0;
 
         public SheepRoleTypeInfo conf;
-        
+
         public float scale;
         public BuffTimeAttacher attacher;
         public int petId;
-        public Vector3? pos;
+
         public Vector3? position;
-        
+
         public ScxSpriteRenderUnit renderUnit;
 
         public PetView() {
-
-        }
-
-        public bool isConnNot {
-            set { isNotConn = value; }
         }
 
         public SheepRoleAnimType animType {
@@ -87,11 +79,6 @@ namespace rvb.scripts {
             posBefX = posX;
             posBefY = posY;
 
-            int _befBlockIndex = Util.getIndexByXY(
-                posBefX,
-                posBefY
-            );
-
             posX = x;
             posY = y;
 
@@ -100,9 +87,7 @@ namespace rvb.scripts {
                 posY
             );
 
-            this.befBlockIndex = _befBlockIndex;
             this.blockIndex = _blockIndex;
         }
-
     }
 }

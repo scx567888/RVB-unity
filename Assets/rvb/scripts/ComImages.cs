@@ -4,7 +4,7 @@ using UnityEngine;
 namespace rvb.scripts {
     public class ComImages {
         public MeshBlock mesh_block=new MeshBlock();
-        public Dictionary<int, Dictionary<int, Dictionary<int,int[]>>> roles_framess = new();  
+        public Dictionary<int, Dictionary<int, Dictionary<int,int>>> roles_framess = new();  
         public void addBullet(BulletView bullet) {
             // Debug.Log("addBullet");
         }

@@ -620,7 +620,7 @@ namespace rvb.scripts {
             view.animX = view.posX;
             view.animY = view.posY;
             view.blockIndex = Util.getIndexByXY(view.posX, view.posY);
-            view.befBlockIndex = view.blockIndex;
+            
             view.dirX = camp == SheepCamp.Red ? 1f : -1f;
             view.dirY = 0f;
 
@@ -2440,7 +2440,6 @@ namespace rvb.scripts {
             petSkin.animY = y7;
             petSkin.posX = x7;
             petSkin.posY = y7;
-            petSkin.befBlockIndex = blockIndex;
             petSkin.blockIndex = blockIndex;
 
             if (petSkin.petId != 0 && this.state == SheepRoomState.Start) {
@@ -2474,19 +2473,17 @@ namespace rvb.scripts {
             }
 
             if (petSkin.petId != 0 && this.state == SheepRoomState.Start) {
-                petSkin.isConnNot = true;
+                petSkin.isNotConn = true;
             }
             else {
-                petSkin.isConnNot = false;
+                petSkin.isNotConn = false;
             }
-
-            petSkin.tarIndex = -1;
-            petSkin.tarId = -1;
+            
             petSkin.curHp = petSkin.conf.hp;
             petSkin.curAtkBuff = 0;
 
             if (petSkin.isBoom) {
-                petSkin.isConnNot = true;
+                petSkin.isNotConn = true;
                 petSkin.isBoom = true;
             }
             else {
@@ -2508,8 +2505,7 @@ namespace rvb.scripts {
             }
 
             this.addPrePet(petSkin);
-
-            petSkin.pos = petSkin.position;
+            
         }
 
 
