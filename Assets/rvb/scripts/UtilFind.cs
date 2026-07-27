@@ -346,7 +346,7 @@ namespace rvb.scripts {
 
         public static void forfeachBlocksByCollView(PetView petSkin, int xn, int yn, int splitN, Action<PetView> callback) {
             var camp = petSkin.camp;
-            var collideId = petSkin.conf.collideId;
+            var collideId = petSkin.conf.collideGroup;
             
             for (int n = -splitN; n <= splitN; n++) {
                 for (int r = -splitN; r <= splitN; r++) {
@@ -633,7 +633,7 @@ namespace rvb.scripts {
         public static bool findNearBlocksByCollisionView(PetView e, int xn, int yn, int o, Func<PetView, bool> callback) {
             // 寻找乙方阵营 和 碰撞 id 相同的 
             var camp = e.camp;
-            var collideId = e.conf.collideId;
+            var collideId = e.conf.collideGroup;
 
             Func<int, int, bool> forEachPetByCell = (blockX, blockY) => {
                 var sheepCell = system.gridMap.getCellSafe(blockX, blockY);

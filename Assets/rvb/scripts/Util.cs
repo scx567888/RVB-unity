@@ -222,7 +222,7 @@ namespace rvb.scripts {
             // 有目标
             if (t != null) {
                 // 如果目标是 boss
-                if (t.conf.roleType == SheepRoleType.boss) {
+                if (t.conf.roleType == SheepRoleType.BOSS) {
                     // 当红方在中线左侧的时候 逼着往中线推进 (不贴边)
                     if (e.camp == SheepCamp.Red && e.posX < 0f) {
                         e.dirX = 1f;

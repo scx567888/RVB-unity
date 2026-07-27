@@ -1196,7 +1196,7 @@ namespace rvb.scripts {
                         }
                         else if (petSkin.conf.atkType == SheepRoleAtkType.Throw) {
                             i5 = UtilFind.findSortAck(petSkin, petSkin.conf.findR);
-                            if (petSkin.conf.roleType == SheepRoleType.pao_che) {
+                            if (petSkin.conf.roleType == SheepRoleType.PAO_CHE) {
                                 var t6 = Util.getBackBoss(petSkin.camp);
                                 if (Util.isCanAckByRole(petSkin, t6)) {
                                     i5 = t6;
@@ -1275,9 +1275,9 @@ namespace rvb.scripts {
             if (i == t.findMoveFrame) {
                 var i3 = false;
                 var s = petSkin.conf;
-                if (petSkin.conf.roleType == SheepRoleType.ci_ke) {
+                if (petSkin.conf.roleType == SheepRoleType.CI_KE) {
                     UtilFind.foreachFront(petSkin, (e => {
-                        if (e.conf.roleType != SheepRoleType.dun_bing) {
+                        if (e.conf.roleType != SheepRoleType.DUN_BING) {
                         }
                         else {
                             i3 = true;
@@ -1328,11 +1328,11 @@ namespace rvb.scripts {
             var s = petSkin.animFrame;
             if (s == i.atkFrame) {
                 var t1 = new List<SheepRoleType>();
-                if (petSkin.conf.roleType != SheepRoleType.chong_feng_bing &&
-                    petSkin.conf.roleType != SheepRoleType.qi_lin) {
+                if (petSkin.conf.roleType != SheepRoleType.CHONG_FENG_BING &&
+                    petSkin.conf.roleType != SheepRoleType.QI_LIN) {
                 }
                 else {
-                    t1.Add(SheepRoleType.qi_lin);
+                    t1.Add(SheepRoleType.QI_LIN);
                 }
 
                 UtilAck.ackMe(petSkin, i.spiltRadiusBet, i.atkBet, i.atkFindR, i.hitBackDistance, t1);
@@ -1607,7 +1607,7 @@ namespace rvb.scripts {
                             return false;
                         }
 
-                        if (s1 && t1.conf.roleType == SheepRoleType.dun_bing && Util.isCanAckByRole(petSkin, t1)) {
+                        if (s1 && t1.conf.roleType == SheepRoleType.DUN_BING && Util.isCanAckByRole(petSkin, t1)) {
                             s1 = false;
                         }
 
@@ -1820,7 +1820,7 @@ namespace rvb.scripts {
                 var s = false;
                 UtilFind.findNearBlocksByAckView(e, n, r, 5, t8 => {
                     if (!t8.isDie && t8.camp != e.camp && 0 != t8.roleId && Util.isCanAckByRole(e, t8)) {
-                        if (t8.conf.roleType == SheepRoleType.xiao_bing) {
+                        if (t8.conf.roleType == SheepRoleType.XIAO_BING) {
                             var i = t8;
                             UtilAck.ackTar(e, i);
                         }
@@ -1855,7 +1855,7 @@ namespace rvb.scripts {
                     }
 
                     // 只允许 roleType = role3
-                    if (t4.conf.roleType != SheepRoleType.gong_jian_shou) {
+                    if (t4.conf.roleType != SheepRoleType.GONG_JIAN_SHOU) {
                         return false;
                     }
 
@@ -2142,12 +2142,12 @@ namespace rvb.scripts {
 
                     var u = petCounts[(int)n][(int)c.roleType];
 
-                    if (c.roleType == SheepRoleType.xiao_bing) {
+                    if (c.roleType == SheepRoleType.XIAO_BING) {
                         if (u > 14500) {
                             continue;
                         }
                     }
-                    else if (c.roleType == SheepRoleType.ci_ke && u > 9500) {
+                    else if (c.roleType == SheepRoleType.CI_KE && u > 9500) {
                         continue;
                     }
 
@@ -2500,7 +2500,7 @@ namespace rvb.scripts {
                 }
             }
 
-            if (this.state == SheepRoomState.Start && petSkin.conf.roleType == SheepRoleType.yang_shen) {
+            if (this.state == SheepRoomState.Start && petSkin.conf.roleType == SheepRoleType.YANG_SHEN) {
                 this.god_view_pets.Add(petSkin);
             }
 
@@ -2676,7 +2676,7 @@ namespace rvb.scripts {
                 i.state = SheepRoleState.Dead;
                 i.subState = SheepRoleSubState.Dead;
 
-                if (i.conf.roleType != SheepRoleType.qi_lin) {
+                if (i.conf.roleType != SheepRoleType.QI_LIN) {
                     i.animType = SheepRoleAnimType.Dead;
                 }
 
@@ -2684,7 +2684,7 @@ namespace rvb.scripts {
                     i.animType = (SheepRoleAnimType)arrOn(i.conf.deadAnimType);
                 }
 
-                if (i.conf.roleType == SheepRoleType.xiao_bing) {
+                if (i.conf.roleType == SheepRoleType.XIAO_BING) {
                     i.animFrame = RandomInt(0, 10);
                 }
 
