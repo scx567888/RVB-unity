@@ -8,7 +8,7 @@ namespace rvb.scripts {
     public class PetView {
         // 唯一 id
         public int id = 0;
-        // 是否活跃
+        // 是否活跃 (用于 SheepMgr 使用)
         public bool isActive = false;
         // 是否死亡
         public bool isDie = false;
@@ -153,7 +153,7 @@ namespace rvb.scripts {
                 this.update_role_state(bbb,sheepMgr,fixedDeltaTime);
             }
 
-            this.update_role_anim();
+            this.updateAnimFrame();
         }
         
         private bool update_frame(SheepMgr sheepMgr) {
@@ -195,8 +195,9 @@ namespace rvb.scripts {
         }    
         
         
-        public void update_role_anim() {
-            this.animFrame = this.animFrame + 1;
+        // 每逻辑帧调用一次
+        public void updateAnimFrame() {
+            animFrame += 1;
         }
         
     }
