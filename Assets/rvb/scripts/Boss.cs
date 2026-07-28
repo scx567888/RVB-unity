@@ -4,13 +4,23 @@ namespace rvb.scripts {
     public class Boss : PetView{
         public long backStateTime;
         public ComProgress comProgress=new ComProgress();
+        private int shield;
 
         public Boss(int t) : base() {
             
         }
 
-        public bool subShield() {
-            return true;
+        public bool subShield(SheepMgr sheepMgr) {
+            if (this.shield != 0) {
+                this.shield -= sheepMgr.sheepConfig.costShield;
+                if (this.shield <= 0) {
+                    this.shield = 0;
+                }
+
+                return this.shield > 0;
+            }
+
+            return false;
         }
 
         public void updateState(SheepCtl sheepCtl, SheepMgr manager, int visualState) {

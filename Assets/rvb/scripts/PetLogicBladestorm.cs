@@ -7,9 +7,7 @@ namespace rvb.scripts {
         public void tick(PetView pet, SheepMgr sheepMgr) {
             // 每四个逻辑帧 (action) 执行一次
             var shouldExecute = pet.frame % LOOP_FRAME == LOOP_FRAME - 1;
-            if (!shouldExecute) {
-                return;
-            }
+            
             var i = SheepMgr.FixedDeltaTime;
             var s = pet.animFrame;
             var o = SheepSkill.getById(pet.readySkillId);
