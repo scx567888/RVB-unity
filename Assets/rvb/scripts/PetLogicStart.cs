@@ -2,19 +2,23 @@
 
 namespace rvb.scripts {
     public class PetLogicStart : PetLogic {
-        public static readonly PetLogicStart Instance = new PetLogicStart();
+        private static readonly int LOOP_FRAME = 4;
 
-        public void tick(PetView pet, SheepMgr sheepMgr, bool t) {
-            if (!t) {
+        public static readonly PetLogicStart Instance = new();
+
+        public void tick(PetView pet, SheepMgr sheepMgr) {
+            // 每四个逻辑帧 (action) 执行一次
+            var shouldExecute = pet.frame % LOOP_FRAME == LOOP_FRAME - 1;
+            if (!shouldExecute) {
                 return;
             }
 
             if (sheepMgr.state == SheepRoomState.Start) {
-                var t2 = pet.posX;
-                var i = pet.posY;
-                var o = pet.tarPosX;
-                var l = pet.tarPosY;
-                var n = SheepMgr.dis(t2, i, o, l);
+                var posX = pet.posX;
+                var posY = pet.posY;
+                var tarPosX = pet.tarPosX;
+                var tarPosY = pet.tarPosY;
+                var n = SheepMgr.dis(posX, posY, tarPosX, tarPosY);
                 var r = 3 * pet.conf.runSpeed;
                 if (n > r * SheepMgr.FixedDeltaTime) {
                     var ddd = SheepMgr.dirTarByPos(pet, pet.tarPosX, pet.tarPosY);
@@ -27,7 +31,7 @@ namespace rvb.scripts {
                     pet.logicMove(n3.x, n3.y);
                 }
                 else {
-                    pet.logicMove(o, l);
+                    pet.logicMove(tarPosX, tarPosY);
                 }
             }
             else if (pet.conf.skillSpurt != 0) {
