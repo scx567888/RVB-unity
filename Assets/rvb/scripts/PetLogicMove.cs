@@ -29,13 +29,13 @@ namespace rvb.scripts {
 
             if (o != null) {
                 pet.subState = SheepRoleSubState.MoveTar;
-                sheepMgr.moveTar(pet, o, shouldExecute);
+                sheepMgr.moveTar(pet, o);
                 return;
             }
 
             if (l != null) {
                 pet.subState = SheepRoleSubState.MoveBoss;
-                sheepMgr.moveTar(pet, l, shouldExecute);
+                sheepMgr.moveTar(pet, l);
                 return;
             }
 

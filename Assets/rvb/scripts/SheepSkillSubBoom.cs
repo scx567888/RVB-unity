@@ -17,7 +17,7 @@ namespace rvb.scripts {
         public int endState;
         public int endSkill;
 
-        public void tick(SheepMgr sheepMgr, PetView e, bool t) {
+        public void tick(SheepMgr sheepMgr, PetView e) {
             
             var fff = sheepMgr.findTar(e);
             var l = fff.atkTar;
@@ -38,7 +38,7 @@ namespace rvb.scripts {
                 return;
             }
 
-            sheepMgr.moveTar(e, null, t);
+            sheepMgr.moveTar(e, null);
         }
 
         public static IReadOnlyList<SheepSkillSubBoom> List => SheepSkillSubBooms.All;

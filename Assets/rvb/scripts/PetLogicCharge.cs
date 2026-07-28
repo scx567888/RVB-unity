@@ -98,7 +98,7 @@ namespace rvb.scripts {
                     o3 = t4;
                     return true;
                 });
-                sheepMgr.moveTar(pet, o3, shouldExecute);
+                sheepMgr.moveTar(pet, o3);
             }
         }
     }

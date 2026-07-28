@@ -1651,12 +1651,8 @@ namespace rvb.scripts {
             }
         }
 
-        public void moveTar(PetView e, PetView t, bool o) {
+        public void moveTar(PetView e, PetView t) {
             var i = FixedDeltaTime;
-            // todo 这个是什么意思 某种跳过开关吗?
-            if (!o) {
-                return;
-            }
 
             // todo 当这两个任意不为 0 的时候 跳过 ? 什么作用?
             if (e.impulseX != 0f || e.impulseY != 0f) {

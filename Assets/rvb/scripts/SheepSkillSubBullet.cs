@@ -7,7 +7,7 @@ namespace rvb.scripts {
         public string name = string.Empty;
         public int bullet;
 
-        public void tick(SheepMgr sheepMgr,PetView e,bool t) {
+        public void tick(SheepMgr sheepMgr,PetView e) {
             var fff = sheepMgr.findTar(e);
             var l = fff.atkTar;
             var n = fff.moveTar;
@@ -29,7 +29,7 @@ namespace rvb.scripts {
             if (n != null) {
                 e.state = SheepRoleState.Move;
                 e.subState = SheepRoleSubState.MoveTar;
-                sheepMgr.moveTar(e, n,  t);
+                sheepMgr.moveTar(e, n);
                 return;
             }
 
@@ -37,11 +37,11 @@ namespace rvb.scripts {
                 e.state = SheepRoleState.Move;
                 e.subState = SheepRoleSubState.MoveBoss;
                 e.animType = SheepRoleAnimType.Idle;
-                sheepMgr.moveTar(e, r,  t);
+                sheepMgr.moveTar(e, r);
                 return;
             }
 
-            sheepMgr.moveTar(e, null,  t);
+            sheepMgr.moveTar(e, null);
         }
 
         public static IReadOnlyList<SheepSkillSubBullet> List => SheepSkillSubBullets.All;

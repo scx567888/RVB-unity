@@ -30,7 +30,7 @@ namespace rvb.scripts {
                 pet.readySkillId = i1.id;
             }
             else {
-                sheepMgr.moveTar(pet, null, true);
+                sheepMgr.moveTar(pet, null);
                 sheepMgr.forNearBlocksByAckView(pet, n, r, pet.conf.findR,
                     t2 => {
                         if (t2.isDie || t2.camp == pet.camp || !sheepMgr.isCanAckByRole(pet, t2)) {

@@ -44,7 +44,7 @@ namespace rvb.scripts {
                         return false;
                     });
                 if (s1) {
-                    sheepMgr.moveTar(pet, null, shouldExecute);
+                    sheepMgr.moveTar(pet, null);
                 }
             }
 

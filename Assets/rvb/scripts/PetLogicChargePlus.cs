@@ -40,7 +40,7 @@ namespace rvb.scripts {
                     return false;
                 });
 
-                sheepMgr.moveTar(pet, null, shouldExecute);
+                sheepMgr.moveTar(pet, null);
             }
         }
     }

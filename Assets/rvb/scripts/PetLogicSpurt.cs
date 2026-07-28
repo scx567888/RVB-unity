@@ -15,19 +15,19 @@ namespace rvb.scripts {
                 var s = SheepSkill.getById(pet.conf.skillSpurt);
                 if (s.skillType == SheepSkillType.Boom) {
                     var o = SheepSkillSubBoom.getById(s.id);
-                    o.tick(sheepMgr, pet, shouldExecute);
+                    o.tick(sheepMgr, pet);
                 }
                 else if (s.skillType == SheepSkillType.Killer) {
                     var o = SheepSkillSubKiller.getById(s.id);
-                    o.tick(sheepMgr, pet, shouldExecute);
+                    o.tick(sheepMgr, pet);
                 }
                 else if (s.skillType == SheepSkillType.Bullet) {
                     var o = SheepSkillSubBullet.getById(s.id);
-                    o.tick(sheepMgr, pet, shouldExecute);
+                    o.tick(sheepMgr, pet);
                 }
                 else if (s.skillType == SheepSkillType.CallBullets) {
                     var o = SheepSkillSubCallBullets.getById(s.id);
-                    o.tick(sheepMgr, pet, shouldExecute);
+                    o.tick(sheepMgr, pet);
                 }
             }
             else {
@@ -45,18 +45,18 @@ namespace rvb.scripts {
                 if (o != null) {
                     pet.state = SheepRoleState.Move;
                     pet.subState = SheepRoleSubState.MoveTar;
-                    sheepMgr.moveTar(pet, o, shouldExecute);
+                    sheepMgr.moveTar(pet, o);
                     return;
                 }
 
                 if (l != null) {
                     pet.state = SheepRoleState.Move;
                     pet.subState = SheepRoleSubState.MoveBoss;
-                    sheepMgr.moveTar(pet, l, shouldExecute);
+                    sheepMgr.moveTar(pet, l);
                     return;
                 }
 
-                sheepMgr.moveTar(pet, null, shouldExecute);
+                sheepMgr.moveTar(pet, null);
             }
         }
     }
