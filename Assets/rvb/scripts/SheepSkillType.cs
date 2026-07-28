@@ -1,19 +1,19 @@
 ﻿namespace rvb.scripts {
     public enum SheepSkillType {
-        Boom = 1,
-        Killer = 2,
-        Bullet = 3,
-        Bladestorm = 4,
-        Invincible = 5,
-        ForceState = 6,
-        Palm = 7,
-        CallBullets = 8,
-        Buff = 9,
-        Charge = 10,
-        Destruction = 11,
-        SpinAtk = 12,
-        SpinSpurt = 13,
-        Rigidity = 14,
-        ChargePlus = 15
+        Boom = 1,          // 爆炸
+        Killer = 2,        // 刺杀 / 处决
+        Bullet = 3,        // 子弹攻击
+        Bladestorm = 4,    // 剑刃风暴 / 旋风斩
+        Invincible = 5,    // 无敌
+        ForceState = 6,    // 强制状态切换
+        Palm = 7,          // 掌击
+        CallBullets = 8,   // 召唤子弹 / 批量生成子弹
+        Buff = 9,          // 增益效果
+        Charge = 10,       // 冲锋
+        Destruction = 11,  // 毁灭 / 摧毁
+        SpinAtk = 12,      // 旋转攻击
+        SpinSpurt = 13,    // 旋转冲刺
+        Rigidity = 14,     // 僵直 / 硬直
+        ChargePlus = 15    // 强化冲锋
     }
 }
