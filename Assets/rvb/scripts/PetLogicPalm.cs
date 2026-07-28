@@ -4,7 +4,7 @@ using UnityEngine;
 namespace rvb.scripts {
     public class PetLogicPalm : PetLogic{
         public static readonly PetLogicPalm  Instance = new ();
-        public void tick(PetView pet, SheepMgr sheepMgr, bool isLogicFrame) {
+        public void tick(PetView pet, SheepMgr sheepMgr) {
             var t1 = pet.animFrame;
             var i1 = SheepSkill.getById(pet.readySkillId);
             var s = SheepSkillSubPalm.getById(i1.id);

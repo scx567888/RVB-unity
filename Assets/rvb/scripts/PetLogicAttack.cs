@@ -110,7 +110,7 @@ namespace rvb.scripts {
                 pet.subState == SheepRoleSubState.AttackAwait) {
                 var s = sheepMgr.findNearAck(pet);
                 if (s != null && SheepMgr.disByRole(pet, s) > pet.conf.atkMinMoveR + s.conf.collideR) {
-                    sheepMgr.moveTar(pet, s, isMoveFrame);
+                    sheepMgr.moveTar(pet, s, true);
                 }
             }
         }

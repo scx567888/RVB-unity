@@ -4,7 +4,7 @@ using UnityEngine;
 namespace rvb.scripts {
     public class PetLogicBoom : PetLogic{
         public static readonly PetLogicBoom  Instance = new ();
-        public void tick(PetView pet, SheepMgr sheepMgr, bool isLogicFrame) {
+        public void tick(PetView pet, SheepMgr sheepMgr) {
             var t = SheepSkill.getById(pet.readySkillId);
             var i = SheepSkillSubBoom.getById(t.id);
             var s = pet.animFrame;

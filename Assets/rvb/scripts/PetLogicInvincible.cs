@@ -4,7 +4,7 @@ using UnityEngine;
 namespace rvb.scripts {
     public class PetLogicInvincible : PetLogic{
         public static readonly PetLogicInvincible  Instance = new ();
-        public void tick(PetView pet, SheepMgr sheepMgr, bool isLogicFrame) {
+        public void tick(PetView pet, SheepMgr sheepMgr) {
             
             var t = pet.animFrame;
             var i = SheepSkill.getById(pet.readySkillId);

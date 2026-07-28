@@ -2,9 +2,12 @@
 
 namespace rvb.scripts {
     public class PetLogicCharge : PetLogic{
+        private static readonly int LOOP_FRAME = 4;
         public static readonly PetLogicCharge  Instance = new ();
-        public void tick(PetView pet, SheepMgr sheepMgr, bool t) {
-             if (!t) {
+        public void tick(PetView pet, SheepMgr sheepMgr) {
+            // 每四个逻辑帧 (action) 执行一次
+            var shouldExecute = pet.frame % LOOP_FRAME == LOOP_FRAME - 1;
+            if (!shouldExecute) {
                 return;
             }
 
@@ -95,7 +98,7 @@ namespace rvb.scripts {
                     o3 = t4;
                     return true;
                 });
-                sheepMgr.moveTar(pet, o3, t);
+                sheepMgr.moveTar(pet, o3, shouldExecute);
             }
         }
     }

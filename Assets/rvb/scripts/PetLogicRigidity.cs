@@ -3,7 +3,7 @@
 namespace rvb.scripts {
     public class PetLogicRigidity : PetLogic{
         public static readonly PetLogicRigidity  Instance = new ();
-        public void tick(PetView pet, SheepMgr sheepMgr, bool isLogicFrame) {
+        public void tick(PetView pet, SheepMgr sheepMgr) {
             var t = SheepSkill.getById(pet.readySkillId);
             var i = SheepSkillSubRigidity.getById(t.id);
             if (pet.animFrame >= i.endFrame) {

@@ -3,7 +3,7 @@
 namespace rvb.scripts {
     public class PetLogicKiller : PetLogic{
         public static readonly PetLogicKiller  Instance = new ();
-        public void tick(PetView pet, SheepMgr sheepMgr, bool isLogicFrame) {
+        public void tick(PetView pet, SheepMgr sheepMgr) {
             var t = SheepSkillSubKiller.getById(pet.readySkillId);
             var i = pet.animFrame;
             if (i == t.findMoveFrame) {

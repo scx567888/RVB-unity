@@ -2,9 +2,12 @@
 
 namespace rvb.scripts {
     public class PetLogicSpinSpurt : PetLogic{
+        private static readonly int LOOP_FRAME = 4;
         public static readonly PetLogicSpinSpurt  Instance = new ();
-        public void tick(PetView pet, SheepMgr sheepMgr, bool t) {
-            if (!t) {
+        public void tick(PetView pet, SheepMgr sheepMgr) {
+            // 每四个逻辑帧 (action) 执行一次
+            var shouldExecute = pet.frame % LOOP_FRAME == LOOP_FRAME - 1;
+            if (!shouldExecute) {
                 return;
             }
 
@@ -27,7 +30,7 @@ namespace rvb.scripts {
                 pet.readySkillId = i1.id;
             }
             else {
-                sheepMgr.moveTar(pet, null, t);
+                sheepMgr.moveTar(pet, null, true);
                 sheepMgr.forNearBlocksByAckView(pet, n, r, pet.conf.findR,
                     t2 => {
                         if (t2.isDie || t2.camp == pet.camp || !sheepMgr.isCanAckByRole(pet, t2)) {

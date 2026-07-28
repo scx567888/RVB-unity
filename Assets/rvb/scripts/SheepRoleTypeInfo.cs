@@ -71,7 +71,9 @@ namespace rvb.scripts {
         public int isSteering;
         public int[] findAtkSort = Array.Empty<int>();
         public int hitBackDistance;
+        // 是否到 boss 附近停止
         public int isLoongStopDistance;
+        // 是否到 boss 附近停止的半径
         public int loongStopDistanceR;
 
         public static SheepRoleTypeInfo getById(int id) {

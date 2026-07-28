@@ -2,8 +2,9 @@
 
 namespace rvb.scripts {
     public class PetLogicSpinAtk : PetLogic{
+        private static readonly int LOOP_FRAME = 4;
         public static readonly PetLogicSpinAtk  Instance = new ();
-        public void tick(PetView pet, SheepMgr sheepMgr, bool t) {
+        public void tick(PetView pet, SheepMgr sheepMgr) {
             var s = pet.posX;
             var o = pet.posY;
             var xnyn = sheepMgr.getXnYn(s, o);
@@ -19,8 +20,11 @@ namespace rvb.scripts {
                     SheepMgr.dirTar(pet, t1);
                 }
             }
+            
+            // 每四个逻辑帧 (action) 执行一次
+            var shouldExecute = pet.frame % LOOP_FRAME == LOOP_FRAME - 1;
 
-            if (t) {
+            if (shouldExecute) {
                 var s1 = true;
                 sheepMgr.forNearBlocksByAckView(pet, l, n, pet.conf.findR,
                     t1 => {
@@ -40,7 +44,7 @@ namespace rvb.scripts {
                         return false;
                     });
                 if (s1) {
-                    sheepMgr.moveTar(pet, null, t);
+                    sheepMgr.moveTar(pet, null, shouldExecute);
                 }
             }
 

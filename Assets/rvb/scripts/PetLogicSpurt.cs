@@ -2,9 +2,12 @@
 
 namespace rvb.scripts {
     public class PetLogicSpurt : PetLogic{
+        private static readonly int LOOP_FRAME = 4;
         public static readonly PetLogicSpurt  Instance = new ();
-        public void tick(PetView pet, SheepMgr sheepMgr, bool t) {
-            if (!t) {
+        public void tick(PetView pet, SheepMgr sheepMgr) {
+            // 每四个逻辑帧 (action) 执行一次
+            var shouldExecute = pet.frame % LOOP_FRAME == LOOP_FRAME - 1;
+            if (!shouldExecute) {
                 return;
             }
 
@@ -12,19 +15,19 @@ namespace rvb.scripts {
                 var s = SheepSkill.getById(pet.conf.skillSpurt);
                 if (s.skillType == SheepSkillType.Boom) {
                     var o = SheepSkillSubBoom.getById(s.id);
-                    o.tick(sheepMgr, pet, t);
+                    o.tick(sheepMgr, pet, shouldExecute);
                 }
                 else if (s.skillType == SheepSkillType.Killer) {
                     var o = SheepSkillSubKiller.getById(s.id);
-                    o.tick(sheepMgr, pet, t);
+                    o.tick(sheepMgr, pet, shouldExecute);
                 }
                 else if (s.skillType == SheepSkillType.Bullet) {
                     var o = SheepSkillSubBullet.getById(s.id);
-                    o.tick(sheepMgr, pet, t);
+                    o.tick(sheepMgr, pet, shouldExecute);
                 }
                 else if (s.skillType == SheepSkillType.CallBullets) {
                     var o = SheepSkillSubCallBullets.getById(s.id);
-                    o.tick(sheepMgr, pet, t);
+                    o.tick(sheepMgr, pet, shouldExecute);
                 }
             }
             else {
@@ -42,18 +45,18 @@ namespace rvb.scripts {
                 if (o != null) {
                     pet.state = SheepRoleState.Move;
                     pet.subState = SheepRoleSubState.MoveTar;
-                    sheepMgr.moveTar(pet, o, t);
+                    sheepMgr.moveTar(pet, o, shouldExecute);
                     return;
                 }
 
                 if (l != null) {
                     pet.state = SheepRoleState.Move;
                     pet.subState = SheepRoleSubState.MoveBoss;
-                    sheepMgr.moveTar(pet, l, t);
+                    sheepMgr.moveTar(pet, l, shouldExecute);
                     return;
                 }
 
-                sheepMgr.moveTar(pet, null, t);
+                sheepMgr.moveTar(pet, null, shouldExecute);
             }
         }
     }
