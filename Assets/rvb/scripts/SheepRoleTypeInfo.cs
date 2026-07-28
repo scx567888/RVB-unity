@@ -1227,7 +1227,7 @@ namespace rvb.scripts {
             findAtkSort = new int[] { },
         };
 
-        private static readonly SheepRoleTypeInfo[] _data = {
+        public static readonly SheepRoleTypeInfo[] _data = {
             BOSS,
             XIAN_FENG_BING,
             CI_KE,
