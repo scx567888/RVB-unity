@@ -2,10 +2,13 @@
 
 namespace rvb.scripts {
     public class PetLogicMove : PetLogic {
+        private static readonly int LOOP_FRAME = 4;
         public static readonly PetLogicMove Instance = new();
 
-        public void tick(PetView pet, SheepMgr sheepMgr, bool t) {
-            if (!t) {
+        public void tick(PetView pet, SheepMgr sheepMgr) {
+            // 每四个逻辑帧 (action) 执行一次
+            var shouldExecute = pet.frame % LOOP_FRAME == LOOP_FRAME - 1;
+            if (!shouldExecute) {
                 return;
             }
 
@@ -26,13 +29,13 @@ namespace rvb.scripts {
 
             if (o != null) {
                 pet.subState = SheepRoleSubState.MoveTar;
-                sheepMgr.moveTar(pet, o, t);
+                sheepMgr.moveTar(pet, o, shouldExecute);
                 return;
             }
 
             if (l != null) {
                 pet.subState = SheepRoleSubState.MoveBoss;
-                sheepMgr.moveTar(pet, l, t);
+                sheepMgr.moveTar(pet, l, shouldExecute);
                 return;
             }
 
