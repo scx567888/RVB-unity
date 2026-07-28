@@ -3,19 +3,19 @@
 namespace rvb.scripts {
     public class PetLogicCharge : PetLogic{
         public static readonly PetLogicCharge  Instance = new ();
-        public void tick(PetView e, SheepMgr sheepMgr, bool t) {
+        public void tick(PetView pet, SheepMgr sheepMgr, bool t) {
              if (!t) {
                 return;
             }
 
-            var o = e.posX;
-            var l = e.posY;
+            var o = pet.posX;
+            var l = pet.posY;
             var (n, r) = sheepMgr.getXnYn(o, l);
-            if (e.camp == SheepCamp.Red && e.posX > e.conf.runEndX ||
-                e.camp == SheepCamp.Blue && e.posX < -e.conf.runEndX) {
+            if (pet.camp == SheepCamp.Red && pet.posX > pet.conf.runEndX ||
+                pet.camp == SheepCamp.Blue && pet.posX < -pet.conf.runEndX) {
                 var t6 = false;
-                sheepMgr.findNearBlocksByAckView(e, n, r, 5, i8 => {
-                    if (i8.isDie || i8.camp == e.camp) {
+                sheepMgr.findNearBlocksByAckView(pet, n, r, 5, i8 => {
+                    if (i8.isDie || i8.camp == pet.camp) {
                     }
                     else {
                         t6 = true;
@@ -24,32 +24,32 @@ namespace rvb.scripts {
                     return t6;
                 });
                 if (t6) {
-                    e.state = SheepRoleState.Boom;
-                    e.subState = SheepRoleSubState.Boom;
-                    var t3 = SheepSkillSubCharge.getById(e.conf.skillSpurt);
+                    pet.state = SheepRoleState.Boom;
+                    pet.subState = SheepRoleSubState.Boom;
+                    var t3 = SheepSkillSubCharge.getById(pet.conf.skillSpurt);
                     var i3 = SheepSkillSubBoom.getById(t3.endSkill);
                     if (i3.isAnim != 0) {
-                        e.animType = SheepRoleAnimType.Boom;
+                        pet.animType = SheepRoleAnimType.Boom;
                     }
                     else {
-                        e.animType = SheepRoleAnimType.Idle;
+                        pet.animType = SheepRoleAnimType.Idle;
                     }
 
-                    e.readySkillId = i3.id;
+                    pet.readySkillId = i3.id;
                 }
                 else {
-                    e.state = SheepRoleState.Move;
-                    e.subState = SheepRoleSubState.MoveBoss;
-                    e.animType = SheepRoleAnimType.Idle;
+                    pet.state = SheepRoleState.Move;
+                    pet.subState = SheepRoleSubState.MoveBoss;
+                    pet.animType = SheepRoleAnimType.Idle;
                 }
             }
             else {
                 var s = false;
-                sheepMgr.findNearBlocksByAckView(e, n, r, 5, t8 => {
-                    if (!t8.isDie && t8.camp != e.camp && sheepMgr.isCanAckByRole(e, t8)) {
+                sheepMgr.findNearBlocksByAckView(pet, n, r, 5, t8 => {
+                    if (!t8.isDie && t8.camp != pet.camp && sheepMgr.isCanAckByRole(pet, t8)) {
                         if (t8.conf.roleType == SheepRoleType.XIAO_BING) {
                             var i = t8;
-                            sheepMgr.ackTar(e, i);
+                            sheepMgr.ackTar(pet, i);
                         }
                         else {
                             s = true;
@@ -59,25 +59,25 @@ namespace rvb.scripts {
                     return false;
                 });
                 if (s) {
-                    e.state = SheepRoleState.Boom;
-                    e.subState = SheepRoleSubState.Boom;
-                    var t8 = SheepSkillSubCharge.getById(e.conf.skillSpurt);
+                    pet.state = SheepRoleState.Boom;
+                    pet.subState = SheepRoleSubState.Boom;
+                    var t8 = SheepSkillSubCharge.getById(pet.conf.skillSpurt);
                     var i8 = SheepSkillSubBoom.getById(t8.endSkill);
                     if (i8.isAnim != 0) {
-                        e.animType = SheepRoleAnimType.Boom;
+                        pet.animType = SheepRoleAnimType.Boom;
                     }
                     else {
-                        e.animType = SheepRoleAnimType.Idle;
+                        pet.animType = SheepRoleAnimType.Idle;
                     }
 
-                    e.readySkillId = i8.id;
+                    pet.readySkillId = i8.id;
                     return;
                 }
 
                 PetView o3 = null;
-                sheepMgr.findNearBlocksByAckView(e, n, r, e.conf.findR, t4 => {
+                sheepMgr.findNearBlocksByAckView(pet, n, r, pet.conf.findR, t4 => {
                     // 跳过：死亡的、同阵营的、没有 roleId 的
-                    if (t4.isDie || t4.camp == e.camp) {
+                    if (t4.isDie || t4.camp == pet.camp) {
                         return false;
                     }
 
@@ -87,7 +87,7 @@ namespace rvb.scripts {
                     }
 
                     // 必须可攻击
-                    if (!sheepMgr.isCanAckByRole(e, t4)) {
+                    if (!sheepMgr.isCanAckByRole(pet, t4)) {
                         return false;
                     }
 
@@ -95,7 +95,7 @@ namespace rvb.scripts {
                     o3 = t4;
                     return true;
                 });
-                sheepMgr.moveTar(e, o3, t);
+                sheepMgr.moveTar(pet, o3, t);
             }
         }
     }

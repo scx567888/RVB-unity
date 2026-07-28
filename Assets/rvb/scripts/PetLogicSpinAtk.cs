@@ -3,51 +3,51 @@
 namespace rvb.scripts {
     public class PetLogicSpinAtk : PetLogic{
         public static readonly PetLogicSpinAtk  Instance = new ();
-        public void tick(PetView petSkin, SheepMgr sheepMgr, bool t) {
-            var s = petSkin.posX;
-            var o = petSkin.posY;
+        public void tick(PetView pet, SheepMgr sheepMgr, bool t) {
+            var s = pet.posX;
+            var o = pet.posY;
             var xnyn = sheepMgr.getXnYn(s, o);
             var l = xnyn.xn;
             var n = xnyn.yn;
-            var r = petSkin.animFrame;
-            var a = SheepSkill.getById(petSkin.readySkillId);
+            var r = pet.animFrame;
+            var a = SheepSkill.getById(pet.readySkillId);
             var c = SheepSkillSubSpinAtk.getById(a.id);
             if (1 == r) {
-                var t1 = sheepMgr.findSortAck1(petSkin, petSkin.conf.findR);
+                var t1 = sheepMgr.findSortAck1(pet, pet.conf.findR);
 
                 if (t1 != null) {
-                    SheepMgr.dirTar(petSkin, t1);
+                    SheepMgr.dirTar(pet, t1);
                 }
             }
 
             if (t) {
                 var s1 = true;
-                sheepMgr.forNearBlocksByAckView(petSkin, l, n, petSkin.conf.findR,
+                sheepMgr.forNearBlocksByAckView(pet, l, n, pet.conf.findR,
                     t1 => {
-                        if (t1.isDie || t1.camp == petSkin.camp) {
+                        if (t1.isDie || t1.camp == pet.camp) {
                             return false;
                         }
 
-                        if (s1 && t1.conf.roleType == SheepRoleType.DUN_BING && sheepMgr.isCanAckByRole(petSkin, t1)) {
+                        if (s1 && t1.conf.roleType == SheepRoleType.DUN_BING && sheepMgr.isCanAckByRole(pet, t1)) {
                             s1 = false;
                         }
 
-                        if (!sheepMgr.isCanAckByRole(petSkin, t1)) {
+                        if (!sheepMgr.isCanAckByRole(pet, t1)) {
                             return false;
                         }
 
-                        sheepMgr.ackTar(petSkin, t1);
+                        sheepMgr.ackTar(pet, t1);
                         return false;
                     });
                 if (s1) {
-                    sheepMgr.moveTar(petSkin, null, t);
+                    sheepMgr.moveTar(pet, null, t);
                 }
             }
 
             if (r >= c.endFrame) {
-                petSkin.state = (SheepRoleState)c.endState;
-                petSkin.animType = SheepRoleAnimType.Boom;
-                petSkin.readySkillId = c.endSkill;
+                pet.state = (SheepRoleState)c.endState;
+                pet.animType = SheepRoleAnimType.Boom;
+                pet.readySkillId = c.endSkill;
             }
         }
     }

@@ -1,37 +1,38 @@
 ﻿using UnityEngine;
 
 namespace rvb.scripts {
-    public class PetLogicMove : PetLogic{
-        public static readonly PetLogicMove  Instance = new ();
-        public void tick(PetView petSkin, SheepMgr sheepMgr, bool t) {
+    public class PetLogicMove : PetLogic {
+        public static readonly PetLogicMove Instance = new();
+
+        public void tick(PetView pet, SheepMgr sheepMgr, bool t) {
             if (!t) {
                 return;
             }
 
-            if (petSkin.isLock) {
+            if (pet.isLock) {
                 return;
             }
 
-            var fff = sheepMgr.findTar(petSkin);
+            var fff = sheepMgr.findTar(pet);
             var s = fff.atkTar;
             var o = fff.moveTar;
             var l = fff.moveBoss;
 
             if (s != null) {
-                petSkin.state = SheepRoleState.Attack;
-                petSkin.subState = SheepRoleSubState.AttackAwait;
+                pet.state = SheepRoleState.Attack;
+                pet.subState = SheepRoleSubState.AttackAwait;
                 return;
             }
 
             if (o != null) {
-                petSkin.subState = SheepRoleSubState.MoveTar;
-                sheepMgr.moveTar(petSkin, o, t);
+                pet.subState = SheepRoleSubState.MoveTar;
+                sheepMgr.moveTar(pet, o, t);
                 return;
             }
 
             if (l != null) {
-                petSkin.subState = SheepRoleSubState.MoveBoss;
-                sheepMgr.moveTar(petSkin, l, t);
+                pet.subState = SheepRoleSubState.MoveBoss;
+                sheepMgr.moveTar(pet, l, t);
                 return;
             }
 

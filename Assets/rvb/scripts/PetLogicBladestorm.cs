@@ -3,13 +3,13 @@
 namespace rvb.scripts {
     public class PetLogicBladestorm : PetLogic{
         public static readonly PetLogicBladestorm  Instance = new ();
-        public void tick(PetView petSkin, SheepMgr sheepMgr, bool isLogicFrame) {
+        public void tick(PetView pet, SheepMgr sheepMgr, bool isLogicFrame) {
             var i = SheepMgr.FixedDeltaTime;
-            var s = petSkin.animFrame;
-            var o = SheepSkill.getById(petSkin.readySkillId);
+            var s = pet.animFrame;
+            var o = SheepSkill.getById(pet.readySkillId);
             var l = SheepSkillSubBladestorm.getById(o.id);
             if (isLogicFrame) {
-                var fff = sheepMgr.findTar(petSkin, l.findR);
+                var fff = sheepMgr.findTar(pet, l.findR);
                 var t1 = fff.atkTar;
                 var s1 = fff.moveTar;
                 var o1 = fff.moveBoss;
@@ -24,25 +24,25 @@ namespace rvb.scripts {
                     n = o1;
                 }
 
-                SheepMgr.dirTar(petSkin, n);
+                SheepMgr.dirTar(pet, n);
                 var r = l.speed;
-                var x = petSkin.posX + petSkin.dirX * r * i * 3f;
-                var y = petSkin.posY + petSkin.dirY * r * i * 3f;
-                petSkin.logicMove(x, y);
+                var x = pet.posX + pet.dirX * r * i * 3f;
+                var y = pet.posY + pet.dirY * r * i * 3f;
+                pet.logicMove(x, y);
             }
 
             var n1 = l.atkFrames;
             foreach (var t3 in n1) {
                 if (s == t3) {
-                    sheepMgr.ackMe(petSkin, l.spiltRadiusBet, l.atkBet, l.atkFindR);
+                    sheepMgr.ackMe(pet, l.spiltRadiusBet, l.atkBet, l.atkFindR);
                     break;
                 }
             }
 
             if (s >= l.endFrame) {
-                petSkin.state = SheepRoleState.Move;
-                petSkin.subState = SheepRoleSubState.MoveBoss;
-                petSkin.animType = SheepRoleAnimType.Idle;
+                pet.state = SheepRoleState.Move;
+                pet.subState = SheepRoleSubState.MoveBoss;
+                pet.animType = SheepRoleAnimType.Idle;
             }
         }
     }
