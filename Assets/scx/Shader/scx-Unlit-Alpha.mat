@@ -63,6 +63,7 @@ Material:
     m_Floats:
     - _Brightness: 1.531
     - _BumpScale: 1
+    - _Cutoff: 0.02
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _EdgeStrength: 2.3
