@@ -121,6 +121,9 @@ namespace rvb.scripts {
             }
 
             this.updateAnimFrame();
+            
+            // 增加逻辑帧
+            frame += 1;
         }
         
         private bool update_frame(SheepMgr sheepMgr) {
@@ -136,8 +139,7 @@ namespace rvb.scripts {
                 this.animY = posBefY + (posY - posBefY) * (frame % loopFrame) / loopFrame;
             }
 
-            frame += 1;
-            this.frame = frame;
+            
             if (!this.isDie && i) {
                 this.logicMove(posX, posY);
             }
@@ -220,7 +222,7 @@ namespace rvb.scripts {
                     throw new ArgumentOutOfRangeException();
             }
 
-            petLogic.tick(this, sheepMgr, isLogicFrame);
+            petLogic.tick(this, sheepMgr);
             
             if (impulseX != 0 || impulseY != 0) {
                 if (!isDie && curHp > 0) {
