@@ -1,16 +1,18 @@
 ﻿using static rvb.scripts.SheepModes;
 
 namespace rvb.scripts {
-    public class PetLogicAttack : PetLogic{
-        public static readonly PetLogicAttack  Instance = new ();
-        public void tick(PetView pet, SheepMgr sheepMgr, bool t) {
-              var o = pet.conf.atkMoveType;
+    public class PetLogicAttack : PetLogic {
+        private static readonly int LOOP_FRAME = 4;
+
+        public static readonly PetLogicAttack Instance = new();
+
+        public void tick(PetView pet, SheepMgr sheepMgr) {
+            var atkMoveType = pet.conf.atkMoveType;
             if (pet.conf.isLoongStopDistance != 0) {
                 var t3 = sheepMode;
                 var i1 = pet.conf.loongStopDistanceR;
-                if (SheepMgr.dis(pet.posX, pet.posY, pet.camp == SheepCamp.Red ? t3.loongX : -t3.loongX, 0) <=
-                    i1) {
-                    o = (int)SheepRoleAtkMoveType.None;
+                if (SheepMgr.dis(pet.posX, pet.posY, pet.camp == SheepCamp.Red ? t3.loongX : -t3.loongX, 0) <= i1) {
+                    atkMoveType = (int)SheepRoleAtkMoveType.None;
                 }
             }
 
@@ -97,12 +99,18 @@ namespace rvb.scripts {
                     }
                 }
             }
+            
+            var isMoveFrame = pet.frame % LOOP_FRAME == LOOP_FRAME - 1;
 
-            if (t && (o == (int)SheepRoleAtkMoveType.Move || o == (int)SheepRoleAtkMoveType.CdMove &&
-                    pet.subState == SheepRoleSubState.AttackAwait)) {
+            if (!isMoveFrame) {
+                return;
+            }
+
+            if (atkMoveType == (int)SheepRoleAtkMoveType.Move || atkMoveType == (int)SheepRoleAtkMoveType.CdMove &&
+                pet.subState == SheepRoleSubState.AttackAwait) {
                 var s = sheepMgr.findNearAck(pet);
                 if (s != null && SheepMgr.disByRole(pet, s) > pet.conf.atkMinMoveR + s.conf.collideR) {
-                    sheepMgr.moveTar(pet, s, t);
+                    sheepMgr.moveTar(pet, s, isMoveFrame);
                 }
             }
         }
