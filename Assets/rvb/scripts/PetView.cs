@@ -145,8 +145,41 @@ namespace rvb.scripts {
             posX = x;
             posY = y;
         }
+
+        public virtual void action(SheepMgr sheepMgr, float fixedDeltaTime) {
+            var bbb = this.update_frame(sheepMgr);
+            var petIsDie = this.isDie;
+            if (!petIsDie) {
+                this.update_role_state(bbb,sheepMgr,fixedDeltaTime);
+            }
+
+            this.update_role_anim();
+        }
         
-        public void update_role_state(bool isLogicFrame,SheepMgr sheepMgr) {
+        private bool update_frame(SheepMgr sheepMgr) {
+            var frame = this.frame;
+            var loopFrame = sheepMgr.sheepConfig.loopFrame;
+            var i = frame % loopFrame == loopFrame - 1;
+            var posBefX = this.posBefX;
+            var posBefY = this.posBefY;
+            var posX = this.posX;
+            var posY = this.posY;
+            if (!this.isDie) {
+                this.animX = posBefX + (posX - posBefX) * (frame % loopFrame) / loopFrame;
+                this.animY = posBefY + (posY - posBefY) * (frame % loopFrame) / loopFrame;
+            }
+
+            frame += 1;
+            this.frame = frame;
+            if (!this.isDie && i) {
+                this.logicMove(posX, posY);
+            }
+
+            return i;
+        }
+        
+        private void update_role_state(bool isLogicFrame, SheepMgr sheepMgr, float fixedDeltaTime) {
+            this.subAtkCd(fixedDeltaTime);
             petLogic.tick(this, sheepMgr, isLogicFrame);
             
             if (impulseX != 0 || impulseY != 0) {
@@ -160,6 +193,11 @@ namespace rvb.scripts {
                 impulseY = 0;
             }
         }    
+        
+        
+        public void update_role_anim() {
+            this.animFrame = this.animFrame + 1;
+        }
         
     }
 }

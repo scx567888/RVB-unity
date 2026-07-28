@@ -192,7 +192,7 @@ namespace rvb {
         }
 
         private void SyncBossMarker(int poolIndex) {
-            PetView bossView = sheepMgr.boss[poolIndex];
+            PetView bossView = sheepMgr.bosses[poolIndex];
             if (bossView == null || !bossView.isActive) {
                 return;
             }
