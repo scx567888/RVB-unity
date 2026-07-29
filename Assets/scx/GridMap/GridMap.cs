@@ -113,12 +113,10 @@ namespace scx.GridMap {
             return this.gridToWorldStartY(gridY) + this.cellSize;
         }
 
-        /**
-     * 获取格子 (越界会返回 null)
-     * @param {number} gridX (Grid 坐标系)
-     * @param {number} gridY (Grid 坐标系)
-     * @returns {T} 格子
-     */
+        /// 获取格子 (越界会返回 null)
+        /// gridX (Grid 坐标系)
+        /// gridY (Grid 坐标系)
+        /// return 格子
         public T getCell(int gridX, int gridY) {
             // 越界判断
             if (gridX < 0 || gridX >= this.gridWidth || gridY < 0 || gridY >= this.gridHeight) {
@@ -128,12 +126,10 @@ namespace scx.GridMap {
             return this.cells[gridY, gridX];
         }
 
-        /**
-     * 获取格子 (越界会返回 边界)
-     * @param {number} gridX (Grid 坐标系)
-     * @param {number} gridY (Grid 坐标系)
-     * @returns {T} 格子
-     */
+        /// 获取格子 (越界会返回 边界)
+        /// gridX (Grid 坐标系)
+        /// gridY (Grid 坐标系)
+        /// return 格子
         public T getCellSafe(int gridX, int gridY) {
             if (gridX < 0) {
                 gridX = 0;
@@ -152,24 +148,20 @@ namespace scx.GridMap {
             return this.cells[gridY, gridX];
         }
 
-        /**
-     * 根据世界坐标获取格子 (越界返回 null)
-     * @param {number} x (世界坐标系)
-     * @param {number} y (世界坐标系)
-     * @returns {T} 格子
-     */
+        /// 根据世界坐标获取格子 (越界返回 null)
+        /// x (世界坐标系)
+        /// y (世界坐标系)
+        /// return 格子
         public T getCellByWorldPosition(float x, float y) {
             var gridX = this.worldToGridX(x);
             var gridY = this.worldToGridY(y);
             return this.getCell(gridX, gridY);
         }
 
-        /**
-     * 根据世界坐标获取格子 (越界返回 边界)
-     * @param {number} x (世界坐标系)
-     * @param {number} y (世界坐标系)
-     * @returns {T} 格子
-     */
+        /// 根据世界坐标获取格子 (越界返回 边界)
+        /// x (世界坐标系)
+        /// y (世界坐标系)
+        /// return 格子
         public T getCellByWorldPositionSafe(float x, float y) {
             var gridX = this.worldToGridX(x);
             var gridY = this.worldToGridY(y);
