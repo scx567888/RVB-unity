@@ -26,7 +26,7 @@ namespace scx.GridMap {
         private readonly int gridHeight;
 
         /// 格子 (二维数组)
-        private readonly T[,] cells;
+        private readonly T[][] cells;
 
         /// 创建一个 GridMap
         /// worldX  世界 X
@@ -56,15 +56,16 @@ namespace scx.GridMap {
             gridHeight = (int)Math.Ceiling(worldHeight / cellSize);
 
             // 创建二维数组
-            cells = new T[gridHeight, gridWidth];
+            cells = new T[gridHeight][];
             for (var gridY = 0; gridY < gridHeight; gridY++) {
+                var row = cells[gridY] = new T[gridWidth];
                 for (var gridX = 0; gridX < gridWidth; gridX++) {
                     var cell = cellFactory(
                         gridX, gridY,
                         gridToWorldStartX(gridX), gridToWorldStartY(gridY),
                         gridToWorldEndX(gridX), gridToWorldEndY(gridY)
                     );
-                    cells[gridY, gridX] = cell;
+                    row[gridX] = cell;
                 }
             }
         }
@@ -123,7 +124,7 @@ namespace scx.GridMap {
                 return null;
             }
 
-            return cells[gridY, gridX];
+            return cells[gridY][gridX];
         }
 
         /// 获取格子 (越界会返回 边界)
@@ -145,7 +146,7 @@ namespace scx.GridMap {
                 gridY = gridHeight - 1;
             }
 
-            return cells[gridY, gridX];
+            return cells[gridY][gridX];
         }
 
         /// 根据世界坐标获取格子 (越界返回 null)
@@ -172,8 +173,9 @@ namespace scx.GridMap {
         /// callback 回调 (返回 true 表示中途退出) 
         public void forEachCell(Func<T, bool> callback) {
             for (var gridY = 0; gridY < gridHeight; gridY++) {
+                var row = cells[gridY];
                 for (var gridX = 0; gridX < gridWidth; gridX++) {
-                    var cell = cells[gridY, gridX];
+                    var cell = row[gridX];
                     var stop = callback(cell);
                     if (stop) {
                         return;
@@ -199,8 +201,9 @@ namespace scx.GridMap {
 
             // 2. 遍历格子
             for (var gridY = startGridY; gridY <= endGridY; gridY++) {
+                var row = cells[gridY];
                 for (var gridX = startGridX; gridX <= endGridX; gridX++) {
-                    var cell = cells[gridY, gridX];
+                    var cell = row[gridX];
                     // 调用回调函数
                     var stop = callback(cell);
                     if (stop) {
@@ -227,8 +230,9 @@ namespace scx.GridMap {
 
             // 2. 遍历格子
             for (var gridY = startGridY; gridY <= endGridY; gridY++) {
+                var row = cells[gridY];
                 for (var gridX = startGridX; gridX <= endGridX; gridX++) {
-                    var cell = cells[gridY, gridX];
+                    var cell = row[gridX];
 
                     // 2.1. 跳过不在圆的范围内的
 
@@ -297,9 +301,10 @@ namespace scx.GridMap {
                 var startGridX = Math.Max(worldToGridX(centerX - dxMax), 0);
                 var endGridX = Math.Min(worldToGridX(centerX + dxMax), gridWidth - 1);
 
+                var row = cells[gridY];
                 // 遍历当前行
                 for (var gridX = startGridX; gridX <= endGridX; gridX++) {
-                    var cell = cells[gridY, gridX];
+                    var cell = row[gridX];
                     // 调用回调函数
                     var stop = callback(cell);
                     if (stop) {
