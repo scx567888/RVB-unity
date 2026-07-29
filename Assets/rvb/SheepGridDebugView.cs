@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using scx.GridMap;
+using UnityEngine;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -137,14 +138,14 @@ namespace rvb.scripts
             {
                 if (cell == null)
                 {
-                    return false;
+                    return;
                 }
 
                 int petCount = cell.petCounts[0]+cell.petCounts[1];
 
                 if (drawOnlyNonEmptyCells && petCount == 0)
                 {
-                    return false;
+                    return ;
                 }
 
                 Vector3 center = GetCellWorldCenter(cell);
@@ -168,7 +169,7 @@ namespace rvb.scripts
                 }
 #endif
 
-                return false;
+                return ;
             });
         }
 
