@@ -168,16 +168,14 @@ namespace scx.GridMap {
             return this.getCellSafe(gridX, gridY);
         }
 
-        /**
-     * 遍历所有格子
-     * @param {function(T): boolean} callback - 回调 (允许中途退出)
-     */
+        /// 遍历所有格子
+        /// callback 回调 (返回 true 表示中途退出) 
         public void forEachCell(Func<T, bool> callback) {
             for (var gridY = 0; gridY < this.gridHeight; gridY++) {
                 for (var gridX = 0; gridX < this.gridWidth; gridX++) {
                     var cell = this.cells[gridY, gridX];
                     var stop = callback(cell);
-                    if (stop == true) {
+                    if (stop) {
                         return;
                     }
                 }
