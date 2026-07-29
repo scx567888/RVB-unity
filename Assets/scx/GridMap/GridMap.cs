@@ -182,9 +182,7 @@ namespace scx.GridMap {
             }
         }
 
-
         // **************************************** find 方法 ******************************************
-
 
         /// 查找 矩形区域内格子 (相交包含)
         /// centerX - 中心 X (世界坐标)
@@ -212,13 +210,11 @@ namespace scx.GridMap {
             }
         }
 
-        /**
-     * 查找 圆形区域内格子 (朴素算法) (相交包含)
-     * @param {number} centerX - 圆心 X (世界坐标)
-     * @param {number} centerY - 圆心 Y (世界坐标)
-     * @param {number} radius - 半径 (世界坐标)
-     * @param {function(T): boolean} callback - 回调 (允许中途退出)
-     */
+        /// 查找 圆形区域内格子 (朴素算法) (相交包含)
+        /// centerX - 圆心 X (世界坐标)
+        /// centerY - 圆心 Y (世界坐标)
+        /// radius - 半径 (世界坐标)
+        /// callback 回调 (返回 true 表示中途退出) 
         public void findCellsInCircleNaive(float centerX, float centerY, float radius, Func<T, bool> callback) {
             // 1. 计算所覆盖的格子
             var startGridX = Math.Max(this.worldToGridX(centerX - radius), 0);
@@ -261,20 +257,18 @@ namespace scx.GridMap {
 
                     // 调用回调函数
                     var stop = callback(cell);
-                    if (stop == true) {
+                    if (stop) {
                         return;
                     }
                 }
             }
         }
 
-        /**
-     * 查找 圆形区域内格子 (扫描线算法)  (相交包含)
-     * @param {number} centerX - 圆心 X (世界坐标)
-     * @param {number} centerY - 圆心 Y (世界坐标)
-     * @param {number} radius - 半径 (世界坐标)
-     * @param {function(T): boolean} callback - 回调 (允许中途退出)
-     */
+        /// 查找 圆形区域内格子 (扫描线算法) (相交包含)
+        /// centerX - 圆心 X (世界坐标)
+        /// centerY - 圆心 Y (世界坐标)
+        /// radius - 半径 (世界坐标)
+        /// callback 回调 (返回 true 表示中途退出) 
         public void findCellsInCircleScanLine(float centerX, float centerY, float radius, Func<T, bool> callback) {
             // 1. 计算覆盖的行范围
             var startGridY = Math.Max(this.worldToGridY(centerY - radius), 0);
@@ -308,7 +302,7 @@ namespace scx.GridMap {
                     var cell = this.cells[gridY, gridX];
                     // 调用回调函数
                     var stop = callback(cell);
-                    if (stop == true) {
+                    if (stop) {
                         return;
                     }
                 }
