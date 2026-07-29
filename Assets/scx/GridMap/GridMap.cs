@@ -1,71 +1,46 @@
 ﻿using System;
 
 namespace scx.GridMap {
-    /**
- * 一个网格容器, 可用于 寻敌, 空间划分 等
- * 每一个格子都是正方形
- * @template {GridCell} T
- */
+    /// 一个网格容器, 可用于 寻敌, 空间划分 等
+    /// 每一个格子都是正方形
     public class GridMap<T> where T : GridCell {
-        /**
-     * 世界 X (世界坐标系)
-     * @type {number}
-     */
+        /// 世界 X (世界坐标系)
         private readonly float worldX;
 
-        /**
-     * 世界 Y (世界坐标系)
-     * @type {number}
-     */
+        /// 世界 Y (世界坐标系)
         private readonly float worldY;
 
-        /**
-     * 世界宽度 (世界坐标系)
-     * @type {number}
-     */
+        /// 世界宽度 (世界坐标系)
         private readonly float worldWidth;
 
-        /**
-     * 世界高度 (世界坐标系)
-     * @type {number}
-     */
+        /// 世界高度 (世界坐标系)
         private readonly float worldHeight;
 
-        /**
-     * 格子大小 (正方形) (世界坐标系)
-     * @type {number}
-     */
+        /// 格子大小 (正方形) (世界坐标系)
         private readonly float cellSize;
 
-        /**
-     * 横向的格子数量 (Grid 坐标系)
-     * @type {number}
-     */
+        /// 横向的格子数量 (Grid 坐标系)
         private readonly int gridWidth;
 
-        /**
-     * 纵向的格子数量 (Grid 坐标系)
-     * @type {number}
-     */
+        /// 纵向的格子数量 (Grid 坐标系)
         private readonly int gridHeight;
 
-        /**
-     * 格子 (二维数组)
-     * @type {T[][]}
-     */
+        /// 格子 (二维数组)
         private readonly T[,] cells;
 
-        /**
-     * 创建一个 GridMap
-     * @param {number} worldX   世界 X
-     * @param {number} worldY  世界 Y
-     * @param {number}  worldWidth  世界宽度
-     * @param {number} worldHeight  世界高度
-     * @param {number} cellSize  格子大小 (正方形宽高)
-     * @param CellClass 格子构造函数
-     */
-        public GridMap(float worldX, float worldY, float worldWidth, float worldHeight, float cellSize,
-            Func<int, int, float, float, float, float, T> CellClass) {
+        /// 创建一个 GridMap
+        /// worldX  世界 X
+        /// worldY  世界 Y
+        /// worldWidth  世界宽度
+        /// worldHeight  世界高度
+        /// cellSize  格子大小 (正方形宽高)
+        /// cellFactory 格子工厂
+        public GridMap(
+            float worldX, float worldY,
+            float worldWidth, float worldHeight,
+            float cellSize,
+            Func<int, int, float, float, float, float, T> cellFactory
+        ) {
             if (worldWidth <= 0 || worldHeight <= 0 || cellSize <= 0) {
                 throw new ArgumentException("worldWidth, worldHeight, cellSize 必须为正数");
             }
@@ -84,7 +59,7 @@ namespace scx.GridMap {
             this.cells = new T[gridHeight, gridWidth];
             for (var gridY = 0; gridY < this.gridHeight; gridY++) {
                 for (var gridX = 0; gridX < this.gridWidth; gridX++) {
-                    var cell = CellClass(
+                    var cell = cellFactory(
                         gridX, gridY,
                         this.gridToWorldStartX(gridX), this.gridToWorldStartY(gridY),
                         this.gridToWorldEndX(gridX), this.gridToWorldEndY(gridY)
