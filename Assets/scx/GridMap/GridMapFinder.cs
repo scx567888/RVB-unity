@@ -1,7 +1,7 @@
 ﻿using System;
 
 namespace scx.GridMap {
-    public class GridMapFinder {
+    public static class GridMapFinder {
         /// 查找 矩形区域内格子 (相交包含)
         /// centerX - 中心 X (世界坐标)
         /// centerY - 中心 Y (世界坐标)
@@ -10,7 +10,7 @@ namespace scx.GridMap {
         /// callback 回调 (返回 true 表示中途退出)
         /// return 返回 true 表示提前停止, false 表示完整遍历.
         public static bool findCellsInRect<T>(
-            GridMap<T> gridMap,
+            this GridMap<T> gridMap,
             float centerX, float centerY, float width, float height,
             Func<T, bool> callback
         ) where T : GridCell {
@@ -43,7 +43,7 @@ namespace scx.GridMap {
         /// callback 回调 (返回 true 表示中途退出)
         /// return 返回 true 表示提前停止, false 表示完整遍历.
         public static bool findCellsInCircleNaive<T>(
-            GridMap<T> gridMap,
+            this GridMap<T> gridMap,
             float centerX, float centerY, float radius,
             Func<T, bool> callback
         ) where T : GridCell {
@@ -105,7 +105,7 @@ namespace scx.GridMap {
         /// callback 回调 (返回 true 表示中途退出)
         /// return 返回 true 表示提前停止, false 表示完整遍历.
         public static bool findCellsInCircleScanLine<T>(
-            GridMap<T> gridMap,
+            this GridMap<T> gridMap,
             float centerX, float centerY, float radius,
             Func<T, bool> callback
         ) where T : GridCell {
