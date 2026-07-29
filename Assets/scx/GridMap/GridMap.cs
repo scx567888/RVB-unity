@@ -169,17 +169,14 @@ namespace scx.GridMap {
             return getCellSafe(gridX, gridY);
         }
 
-        /// 遍历所有格子
-        /// callback 回调 (返回 true 表示中途退出) 
-        public void forEachCell(Func<T, bool> callback) {
+        /// 遍历所有格子 (gridY 从小到大, gridX 从小到大)
+        /// callback 回调
+        public void forEachCell(Action<T> callback) {
             for (var gridY = 0; gridY < gridHeight; gridY++) {
                 var row = cells[gridY];
                 for (var gridX = 0; gridX < gridWidth; gridX++) {
                     var cell = row[gridX];
-                    var stop = callback(cell);
-                    if (stop) {
-                        return;
-                    }
+                    callback(cell);
                 }
             }
         }
