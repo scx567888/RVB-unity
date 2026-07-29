@@ -26,7 +26,7 @@ namespace scx.GridMap {
         public readonly int gridHeight;
 
         /// 格子 (二维数组)
-        private readonly T[][] cells;
+        public readonly T[][] cells;
 
         /// 创建一个 GridMap
         /// worldStartX  世界起始 X (世界坐标系)
