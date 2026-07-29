@@ -185,14 +185,13 @@ namespace scx.GridMap {
 
         // **************************************** find 方法 ******************************************
 
-        /**
-     * 查找 矩形区域内格子 (相交包含)
-     * @param {number} centerX - 中心 X (世界坐标)
-     * @param {number} centerY - 中心 Y (世界坐标)
-     * @param {number} width - 矩形宽度 (世界坐标)
-     * @param {number} height - 矩形高度 (世界坐标)
-     * @param {function(T): boolean} callback - 回调 (允许中途退出)
-     */
+
+        /// 查找 矩形区域内格子 (相交包含)
+        /// centerX - 中心 X (世界坐标)
+        /// centerY - 中心 Y (世界坐标)
+        /// width - 矩形宽度 (世界坐标)
+        /// height - 矩形高度 (世界坐标)
+        /// callback 回调 (返回 true 表示中途退出) 
         public void findCellsInRect(float centerX, float centerY, float width, float height, Func<T, bool> callback) {
             // 1. 计算所覆盖的格子
             var startGridX = Math.Max(this.worldToGridX(centerX - width / 2), 0);
@@ -206,7 +205,7 @@ namespace scx.GridMap {
                     var cell = this.cells[gridY, gridX];
                     // 调用回调函数
                     var stop = callback(cell);
-                    if (stop == true) {
+                    if (stop) {
                         return;
                     }
                 }
