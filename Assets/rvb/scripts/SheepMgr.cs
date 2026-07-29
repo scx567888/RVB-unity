@@ -457,7 +457,7 @@ namespace rvb.scripts {
                         }
                     }
 
-                    if (t.subShield() && _ > 1) {
+                    if (t.subShield(this) && _ > 1) {
                         curHp = d - 1;
                         if (curHp < 0) {
                             curHp = 0;
@@ -582,8 +582,7 @@ namespace rvb.scripts {
 
             view.dirX = camp == SheepCamp.Red ? 1f : -1f;
             view.dirY = 0f;
-
-            view.curHp = 99999;
+            
             bosses[(int)camp] = view;
         }
 
