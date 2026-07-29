@@ -9,8 +9,11 @@ namespace scx.GridMap {
         /// height - 矩形高度 (世界坐标)
         /// callback 回调 (返回 true 表示中途退出)
         /// return 返回 true 表示提前停止, false 表示完整遍历.
-        public static bool findCellsInRect<T>(GridMap<T> gridMap, float centerX, float centerY, float width,
-            float height, Func<T, bool> callback) where T : GridCell {
+        public static bool findCellsInRect<T>(
+            GridMap<T> gridMap,
+            float centerX, float centerY, float width, float height,
+            Func<T, bool> callback
+        ) where T : GridCell {
             // 1. 计算所覆盖的格子
             var startGridX = Math.Max(gridMap.worldToGridX(centerX - width / 2), 0);
             var endGridX = Math.Min(gridMap.worldToGridX(centerX + width / 2), gridMap.gridWidth - 1);
@@ -39,8 +42,11 @@ namespace scx.GridMap {
         /// radius - 半径 (世界坐标)
         /// callback 回调 (返回 true 表示中途退出)
         /// return 返回 true 表示提前停止, false 表示完整遍历.
-        public static bool findCellsInCircleNaive<T>(GridMap<T> gridMap, float centerX, float centerY, float radius,
-            Func<T, bool> callback) where T : GridCell {
+        public static bool findCellsInCircleNaive<T>(
+            GridMap<T> gridMap,
+            float centerX, float centerY, float radius,
+            Func<T, bool> callback
+        ) where T : GridCell {
             // 1. 计算所覆盖的格子
             var startGridX = Math.Max(gridMap.worldToGridX(centerX - radius), 0);
             var endGridX = Math.Min(gridMap.worldToGridX(centerX + radius), gridMap.gridWidth - 1);
@@ -98,8 +104,11 @@ namespace scx.GridMap {
         /// radius - 半径 (世界坐标)
         /// callback 回调 (返回 true 表示中途退出)
         /// return 返回 true 表示提前停止, false 表示完整遍历.
-        public static bool findCellsInCircleScanLine<T>(GridMap<T> gridMap, float centerX, float centerY, float radius,
-            Func<T, bool> callback) where T : GridCell {
+        public static bool findCellsInCircleScanLine<T>(
+            GridMap<T> gridMap,
+            float centerX, float centerY, float radius,
+            Func<T, bool> callback
+        ) where T : GridCell {
             // 1. 计算覆盖的行范围
             var startGridY = Math.Max(gridMap.worldToGridY(centerY - radius), 0);
             var endGridY = Math.Min(gridMap.worldToGridY(centerY + radius), gridMap.gridHeight - 1);
