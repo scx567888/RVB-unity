@@ -69,22 +69,18 @@ namespace scx.GridMap {
             }
         }
 
-        /**
-     * 世界坐标 X 转 Grid 坐标 X
-     * 坐标正好在格子边界时, 归入索引较大的格子.
-     * @param {number} x X 坐标 (世界坐标系)
-     * @returns {number} 格子 X (Grid 坐标系)
-     */
+        /// 世界坐标 X 转 Grid 坐标 X
+        /// 坐标正好在格子边界时, 归入索引较大的格子.
+        /// x X 坐标 (世界坐标系)
+        /// return 格子 X (Grid 坐标系)
         public int worldToGridX(float x) {
             return (int)Math.Floor((x - this.worldX) / this.cellSize);
         }
 
-        /**
-     * 世界坐标 Y 转 Grid 坐标 Y
-     * 坐标正好在格子边界时, 归入索引较大的格子.
-     * @param {number} y Y 坐标 (世界坐标系)
-     * @returns {number} 格子 Y (Grid 坐标系)
-     */
+        /// 世界坐标 Y 转 Grid 坐标 Y
+        /// 坐标正好在格子边界时, 归入索引较大的格子.
+        /// y Y 坐标 (世界坐标系)
+        /// return 格子 Y (Grid 坐标系)
         public int worldToGridY(float y) {
             return (int)Math.Floor((y - this.worldY) / this.cellSize);
         }
