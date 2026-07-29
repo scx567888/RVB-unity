@@ -307,7 +307,6 @@ namespace rvb.scripts {
             // 清空格子
             gridMap.forEachCell(cell => {
                 cell.clearPets();
-                return false;
             });
 
             // 重建格子
