@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using scx.GridMap;
+using UnityEngine;
 
 #if UNITY_EDITOR
 using UnityEditor;

@@ -180,6 +180,5 @@ namespace scx.GridMap {
                 }
             }
         }
-
     }
 }
