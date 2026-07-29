@@ -52,17 +52,17 @@ namespace scx.GridMap {
             this.cellSize = cellSize;
 
             // 计算有多少个格子
-            this.gridWidth = (int)Math.Ceiling(worldWidth / cellSize);
-            this.gridHeight = (int)Math.Ceiling(worldHeight / cellSize);
+            gridWidth = (int)Math.Ceiling(worldWidth / cellSize);
+            gridHeight = (int)Math.Ceiling(worldHeight / cellSize);
 
             // 创建二维数组
-            this.cells = new T[gridHeight, gridWidth];
-            for (var gridY = 0; gridY < this.gridHeight; gridY++) {
-                for (var gridX = 0; gridX < this.gridWidth; gridX++) {
+            cells = new T[gridHeight, gridWidth];
+            for (var gridY = 0; gridY < gridHeight; gridY++) {
+                for (var gridX = 0; gridX < gridWidth; gridX++) {
                     var cell = cellFactory(
                         gridX, gridY,
-                        this.gridToWorldStartX(gridX), this.gridToWorldStartY(gridY),
-                        this.gridToWorldEndX(gridX), this.gridToWorldEndY(gridY)
+                        gridToWorldStartX(gridX), gridToWorldStartY(gridY),
+                        gridToWorldEndX(gridX), gridToWorldEndY(gridY)
                     );
                     cells[gridY, gridX] = cell;
                 }
@@ -74,7 +74,7 @@ namespace scx.GridMap {
         /// x X 坐标 (世界坐标系)
         /// return 格子 X (Grid 坐标系)
         public int worldToGridX(float x) {
-            return (int)Math.Floor((x - this.worldX) / this.cellSize);
+            return (int)Math.Floor((x - worldX) / cellSize);
         }
 
         /// 世界坐标 Y 转 Grid 坐标 Y
@@ -82,35 +82,35 @@ namespace scx.GridMap {
         /// y Y 坐标 (世界坐标系)
         /// return 格子 Y (Grid 坐标系)
         public int worldToGridY(float y) {
-            return (int)Math.Floor((y - this.worldY) / this.cellSize);
+            return (int)Math.Floor((y - worldY) / cellSize);
         }
 
         /// Grid 坐标 X 转 格子起始 X 坐标 (世界坐标系)
         /// gridX 格子 X (Grid 坐标系)
         /// return 格子起始 X 坐标 (世界坐标系)
         public float gridToWorldStartX(int gridX) {
-            return this.worldX + gridX * this.cellSize;
+            return worldX + gridX * cellSize;
         }
 
         /// Grid 坐标 Y 转 格子起始 Y 坐标 (世界坐标系)
         /// gridY 格子 Y (Grid 坐标系)
         /// return 格子起始 Y 坐标 (世界坐标系)
         public float gridToWorldStartY(int gridY) {
-            return this.worldY + gridY * this.cellSize;
+            return worldY + gridY * cellSize;
         }
 
         /// Grid 坐标 X 转 格子结束 X 坐标 (世界坐标系)
         /// gridX 格子 X (Grid 坐标系)
         /// return 格子结束 X 坐标 (世界坐标系)
         public float gridToWorldEndX(int gridX) {
-            return this.gridToWorldStartX(gridX) + this.cellSize;
+            return gridToWorldStartX(gridX) + cellSize;
         }
 
         /// Grid 坐标 Y 转 格子结束 Y 坐标 (世界坐标系)
         /// gridY 格子 Y (Grid 坐标系)
         /// return 格子结束 Y 坐标 (世界坐标系)
         public float gridToWorldEndY(int gridY) {
-            return this.gridToWorldStartY(gridY) + this.cellSize;
+            return gridToWorldStartY(gridY) + cellSize;
         }
 
         /// 获取格子 (越界会返回 null)
@@ -119,11 +119,11 @@ namespace scx.GridMap {
         /// return 格子
         public T getCell(int gridX, int gridY) {
             // 越界判断
-            if (gridX < 0 || gridX >= this.gridWidth || gridY < 0 || gridY >= this.gridHeight) {
+            if (gridX < 0 || gridX >= gridWidth || gridY < 0 || gridY >= gridHeight) {
                 return null;
             }
 
-            return this.cells[gridY, gridX];
+            return cells[gridY, gridX];
         }
 
         /// 获取格子 (越界会返回 边界)
@@ -134,18 +134,18 @@ namespace scx.GridMap {
             if (gridX < 0) {
                 gridX = 0;
             }
-            else if (gridX >= this.gridWidth) {
-                gridX = this.gridWidth - 1;
+            else if (gridX >= gridWidth) {
+                gridX = gridWidth - 1;
             }
 
             if (gridY < 0) {
                 gridY = 0;
             }
-            else if (gridY >= this.gridHeight) {
-                gridY = this.gridHeight - 1;
+            else if (gridY >= gridHeight) {
+                gridY = gridHeight - 1;
             }
 
-            return this.cells[gridY, gridX];
+            return cells[gridY, gridX];
         }
 
         /// 根据世界坐标获取格子 (越界返回 null)
@@ -153,9 +153,9 @@ namespace scx.GridMap {
         /// y (世界坐标系)
         /// return 格子
         public T getCellByWorldPosition(float x, float y) {
-            var gridX = this.worldToGridX(x);
-            var gridY = this.worldToGridY(y);
-            return this.getCell(gridX, gridY);
+            var gridX = worldToGridX(x);
+            var gridY = worldToGridY(y);
+            return getCell(gridX, gridY);
         }
 
         /// 根据世界坐标获取格子 (越界返回 边界)
@@ -163,17 +163,17 @@ namespace scx.GridMap {
         /// y (世界坐标系)
         /// return 格子
         public T getCellByWorldPositionSafe(float x, float y) {
-            var gridX = this.worldToGridX(x);
-            var gridY = this.worldToGridY(y);
-            return this.getCellSafe(gridX, gridY);
+            var gridX = worldToGridX(x);
+            var gridY = worldToGridY(y);
+            return getCellSafe(gridX, gridY);
         }
 
         /// 遍历所有格子
         /// callback 回调 (返回 true 表示中途退出) 
         public void forEachCell(Func<T, bool> callback) {
-            for (var gridY = 0; gridY < this.gridHeight; gridY++) {
-                for (var gridX = 0; gridX < this.gridWidth; gridX++) {
-                    var cell = this.cells[gridY, gridX];
+            for (var gridY = 0; gridY < gridHeight; gridY++) {
+                for (var gridX = 0; gridX < gridWidth; gridX++) {
+                    var cell = cells[gridY, gridX];
                     var stop = callback(cell);
                     if (stop) {
                         return;
@@ -192,15 +192,15 @@ namespace scx.GridMap {
         /// callback 回调 (返回 true 表示中途退出) 
         public void findCellsInRect(float centerX, float centerY, float width, float height, Func<T, bool> callback) {
             // 1. 计算所覆盖的格子
-            var startGridX = Math.Max(this.worldToGridX(centerX - width / 2), 0);
-            var endGridX = Math.Min(this.worldToGridX(centerX + width / 2), this.gridWidth - 1);
-            var startGridY = Math.Max(this.worldToGridY(centerY - height / 2), 0);
-            var endGridY = Math.Min(this.worldToGridY(centerY + height / 2), this.gridHeight - 1);
+            var startGridX = Math.Max(worldToGridX(centerX - width / 2), 0);
+            var endGridX = Math.Min(worldToGridX(centerX + width / 2), gridWidth - 1);
+            var startGridY = Math.Max(worldToGridY(centerY - height / 2), 0);
+            var endGridY = Math.Min(worldToGridY(centerY + height / 2), gridHeight - 1);
 
             // 2. 遍历格子
             for (var gridY = startGridY; gridY <= endGridY; gridY++) {
                 for (var gridX = startGridX; gridX <= endGridX; gridX++) {
-                    var cell = this.cells[gridY, gridX];
+                    var cell = cells[gridY, gridX];
                     // 调用回调函数
                     var stop = callback(cell);
                     if (stop) {
@@ -217,10 +217,10 @@ namespace scx.GridMap {
         /// callback 回调 (返回 true 表示中途退出) 
         public void findCellsInCircleNaive(float centerX, float centerY, float radius, Func<T, bool> callback) {
             // 1. 计算所覆盖的格子
-            var startGridX = Math.Max(this.worldToGridX(centerX - radius), 0);
-            var endGridX = Math.Min(this.worldToGridX(centerX + radius), this.gridWidth - 1);
-            var startGridY = Math.Max(this.worldToGridY(centerY - radius), 0);
-            var endGridY = Math.Min(this.worldToGridY(centerY + radius), this.gridHeight - 1);
+            var startGridX = Math.Max(worldToGridX(centerX - radius), 0);
+            var endGridX = Math.Min(worldToGridX(centerX + radius), gridWidth - 1);
+            var startGridY = Math.Max(worldToGridY(centerY - radius), 0);
+            var endGridY = Math.Min(worldToGridY(centerY + radius), gridHeight - 1);
 
             // 1.1. 计算常量值
             var radius2 = radius * radius;
@@ -228,7 +228,7 @@ namespace scx.GridMap {
             // 2. 遍历格子
             for (var gridY = startGridY; gridY <= endGridY; gridY++) {
                 for (var gridX = startGridX; gridX <= endGridX; gridX++) {
-                    var cell = this.cells[gridY, gridX];
+                    var cell = cells[gridY, gridX];
 
                     // 2.1. 跳过不在圆的范围内的
 
@@ -271,8 +271,8 @@ namespace scx.GridMap {
         /// callback 回调 (返回 true 表示中途退出) 
         public void findCellsInCircleScanLine(float centerX, float centerY, float radius, Func<T, bool> callback) {
             // 1. 计算覆盖的行范围
-            var startGridY = Math.Max(this.worldToGridY(centerY - radius), 0);
-            var endGridY = Math.Min(this.worldToGridY(centerY + radius), this.gridHeight - 1);
+            var startGridY = Math.Max(worldToGridY(centerY - radius), 0);
+            var endGridY = Math.Min(worldToGridY(centerY + radius), gridHeight - 1);
 
             // 1.1. 计算常量值
             var radius2 = radius * radius;
@@ -280,8 +280,8 @@ namespace scx.GridMap {
             // 2. 循环每一行
             for (var gridY = startGridY; gridY <= endGridY; gridY++) {
                 // 计算当前行的 上下 Y (世界坐标距离)
-                var worldStartY = this.gridToWorldStartY(gridY);
-                var worldEndY = this.gridToWorldEndY(gridY);
+                var worldStartY = gridToWorldStartY(gridY);
+                var worldEndY = gridToWorldEndY(gridY);
 
                 // 计算当前行垂直方向上到圆心的最短距离
                 var dy = 0f;
@@ -294,12 +294,12 @@ namespace scx.GridMap {
 
                 // 计算当前行覆盖的列范围
                 var dxMax = (float)Math.Sqrt(radius2 - dy * dy);
-                var startGridX = Math.Max(this.worldToGridX(centerX - dxMax), 0);
-                var endGridX = Math.Min(this.worldToGridX(centerX + dxMax), this.gridWidth - 1);
+                var startGridX = Math.Max(worldToGridX(centerX - dxMax), 0);
+                var endGridX = Math.Min(worldToGridX(centerX + dxMax), gridWidth - 1);
 
                 // 遍历当前行
                 for (var gridX = startGridX; gridX <= endGridX; gridX++) {
-                    var cell = this.cells[gridY, gridX];
+                    var cell = cells[gridY, gridX];
                     // 调用回调函数
                     var stop = callback(cell);
                     if (stop) {
