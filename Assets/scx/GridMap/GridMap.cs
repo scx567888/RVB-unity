@@ -5,25 +5,25 @@ namespace scx.GridMap {
     /// 每一个格子都是正方形
     public class GridMap<T> where T : GridCell {
         /// 世界起始 X (世界坐标系)
-        private readonly float worldStartX;
+        public readonly float worldStartX;
 
         /// 世界起始 Y (世界坐标系)
-        private readonly float worldStartY;
+        public readonly float worldStartY;
 
         /// 世界宽度 (世界坐标系)
-        private readonly float worldWidth;
+        public readonly float worldWidth;
 
         /// 世界高度 (世界坐标系)
-        private readonly float worldHeight;
+        public readonly float worldHeight;
 
         /// 格子大小 (正方形) (世界坐标系)
-        private readonly float cellSize;
+        public readonly float cellSize;
 
         /// 横向的格子数量 (Grid 坐标系)
-        private readonly int gridWidth;
+        public readonly int gridWidth;
 
         /// 纵向的格子数量 (Grid 坐标系)
-        private readonly int gridHeight;
+        public readonly int gridHeight;
 
         /// 格子 (二维数组)
         private readonly T[][] cells;
