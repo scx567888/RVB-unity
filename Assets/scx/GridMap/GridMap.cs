@@ -85,38 +85,30 @@ namespace scx.GridMap {
             return (int)Math.Floor((y - this.worldY) / this.cellSize);
         }
 
-        /**
-     * Grid 坐标 X 转 格子起始 X 坐标 (世界坐标系)
-     * @param {number} gridX
-     * @return {number} 格子起始 X 坐标
-     */
+        /// Grid 坐标 X 转 格子起始 X 坐标 (世界坐标系)
+        /// gridX 格子 X (Grid 坐标系)
+        /// return 格子起始 X 坐标 (世界坐标系)
         public float gridToWorldStartX(int gridX) {
             return this.worldX + gridX * this.cellSize;
         }
 
-        /**
-     * Grid 坐标 Y 转 格子起始 Y 坐标 (世界坐标系)
-     * @param {number} gridY
-     * @returns {number} 格子起始 Y 坐标
-     */
+        /// Grid 坐标 Y 转 格子起始 Y 坐标 (世界坐标系)
+        /// gridY 格子 Y (Grid 坐标系)
+        /// return 格子起始 Y 坐标 (世界坐标系)
         public float gridToWorldStartY(int gridY) {
             return this.worldY + gridY * this.cellSize;
         }
 
-        /**
-     * Grid 坐标 X 转 格子结束 X 坐标 (世界坐标系)
-     * @param {number} gridX
-     * @returns {number} 格子结束 X 坐标
-     */
+        /// Grid 坐标 X 转 格子结束 X 坐标 (世界坐标系)
+        /// gridX 格子 X (Grid 坐标系)
+        /// return 格子结束 X 坐标 (世界坐标系)
         public float gridToWorldEndX(int gridX) {
             return this.gridToWorldStartX(gridX) + this.cellSize;
         }
 
-        /**
-     * Grid 坐标 Y 转 格子结束 Y 坐标 (世界坐标系)
-     * @param {number}  gridY
-     * @returns {number} 格子结束 Y 坐标
-     */
+        /// Grid 坐标 Y 转 格子结束 Y 坐标 (世界坐标系)
+        /// gridY 格子 Y (Grid 坐标系)
+        /// return 格子结束 Y 坐标 (世界坐标系)
         public float gridToWorldEndY(int gridY) {
             return this.gridToWorldStartY(gridY) + this.cellSize;
         }
