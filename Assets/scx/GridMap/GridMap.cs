@@ -4,11 +4,11 @@ namespace scx.GridMap {
     /// 一个网格容器, 可用于 寻敌, 空间划分 等
     /// 每一个格子都是正方形
     public class GridMap<T> where T : GridCell {
-        /// 世界 X (世界坐标系)
-        private readonly float worldX;
+        /// 世界起始 X (世界坐标系)
+        private readonly float worldStartX;
 
-        /// 世界 Y (世界坐标系)
-        private readonly float worldY;
+        /// 世界起始 Y (世界坐标系)
+        private readonly float worldStartY;
 
         /// 世界宽度 (世界坐标系)
         private readonly float worldWidth;
@@ -29,14 +29,14 @@ namespace scx.GridMap {
         private readonly T[][] cells;
 
         /// 创建一个 GridMap
-        /// worldX  世界 X
-        /// worldY  世界 Y
+        /// worldStartX  世界起始 X (世界坐标系)
+        /// worldStartY  世界起始 Y (世界坐标系)
         /// worldWidth  世界宽度
         /// worldHeight  世界高度
         /// cellSize  格子大小 (正方形宽高)
         /// cellFactory 格子工厂
         public GridMap(
-            float worldX, float worldY,
+            float worldStartX, float worldStartY,
             float worldWidth, float worldHeight,
             float cellSize,
             Func<int, int, float, float, float, float, T> cellFactory
@@ -45,8 +45,8 @@ namespace scx.GridMap {
                 throw new ArgumentException("worldWidth, worldHeight, cellSize 必须为正数");
             }
 
-            this.worldX = worldX;
-            this.worldY = worldY;
+            this.worldStartX = worldStartX;
+            this.worldStartY = worldStartY;
             this.worldWidth = worldWidth;
             this.worldHeight = worldHeight;
             this.cellSize = cellSize;
@@ -75,7 +75,7 @@ namespace scx.GridMap {
         /// x X 坐标 (世界坐标系)
         /// return 格子 X (Grid 坐标系)
         public int worldToGridX(float x) {
-            return (int)Math.Floor((x - worldX) / cellSize);
+            return (int)Math.Floor((x - worldStartX) / cellSize);
         }
 
         /// 世界坐标 Y 转 Grid 坐标 Y
@@ -83,21 +83,21 @@ namespace scx.GridMap {
         /// y Y 坐标 (世界坐标系)
         /// return 格子 Y (Grid 坐标系)
         public int worldToGridY(float y) {
-            return (int)Math.Floor((y - worldY) / cellSize);
+            return (int)Math.Floor((y - worldStartY) / cellSize);
         }
 
         /// Grid 坐标 X 转 格子起始 X 坐标 (世界坐标系)
         /// gridX 格子 X (Grid 坐标系)
         /// return 格子起始 X 坐标 (世界坐标系)
         public float gridToWorldStartX(int gridX) {
-            return worldX + gridX * cellSize;
+            return worldStartX + gridX * cellSize;
         }
 
         /// Grid 坐标 Y 转 格子起始 Y 坐标 (世界坐标系)
         /// gridY 格子 Y (Grid 坐标系)
         /// return 格子起始 Y 坐标 (世界坐标系)
         public float gridToWorldStartY(int gridY) {
-            return worldY + gridY * cellSize;
+            return worldStartY + gridY * cellSize;
         }
 
         /// Grid 坐标 X 转 格子结束 X 坐标 (世界坐标系)
