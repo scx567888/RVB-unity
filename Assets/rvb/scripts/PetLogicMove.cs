@@ -1,37 +1,41 @@
 ﻿using UnityEngine;
 
 namespace rvb.scripts {
-    public class PetLogicMove : PetLogic{
-        public static readonly PetLogicMove  Instance = new ();
-        public void tick(PetView petSkin, SheepMgr sheepMgr, bool t) {
-            if (!t) {
+    public class PetLogicMove : PetLogic {
+        private static readonly int LOOP_FRAME = 4;
+        public static readonly PetLogicMove Instance = new();
+
+        public void tick(PetView pet, SheepMgr sheepMgr) {
+            // 每四个逻辑帧 (action) 执行一次
+            var shouldExecute = pet.frame % LOOP_FRAME == LOOP_FRAME - 1;
+            if (!shouldExecute) {
                 return;
             }
 
-            if (petSkin.isLock) {
+            if (pet.isLock) {
                 return;
             }
 
-            var fff = sheepMgr.findTar(petSkin);
+            var fff = sheepMgr.findTar(pet);
             var s = fff.atkTar;
             var o = fff.moveTar;
             var l = fff.moveBoss;
 
             if (s != null) {
-                petSkin.state = SheepRoleState.Attack;
-                petSkin.subState = SheepRoleSubState.AttackAwait;
+                pet.state = SheepRoleState.Attack;
+                pet.subState = SheepRoleSubState.AttackAwait;
                 return;
             }
 
             if (o != null) {
-                petSkin.subState = SheepRoleSubState.MoveTar;
-                sheepMgr.moveTar(petSkin, o, t);
+                pet.subState = SheepRoleSubState.MoveTar;
+                sheepMgr.moveTar(pet, o);
                 return;
             }
 
             if (l != null) {
-                petSkin.subState = SheepRoleSubState.MoveBoss;
-                sheepMgr.moveTar(petSkin, l, t);
+                pet.subState = SheepRoleSubState.MoveBoss;
+                sheepMgr.moveTar(pet, l);
                 return;
             }
 

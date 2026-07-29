@@ -8,7 +8,7 @@ namespace rvb.scripts {
     public class PetView {
         // 唯一 id
         public int id = 0;
-        // 是否活跃
+        // 是否活跃 (用于 SheepMgr 使用)
         public bool isActive = false;
         // 是否死亡
         public bool isDie = false;
@@ -19,7 +19,7 @@ namespace rvb.scripts {
         // 
         public int roleId = 0;
         // 主状态
-        private  SheepRoleState _state = SheepRoleState.In;
+        public SheepRoleState state = SheepRoleState.In;
         // 子状态
         public SheepRoleSubState subState = SheepRoleSubState.None;
         
@@ -56,7 +56,6 @@ namespace rvb.scripts {
         
         public int readySkillId = 0;
         public int energy = 0;
-        private  PetLogic petLogic ;
 
         public BuffTimeAttacher attacher;
 
@@ -73,39 +72,6 @@ namespace rvb.scripts {
             set {
                 _animType = value;
                 animFrame = 0;
-            }
-        }
-        
-        public SheepRoleState state {
-            get { return _state; }
-
-            set {
-                _state = value;
-                this.petLogic = _state switch {
-                    SheepRoleState.Start => PetLogicStart.Instance,
-                    SheepRoleState.In => PetLogicIn.Instance,
-                    SheepRoleState.Spurt => PetLogicSpurt.Instance,
-                    SheepRoleState.Charge => PetLogicCharge.Instance,
-                    SheepRoleState.ChargePlus => PetLogicChargePlus.Instance,
-                    SheepRoleState.SpinSpurt => PetLogicSpinSpurt.Instance,
-                    SheepRoleState.Move => PetLogicMove.Instance,
-                    SheepRoleState.Attack => PetLogicAttack.Instance,
-                    SheepRoleState.Killer => PetLogicKiller.Instance,
-                    SheepRoleState.Boom => PetLogicBoom.Instance,
-                    SheepRoleState.Invincible => PetLogicInvincible.Instance,
-                    SheepRoleState.Bladestorm => PetLogicBladestorm.Instance,
-                    SheepRoleState.Palm => PetLogicPalm.Instance,
-                    SheepRoleState.CallBullets => PetLogicCallBullets.Instance,
-                    SheepRoleState.Buff => PetLogicBuff.Instance,
-                    SheepRoleState.Rigidity => PetLogicRigidity.Instance,
-                    SheepRoleState.SpinAtk => PetLogicSpinAtk.Instance,
-                    SheepRoleState.Dead => PetLogicDead.Instance,
-                    SheepRoleState.Merge => PetLogicMerge.Instance,
-                    SheepRoleState.Res => PetLogicRes.Instance,
-                    SheepRoleState.SkillBullet => PetLogicSkillBullet.Instance,
-                    SheepRoleState.Up => PetLogicUp.Instance,
-                    _ => throw new ArgumentOutOfRangeException()
-                };
             }
         }
 
@@ -145,9 +111,118 @@ namespace rvb.scripts {
             posX = x;
             posY = y;
         }
+
+        public virtual void action(SheepMgr sheepMgr, float fixedDeltaTime) {
+           
+            var bbb = this.update_frame(sheepMgr);
+            var petIsDie = this.isDie;
+            if (!petIsDie) {
+                this.update_role_state(bbb,sheepMgr,fixedDeltaTime);
+            }
+
+            this.updateAnimFrame();
+            
+            // 增加逻辑帧
+            frame += 1;
+        }
         
-        public void update_role_state(bool isLogicFrame,SheepMgr sheepMgr) {
-            petLogic.tick(this, sheepMgr, isLogicFrame);
+        private bool update_frame(SheepMgr sheepMgr) {
+            var frame = this.frame;
+            var loopFrame = sheepMgr.sheepConfig.loopFrame;
+            var i = frame % loopFrame == loopFrame - 1;
+            var posBefX = this.posBefX;
+            var posBefY = this.posBefY;
+            var posX = this.posX;
+            var posY = this.posY;
+            if (!this.isDie) {
+                this.animX = posBefX + (posX - posBefX) * (frame % loopFrame) / loopFrame;
+                this.animY = posBefY + (posY - posBefY) * (frame % loopFrame) / loopFrame;
+            }
+
+            
+            if (!this.isDie && i) {
+                this.logicMove(posX, posY);
+            }
+
+            return i;
+        }
+        
+        private void update_role_state(bool isLogicFrame, SheepMgr sheepMgr, float fixedDeltaTime) {
+            this.subAtkCd(fixedDeltaTime);
+
+            PetLogic petLogic;
+            switch (state) {
+                case SheepRoleState.Start:
+                    petLogic = PetLogicStart.Instance;
+                    break;
+                case SheepRoleState.In:
+                    petLogic = PetLogicIn.Instance;
+                    break;
+                case SheepRoleState.Spurt:
+                    petLogic = PetLogicSpurt.Instance;
+                    break;
+                case SheepRoleState.Charge:
+                    petLogic = PetLogicCharge.Instance;
+                    break;
+                case SheepRoleState.ChargePlus:
+                    petLogic = PetLogicChargePlus.Instance;
+                    break;
+                case SheepRoleState.SpinSpurt:
+                    petLogic = PetLogicSpinSpurt.Instance;
+                    break;
+                case SheepRoleState.Move:
+                    petLogic = PetLogicMove.Instance;
+                    break;
+                case SheepRoleState.Attack:
+                    petLogic = PetLogicAttack.Instance;
+                    break;
+                case SheepRoleState.Killer:
+                    petLogic = PetLogicKiller.Instance;
+                    break;
+                case SheepRoleState.Boom:
+                    petLogic = PetLogicBoom.Instance;
+                    break;
+                case SheepRoleState.Invincible:
+                    petLogic = PetLogicInvincible.Instance;
+                    break;
+                case SheepRoleState.Bladestorm:
+                    petLogic = PetLogicBladestorm.Instance;
+                    break;
+                case SheepRoleState.Palm:
+                    petLogic = PetLogicPalm.Instance;
+                    break;
+                case SheepRoleState.CallBullets:
+                    petLogic = PetLogicCallBullets.Instance;
+                    break;
+                case SheepRoleState.Buff:
+                    petLogic = PetLogicBuff.Instance;
+                    break;
+                case SheepRoleState.Rigidity:
+                    petLogic = PetLogicRigidity.Instance;
+                    break;
+                case SheepRoleState.SpinAtk:
+                    petLogic = PetLogicSpinAtk.Instance;
+                    break;
+                case SheepRoleState.Dead:
+                    petLogic = PetLogicDead.Instance;
+                    break;
+                case SheepRoleState.Merge:
+                    petLogic = PetLogicMerge.Instance;
+                    break;
+                case SheepRoleState.Res:
+                    petLogic = PetLogicRes.Instance;
+                    break;
+                case SheepRoleState.SkillBullet:
+                    petLogic = PetLogicSkillBullet.Instance;
+                    break;
+                case SheepRoleState.Up:
+                    petLogic = PetLogicUp.Instance;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            petLogic.tick(this, sheepMgr);
             
             if (impulseX != 0 || impulseY != 0) {
                 if (!isDie && curHp > 0) {
@@ -160,6 +235,12 @@ namespace rvb.scripts {
                 impulseY = 0;
             }
         }    
+        
+        
+        // 每逻辑帧调用一次
+        public void updateAnimFrame() {
+            animFrame += 1;
+        }
         
     }
 }

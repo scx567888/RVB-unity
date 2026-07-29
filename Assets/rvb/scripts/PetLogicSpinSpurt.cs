@@ -2,39 +2,42 @@
 
 namespace rvb.scripts {
     public class PetLogicSpinSpurt : PetLogic{
+        private static readonly int LOOP_FRAME = 4;
         public static readonly PetLogicSpinSpurt  Instance = new ();
-        public void tick(PetView e, SheepMgr sheepMgr, bool t) {
-            if (!t) {
+        public void tick(PetView pet, SheepMgr sheepMgr) {
+            // 每四个逻辑帧 (action) 执行一次
+            var shouldExecute = pet.frame % LOOP_FRAME == LOOP_FRAME - 1;
+            if (!shouldExecute) {
                 return;
             }
 
-            var o = e.posX;
-            var l = e.posY;
+            var o = pet.posX;
+            var l = pet.posY;
             (int n, int r) = sheepMgr.getXnYn(o, l);
-            if (e.camp == SheepCamp.Red && e.posX > e.conf.runEndX ||
-                e.camp == SheepCamp.Blue && e.posX < -e.conf.runEndX) {
-                e.state = SheepRoleState.Boom;
-                e.subState = SheepRoleSubState.Boom;
-                var t1 = SheepSkillSubSpinSpurt.getById(e.conf.skillSpurt);
+            if (pet.camp == SheepCamp.Red && pet.posX > pet.conf.runEndX ||
+                pet.camp == SheepCamp.Blue && pet.posX < -pet.conf.runEndX) {
+                pet.state = SheepRoleState.Boom;
+                pet.subState = SheepRoleSubState.Boom;
+                var t1 = SheepSkillSubSpinSpurt.getById(pet.conf.skillSpurt);
                 var i1 = SheepSkillSubBoom.getById(t1.endSkill);
                 if (i1.isAnim != 0) {
-                    e.animType = SheepRoleAnimType.Boom;
+                    pet.animType = SheepRoleAnimType.Boom;
                 }
                 else {
-                    e.animType = SheepRoleAnimType.Idle;
+                    pet.animType = SheepRoleAnimType.Idle;
                 }
 
-                e.readySkillId = i1.id;
+                pet.readySkillId = i1.id;
             }
             else {
-                sheepMgr.moveTar(e, null, t);
-                sheepMgr.forNearBlocksByAckView(e, n, r, e.conf.findR,
+                sheepMgr.moveTar(pet, null);
+                sheepMgr.forNearBlocksByAckView(pet, n, r, pet.conf.findR,
                     t2 => {
-                        if (t2.isDie || t2.camp == e.camp || !sheepMgr.isCanAckByRole(e, t2)) {
+                        if (t2.isDie || t2.camp == pet.camp || !sheepMgr.isCanAckByRole(pet, t2)) {
                             return false;
                         }
 
-                        sheepMgr.ackTar(e, t2);
+                        sheepMgr.ackTar(pet, t2);
                         return false;
                     });
             }
