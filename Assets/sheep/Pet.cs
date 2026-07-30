@@ -28,8 +28,13 @@ namespace sheep {
         public ScxSpriteRenderUnit scxSpriteRenderUnit;
 
         public void action(SheepWorld sheepWorld) {
+            // 1, 执行逻辑
+            PetLogic.INSTANCE.tick(this, sheepWorld);
+            
+            // 2, 计算自主位移
             var selfMove = calculateSelfMove();
 
+            // 3, 应用位移
             this.x += selfMove.X;
             this.y += selfMove.Y;
         }
