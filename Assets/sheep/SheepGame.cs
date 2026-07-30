@@ -90,6 +90,28 @@ namespace sheep {
             
         }
 
+        void OnGUI() {
+            
+            // 计算区域
+            var w = Screen.width;
+            var h = Screen.height;
+
+            // 设置显示样式
+            var position = new Rect(100, 100, w, h * 2f / 100);
+
+            // 设置样式
+            var style = new GUIStyle {
+                alignment = TextAnchor.UpperLeft,
+                fontSize = h * 2 / 50,
+                normal = {
+                    textColor = Color.green
+                }
+            };
+
+            // 绘制在屏幕左上角
+            GUI.Label(position, "pet 数量 : "+sheepWorld.pets.Count, style);
+        }
+
         // 执行逻辑帧
         void tick() {
             // 记录状态 用于插值
