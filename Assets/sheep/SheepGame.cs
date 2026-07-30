@@ -76,6 +76,8 @@ namespace sheep {
                 for (int i = 0; i < 20; i++) {
                     sheepWorld.addPrePet(new Pet() {
                         moveSpeed = sheepWorld.randomFloat(0.25f, 0.5f),
+                        x = sheepWorld.randomFloat(-50f, 50f),
+                        y = sheepWorld.randomFloat(-50f, 50f),
                         collideR = 0.5f,
                         collideMoveScale = 1,
                         collideElasticityScale = 1.3f / 4,
@@ -130,6 +132,8 @@ namespace sheep {
                     pet.scxSpriteRenderUnit = scxSpriteRenderer.createUnit();
                     pet.scxSpriteRenderUnit.setRotationFromEuler(45, 0, 0);
                     pet.scxSpriteRenderUnit.setVisible(true);
+                    pet.lastX = pet.x; // 防止插值瞬移
+                    pet.lastY = pet.y; // 防止插值瞬移
                 }
 
                 renderPet(pet, alpha);
