@@ -1,3 +1,4 @@
+using rvb.scripts;
 using rvb.utils;
 using scx.SpriteRenderer;
 using UnityEngine;
@@ -7,8 +8,7 @@ namespace sheep {
         // ********************* 逻辑帧相关 *********************
 
         // 逻辑帧率
-        [Range(1, 240)] 
-        public int tickRate = 30;
+        [Range(1, 240)] public int tickRate = 30;
 
         // 逻辑帧率累加器
         private double tickAccumulator = 0;
@@ -23,18 +23,17 @@ namespace sheep {
         // ********************* 渲染器相关 *********************
 
         private ScxSpriteRenderer scxSpriteRenderer;
-        private ScxSpriteRenderUnit scxSpriteRenderUnit;
-        private ScxSpriteRenderUnit scxSpriteRenderUnit1;
 
         // ********************* 渲染插值相关 *********************
 
         public bool useLerp = true;
-        private Vector3 previousPosition;
-        private Vector3 currentPosition;
 
         // ********************* 主逻辑相关 *********************
 
         private SheepWorld sheepWorld;
+
+        // *******************  测试  ****************
+        public GameObject boss;
 
         void Start() {
             // 创建渲染器
@@ -46,18 +45,14 @@ namespace sheep {
                 100
             );
             this.scxSpriteRenderer.setParent(this.gameObject);
-            
-            // 创建渲染单元
-            this.scxSpriteRenderUnit = scxSpriteRenderer.createUnit();
-            this.scxSpriteRenderUnit.setFrame(0);
-            this.scxSpriteRenderUnit1 = scxSpriteRenderer.createUnit();
-            this.scxSpriteRenderUnit1.setFrame(0);
 
             // 初始化主逻辑
             sheepWorld = new SheepWorld();
         }
 
         void Update() {
+            UpdateTest();
+
             // 计算 tick 帧 时长
             double tickInterval = 1.0 / tickRate;
 
@@ -77,36 +72,68 @@ namespace sheep {
             render(alpha);
         }
 
+        private void UpdateTest() {
+            if (Input.GetKeyDown(KeyCode.Space)) {
+                for (int i = 0; i < 10; i++) {
+                    sheepWorld.addPrePet(new Pet() {
+                        moveSpeed = 0.25f,
+                        collideR = 0.5f,
+                        collideMoveScale = 1,
+                        collideElasticityScale = 1.3f / 4,
+                        collideNotMoveNum = 500
+                    });
+                }
+            }
+
+            sheepWorld.bossX = boss.transform.position.x;
+            sheepWorld.bossY = boss.transform.position.z;
+            
+        }
+
         // 执行逻辑帧
         void tick() {
             // 记录状态 用于插值
-            previousPosition = currentPosition;
+            foreach (var pet in sheepWorld.pets) {
+                pet.lastX = pet.x;
+                pet.lastY = pet.y;
+            }
 
             // 执行 sheepWorld.tick()
             sheepWorld.tick();
-
-            // 记录状态 用于插值
-            currentPosition = sheepWorld.position;
         }
 
         // 执行渲染
         void render(float alpha) {
+            foreach (var pet in sheepWorld.pets) {
+                if (pet.scxSpriteRenderUnit == null) {
+                    pet.scxSpriteRenderUnit = scxSpriteRenderer.createUnit();
+                    pet.scxSpriteRenderUnit.setRotationFromEuler(45, 0, 0);
+                    pet.scxSpriteRenderUnit.setVisible(true);
+                }
+
+                renderPet(pet, alpha);
+            }
+
+            // 更新渲染器
+            scxSpriteRenderer.update();
+        }
+
+        public void renderPet(Pet pet, float alpha) {
             Vector3 renderPosition;
             // 判断是否启用线性插值
             if (useLerp) {
                 renderPosition = Vector3.Lerp(
-                    previousPosition,
-                    currentPosition,
+                    new Vector3(pet.lastX, 0, pet.lastY),
+                    new Vector3(pet.x, 0, pet.y),
                     alpha
                 );
             }
             else {
-                renderPosition = currentPosition;
+                renderPosition = new Vector3(pet.x, 0, pet.y);
             }
 
-            scxSpriteRenderUnit.setPosition(renderPosition.x, renderPosition.y, renderPosition.z);
-            scxSpriteRenderUnit1.setPosition(currentPosition.x, currentPosition.y + 1, currentPosition.z);
-            scxSpriteRenderer.update();
+            pet.scxSpriteRenderUnit.setPosition(renderPosition.x, renderPosition.y, renderPosition.z);
+            pet.scxSpriteRenderUnit.setFrame(0);
         }
     }
 }
