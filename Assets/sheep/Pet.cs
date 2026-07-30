@@ -10,6 +10,12 @@ namespace sheep {
         // 唯一真实位置 Y
         public float y;
 
+
+        // ****************** 核心逻辑帧 *********************
+
+        // 核心逻辑帧
+        public int frame;
+
         // ********************** 自主移动相关 ***********************
 
         // 自主移动模式
@@ -44,8 +50,10 @@ namespace sheep {
 
         // 渲染器句柄 (逻辑层不应使用此字段)
         public ScxSpriteRenderUnit scxSpriteRenderUnit;
+
         // 渲染器 X 用于插值 (逻辑层不应使用此字段)
         public float lastX;
+
         // 渲染器 Y 用于插值 (逻辑层不应使用此字段)
         public float lastY;
 
@@ -65,6 +73,9 @@ namespace sheep {
             // 4. 应用最终位移
             this.x += collisionMove.x;
             this.y += collisionMove.y;
+
+            // 5, 更新逻辑帧
+            frame++;
         }
 
         // 计算自主移动位移

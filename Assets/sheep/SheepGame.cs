@@ -73,7 +73,7 @@ namespace sheep {
 
         private void UpdateTest() {
             if (Input.GetKeyDown(KeyCode.Space)) {
-                for (int i = 0; i < 20; i++) {
+                for (int i = 0; i < 50; i++) {
                     sheepWorld.addPrePet(new Pet() {
                         moveSpeed = sheepWorld.randomFloat(0.25f, 0.5f),
                         x = sheepWorld.randomFloat(-50f, 50f),
@@ -158,7 +158,7 @@ namespace sheep {
             }
 
             pet.scxSpriteRenderUnit.setPosition(renderPosition.x, renderPosition.y, renderPosition.z);
-            pet.scxSpriteRenderUnit.setFrame(0);
+            pet.scxSpriteRenderUnit.setFrame(pet.frame % 10);
         }
     }
 }
