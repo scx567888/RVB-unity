@@ -76,7 +76,7 @@ namespace sheep {
             if (Input.GetKeyDown(KeyCode.Space)) {
                 for (int i = 0; i < 10; i++) {
                     sheepWorld.addPrePet(new Pet() {
-                        moveSpeed = 0.25f,
+                        moveSpeed = sheepWorld.randomFloat(0.25f,0.5f),
                         collideR = 0.5f,
                         collideMoveScale = 1,
                         collideElasticityScale = 1.3f / 4,
