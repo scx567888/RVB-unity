@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using rvb.utils;
 using scx.SpriteRenderer;
 using UnityEngine;
@@ -33,6 +34,7 @@ namespace sheep {
 
         // *******************  测试  ****************
         public GameObject boss;
+        public GameObject boss1;
 
         void Start() {
             // 创建渲染器
@@ -51,6 +53,12 @@ namespace sheep {
 
         void Update() {
             UpdateTest();
+            tick();
+        }
+
+        // 执行逻辑帧
+        public void tick() {
+            var results = new List<HashSet<Pet>>();
 
             // 计算 tick 帧 时长
             double tickInterval = 1.0 / tickRate;
@@ -60,8 +68,23 @@ namespace sheep {
 
             // 调度逻辑帧
             while (tickAccumulator >= tickInterval) {
-                tick();
+                // 记录状态 用于插值
+                foreach (var pet in sheepWorld.pets) {
+                    pet.lastX = pet.x;
+                    pet.lastY = pet.y;
+                }
+
+                // 执行 sheepWorld.tick()
+                var result = sheepWorld.tick();
+                results.Add(result);
                 tickAccumulator -= tickInterval;
+            }
+
+            // 处理渲染
+            foreach (var result in results) {
+                foreach (var pet in result) {
+                    pet.scxSpriteRenderUnit?.destroy();
+                }
             }
 
             // 计算插值
@@ -69,58 +92,6 @@ namespace sheep {
 
             // 渲染
             render(alpha);
-        }
-
-        private void UpdateTest() {
-            if (Input.GetKeyDown(KeyCode.Space)) {
-                for (int i = 0; i < 50; i++) {
-                    sheepWorld.addPrePet(new Pet() {
-                        moveSpeed = sheepWorld.randomFloat(0.25f, 0.5f),
-                        x = sheepWorld.randomFloat(-50f, 50f),
-                        y = sheepWorld.randomFloat(-50f, 50f),
-                        collideR = 0.5f,
-                        collideMoveScale = 1,
-                        collideElasticityScale = 1.3f / 4,
-                        collideNotMoveNum = 500
-                    });
-                }
-            }
-
-            sheepWorld.bossX = boss.transform.position.x;
-            sheepWorld.bossY = boss.transform.position.z;
-        }
-
-        void OnGUI() {
-            // 计算区域
-            var w = Screen.width;
-            var h = Screen.height;
-
-            // 设置显示样式
-            var position = new Rect(100, 100, w, h * 2f / 100);
-
-            // 设置样式
-            var style = new GUIStyle {
-                alignment = TextAnchor.UpperLeft,
-                fontSize = h * 2 / 50,
-                normal = {
-                    textColor = Color.green
-                }
-            };
-
-            // 绘制在屏幕左上角
-            GUI.Label(position, "pet 数量 : " + sheepWorld.pets.Count, style);
-        }
-
-        // 执行逻辑帧
-        void tick() {
-            // 记录状态 用于插值
-            foreach (var pet in sheepWorld.pets) {
-                pet.lastX = pet.x;
-                pet.lastY = pet.y;
-            }
-
-            // 执行 sheepWorld.tick()
-            sheepWorld.tick();
         }
 
         // 执行渲染
@@ -159,6 +130,66 @@ namespace sheep {
 
             pet.scxSpriteRenderUnit.setPosition(renderPosition.x, renderPosition.y, renderPosition.z);
             pet.scxSpriteRenderUnit.setFrame(pet.frame % 10);
+        }
+
+        // *************************** 测试用 *********************************
+
+
+        private void UpdateTest() {
+            if (Input.GetKeyDown(KeyCode.Space)) {
+                for (int i = 0; i < 500; i++) {
+                    sheepWorld.addPrePet(new Pet() {
+                        id = sheepWorld.getNextPetId(),
+                        moveSpeed = sheepWorld.randomFloat(0.25f, 0.5f),
+                        x = sheepWorld.randomFloat(-50f, 50f),
+                        y = sheepWorld.randomFloat(-50f, 50f),
+                        collideR = 0.5f,
+                        collideMoveScale = 1,
+                        collideElasticityScale = 1.3f / 4,
+                        collideNotMoveNum = 500
+                    });
+                }
+            }
+
+            if (Input.GetKeyDown(KeyCode.R)) {
+                int i = 0;
+                foreach (var pet in sheepWorld.pets) {
+                    if (i >= 500) { // 一次最多删除 500 个单位
+                        break;
+                    }
+
+                    sheepWorld.addDelPet(pet);
+                    i++;
+                }
+            }
+
+
+            sheepWorld.bossX = boss.transform.position.x;
+            sheepWorld.bossY = boss.transform.position.z;
+
+            sheepWorld.boss1X = boss1.transform.position.x;
+            sheepWorld.boss1Y = boss1.transform.position.z;
+        }
+
+        void OnGUI() {
+            // 计算区域
+            var w = Screen.width;
+            var h = Screen.height;
+
+            // 设置显示样式
+            var position = new Rect(100, 100, w, h * 2f / 100);
+
+            // 设置样式
+            var style = new GUIStyle {
+                alignment = TextAnchor.UpperLeft,
+                fontSize = h * 2 / 50,
+                normal = {
+                    textColor = Color.green
+                }
+            };
+
+            // 绘制在屏幕左上角
+            GUI.Label(position, "pet 数量 : " + sheepWorld.pets.Count, style);
         }
     }
 }
