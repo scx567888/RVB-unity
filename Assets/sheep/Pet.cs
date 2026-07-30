@@ -42,8 +42,12 @@ namespace sheep {
 
         // ********************* 渲染器挂载相关 **********************
 
-        // 逻辑层不应使用此字段
+        // 渲染器句柄 (逻辑层不应使用此字段)
         public ScxSpriteRenderUnit scxSpriteRenderUnit;
+        // 渲染器 X 用于插值 (逻辑层不应使用此字段)
+        public float lastX;
+        // 渲染器 Y 用于插值 (逻辑层不应使用此字段)
+        public float lastY;
 
         public void action(SheepWorld sheepWorld) {
             // 1. 执行逻辑, 更新自主移动意图
