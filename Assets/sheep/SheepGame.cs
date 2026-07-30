@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using rvb.utils;
 using scx.SpriteRenderer;
 using UnityEngine;
@@ -7,8 +8,7 @@ namespace sheep {
         // ********************* 逻辑帧相关 *********************
 
         // 逻辑帧率
-        [Range(1, 240)] 
-        public int tickRate = 30;
+        [Range(1, 240)] public int tickRate = 30;
 
         // 逻辑帧率累加器
         private double tickAccumulator = 0;
@@ -23,18 +23,18 @@ namespace sheep {
         // ********************* 渲染器相关 *********************
 
         private ScxSpriteRenderer scxSpriteRenderer;
-        private ScxSpriteRenderUnit scxSpriteRenderUnit;
-        private ScxSpriteRenderUnit scxSpriteRenderUnit1;
 
         // ********************* 渲染插值相关 *********************
 
         public bool useLerp = true;
-        private Vector3 previousPosition;
-        private Vector3 currentPosition;
 
         // ********************* 主逻辑相关 *********************
 
         private SheepWorld sheepWorld;
+
+        // *******************  测试  ****************
+        public GameObject boss;
+        public GameObject boss1;
 
         void Start() {
             // 创建渲染器
@@ -43,21 +43,23 @@ namespace sheep {
                 loadRoleResult.spriteAtlas,
                 100,
                 mainMaterial,
-                100
+                1000
             );
             this.scxSpriteRenderer.setParent(this.gameObject);
-            
-            // 创建渲染单元
-            this.scxSpriteRenderUnit = scxSpriteRenderer.createUnit();
-            this.scxSpriteRenderUnit.setFrame(0);
-            this.scxSpriteRenderUnit1 = scxSpriteRenderer.createUnit();
-            this.scxSpriteRenderUnit1.setFrame(0);
 
             // 初始化主逻辑
             sheepWorld = new SheepWorld();
         }
 
         void Update() {
+            UpdateTest();
+            tick();
+        }
+
+        // 执行逻辑帧
+        public void tick() {
+            var results = new List<HashSet<Pet>>();
+
             // 计算 tick 帧 时长
             double tickInterval = 1.0 / tickRate;
 
@@ -66,8 +68,23 @@ namespace sheep {
 
             // 调度逻辑帧
             while (tickAccumulator >= tickInterval) {
-                tick();
+                // 记录状态 用于插值
+                foreach (var pet in sheepWorld.pets) {
+                    pet.lastX = pet.x;
+                    pet.lastY = pet.y;
+                }
+
+                // 执行 sheepWorld.tick()
+                var result = sheepWorld.tick();
+                results.Add(result);
                 tickAccumulator -= tickInterval;
+            }
+
+            // 处理渲染
+            foreach (var result in results) {
+                foreach (var pet in result) {
+                    pet.scxSpriteRenderUnit?.destroy();
+                }
             }
 
             // 计算插值
@@ -77,36 +94,102 @@ namespace sheep {
             render(alpha);
         }
 
-        // 执行逻辑帧
-        void tick() {
-            // 记录状态 用于插值
-            previousPosition = currentPosition;
-
-            // 执行 sheepWorld.tick()
-            sheepWorld.tick();
-
-            // 记录状态 用于插值
-            currentPosition = sheepWorld.position;
-        }
-
         // 执行渲染
         void render(float alpha) {
+            var pets = sheepWorld.pets;
+
+            foreach (var pet in pets) {
+                if (pet.scxSpriteRenderUnit == null) {
+                    pet.scxSpriteRenderUnit = scxSpriteRenderer.createUnit();
+                    pet.scxSpriteRenderUnit.setRotationFromEuler(45, 0, 0);
+                    pet.scxSpriteRenderUnit.setVisible(true);
+                    pet.lastX = pet.x; // 防止插值瞬移
+                    pet.lastY = pet.y; // 防止插值瞬移
+                }
+
+                renderPet(pet, alpha);
+            }
+
+            // 更新渲染器
+            scxSpriteRenderer.update();
+        }
+
+        public void renderPet(Pet pet, float alpha) {
             Vector3 renderPosition;
             // 判断是否启用线性插值
             if (useLerp) {
                 renderPosition = Vector3.Lerp(
-                    previousPosition,
-                    currentPosition,
+                    new Vector3(pet.lastX, 0, pet.lastY),
+                    new Vector3(pet.x, 0, pet.y),
                     alpha
                 );
             }
             else {
-                renderPosition = currentPosition;
+                renderPosition = new Vector3(pet.x, 0, pet.y);
             }
 
-            scxSpriteRenderUnit.setPosition(renderPosition.x, renderPosition.y, renderPosition.z);
-            scxSpriteRenderUnit1.setPosition(currentPosition.x, currentPosition.y + 1, currentPosition.z);
-            scxSpriteRenderer.update();
+            pet.scxSpriteRenderUnit.setPosition(renderPosition.x, renderPosition.y, renderPosition.z);
+            pet.scxSpriteRenderUnit.setFrame(pet.frame % 10);
+        }
+
+        // *************************** 测试用 *********************************
+
+
+        private void UpdateTest() {
+            if (Input.GetKeyDown(KeyCode.Space)) {
+                for (int i = 0; i < 500; i++) {
+                    sheepWorld.addPrePet(new Pet() {
+                        id = sheepWorld.getNextPetId(),
+                        moveSpeed = sheepWorld.randomFloat(0.25f, 0.5f),
+                        x = sheepWorld.randomFloat(-50f, 50f),
+                        y = sheepWorld.randomFloat(-50f, 50f),
+                        collideR = 0.5f,
+                        collideMoveScale = 1,
+                        collideElasticityScale = 1.3f / 4,
+                        collideNotMoveNum = 500
+                    });
+                }
+            }
+
+            if (Input.GetKeyDown(KeyCode.R)) {
+                int i = 0;
+                foreach (var pet in sheepWorld.pets) {
+                    if (i >= 500) { // 一次最多删除 500 个单位
+                        break;
+                    }
+
+                    sheepWorld.addDelPet(pet);
+                    i++;
+                }
+            }
+
+
+            sheepWorld.bossX = boss.transform.position.x;
+            sheepWorld.bossY = boss.transform.position.z;
+
+            sheepWorld.boss1X = boss1.transform.position.x;
+            sheepWorld.boss1Y = boss1.transform.position.z;
+        }
+
+        void OnGUI() {
+            // 计算区域
+            var w = Screen.width;
+            var h = Screen.height;
+
+            // 设置显示样式
+            var position = new Rect(100, 100, w, h * 2f / 100);
+
+            // 设置样式
+            var style = new GUIStyle {
+                alignment = TextAnchor.UpperLeft,
+                fontSize = h * 2 / 50,
+                normal = {
+                    textColor = Color.green
+                }
+            };
+
+            // 绘制在屏幕左上角
+            GUI.Label(position, "pet 数量 : " + sheepWorld.pets.Count, style);
         }
     }
 }
