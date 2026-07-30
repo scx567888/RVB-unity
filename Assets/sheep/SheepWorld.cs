@@ -148,5 +148,8 @@ namespace sheep {
 
         public float bossX;
         public float bossY;
+        
+        public float boss1X;
+        public float boss1Y;
     }
 }
