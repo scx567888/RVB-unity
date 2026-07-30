@@ -1,4 +1,3 @@
-using rvb.scripts;
 using rvb.utils;
 using scx.SpriteRenderer;
 using UnityEngine;
@@ -42,7 +41,7 @@ namespace sheep {
                 loadRoleResult.spriteAtlas,
                 100,
                 mainMaterial,
-                100
+                1000
             );
             this.scxSpriteRenderer.setParent(this.gameObject);
 
@@ -74,9 +73,9 @@ namespace sheep {
 
         private void UpdateTest() {
             if (Input.GetKeyDown(KeyCode.Space)) {
-                for (int i = 0; i < 10; i++) {
+                for (int i = 0; i < 20; i++) {
                     sheepWorld.addPrePet(new Pet() {
-                        moveSpeed = sheepWorld.randomFloat(0.25f,0.5f),
+                        moveSpeed = sheepWorld.randomFloat(0.25f, 0.5f),
                         collideR = 0.5f,
                         collideMoveScale = 1,
                         collideElasticityScale = 1.3f / 4,
@@ -87,11 +86,9 @@ namespace sheep {
 
             sheepWorld.bossX = boss.transform.position.x;
             sheepWorld.bossY = boss.transform.position.z;
-            
         }
 
         void OnGUI() {
-            
             // 计算区域
             var w = Screen.width;
             var h = Screen.height;
@@ -109,7 +106,7 @@ namespace sheep {
             };
 
             // 绘制在屏幕左上角
-            GUI.Label(position, "pet 数量 : "+sheepWorld.pets.Count, style);
+            GUI.Label(position, "pet 数量 : " + sheepWorld.pets.Count, style);
         }
 
         // 执行逻辑帧
@@ -126,7 +123,9 @@ namespace sheep {
 
         // 执行渲染
         void render(float alpha) {
-            foreach (var pet in sheepWorld.pets) {
+            var pets = sheepWorld.pets;
+
+            foreach (var pet in pets) {
                 if (pet.scxSpriteRenderUnit == null) {
                     pet.scxSpriteRenderUnit = scxSpriteRenderer.createUnit();
                     pet.scxSpriteRenderUnit.setRotationFromEuler(45, 0, 0);
