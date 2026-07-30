@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace sheep {
     public class Pet {
+        // 唯一 ID
+        public int id;
+        
         // 唯一真实位置 X
         public float x;
 
