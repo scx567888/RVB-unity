@@ -18,16 +18,21 @@ namespace sheep {
 
         // 格子空间, 用于加速索敌碰撞
         public GridMap<SheepCell> gridMap;
+        
+        // 世界随机数生成器
+        public System.Random random ;
 
         public SheepWorld() {
             // 初始化格子空间
-            gridMap = new GridMap<SheepCell>(
+            this.gridMap = new GridMap<SheepCell>(
                 -50, -50,
                 100, 100,
                 4,
                 (gridX, gridY, worldStartX, worldStartY, worldEndX, worldEndY) =>
                     new SheepCell(gridX, gridY, worldStartX, worldStartY, worldEndX, worldEndY)
             );
+            // 初始化随机数器
+            this.random = new(666);
         }
 
         // *********************** 单位添加删除相关 ***************************
@@ -100,6 +105,19 @@ namespace sheep {
                 cell.addPet(pet);
             }
         }
+        
+        // ******************** 随机数相关 *************************
+        public int randomInt(int minValue, int maxValue) {
+            return random.Next(minValue, maxValue);
+        }
+
+        public float random01() {
+            return (float)random.NextDouble();
+        }
+
+        public float randomFloat(float minValue, float maxValue) {
+            return minValue + (maxValue - minValue) * (float)random.NextDouble();
+        }
 
         // **************************** 逻辑相关 ***************************
 
@@ -125,6 +143,11 @@ namespace sheep {
 
             return del_pets1;
         }
+        
+        // ************* 测试 ******************
+
+        public float bossX;
+        public float bossY;
 
     }
 }
