@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using scx.GridMap;
 using UnityEngine;
 
 namespace sheep {
@@ -14,6 +15,20 @@ namespace sheep {
 
         // 角色自增 id 
         public int petId = 0;
+
+        // 格子空间, 用于加速索敌碰撞
+        public GridMap<SheepCell> gridMap;
+
+        public SheepWorld() {
+            // 初始化格子空间
+            gridMap = new GridMap<SheepCell>(
+                -50, -50,
+                100, 100,
+                4,
+                (gridX, gridY, worldStartX, worldStartY, worldEndX, worldEndY) =>
+                    new SheepCell(gridX, gridY, worldStartX, worldStartY, worldEndX, worldEndY)
+            );
+        }
 
         // *********************** 单位添加删除相关 ***************************
 
@@ -66,6 +81,25 @@ namespace sheep {
 
             return copy;
         }
+        
+        // ************************ 格子相关 ************************
+        
+        // 重建格子
+        public void rebuildGridMap() {
+            // 清空格子
+            gridMap.forEachCell(cell => {
+                cell.clearPets();
+            });
+
+            // 重建格子
+            foreach (var pet in pets) {
+                var cell = gridMap.getCellByWorldPositionSafe(
+                    pet.x,
+                    pet.y
+                );
+                cell.addPet(pet);
+            }
+        }
 
         // **************************** 逻辑相关 ***************************
 
@@ -77,14 +111,20 @@ namespace sheep {
 
         // Tick
         public HashSet<Pet> tick() {
-            // 应用 预添加数据
+            // 1, 应用 预添加数据
             applyPrePets();
 
+            // 2, 重建格子
+            rebuildGridMap();
+
+            // 3, 执行动作
             this.petsAction();
 
+            // 4, 应用移除
             var del_pets1 = applyDelPets();
 
             return del_pets1;
         }
+
     }
 }
