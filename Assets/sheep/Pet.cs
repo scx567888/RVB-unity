@@ -10,6 +10,8 @@ namespace sheep {
         // 唯一真实位置 Y
         public float y;
 
+        // ********************** 自主移动相关 ***********************
+
         // 自主移动模式
         public PetMoveMode moveMode;
 
@@ -24,19 +26,27 @@ namespace sheep {
         public float targetX;
         public float targetY;
 
-        // 渲染器挂载相关
+        // ********************* 碰撞移动相关 **************************
+        
+        // 碰撞半径
+        public float collideR;
+
+        // 渲染器挂载相关 逻辑层应无视
         public ScxSpriteRenderUnit scxSpriteRenderUnit;
 
         public void action(SheepWorld sheepWorld) {
             // 1, 执行逻辑
             PetLogic.INSTANCE.tick(this, sheepWorld);
-            
+
             // 2, 计算自主位移
             var selfMove = calculateSelfMove();
 
+            // 3, 计算碰撞位移
+            var collisionMove = calculateCollisionMove(selfMove);
+
             // 3, 应用位移
-            this.x += selfMove.X;
-            this.y += selfMove.Y;
+            this.x += collisionMove.X;
+            this.y += collisionMove.Y;
         }
 
         // 计算自主移动位移
@@ -46,7 +56,7 @@ namespace sheep {
                 return Vector2.Zero;
             }
 
-            // 计算移动距离
+            // 计算移动距离 这里因为固定帧 所以 我们 的速度 实际上 就是 位移距离
             float moveDistance = moveSpeed;
 
             // 向量模式
@@ -76,6 +86,11 @@ namespace sheep {
 
             // 默认兜底
             return Vector2.Zero;
+        }
+
+        // 根据自主位移计算碰撞位移
+        private Vector2 calculateCollisionMove(Vector2 selfMove) {
+            return selfMove;
         }
     }
 }
