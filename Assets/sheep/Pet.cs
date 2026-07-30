@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Numerics;
+using scx.SpriteRenderer;
 
 namespace sheep {
     public class Pet {
@@ -23,7 +24,10 @@ namespace sheep {
         public float targetX;
         public float targetY;
 
-        public void action() {
+        // 渲染器挂载相关
+        public ScxSpriteRenderUnit scxSpriteRenderUnit;
+
+        public void action(SheepWorld sheepWorld) {
             var selfMove = calculateSelfMove();
 
             this.x += selfMove.X;
