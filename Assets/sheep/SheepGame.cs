@@ -70,8 +70,8 @@ namespace sheep {
             while (tickAccumulator >= tickInterval) {
                 // 记录状态 用于插值
                 foreach (var pet in sheepWorld.pets) {
-                    pet.lastX = pet.x;
-                    pet.lastY = pet.y;
+                    pet.renderHandle.lastX = pet.x;
+                    pet.renderHandle.lastY = pet.y;
                 }
 
                 // 执行 sheepWorld.tick()
@@ -83,7 +83,7 @@ namespace sheep {
             // 处理渲染
             foreach (var result in results) {
                 foreach (var pet in result) {
-                    pet.scxSpriteRenderUnit?.destroy();
+                    pet.renderHandle?.scxSpriteRenderUnit.destroy();
                 }
             }
 
@@ -99,12 +99,14 @@ namespace sheep {
             var pets = sheepWorld.pets;
 
             foreach (var pet in pets) {
-                if (pet.scxSpriteRenderUnit == null) {
-                    pet.scxSpriteRenderUnit = scxSpriteRenderer.createUnit();
-                    pet.scxSpriteRenderUnit.setRotationFromEuler(45, 0, 0);
-                    pet.scxSpriteRenderUnit.setVisible(true);
-                    pet.lastX = pet.x; // 防止插值瞬移
-                    pet.lastY = pet.y; // 防止插值瞬移
+                if (pet.renderHandle == null) {
+                    pet.renderHandle = new PetRenderHandle() {
+                        scxSpriteRenderUnit = scxSpriteRenderer.createUnit(),
+                    };
+                    pet.renderHandle.scxSpriteRenderUnit.setRotationFromEuler(45, 0, 0);
+                    pet.renderHandle.scxSpriteRenderUnit.setVisible(true);
+                    pet.renderHandle.lastX = pet.x; // 防止插值瞬移
+                    pet.renderHandle.lastY = pet.y; // 防止插值瞬移
                 }
 
                 renderPet(pet, alpha);
@@ -119,7 +121,7 @@ namespace sheep {
             // 判断是否启用线性插值
             if (useLerp) {
                 renderPosition = Vector3.Lerp(
-                    new Vector3(pet.lastX, 0, pet.lastY),
+                    new Vector3(pet.renderHandle.lastX, 0, pet.renderHandle.lastY),
                     new Vector3(pet.x, 0, pet.y),
                     alpha
                 );
@@ -128,8 +130,8 @@ namespace sheep {
                 renderPosition = new Vector3(pet.x, 0, pet.y);
             }
 
-            pet.scxSpriteRenderUnit.setPosition(renderPosition.x, renderPosition.y, renderPosition.z);
-            pet.scxSpriteRenderUnit.setFrame(pet.frame % 10);
+            pet.renderHandle.scxSpriteRenderUnit.setPosition(renderPosition.x, renderPosition.y, renderPosition.z);
+            pet.renderHandle.scxSpriteRenderUnit.setFrame(pet.frame % 10);
         }
 
         // *************************** 测试用 *********************************
@@ -143,12 +145,14 @@ namespace sheep {
                         moveIntent = new PetMoveIntent() {
                             moveSpeed = sheepWorld.randomFloat(0.25f, 0.5f)
                         },
+                        collideIntent = new PetCollideIntent() {
+                            collideRadius = 0.5f,
+                            // collideMoveScale = 1,
+                            // collideElasticityScale = 1.3f / 4,
+                            // collideNotMoveNum = 500
+                        },
                         x = sheepWorld.randomFloat(-50f, 50f),
                         y = sheepWorld.randomFloat(-50f, 50f),
-                        collideR = 0.5f,
-                        collideMoveScale = 1,
-                        collideElasticityScale = 1.3f / 4,
-                        collideNotMoveNum = 500
                     });
                 }
             }
