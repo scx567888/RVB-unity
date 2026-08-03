@@ -24,7 +24,7 @@
         public PetRenderHandle renderHandle;
 
         public void action(SheepWorld sheepWorld) {
-            // 1. 执行逻辑, 更新自主移动意图
+            // 1, 执行单位自身逻辑, 更新各类意图和逻辑状态
             PetLogic.INSTANCE.tick(this, sheepWorld);
 
             // 2, 更新逻辑帧

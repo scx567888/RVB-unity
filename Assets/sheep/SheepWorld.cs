@@ -122,7 +122,7 @@ namespace sheep {
         // **************************** 逻辑相关 ***************************
 
         public void petsAction() {
-            // 所有 pet 行动, 产生自主移动意图
+            // 所有 pet 行动, 执行单位自身逻辑, 更新各类意图和逻辑状态
             foreach (var pet in pets) {
                 pet.action(this);
             }
