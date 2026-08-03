@@ -140,7 +140,9 @@ namespace sheep {
                 for (int i = 0; i < 500; i++) {
                     sheepWorld.addPrePet(new Pet() {
                         id = sheepWorld.getNextPetId(),
-                        moveSpeed = sheepWorld.randomFloat(0.25f, 0.5f),
+                        moveIntent = new PetMoveIntent() {
+                            moveSpeed = sheepWorld.randomFloat(0.25f, 0.5f)
+                        },
                         x = sheepWorld.randomFloat(-50f, 50f),
                         y = sheepWorld.randomFloat(-50f, 50f),
                         collideR = 0.5f,
