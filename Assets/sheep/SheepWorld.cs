@@ -21,6 +21,12 @@ namespace sheep {
 
         // 世界随机数生成器
         public System.Random random;
+        
+        // 移动系统
+        public PetMoveSystem moveSystem;
+        
+        // 碰撞系统
+        public PetCollideSystem collideSystem;
 
         public SheepWorld() {
             // 初始化格子空间
@@ -33,6 +39,10 @@ namespace sheep {
             );
             // 初始化随机数器
             this.random = new(666);
+            // 初始化移动系统
+            this.moveSystem = new();
+            // 初始化碰撞系统
+            this.collideSystem = new();
         }
 
         // *********************** 单位添加删除相关 ***************************
@@ -122,8 +132,19 @@ namespace sheep {
         // **************************** 逻辑相关 ***************************
 
         public void petsAction() {
+            // 所有 pet 行动, 执行单位自身逻辑, 更新各类意图和逻辑状态
             foreach (var pet in pets) {
                 pet.action(this);
+            }
+            // 更新 pet 实际位置 
+            foreach (var pet in pets) {
+                // 1. 计算自主位移
+                var selfMove = moveSystem.calculateSelfMove(pet);
+                // 2. 根据碰撞修正最终位移
+                var finalMove = collideSystem.calculateCollisionMove(pet,selfMove,this);
+                // 4. 应用最终位移
+                pet.x += finalMove.x;
+                pet.y += finalMove.y;
             }
         }
 
