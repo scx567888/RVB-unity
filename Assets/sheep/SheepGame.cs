@@ -119,7 +119,7 @@ namespace sheep {
         public void renderPet(Pet pet, float alpha) {
             Vector3 renderPosition;
             // 判断是否启用线性插值
-            if (useLerp) {
+            if (useLerp&&pet.moveIntent.moveMode!=PetMoveMode.TELEPORT) {
                 renderPosition = Vector3.Lerp(
                     new Vector3(pet.renderHandle.lastX, 0, pet.renderHandle.lastY),
                     new Vector3(pet.x, 0, pet.y),
@@ -146,7 +146,7 @@ namespace sheep {
                             moveSpeed = sheepWorld.randomFloat(0.25f, 0.5f)
                         },
                         collideIntent = new PetCollideIntent() {
-                            collideRadius = 0.5f,
+                            // collideRadius = 0.5f,
                             // collideMoveScale = 1,
                             // collideElasticityScale = 1.3f / 4,
                             // collideNotMoveNum = 500
