@@ -6,7 +6,7 @@
         public void tick(Pet pet, SheepWorld sheepWorld) {
             // 简化的 索敌逻辑 
             if (pet.id % 2 == 0) {
-                pet.moveIntent.moveMode = PetMoveMode.TARGET;
+                pet.moveIntent.moveMode = PetMoveMode.TELEPORT;
                 pet.moveIntent.targetX = sheepWorld.bossX;
                 pet.moveIntent.targetY = sheepWorld.bossY;
             }
