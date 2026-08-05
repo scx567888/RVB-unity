@@ -85,11 +85,19 @@ namespace scx.SpriteRenderer {
                     frameData.sourceSize.h
                 );
 
-                // 4) pivot
-                Vector2 pivot = new Vector2(
-                    frameData.pivot.x,
-                    1f - frameData.pivot.y
-                );
+                Vector2 pivot;
+
+                if (frameData.pivot == null) {
+                    // defaultPivot 已经是 Scx 所需的左下原点坐标
+                    pivot = defaultPivot;
+                }
+                else {
+                    // TexturePacker JSON 坐标转换到 Scx 左下原点
+                    pivot = new Vector2(
+                        frameData.pivot.x,
+                        1f - frameData.pivot.y
+                    );
+                }
 
                 string name = frameData.filename;
 
@@ -130,13 +138,6 @@ namespace scx.SpriteRenderer {
                 throw new ArgumentException($"TexturePacker frame[{i}] 数据非法: spriteSourceSize 不能为空.");
             }
 
-            if (frameData.pivot == null) {
-                // 没有我们回退到 默认的 
-                frameData.pivot = new TpPivot() {
-                    x = defaultPivot.x,
-                    y = defaultPivot.y,
-                };
-            }
         }
 
         private sealed class TpRoot {
