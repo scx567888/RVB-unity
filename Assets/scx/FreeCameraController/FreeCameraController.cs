@@ -1,6 +1,7 @@
 using UnityEngine;
 
 namespace scx.FreeCameraController {
+    // 自由视角相机, 建议挂载到 相机上
     public class FreeCameraController : MonoBehaviour {
         [Header("移动设置")] [SerializeField] private float moveSpeed = 5f;
         [SerializeField] private float fastMoveMultiplier = 3f;

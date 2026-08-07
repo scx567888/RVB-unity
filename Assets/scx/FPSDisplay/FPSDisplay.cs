@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 
 namespace scx.FPSDisplay {
+    // 简易 FPS 显示, 建议挂载到 相机上
     public class FPSDisplay : MonoBehaviour {
         private float deltaTime = 0.0f;
 
