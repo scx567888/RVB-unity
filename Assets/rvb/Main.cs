@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using rvb.scripts;
 using rvb.utils;
 using scx.SpriteRenderer;
+using scx.TestSpriteRenderer;
 using UnityEngine;
 
 namespace rvb {
@@ -58,8 +59,10 @@ namespace rvb {
 
         private float logicAccumulator;
         private LoadRoleResult loadRoleResult;
+        public BlockRender blockRender;
 
         private void Start() {
+            sheepCtl.addFrameBlockCampCallback = (gridx, gridy, c) => blockRender.setColor(gridx,gridy, c);
             this.petSpriteRenderers = new[] {
                 new Dictionary<int, ScxSpriteRenderer>(),
                 new Dictionary<int, ScxSpriteRenderer>()

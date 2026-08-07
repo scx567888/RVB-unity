@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace rvb.scripts {
     public class SheepCtl {
@@ -6,11 +7,22 @@ namespace rvb.scripts {
         public ComUIAnim comUIAnim=new ();
         public CameraCtl cameraCtl=new ();
         public ComImages comImages=new ();
+        public Action<int,int, SheepCamp> addFrameBlockCampCallback;
+        public void addFrameBlockCamp(int blockIndex, SheepCamp bulletCamp) {
+            
+        }
         public Boss[] boss=new [] {
             new Boss(0),
             new Boss(0),
         };
         public static SheepCtl instance=new SheepCtl();
+
+        public void addFrameBlockCamp(int gridX, int gridY, SheepCamp camp) {
+            if (addFrameBlockCampCallback==null) {
+                return;
+            }
+            addFrameBlockCampCallback(gridX, gridY, camp);
+        }
     }
 
     public class ComMatch {
