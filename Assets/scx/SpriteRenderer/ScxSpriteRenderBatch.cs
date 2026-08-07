@@ -60,7 +60,7 @@ namespace scx.SpriteRenderer {
                 this.indices[indexOffset + 3] = BASE_INDICES[3] + vertexOffset;
                 this.indices[indexOffset + 4] = BASE_INDICES[4] + vertexOffset;
                 this.indices[indexOffset + 5] = BASE_INDICES[5] + vertexOffset;
-                
+
                 // 填充颜色 (默认全用白色)
                 this.colors[vertexOffset + 0] = Color.white;
                 this.colors[vertexOffset + 1] = Color.white;
@@ -146,7 +146,7 @@ namespace scx.SpriteRenderer {
             this.positions[startIndex + 2] = p2;
             this.positions[startIndex + 3] = p3;
         }
-        
+
         /// 更新 颜色
         public void setColor(int index, Color32 color) {
             // 计算 Unit 在 colors 数组中的起始位置

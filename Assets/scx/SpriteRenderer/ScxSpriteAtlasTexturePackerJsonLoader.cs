@@ -137,7 +137,6 @@ namespace scx.SpriteRenderer {
             if (frameData.spriteSourceSize == null) {
                 throw new ArgumentException($"TexturePacker frame[{i}] 数据非法: spriteSourceSize 不能为空.");
             }
-
         }
 
         private sealed class TpRoot {
