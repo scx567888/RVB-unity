@@ -167,7 +167,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   unitySpriteAtlas: {fileID: 4343727234628468602, guid: b17b245ad70f4f7458d6d15039b71088, type: 2}
-  mainMaterial: {fileID: 2100000, guid: 9a621e06d2f355a489fa4258552c4d88, type: 2}
+  mainMaterial: {fileID: 2100000, guid: de552a8032c24a2b826d1da4ff7198d9, type: 2}
 --- !u!1 &944232595
 GameObject:
   m_ObjectHideFlags: 0
