@@ -312,8 +312,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cea1d4b23d88466a807e2da9eac8bea5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  texture: {fileID: 2800000, guid: 2c31cecaeeaf9ba4591f604ad1682607, type: 3}
-  json: {fileID: 4900000, guid: 321293f3ae85b174388f4a964fc7b773, type: 3}
+  texture: {fileID: 2800000, guid: 25f3f9c2b2c37a24f9e4970e4b65a57f, type: 3}
+  json: {fileID: 4900000, guid: 70217ee277bd3874b8dbab2ba7e9e77d, type: 3}
   mainMaterial: {fileID: 2100000, guid: de552a8032c24a2b826d1da4ff7198d9, type: 2}
   highlightMaterial: {fileID: 2100000, guid: f99dc9165e4bbd348a5a067e31ce258b, type: 2}
   animationFPS: 30
