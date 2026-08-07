@@ -81,5 +81,10 @@ namespace scx.SpriteRendererTest {
 
             this.scxSpriteRenderer.update();
         }
+
+        public void setColor(int gridX,int gridY,Color32 color) {
+            units[gridX, gridY].setColor(color);
+        }
+        
     }
 }
