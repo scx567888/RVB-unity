@@ -167,7 +167,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   unitySpriteAtlas: {fileID: 4343727234628468602, guid: b17b245ad70f4f7458d6d15039b71088, type: 2}
-  mainMaterial: {fileID: 2100000, guid: de552a8032c24a2b826d1da4ff7198d9, type: 2}
+  mainMaterial: {fileID: 2100000, guid: 57fe411cf002ce54b866f803b6d478f5, type: 2}
+  line_w: 24
+  line_h: 24
+  d: 0.5
+  color0:
+    serializedVersion: 2
+    rgba: 4294703340
+  color1:
+    serializedVersion: 2
+    rgba: 4278848533
+  randomOffset: 0.02
 --- !u!1 &944232595
 GameObject:
   m_ObjectHideFlags: 0
