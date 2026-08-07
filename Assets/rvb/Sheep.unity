@@ -346,6 +346,62 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   roleIds: 
   uiFont: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &822570349
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 822570351}
+  - component: {fileID: 822570352}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &822570351
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 822570349}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: 0, y: 0.01, z: 0}
+  m_LocalScale: {x: 10, y: 10, z: 10}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
+--- !u!114 &822570352
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 822570349}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2441dc7e75684ab89a13c8a8c89bfd93, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unitySpriteAtlas: {fileID: 4343727234628468602, guid: b17b245ad70f4f7458d6d15039b71088, type: 2}
+  mainMaterial: {fileID: 2100000, guid: 57fe411cf002ce54b866f803b6d478f5, type: 2}
+  line_w: 24
+  line_h: 24
+  d: 0.5
+  color0:
+    serializedVersion: 2
+    rgba: 4294703340
+  color1:
+    serializedVersion: 2
+    rgba: 4283716692
+  randomOffset: 0.02
 --- !u!1 &841530568
 GameObject:
   m_ObjectHideFlags: 0
@@ -555,6 +611,7 @@ MonoBehaviour:
   logicToWorldScale: 0.01
   logicHeightToWorldScale: 0.01
   fallbackLogicalAnimationFrames: 30
+  blockRender: {fileID: 822570352}
 --- !u!114 &841530571
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1033,3 +1090,4 @@ SceneRoots:
   - {fileID: 148508309}
   - {fileID: 1153007506}
   - {fileID: 178806761}
+  - {fileID: 822570351}

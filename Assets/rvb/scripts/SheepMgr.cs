@@ -754,8 +754,8 @@ namespace rvb.scripts {
 
                     for (var O = -z; O <= z; ++O) {
                         for (var Q = -z; Q <= z; ++Q) {
-                            var Z = getIndexByXY(X.x + O, X.y + Q);
-                            sheepCtl.comImages.mesh_block.addFrameBlockCamp(Z, X.camp);
+                            var (gridX,gridY) = getXnYn(X.x + O, X.y + Q);
+                            sheepCtl.addFrameBlockCamp(gridX,gridY, X.camp);
                         }
                     }
                 }
@@ -1361,6 +1361,7 @@ namespace rvb.scripts {
 
             bool isDie = i.isDie;
             int blockIndex = getIndexByXY(i.posX, i.posY);
+            var (gridX,gridY) = getXnYn(i.posX, i.posY);
             float curHp = i.curHp;
 
             if (isDie) {
@@ -1399,7 +1400,7 @@ namespace rvb.scripts {
 
                 for (int y = -S; y <= S; ++y) {
                     for (int v = -S; v <= S; ++v) {
-                        e.comImages.mesh_block.addFrameBlockCamp(blockIndex, ppp.camp);
+                        e.addFrameBlockCamp(gridX,gridY, ppp.camp);
                     }
                 }
 
