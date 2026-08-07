@@ -149,7 +149,7 @@ namespace scx.SpriteRenderer {
         
         /// 更新 颜色
         public void setColor(int index, Color32 color) {
-            // 计算 Unit 在 positions 数组中的起始位置
+            // 计算 Unit 在 colors 数组中的起始位置
             var startIndex = index * 4;
             this.colors[startIndex + 0] = color;
             this.colors[startIndex + 1] = color;
