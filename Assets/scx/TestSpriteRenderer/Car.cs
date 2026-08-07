@@ -1,6 +1,6 @@
 ﻿using scx.SpriteRenderer;
 
-namespace scx.SpriteRendererTest {
+namespace scx.TestSpriteRenderer {
     public class Car {
         public ScxSpriteRenderUnit renderUnit;
 

@@ -1,10 +1,9 @@
-using System.Collections.Generic;
 using scx.SpriteRenderer;
 using UnityEngine;
 using UnityEngine.U2D;
 using Random = UnityEngine.Random;
 
-namespace scx.SpriteRendererTest {
+namespace scx.TestSpriteRenderer {
     public class SpriteRendererTest2 : MonoBehaviour {
         // unity 图集
         public SpriteAtlas unitySpriteAtlas;
