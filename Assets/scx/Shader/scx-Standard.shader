@@ -50,12 +50,15 @@ Shader "scx/Standard"
     }
 
     CGINCLUDE
-        #define UNITY_SETUP_BRDF_INPUT MetallicSetup
+    #define UNITY_SETUP_BRDF_INPUT MetallicSetup
     ENDCG
 
     SubShader
     {
-        Tags { "RenderType"="Opaque" "PerformanceChecks"="False" }
+        Tags
+        {
+            "RenderType"="Opaque" "PerformanceChecks"="False"
+        }
         LOD 300
 
         Cull Off
@@ -65,7 +68,10 @@ Shader "scx/Standard"
         Pass
         {
             Name "FORWARD"
-            Tags { "LightMode" = "ForwardBase" }
+            Tags
+            {
+                "LightMode" = "ForwardBase"
+            }
 
             Blend [_SrcBlend] [_DstBlend]
             ZWrite [_ZWrite]
@@ -94,7 +100,6 @@ Shader "scx/Standard"
             #pragma vertex vertBase
             #pragma fragment fragBase
             #include "UnityStandardCoreForward.cginc"
-
             ENDCG
         }
         // ------------------------------------------------------------------
@@ -102,9 +107,15 @@ Shader "scx/Standard"
         Pass
         {
             Name "FORWARD_DELTA"
-            Tags { "LightMode" = "ForwardAdd" }
+            Tags
+            {
+                "LightMode" = "ForwardAdd"
+            }
             Blend [_SrcBlend] One
-            Fog { Color (0,0,0,0) } // in additive pass fog should be black
+            Fog
+            {
+                Color (0,0,0,0)
+            } // in additive pass fog should be black
             ZWrite Off
             ZTest LEqual
 
@@ -130,14 +141,17 @@ Shader "scx/Standard"
             #pragma vertex vertAdd
             #pragma fragment fragAdd
             #include "UnityStandardCoreForward.cginc"
-
             ENDCG
         }
         // ------------------------------------------------------------------
         //  Shadow rendering pass
-        Pass {
+        Pass
+        {
             Name "ShadowCaster"
-            Tags { "LightMode" = "ShadowCaster" }
+            Tags
+            {
+                "LightMode" = "ShadowCaster"
+            }
 
             ZWrite On ZTest LEqual
 
@@ -160,7 +174,6 @@ Shader "scx/Standard"
             #pragma fragment fragShadowCaster
 
             #include "UnityStandardShadow.cginc"
-
             ENDCG
         }
         // ------------------------------------------------------------------
@@ -168,7 +181,10 @@ Shader "scx/Standard"
         Pass
         {
             Name "DEFERRED"
-            Tags { "LightMode" = "Deferred" }
+            Tags
+            {
+                "LightMode" = "Deferred"
+            }
 
             CGPROGRAM
             #pragma target 3.0
@@ -195,7 +211,6 @@ Shader "scx/Standard"
             #pragma fragment fragDeferred
 
             #include "UnityStandardCore.cginc"
-
             ENDCG
         }
 
@@ -205,7 +220,10 @@ Shader "scx/Standard"
         Pass
         {
             Name "META"
-            Tags { "LightMode"="Meta" }
+            Tags
+            {
+                "LightMode"="Meta"
+            }
 
             Cull Off
 
@@ -226,9 +244,12 @@ Shader "scx/Standard"
 
     SubShader
     {
-        Tags { "RenderType"="Opaque" "PerformanceChecks"="False" }
+        Tags
+        {
+            "RenderType"="Opaque" "PerformanceChecks"="False"
+        }
         LOD 150
-        
+
         Cull Off
 
         // ------------------------------------------------------------------
@@ -236,7 +257,10 @@ Shader "scx/Standard"
         Pass
         {
             Name "FORWARD"
-            Tags { "LightMode" = "ForwardBase" }
+            Tags
+            {
+                "LightMode" = "ForwardBase"
+            }
 
             Blend [_SrcBlend] [_DstBlend]
             ZWrite [_ZWrite]
@@ -262,7 +286,6 @@ Shader "scx/Standard"
             #pragma vertex vertBase
             #pragma fragment fragBase
             #include "UnityStandardCoreForward.cginc"
-
             ENDCG
         }
         // ------------------------------------------------------------------
@@ -270,9 +293,15 @@ Shader "scx/Standard"
         Pass
         {
             Name "FORWARD_DELTA"
-            Tags { "LightMode" = "ForwardAdd" }
+            Tags
+            {
+                "LightMode" = "ForwardAdd"
+            }
             Blend [_SrcBlend] One
-            Fog { Color (0,0,0,0) } // in additive pass fog should be black
+            Fog
+            {
+                Color (0,0,0,0)
+            } // in additive pass fog should be black
             ZWrite Off
             ZTest LEqual
 
@@ -294,14 +323,17 @@ Shader "scx/Standard"
             #pragma vertex vertAdd
             #pragma fragment fragAdd
             #include "UnityStandardCoreForward.cginc"
-
             ENDCG
         }
         // ------------------------------------------------------------------
         //  Shadow rendering pass
-        Pass {
+        Pass
+        {
             Name "ShadowCaster"
-            Tags { "LightMode" = "ShadowCaster" }
+            Tags
+            {
+                "LightMode" = "ShadowCaster"
+            }
 
             ZWrite On ZTest LEqual
 
@@ -318,7 +350,6 @@ Shader "scx/Standard"
             #pragma fragment fragShadowCaster
 
             #include "UnityStandardShadow.cginc"
-
             ENDCG
         }
 
@@ -328,7 +359,10 @@ Shader "scx/Standard"
         Pass
         {
             Name "META"
-            Tags { "LightMode"="Meta" }
+            Tags
+            {
+                "LightMode"="Meta"
+            }
 
             Cull Off
 

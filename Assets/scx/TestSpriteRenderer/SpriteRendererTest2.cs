@@ -13,7 +13,7 @@ namespace scx.TestSpriteRenderer {
 
         // 渲染器
         private ScxSpriteRenderer scxSpriteRenderer;
-        
+
         public int line_w = 24;
         public int line_h = 24;
         public float d = 0.5f;
@@ -30,13 +30,12 @@ namespace scx.TestSpriteRenderer {
             this.scxSpriteRenderer = new ScxSpriteRenderer(scxSpriteAtlas, 100, mainMaterial, 1000);
 
             this.scxSpriteRenderer.setParent(this.gameObject);
-            
-            units=new ScxSpriteRenderUnit[line_w, line_h];
-            
+
+            units = new ScxSpriteRenderUnit[line_w, line_h];
+
             var w = line_w * d;
             var h = line_h * d;
 
-            
 
             for (int i = 0; i < line_w; i++) {
                 for (int j = 0; j < line_h; j++) {
@@ -44,7 +43,7 @@ namespace scx.TestSpriteRenderer {
 
                     spriteRenderUnit.setVisible(true);
                     spriteRenderUnit.setFrame(0);
-                    
+
                     var x =
                         (i + 0.5f) * d
                         - w / 2
@@ -54,26 +53,24 @@ namespace scx.TestSpriteRenderer {
                         (j + 0.5f) * d
                         - h / 2
                         + Random.Range(-randomOffset, randomOffset);
-                    spriteRenderUnit.setPosition(x,y,0);
+                    spriteRenderUnit.setPosition(x, y, 0);
                     units[i, j] = spriteRenderUnit;
                 }
             }
-            
+
             // 着色
             for (int i = 0; i < line_w; i++) {
                 for (int j = 0; j < line_h; j++) {
                     var spriteRenderUnit = units[i, j];
-                    
+
                     if (i < line_h / 2) {
                         spriteRenderUnit.setColor(color0);
                     }
                     else {
                         spriteRenderUnit.setColor(color1);
                     }
-                    
                 }
             }
-
         }
 
         void Update() {
@@ -81,10 +78,10 @@ namespace scx.TestSpriteRenderer {
             this.scxSpriteRenderer.update();
         }
 
-        public void setColor(int gridX,int gridY,Color32 color) {
+        public void setColor(int gridX, int gridY, Color32 color) {
             units[gridX, gridY].setColor(color);
         }
-        
+
         // 测试点击变色
         private void handleMousePaint() {
             if (!Input.GetMouseButton(0)) {
@@ -137,6 +134,5 @@ namespace scx.TestSpriteRenderer {
 
             setColor(gridX, gridY, color);
         }
-        
     }
 }
