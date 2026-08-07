@@ -23,6 +23,7 @@ namespace scx.SpriteRenderer {
         private readonly Vector3[] normals; // 整个网格的 法线 数据
         private readonly Vector2[] uvs; // 整个网格的 UV 数据
         private readonly int[] indices; // 整个网格的 索引 数据
+        private readonly Color32[] colors; // 整个网格的 颜色 数据
 
         private readonly GameObject node; // 持有节点
         private readonly Mesh mesh; // 整个网格
@@ -39,6 +40,7 @@ namespace scx.SpriteRenderer {
             this.normals = new Vector3[capacity * 4];
             this.uvs = new Vector2[capacity * 4];
             this.indices = new int[capacity * 6];
+            this.colors = new Color32[capacity * 4];
 
             // 初始化网格数据
             for (var i = 0; i < this.capacity; i++) {
@@ -58,6 +60,12 @@ namespace scx.SpriteRenderer {
                 this.indices[indexOffset + 3] = BASE_INDICES[3] + vertexOffset;
                 this.indices[indexOffset + 4] = BASE_INDICES[4] + vertexOffset;
                 this.indices[indexOffset + 5] = BASE_INDICES[5] + vertexOffset;
+                
+                // 填充颜色 (默认全用白色)
+                this.colors[vertexOffset + 0] = Color.white;
+                this.colors[vertexOffset + 1] = Color.white;
+                this.colors[vertexOffset + 2] = Color.white;
+                this.colors[vertexOffset + 3] = Color.white;
             }
 
 
@@ -75,6 +83,7 @@ namespace scx.SpriteRenderer {
             this.mesh.normals = normals;
             this.mesh.uv = uvs;
             this.mesh.triangles = indices;
+            this.mesh.colors32 = colors;
 
             // 创建 MeshRenderer 和 MeshFilter
             this.meshRenderer = this.node.AddComponent<MeshRenderer>();
@@ -137,6 +146,16 @@ namespace scx.SpriteRenderer {
             this.positions[startIndex + 2] = p2;
             this.positions[startIndex + 3] = p3;
         }
+        
+        /// 更新 颜色
+        public void setColor(int index, Color32 color) {
+            // 计算 Unit 在 positions 数组中的起始位置
+            var startIndex = index * 4;
+            this.colors[startIndex + 0] = color;
+            this.colors[startIndex + 1] = color;
+            this.colors[startIndex + 2] = color;
+            this.colors[startIndex + 3] = color;
+        }
 
         /// 更新材质
         public void setMaterial(Material material) {
@@ -148,6 +167,7 @@ namespace scx.SpriteRenderer {
             // 更新网格 (索引和法线无需更新)
             mesh.SetVertices(positions);
             mesh.SetUVs(0, uvs);
+            mesh.SetColors(colors);
 
             // 更新包围盒
             mesh.RecalculateBounds();

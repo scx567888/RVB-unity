@@ -12,6 +12,7 @@ namespace scx.SpriteRenderer {
         private Vector3 position;
         private Quaternion rotation;
         private Vector3 scale;
+        private Color32 color;
         private bool visible;
 
         private Vector3 p0;
@@ -35,8 +36,12 @@ namespace scx.SpriteRenderer {
             this.position = new Vector3(0, 0, 0);
             this.rotation = new Quaternion(0, 0, 0, 1);
             this.scale = new Vector3(1, 1, 1);
+            this.color = Color.white;
             this.visible = false;
+            // 因为 ScxSpriteRenderUnit 会复用 index, 这里 重置 uvs
             this.renderBatch.setUVs(this.index, this.sprite.uv0, this.sprite.uv1, this.sprite.uv2, this.sprite.uv3);
+            // 同上 这里重置 color
+            this.renderBatch.setColor(this.index, this.color);
         }
 
         // UV
@@ -103,6 +108,17 @@ namespace scx.SpriteRenderer {
 
         public Vector3 getScale() {
             return this.scale;
+        }
+
+        // 颜色
+        public void setColor(Color32 color) {
+            this.color = color;
+            this.renderBatch.setColor(this.index, color);
+        }
+
+        // 颜色
+        public Color32 getColor() {
+            return this.color;
         }
 
         // 可见性
