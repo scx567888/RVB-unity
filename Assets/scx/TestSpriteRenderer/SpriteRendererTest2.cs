@@ -77,12 +77,65 @@ namespace scx.TestSpriteRenderer {
         }
 
         void Update() {
-
+            handleMousePaint();
             this.scxSpriteRenderer.update();
         }
 
         public void setColor(int gridX,int gridY,Color32 color) {
             units[gridX, gridY].setColor(color);
+        }
+        
+        // 测试点击变色
+        private void handleMousePaint() {
+            if (!Input.GetMouseButton(0)) {
+                return;
+            }
+
+            var camera = Camera.main;
+            if (camera == null) {
+                return;
+            }
+
+            var ray = camera.ScreenPointToRay(Input.mousePosition);
+
+            var plane = new Plane(
+                this.transform.forward,
+                this.transform.position
+            );
+
+            if (!plane.Raycast(ray, out var distance)) {
+                return;
+            }
+
+            var worldPosition = ray.GetPoint(distance);
+            var localPosition = this.transform.InverseTransformPoint(worldPosition);
+
+            var w = line_w * d;
+            var h = line_h * d;
+
+            var gridX = Mathf.FloorToInt(
+                (localPosition.x + w / 2) / d
+            );
+
+            var gridY = Mathf.FloorToInt(
+                (localPosition.y + h / 2) / d
+            );
+
+            if (
+                gridX < 0 || gridX >= line_w ||
+                gridY < 0 || gridY >= line_h
+            ) {
+                return;
+            }
+
+            // 默认 color0，按住 Shift 使用 color1
+            var color =
+                Input.GetKey(KeyCode.LeftShift) ||
+                Input.GetKey(KeyCode.RightShift)
+                    ? color1
+                    : color0;
+
+            setColor(gridX, gridY, color);
         }
         
     }
