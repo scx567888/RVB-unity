@@ -1,7 +1,7 @@
 using UnityEngine;
 
 namespace sheep {
-    public class BOSS : MonoBehaviour
+    public class BOSSController : MonoBehaviour
     {
         [Header("移动设置")]
         public float moveSpeed = 5f;
