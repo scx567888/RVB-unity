@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 using scx.SpriteRenderer;
 using UnityEngine;
 
-namespace rvb.utils {
+namespace sheep_game.utils {
     public static class SheepSpriteAtlasLoader {
         public static LoadRoleResult loadRole(Texture2D texture, string json) {
             var data0 = JsonConvert.DeserializeObject<Dictionary<string, SheepRoleSprite[][]>>(json).First()

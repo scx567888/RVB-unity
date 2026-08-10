@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace sheep {
+namespace sheep_game {
     public class BOSSController : MonoBehaviour
     {
         [Header("移动设置")]

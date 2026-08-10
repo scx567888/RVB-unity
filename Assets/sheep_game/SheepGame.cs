@@ -1,9 +1,10 @@
 using System.Collections.Generic;
-using rvb.utils;
 using scx.SpriteRenderer;
+using sheep_game.utils;
+using sheep;
 using UnityEngine;
 
-namespace sheep {
+namespace sheep_game {
     public class SheepGame : MonoBehaviour {
         // ********************* 逻辑帧相关 *********************
 
