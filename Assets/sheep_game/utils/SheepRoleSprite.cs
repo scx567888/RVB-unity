@@ -2,7 +2,7 @@
 using scx.SpriteRenderer;
 using UnityEngine;
 
-namespace rvb.utils {
+namespace sheep_game.utils {
     
     [Serializable]
     public class SheepRoleSprite : ScxSprite {

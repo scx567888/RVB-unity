@@ -2,7 +2,7 @@
 using scx.SpriteRenderer;
 using UnityEngine;
 
-namespace rvb.utils {
+namespace sheep_game.utils {
 
     /// <summary>
     /// 子弹图块元数据。
