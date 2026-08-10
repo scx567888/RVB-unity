@@ -38,12 +38,12 @@ namespace sheep {
             var moveDistance = calculateMoveDistance(moveIntent);
             return direction * moveDistance;
         }
-        
-        public static Vector2 calculateTargetMove(PetMoveIntent moveIntent,float x, float y) {
+
+        public static Vector2 calculateTargetMove(PetMoveIntent moveIntent, float x, float y) {
             var offset = new Vector2(moveIntent.targetX - x, moveIntent.targetY - y);
 
             var distance = offset.magnitude;
-            
+
             var moveDistance = calculateMoveDistance(moveIntent);
 
             // 已到达, 或者这一帧可以直接到达
@@ -54,8 +54,8 @@ namespace sheep {
             var direction = offset / distance;
             return direction * moveDistance;
         }
-        
-        public static Vector2 calculateTeleportMove(PetMoveIntent moveIntent,float x, float y) {
+
+        public static Vector2 calculateTeleportMove(PetMoveIntent moveIntent, float x, float y) {
             var offset = new Vector2(moveIntent.targetX - x, moveIntent.targetY - y);
             return offset;
         }
