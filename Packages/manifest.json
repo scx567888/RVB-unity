@@ -4,6 +4,7 @@
     "com.unity.nuget.newtonsoft-json": "3.2.2",
     "com.unity.render-pipelines.universal": "14.0.12",
     "com.unity.ugui": "1.0.0",
+    "jp.keijiro.klak.spout": "2.0.6",
     "com.unity.modules.audio": "1.0.0",
     "com.unity.modules.imageconversion": "1.0.0",
     "com.unity.modules.imgui": "1.0.0",
@@ -20,5 +21,14 @@
     "com.unity.modules.unitywebrequesttexture": "1.0.0",
     "com.unity.modules.vehicles": "1.0.0",
     "com.unity.modules.video": "1.0.0"
-  }
+  },
+  "scopedRegistries": [
+    {
+      "name": "Keijiro",
+      "url": "https://registry.npmjs.com",
+      "scopes": [
+        "jp.keijiro"
+      ]
+    }
+  ]
 }
