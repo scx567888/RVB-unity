@@ -1,21 +1,20 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using scx.SpriteRenderer;
-using sheep_game.utils;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 namespace rvb {
-    public class RVB : MonoBehaviour {
+    public class RVBTest2 : MonoBehaviour {
         // 贴图
         public Texture2D texture;
 
         // json
         public TextAsset json;
-    
+
         // 主材质
         public Material mainMaterial;
-    
+
         // 高亮材质
         public Material highlightMaterial;
 
@@ -26,32 +25,43 @@ namespace rvb {
         private List<Pet> pets;
 
         private string[] spriteNames;
-    
+
         // 动画播放帧率
-        [SerializeField]
-        private float animationFPS = 30f;
+        [SerializeField] private float animationFPS = 30f;
 
         // 动画计时器
         private float animationTimer = 0f;
-    
-        [SerializeField]
-        private bool enableRotate = false;
 
-        [SerializeField]
-        private float rotateSpeed = 1f;
-    
-        [SerializeField]
-        private int targetPetCount = 5000;
+        [SerializeField] private bool enableRotate = false;
 
-        [SerializeField]
-        private int maxPetCount = 50000;
+        [SerializeField] private float rotateSpeed = 1f;
+
+        [SerializeField] private int targetPetCount = 5000;
+
+        [SerializeField] private int maxPetCount = 50000;
 
         private int lastTargetPetCount = -1;
 
         void Start() {
-            var loadRoleResult = SheepSpriteAtlasLoader.loadRole(texture, json.text);
-            this.scxSpriteRenderer = new ScxSpriteRenderer(loadRoleResult.spriteAtlas, 100, mainMaterial, 5000);
+            var loadRoleResult =
+                ScxSpriteAtlasTexturePackerJsonLoader.load(texture, json.text, new Vector2(0.5f, 0.25f));
+            this.scxSpriteRenderer = new ScxSpriteRenderer(loadRoleResult, 100, mainMaterial, 5000);
             this.spriteNames = this.scxSpriteRenderer.getSpriteNames();
+
+
+            var map = new Dictionary<string, List<string>>();
+
+            foreach (var spriteName in this.spriteNames) {
+                var strings = spriteName.Split("/");
+                var group = strings[0];
+                var tryGetValue = map.TryGetValue(group, out List<string> groupList);
+                if (!tryGetValue) {
+                    map.Add(group, new List<string>());
+                }
+
+                map[group].Add(strings[1]);
+            }
+
 
             this.scxSpriteRenderer.setParent(this.gameObject);
 
@@ -65,7 +75,7 @@ namespace rvb {
 
         void Update() {
             UpdatePetCount();
-        
+
             UpdateRotate();
 
             // 测试更换材质
@@ -81,11 +91,11 @@ namespace rvb {
 
             // 按指定 FPS 播放动画
             UpdateAnimationByFps(animationFPS);
-       
+
 
             this.scxSpriteRenderer.update();
         }
-    
+
         private void UpdateAnimationByFps(float fps) {
             if (fps <= 0f) {
                 return;
@@ -105,9 +115,9 @@ namespace rvb {
             // 多核并行执行方式
             Parallel.For(0, pets.Count, i => {
                 var pet = pets[i];
-        
+
                 pet.frameIndex += step;
-        
+
                 int index = pet.frameIndex % spriteNames.Length;
                 pet.renderUnit.setFrame(index);
             });
@@ -120,9 +130,8 @@ namespace rvb {
             //     int index = pet.frameIndex % spriteNames.Length;
             //     pet.renderUnit.setFrame(index);
             // }
-        
         }
-    
+
         private void UpdateRotate() {
             if (!enableRotate) {
                 return;
@@ -132,7 +141,7 @@ namespace rvb {
             euler.y += rotateSpeed * Time.deltaTime;
             transform.eulerAngles = euler;
         }
-    
+
         public void SetPetCount(int count) {
             if (scxSpriteRenderer == null || spriteNames == null || spriteNames.Length == 0) {
                 return;
@@ -153,7 +162,7 @@ namespace rvb {
             targetPetCount = count;
             lastTargetPetCount = count;
         }
-    
+
         private void AddOnePet() {
             var spriteRenderUnit = this.scxSpriteRenderer.createUnit();
 
@@ -163,7 +172,7 @@ namespace rvb {
             //     Random.Range(-50f, 50f),
             //     Random.Range(-50f, 50f)
             // );
-        
+
             spriteRenderUnit.setPosition(
                 Random.Range(-50f, 50f),
                 0,
@@ -179,7 +188,7 @@ namespace rvb {
 
             pets.Add(pet);
         }
-    
+
         private void RemoveLastPet() {
             int lastIndex = pets.Count - 1;
             var pet = pets[lastIndex];
@@ -190,12 +199,11 @@ namespace rvb {
             // 再还给 ScxSpriteRenderer
             pet.destroy();
         }
-    
+
         private void UpdatePetCount() {
             if (targetPetCount != lastTargetPetCount) {
                 SetPetCount(targetPetCount);
             }
         }
-    
     }
 }
