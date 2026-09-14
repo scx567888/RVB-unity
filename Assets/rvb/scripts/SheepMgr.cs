@@ -1999,7 +1999,7 @@ namespace rvb.scripts {
                     float distance = Mathf.Sqrt(targetX * targetX + targetY * targetY);
                     if (distance <= e.conf.collideR + target.conf.collideR + e.conf.spiltR * t) {
                         hurtByRole(e, target, n);
-                        if (o != 0f) {
+                        if (o != 0f && distance > 0.0001f) {
                             targetX /= distance;
                             targetY /= distance;
                             target.impulseX = -targetX * o;
@@ -2017,7 +2017,7 @@ namespace rvb.scripts {
                     float o = e.posX - target.posX;
                     float l = e.posY - target.posY;
                     float n = Mathf.Sqrt(o * o + l * l);
-                    if (n <= e.conf.collideR + target.conf.collideR + e.conf.spiltR * t && s != 0f) {
+                    if (n > 0.0001f && n <= e.conf.collideR + target.conf.collideR + e.conf.spiltR * t && s != 0f) {
                         o /= n;
                         l /= n;
                         target.impulseX = -o * s;
