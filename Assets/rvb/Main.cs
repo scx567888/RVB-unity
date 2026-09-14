@@ -255,26 +255,13 @@ namespace rvb {
             
         }
         
-        
         private Quaternion CalcBulletRotation(BulletView view)
         {
-            Quaternion baseRotation =
-                Quaternion.Euler(45, 0, 0);
-
-            float angle =
-                Mathf.Atan2(
-                    view.dirZ,
-                    view.dirX
-                ) * Mathf.Rad2Deg;
-
-
-            Quaternion bulletRotation =
-                Quaternion.AngleAxis(
-                    angle,
-                    Vector3.forward
-                );
-
-            return baseRotation * bulletRotation;
+            return Quaternion.Euler(
+                45f,
+                0f,
+                Mathf.Atan2(view.dirZ, view.dirX) * Mathf.Rad2Deg
+            );
         }
 
         private string ResolveRoleSpriteFrame(PetView view) {
