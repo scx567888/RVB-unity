@@ -80,6 +80,12 @@ namespace scx.SpriteRenderer {
             this.rotation.Set(x, y, z, w);
             this.updateUnitVertices();
         }
+        
+        public void setRotation(Quaternion rotation)
+        {
+            this.rotation = rotation;
+            this.updateUnitVertices();
+        }
 
         public void setRotationFromEuler(float x, float y, float z) {
             this.rotation = Quaternion.Euler(x, y, z);
